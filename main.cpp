@@ -34,7 +34,7 @@ enum class Tile
 constexpr int LEVEL_WIDTH = 5;
 constexpr int LEVEL_HEIGHT = 5;
 
-Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
+constexpr Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
