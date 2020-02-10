@@ -6,5 +6,5 @@
 
 ```console
 $ make
-$ something
+$ ./something
 ```
