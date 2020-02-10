@@ -138,7 +138,7 @@ int main(void)
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
-    // TODO: replace fantasy_tiles.png with our own assets
+    // TODO(#8): replace fantasy_tiles.png with our own assets
     SDL_Texture *tileset_texture = load_texture_from_png_file(
         renderer,
         "fantasy_tiles.png");
