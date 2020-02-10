@@ -87,7 +87,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     png_image image;
     memset(&image, 0, sizeof(image));
     image.version = PNG_IMAGE_VERSION;
-    // TODO: implement libpng error checker similar to the SDL one
+    // TODO(#6): implement libpng error checker similar to the SDL one
     // TODO: try stb_image.h instead of libpng
     //   https://github.com/nothings/stb/blob/master/stb_image.h
     if (!png_image_begin_read_from_file(&image, image_filename)) {
