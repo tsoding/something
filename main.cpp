@@ -123,7 +123,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     return image_texture;
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
     sdl(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS));
 
@@ -144,8 +144,8 @@ int main(int argc, char *argv[])
         "fantasy_tiles.png");
 
     Tile_Texture wall_texture = {
-        .srcrect = {120, 128, 16, 16},
-        .texture = tileset_texture
+        {120, 128, 16, 16},
+        tileset_texture
     };
 
     SDL_Texture *walking_texture = load_texture_from_png_file(
@@ -160,10 +160,10 @@ int main(int argc, char *argv[])
 
     for (int i = 0; i < walking_frame_count; ++i) {
         walking_frames[i].srcrect = {
-            .x = i * walking_frame_size,
-            .y = 0,
-            .w = walking_frame_size,
-            .h = walking_frame_size
+            i * walking_frame_size,
+            0,
+            walking_frame_size,
+            walking_frame_size
         };
         walking_frames[i].texture = walking_texture;
     }
