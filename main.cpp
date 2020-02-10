@@ -148,7 +148,7 @@ int main(void)
         tileset_texture
     };
 
-    // TODO: baking assets into executable
+    // TODO(#9): baking assets into executable
     SDL_Texture *walking_texture = load_texture_from_png_file(
         renderer,
         "walking-12px-zoom.png");
