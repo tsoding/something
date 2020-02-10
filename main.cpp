@@ -4,6 +4,7 @@
 
 #include <png.h>
 
+// TODO: rename sdl -> sec (SDL Error Check)
 int sdl(int code)
 {
     if (code < 0) {
@@ -44,6 +45,7 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall},
 };
 
+// TODO: rename Tile_Texture -> Sprite
 struct Tile_Texture
 {
     SDL_Rect srcrect;
@@ -85,6 +87,9 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     png_image image;
     memset(&image, 0, sizeof(image));
     image.version = PNG_IMAGE_VERSION;
+    // TODO: implement libpng error checker similar to the SDL one
+    // TODO: try stb_image.h instead of libpng
+    //   https://github.com/nothings/stb/blob/master/stb_image.h
     if (!png_image_begin_read_from_file(&image, image_filename)) {
         fprintf(stderr, "Could not read file `%s`: %s\n",
                 image_filename, image.message);
