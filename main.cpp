@@ -44,15 +44,14 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall},
 };
 
-// TODO: rename Tile_Texture -> Sprite
-struct Tile_Texture
+struct Sprite
 {
     SDL_Rect srcrect;
     SDL_Texture *texture;
 };
 
-void render_tile_texture(SDL_Renderer *renderer,
-                         Tile_Texture texture,
+void render_sprite(SDL_Renderer *renderer,
+                         Sprite texture,
                          SDL_Rect destrect)
 {
     sec(SDL_RenderCopy(
@@ -62,7 +61,7 @@ void render_tile_texture(SDL_Renderer *renderer,
             &destrect));
 }
 
-void render_level(SDL_Renderer *renderer, Tile_Texture wall_texture)
+void render_level(SDL_Renderer *renderer, Sprite wall_texture)
 {
     for (int y = 0; y < LEVEL_HEIGHT; ++y) {
         for (int x = 0; x < LEVEL_WIDTH; ++x) {
@@ -72,7 +71,7 @@ void render_level(SDL_Renderer *renderer, Tile_Texture wall_texture)
 
             case Tile::Wall: {
                 sec(SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255));
-                render_tile_texture(renderer, wall_texture,
+                render_sprite(renderer, wall_texture,
                                     {x * TILE_SIZE, y * TILE_SIZE,
                                      TILE_SIZE, TILE_SIZE});
             } break;
@@ -142,7 +141,7 @@ int main(void)
         renderer,
         "fantasy_tiles.png");
 
-    Tile_Texture wall_texture = {
+    Sprite wall_texture = {
         {120, 128, 16, 16},
         tileset_texture
     };
@@ -156,7 +155,7 @@ int main(void)
     constexpr int walking_frame_count = 4;
     constexpr int walking_frame_duration = 200;
     int walking_frame_current = 0;
-    Tile_Texture walking_frames[walking_frame_count];
+    Sprite walking_frames[walking_frame_count];
 
     for (int i = 0; i < walking_frame_count; ++i) {
         walking_frames[i].srcrect = {
@@ -196,9 +195,9 @@ int main(void)
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, wall_texture);
-        render_tile_texture(renderer, walking_frames[walking_frame_current],
-                            {x, 4 * TILE_SIZE - walking_frame_size,
-                             walking_frame_size, walking_frame_size});
+        render_sprite(renderer, walking_frames[walking_frame_current],
+                      {x, 4 * TILE_SIZE - walking_frame_size,
+                       walking_frame_size, walking_frame_size});
 
         SDL_RenderPresent(renderer);
 
