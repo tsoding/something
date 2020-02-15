@@ -1,6 +1,9 @@
+#include <cassert>
 #include <cstdio>
 #include <cstdlib>
 #include <SDL.h>
+
+#include <algorithm>
 
 #include <png.h>
 
@@ -25,7 +28,7 @@ T *sec(T *ptr)
     return ptr;
 }
 
-constexpr int TILE_SIZE = 64;
+constexpr int TILE_SIZE = 128;
 
 enum class Tile
 {
@@ -41,7 +44,7 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall,  Tile::Wall},
+    {Tile::Wall,  Tile::Wall,  Tile::Empty,  Tile::Wall,  Tile::Wall},
 };
 
 struct Sprite
@@ -147,13 +150,43 @@ void render_animat(SDL_Renderer *renderer,
         flip);
 }
 
-void update_animat(Animat *animat, float dt)
+void update_animat(Animat *animat, uint32_t dt)
 {
     if (dt < animat->frame_cooldown) {
         animat->frame_cooldown -= dt;
     } else {
         animat->frame_current = (animat->frame_current + 1) % animat->frame_count;
         animat->frame_cooldown = animat->frame_duration;
+    }
+}
+
+struct Player
+{
+    SDL_Rect hitbox;
+    int dy;
+};
+
+void resolve_player_collision(Player *player)
+{
+    assert(player);
+
+    int x0 = std::clamp(player->hitbox.x / TILE_SIZE,
+                        0, LEVEL_WIDTH - 1);
+    int x1 = std::clamp((player->hitbox.x + player->hitbox.w) / TILE_SIZE,
+                        0, LEVEL_WIDTH - 1);
+
+    int y = std::clamp((player->hitbox.y + player->hitbox.h) / TILE_SIZE,
+                       0, LEVEL_HEIGHT - 1);
+
+
+    assert(x0 <= x1);
+
+    for (int x = x0; x <= x1; ++x) {
+        if (level[y][x] == Tile::Wall) {
+            player->dy = 0;
+            player->hitbox.y = y * TILE_SIZE - player->hitbox.h;
+            return;
+        }
     }
 }
 
@@ -213,7 +246,11 @@ int main(void)
 
     Animat *current = &idle;
 
-    int x = 0;
+    Player player = {};
+    player.dy = 0;
+    player.hitbox = {0, 0, 64, 64};
+
+    int ddy = 1;
     bool quit = false;
 
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
@@ -221,37 +258,46 @@ int main(void)
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
+        constexpr int PLAYER_SPEED = 4;
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT: {
                 quit = true;
             } break;
+
+            case SDL_KEYDOWN: {
+                switch (event.key.keysym.sym) {
+                case SDLK_SPACE: {
+                    player.dy = -10;
+                } break;
+                }
+            } break;
             }
         }
 
-        constexpr int PLAYER_SPEED = 2;
-
         if (keyboard[SDL_SCANCODE_D]) {
-            x += PLAYER_SPEED;
+            player.hitbox.x += PLAYER_SPEED;
             current = &walking;
             player_dir = SDL_FLIP_HORIZONTAL;
         } else if (keyboard[SDL_SCANCODE_A]) {
-            x -= PLAYER_SPEED;
+            player.hitbox.x -= PLAYER_SPEED;
             current = &walking;
             player_dir = SDL_FLIP_NONE;
         } else {
             current = &idle;
         }
 
+        player.dy += ddy;
+        player.hitbox.y  += player.dy;
+
+        resolve_player_collision(&player);
+
         sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, wall_texture);
-        render_animat(renderer, *current,
-                      {x, 4 * TILE_SIZE - walking_frame_size,
-                       walking_frame_size, walking_frame_size},
-                      player_dir);
+        render_animat(renderer, *current, player.hitbox, player_dir);
 
         SDL_RenderPresent(renderer);
 
