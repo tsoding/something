@@ -244,17 +244,17 @@ int main(void)
     idle.frame_count = 1;
     idle.frame_duration = 200;
 
-    Animat *current = &idle;
-
     Player player = {};
     player.dy = 0;
     player.hitbox = {0, 0, 64, 64};
 
-    int ddy = 1;
-    bool quit = false;
 
+    Animat *current = &idle;
+    int ddy = 1;
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
     SDL_RendererFlip player_dir = SDL_FLIP_NONE;
+    bool quit = false;
+    bool debug = false;
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -270,6 +270,10 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     player.dy = -10;
+                } break;
+
+                case SDLK_q: {
+                    debug = !debug;
                 } break;
                 }
             } break;
@@ -298,6 +302,11 @@ int main(void)
 
         render_level(renderer, wall_texture);
         render_animat(renderer, *current, player.hitbox, player_dir);
+
+        if (debug) {
+            sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+            sec(SDL_RenderDrawRect(renderer, &player.hitbox));
+        }
 
         SDL_RenderPresent(renderer);
 
