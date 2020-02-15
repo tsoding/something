@@ -4,8 +4,7 @@
 
 #include <png.h>
 
-// TODO: rename sdl -> sec (SDL Error Check)
-int sdl(int code)
+int sec(int code)
 {
     if (code < 0) {
         fprintf(stderr, "SDL pooped itself: %s\n", SDL_GetError());
@@ -16,7 +15,7 @@ int sdl(int code)
 }
 
 template <typename T>
-T *sdl(T *ptr)
+T *sec(T *ptr)
 {
     if (ptr == nullptr) {
         fprintf(stderr, "SDL pooped itself: %s\n", SDL_GetError());
@@ -56,7 +55,7 @@ void render_tile_texture(SDL_Renderer *renderer,
                          Tile_Texture texture,
                          SDL_Rect destrect)
 {
-    sdl(SDL_RenderCopy(
+    sec(SDL_RenderCopy(
             renderer,
             texture.texture,
             &texture.srcrect,
@@ -72,7 +71,7 @@ void render_level(SDL_Renderer *renderer, Tile_Texture wall_texture)
             } break;
 
             case Tile::Wall: {
-                sdl(SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255));
+                sec(SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255));
                 render_tile_texture(renderer, wall_texture,
                                     {x * TILE_SIZE, y * TILE_SIZE,
                                      TILE_SIZE, TILE_SIZE});
@@ -105,7 +104,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     }
 
     SDL_Surface* image_surface =
-        sdl(SDL_CreateRGBSurfaceFrom(image_pixels,
+        sec(SDL_CreateRGBSurfaceFrom(image_pixels,
                                      image.width,
                                      image.height,
                                      32,
@@ -116,7 +115,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
                                      0xFF000000));
 
     SDL_Texture *image_texture =
-        sdl(SDL_CreateTextureFromSurface(renderer,
+        sec(SDL_CreateTextureFromSurface(renderer,
                                          image_surface));
     SDL_FreeSurface(image_surface);
 
@@ -125,16 +124,16 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
 
 int main(void)
 {
-    sdl(SDL_Init(SDL_INIT_VIDEO));
+    sec(SDL_Init(SDL_INIT_VIDEO));
 
     SDL_Window *window =
-        sdl(SDL_CreateWindow(
+        sec(SDL_CreateWindow(
                 "New folder 1",
                 0, 0, 800, 600,
                 SDL_WINDOW_RESIZABLE));
 
     SDL_Renderer *renderer =
-        sdl(SDL_CreateRenderer(
+        sec(SDL_CreateRenderer(
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
@@ -193,8 +192,8 @@ int main(void)
             x -= 1;
         }
 
-        sdl(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
-        sdl(SDL_RenderClear(renderer));
+        sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
+        sec(SDL_RenderClear(renderer));
 
         render_level(renderer, wall_texture);
         render_tile_texture(renderer, walking_frames[walking_frame_current],
