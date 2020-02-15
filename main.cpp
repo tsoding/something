@@ -125,13 +125,13 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
 
 int main(void)
 {
-    sdl(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS));
+    sdl(SDL_Init(SDL_INIT_VIDEO));
 
     SDL_Window *window =
         sdl(SDL_CreateWindow(
                 "New folder 1",
                 0, 0, 800, 600,
-                SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE));
+                SDL_WINDOW_RESIZABLE));
 
     SDL_Renderer *renderer =
         sdl(SDL_CreateRenderer(
