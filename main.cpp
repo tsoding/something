@@ -177,6 +177,7 @@ bool is_tile_empty(int x, int y)
     return !is_not_oob(x, y) || level[y][x] == Tile::Empty;
 }
 
+static inline
 int sqr_dist(int x0, int y0, int x1, int y1)
 {
     int dx = x0 - x1;
@@ -211,30 +212,14 @@ void resolve_point_collision(int *x, int *y)
     };
 
     Side sides[] = {
-        // left
-        {std::abs(x0 - *x) * std::abs(x0 - *x), x0, *y, -1,  0, TILE_SIZE * TILE_SIZE},
-        // right
-        {std::abs(x1 - *x) * std::abs(x1 - *x), x1, *y,  1,  0, TILE_SIZE * TILE_SIZE},
-        // top
-        {std::abs(y0 - *y) * std::abs(y0 - *y), *x, y0,  0, -1, TILE_SIZE * TILE_SIZE},
-        // bottom
-        {std::abs(y1 - *y) * std::abs(y1 - *y), *x, y1,  0,  1, TILE_SIZE * TILE_SIZE},
-        // top-left
-        {std::abs(x0 - *x) * std::abs(x0 - *x) + std::abs(y0 - *y) * std::abs(y0 - *y),
-         x0, y0, -1, -1,
-         TILE_SIZE * TILE_SIZE * 2},
-        // top-right
-        {std::abs(x1 - *x) * std::abs(x1 - *x) + std::abs(y0 - *y) * std::abs(y0 - *y),
-         x1, y0,  1, -1,
-         TILE_SIZE * TILE_SIZE * 2},
-        // bottom-left
-        {std::abs(x0 - *x) * std::abs(x0 - *x) + std::abs(y1 - *y) * std::abs(y1 - *y),
-         x0, y1, -1,  1,
-         TILE_SIZE * TILE_SIZE * 2},
-        // bottom-right
-        {std::abs(x1 - *x) * std::abs(x1 - *x) + std::abs(y1 - *y) * std::abs(y1 - *y),
-         x1, y1, 1,  1,
-         TILE_SIZE * TILE_SIZE * 2}
+        {sqr_dist(x0, 0, *x, 0),   x0, *y, -1,  0, TILE_SIZE * TILE_SIZE},     // left
+        {sqr_dist(x1, 0, *x, 0),   x1, *y,  1,  0, TILE_SIZE * TILE_SIZE},     // right
+        {sqr_dist(0, y0, 0, *y),   *x, y0,  0, -1, TILE_SIZE * TILE_SIZE},     // top
+        {sqr_dist(0, y1, 0, *y),   *x, y1,  0,  1, TILE_SIZE * TILE_SIZE},     // bottom
+        {sqr_dist(x0, y0, *x, *y), x0, y0, -1, -1, TILE_SIZE * TILE_SIZE * 2}, // top-left
+        {sqr_dist(x1, y0, *x, *y), x1, y0,  1, -1, TILE_SIZE * TILE_SIZE * 2}, // top-right
+        {sqr_dist(x0, y1, *x, *y), x0, y1, -1,  1, TILE_SIZE * TILE_SIZE * 2}, // bottom-left
+        {sqr_dist(x1, y1, *x, *y), x1, y1,  1,  1, TILE_SIZE * TILE_SIZE * 2}  // bottom-right
     };
     constexpr int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
 
