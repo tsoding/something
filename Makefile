@@ -4,4 +4,4 @@ CFLAGS=-Wall -Wextra $(WERROR) -pedantic -std=c++17 -ggdb $(shell pkg-config --c
 LIBS=$(shell pkg-config --libs $(PKGS)) -lm
 
 something: main.cpp
-	$(CC) $(CFLAGS) -o something main.cpp $(LIBS)
+	$(CXX) $(CFLAGS) -o something main.cpp $(LIBS)
