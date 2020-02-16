@@ -3,8 +3,6 @@
 #include <cstdlib>
 #include <SDL.h>
 
-#include <algorithm>
-
 #include <png.h>
 
 int sec(int code)
