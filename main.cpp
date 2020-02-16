@@ -102,7 +102,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     }
     image.format = PNG_FORMAT_RGBA;
     printf("Width: %d, Height: %d\n", image.width, image.height);
-    uint32_t *image_pixels = (uint32_t *) std::malloc(sizeof(uint32_t) * image.width * image.height);
+    uint32_t *image_pixels = new uint32_t[image.width * image.height];
 
     if (!png_image_finish_read(&image, nullptr, image_pixels, 0, nullptr)) {
         fprintf(stderr, "libpng pooped itself: %s\n", image.message);
