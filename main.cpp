@@ -36,15 +36,15 @@ enum class Tile
     Wall
 };
 
-constexpr int LEVEL_WIDTH = 5;
+constexpr int LEVEL_WIDTH = 6;
 constexpr int LEVEL_HEIGHT = 5;
 
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Wall,  Tile::Wall,  Tile::Empty,  Tile::Wall,  Tile::Wall},
+    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
+    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
+    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
+    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall , Tile::Empty},
+    {Tile::Wall,  Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Wall , Tile::Wall},
 };
 
 struct Sprite
@@ -172,6 +172,46 @@ bool is_not_oob(int x, int y)
     return 0 <= x && x < LEVEL_WIDTH && 0 <= y && y < LEVEL_HEIGHT;
 }
 
+void resolve_point_collision(int *x, int *y)
+{
+    assert(x);
+    assert(y);
+
+    const int tile_x = *x / TILE_SIZE;
+    const int tile_y = *y / TILE_SIZE;
+
+    const int x0 = tile_x * TILE_SIZE;
+    const int x1 = (tile_x + 1) * TILE_SIZE;
+    const int y0 = tile_y * TILE_SIZE;
+    const int y1 = (tile_y + 1) * TILE_SIZE;
+
+    constexpr auto SIDES_COUNT = 4;
+    constexpr auto FIELDS_COUNT = 3;
+
+    constexpr auto DISTANCE = 0;
+    constexpr auto X = 1;
+    constexpr auto Y = 2;
+
+    const int dxy[SIDES_COUNT][FIELDS_COUNT] = {
+        {std::abs(x0 - *x), x0, *y},
+        {std::abs(x1 - *x), x1, *y},
+        {std::abs(y0 - *y), *x, y0},
+        {std::abs(y1 - *y), *x, y1},
+    };
+
+    if (is_not_oob(tile_x, tile_y) && level[tile_y][tile_x] == Tile::Wall) {
+        int closest_side = -1;
+        for (auto side = 0; side < SIDES_COUNT; ++side) {
+            if (closest_side < 0 || dxy[closest_side][DISTANCE] > dxy[side][DISTANCE]) {
+                closest_side = side;
+            }
+        }
+
+        *x = dxy[closest_side][X];
+        *y = dxy[closest_side][Y];
+    }
+}
+
 void resolve_player_collision(Player *player)
 {
     assert(player);
@@ -263,10 +303,13 @@ int main(void)
     SDL_RendererFlip player_dir = SDL_FLIP_NONE;
     bool quit = false;
     bool debug = false;
+    constexpr int CURSOR_SIZE = 10;
+    SDL_Rect cursor = {};
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
         constexpr int PLAYER_SPEED = 4;
+
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -290,6 +333,16 @@ int main(void)
                     player.dy = 0;
                 } break;
                 }
+            } break;
+
+            case SDL_MOUSEMOTION: {
+                auto x = event.motion.x;
+                auto y = event.motion.y;
+                resolve_point_collision(&x, &y);
+                cursor = {
+                    x - CURSOR_SIZE, y - CURSOR_SIZE,
+                    CURSOR_SIZE * 2, CURSOR_SIZE * 2
+                };
             } break;
             }
         }
@@ -319,7 +372,9 @@ int main(void)
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+
             sec(SDL_RenderDrawRect(renderer, &player.hitbox));
+            sec(SDL_RenderFillRect(renderer, &cursor));
         }
 
         SDL_RenderPresent(renderer);
