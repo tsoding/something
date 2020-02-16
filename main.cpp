@@ -163,7 +163,7 @@ void update_animat(Animat *animat, uint32_t dt)
 struct Player
 {
     SDL_Rect hitbox;
-    int dy;
+    int dx, dy;
 };
 
 static inline
@@ -238,12 +238,12 @@ void resolve_point_collision(int *x, int *y)
         }
     }
 
-    printf("d:\t%d,\tx: %d,\ty: %d,\tdx:%d,\tdy:%d\n",
-           sides[closest].d,
-           sides[closest].x,
-           sides[closest].y,
-           sides[closest].dx,
-           sides[closest].dy);
+    // printf("d:\t%d,\tx: %d,\ty: %d,\tdx:%d,\tdy:%d\n",
+    //        sides[closest].d,
+    //        sides[closest].x,
+    //        sides[closest].y,
+    //        sides[closest].dx,
+    //        sides[closest].dy);
 
     *x = sides[closest].x;
     *y = sides[closest].y;
@@ -253,26 +253,47 @@ void resolve_player_collision(Player *player)
 {
     assert(player);
 
-    int x0 = player->hitbox.x / TILE_SIZE;
-    int x1 = (player->hitbox.x + player->hitbox.w) / TILE_SIZE;
-    int y0 = player->hitbox.y / TILE_SIZE;
-    int y1 = (player->hitbox.y + player->hitbox.h) / TILE_SIZE;
+    int x0 = player->hitbox.x;
+    int y0 = player->hitbox.y;
+    int x1 = player->hitbox.x + player->hitbox.w;
+    int y1 = player->hitbox.y + player->hitbox.h;
 
-    assert(x0 <= x1);
+    int mesh[][2] = {
+        {x0, y0},
+        {x1, y0},
+        {x0, y1},
+        {x1, y1},
+    };
+    constexpr int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+    constexpr int X = 0;
+    constexpr int Y = 1;
 
-    for (int x = x0; x <= x1; ++x) {
-        if (is_not_oob(x, y0) && level[y0][x] == Tile::Wall) {
+    for (int i = 0; i < MESH_COUNT; ++i) {
+
+        int tx = mesh[i][X];
+        int ty = mesh[i][Y];
+        resolve_point_collision(&tx, &ty);
+        int dx = tx - mesh[i][X];
+        int dy = ty - mesh[i][Y];
+
+        if (dy) {
             player->dy = 0;
-            player->hitbox.y = (y0 + 1) * TILE_SIZE;
-            return;
         }
 
-        if (is_not_oob(x, y1) && level[y1][x] == Tile::Wall) {
-            player->dy = 0;
-            player->hitbox.y = y1 * TILE_SIZE - player->hitbox.h;
-            return;
+        if (dx) {
+            player->dx = 0;
+        }
+
+        for (int j = 0; j < MESH_COUNT; ++j) {
+            mesh[j][X] += dx;
+            mesh[j][Y] += dy;
         }
     }
+
+    static_assert(MESH_COUNT >= 1);
+
+    player->hitbox.x = mesh[0][X];
+    player->hitbox.y = mesh[0][Y];
 }
 
 int main(void)
@@ -395,19 +416,22 @@ int main(void)
         }
 
         if (keyboard[SDL_SCANCODE_D]) {
-            player.hitbox.x += PLAYER_SPEED;
+            player.dx = PLAYER_SPEED;
             current = &walking;
             player_dir = SDL_FLIP_HORIZONTAL;
         } else if (keyboard[SDL_SCANCODE_A]) {
-            player.hitbox.x -= PLAYER_SPEED;
+            player.dx = -PLAYER_SPEED;
             current = &walking;
             player_dir = SDL_FLIP_NONE;
         } else {
+            player.dx = 0;
             current = &idle;
         }
 
         player.dy += ddy;
-        player.hitbox.y  += player.dy;
+
+        player.hitbox.x += player.dx;
+        player.hitbox.y += player.dy;
 
         resolve_player_collision(&player);
 
