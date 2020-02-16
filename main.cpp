@@ -27,6 +27,7 @@ T *sec(T *ptr)
 }
 
 constexpr int TILE_SIZE = 128;
+constexpr int TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 enum class Tile
 {
@@ -210,14 +211,14 @@ void resolve_point_collision(int *x, int *y)
     };
 
     Side sides[] = {
-        {sqr_dist(x0, 0, *x, 0),   x0, *y, -1,  0, TILE_SIZE * TILE_SIZE},     // left
-        {sqr_dist(x1, 0, *x, 0),   x1, *y,  1,  0, TILE_SIZE * TILE_SIZE},     // right
-        {sqr_dist(0, y0, 0, *y),   *x, y0,  0, -1, TILE_SIZE * TILE_SIZE},     // top
-        {sqr_dist(0, y1, 0, *y),   *x, y1,  0,  1, TILE_SIZE * TILE_SIZE},     // bottom
-        {sqr_dist(x0, y0, *x, *y), x0, y0, -1, -1, TILE_SIZE * TILE_SIZE * 2}, // top-left
-        {sqr_dist(x1, y0, *x, *y), x1, y0,  1, -1, TILE_SIZE * TILE_SIZE * 2}, // top-right
-        {sqr_dist(x0, y1, *x, *y), x0, y1, -1,  1, TILE_SIZE * TILE_SIZE * 2}, // bottom-left
-        {sqr_dist(x1, y1, *x, *y), x1, y1,  1,  1, TILE_SIZE * TILE_SIZE * 2}  // bottom-right
+        {sqr_dist(x0, 0, *x, 0),   x0, *y, -1,  0, TILE_SIZE_SQR},     // left
+        {sqr_dist(x1, 0, *x, 0),   x1, *y,  1,  0, TILE_SIZE_SQR},     // right
+        {sqr_dist(0, y0, 0, *y),   *x, y0,  0, -1, TILE_SIZE_SQR},     // top
+        {sqr_dist(0, y1, 0, *y),   *x, y1,  0,  1, TILE_SIZE_SQR},     // bottom
+        {sqr_dist(x0, y0, *x, *y), x0, y0, -1, -1, TILE_SIZE_SQR * 2}, // top-left
+        {sqr_dist(x1, y0, *x, *y), x1, y0,  1, -1, TILE_SIZE_SQR * 2}, // top-right
+        {sqr_dist(x0, y1, *x, *y), x0, y1, -1,  1, TILE_SIZE_SQR * 2}, // bottom-left
+        {sqr_dist(x1, y1, *x, *y), x1, y1,  1,  1, TILE_SIZE_SQR * 2}  // bottom-right
     };
     constexpr int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
 
