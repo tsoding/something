@@ -192,7 +192,7 @@ void resolve_point_collision(int *x, int *y)
     const int tile_x = *x / TILE_SIZE;
     const int tile_y = *y / TILE_SIZE;
 
-    if (!is_not_oob(tile_x, tile_y) || level[tile_y][tile_x] == Tile::Empty) {
+    if (is_tile_empty(tile_x, tile_y)) {
         return;
     }
 
@@ -201,14 +201,7 @@ void resolve_point_collision(int *x, int *y)
     const int y0 = tile_y * TILE_SIZE;
     const int y1 = (tile_y + 1) * TILE_SIZE;
 
-    struct Side {
-        int d;
-        int x;
-        int y;
-        int dx;
-        int dy;
-        int dd;
-    };
+    struct Side { int d, x, y, dx, dy, dd; };
 
     Side sides[] = {
         {sqr_dist(x0, 0, *x, 0),   x0, *y, -1,  0, TILE_SIZE_SQR},     // left
@@ -236,13 +229,6 @@ void resolve_point_collision(int *x, int *y)
             closest = current;
         }
     }
-
-    // printf("d:\t%d,\tx: %d,\ty: %d,\tdx:%d,\tdy:%d\n",
-    //        sides[closest].d,
-    //        sides[closest].x,
-    //        sides[closest].y,
-    //        sides[closest].dx,
-    //        sides[closest].dy);
 
     *x = sides[closest].x;
     *y = sides[closest].y;
