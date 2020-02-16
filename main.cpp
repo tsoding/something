@@ -178,14 +178,21 @@ void resolve_player_collision(Player *player)
 
     int x0 = player->hitbox.x / TILE_SIZE;
     int x1 = (player->hitbox.x + player->hitbox.w) / TILE_SIZE;
-    int y = (player->hitbox.y + player->hitbox.h) / TILE_SIZE;
+    int y0 = player->hitbox.y / TILE_SIZE;
+    int y1 = (player->hitbox.y + player->hitbox.h) / TILE_SIZE;
 
     assert(x0 <= x1);
 
     for (int x = x0; x <= x1; ++x) {
-        if (is_not_oob(x, y) && level[y][x] == Tile::Wall) {
+        if (is_not_oob(x, y0) && level[y0][x] == Tile::Wall) {
             player->dy = 0;
-            player->hitbox.y = y * TILE_SIZE - player->hitbox.h;
+            player->hitbox.y = (y0 + 1) * TILE_SIZE;
+            return;
+        }
+
+        if (is_not_oob(x, y1) && level[y1][x] == Tile::Wall) {
+            player->dy = 0;
+            player->hitbox.y = y1 * TILE_SIZE - player->hitbox.h;
             return;
         }
     }
