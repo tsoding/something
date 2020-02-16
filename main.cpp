@@ -42,9 +42,9 @@ constexpr int LEVEL_HEIGHT = 5;
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall , Tile::Empty},
-    {Tile::Wall,  Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Wall , Tile::Wall},
+    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall,  Tile::Empty},
+    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Wall , Tile::Wall},
+    {Tile::Wall,  Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall , Tile::Empty},
 };
 
 struct Sprite
@@ -172,6 +172,18 @@ bool is_not_oob(int x, int y)
     return 0 <= x && x < LEVEL_WIDTH && 0 <= y && y < LEVEL_HEIGHT;
 }
 
+bool is_tile_empty(int x, int y)
+{
+    return !is_not_oob(x, y) || level[y][x] == Tile::Empty;
+}
+
+int sqr_dist(int x0, int y0, int x1, int y1)
+{
+    int dx = x0 - x1;
+    int dy = y0 - y1;
+    return dx * dx + dy * dy;
+}
+
 void resolve_point_collision(int *x, int *y)
 {
     assert(x);
@@ -180,36 +192,76 @@ void resolve_point_collision(int *x, int *y)
     const int tile_x = *x / TILE_SIZE;
     const int tile_y = *y / TILE_SIZE;
 
+    if (!is_not_oob(tile_x, tile_y) || level[tile_y][tile_x] == Tile::Empty) {
+        return;
+    }
+
     const int x0 = tile_x * TILE_SIZE;
     const int x1 = (tile_x + 1) * TILE_SIZE;
     const int y0 = tile_y * TILE_SIZE;
     const int y1 = (tile_y + 1) * TILE_SIZE;
 
-    constexpr auto SIDES_COUNT = 4;
-    constexpr auto FIELDS_COUNT = 3;
-
-    constexpr auto DISTANCE = 0;
-    constexpr auto X = 1;
-    constexpr auto Y = 2;
-
-    const int dxy[SIDES_COUNT][FIELDS_COUNT] = {
-        {std::abs(x0 - *x), x0, *y},
-        {std::abs(x1 - *x), x1, *y},
-        {std::abs(y0 - *y), *x, y0},
-        {std::abs(y1 - *y), *x, y1},
+    struct Side {
+        int d;
+        int x;
+        int y;
+        int dx;
+        int dy;
+        int dd;
     };
 
-    if (is_not_oob(tile_x, tile_y) && level[tile_y][tile_x] == Tile::Wall) {
-        int closest_side = -1;
-        for (auto side = 0; side < SIDES_COUNT; ++side) {
-            if (closest_side < 0 || dxy[closest_side][DISTANCE] > dxy[side][DISTANCE]) {
-                closest_side = side;
-            }
+    Side sides[] = {
+        // left
+        {std::abs(x0 - *x) * std::abs(x0 - *x), x0, *y, -1,  0, TILE_SIZE * TILE_SIZE},
+        // right
+        {std::abs(x1 - *x) * std::abs(x1 - *x), x1, *y,  1,  0, TILE_SIZE * TILE_SIZE},
+        // top
+        {std::abs(y0 - *y) * std::abs(y0 - *y), *x, y0,  0, -1, TILE_SIZE * TILE_SIZE},
+        // bottom
+        {std::abs(y1 - *y) * std::abs(y1 - *y), *x, y1,  0,  1, TILE_SIZE * TILE_SIZE},
+        // top-left
+        {std::abs(x0 - *x) * std::abs(x0 - *x) + std::abs(y0 - *y) * std::abs(y0 - *y),
+         x0, y0, -1, -1,
+         TILE_SIZE * TILE_SIZE * 2},
+        // top-right
+        {std::abs(x1 - *x) * std::abs(x1 - *x) + std::abs(y0 - *y) * std::abs(y0 - *y),
+         x1, y0,  1, -1,
+         TILE_SIZE * TILE_SIZE * 2},
+        // bottom-left
+        {std::abs(x0 - *x) * std::abs(x0 - *x) + std::abs(y1 - *y) * std::abs(y1 - *y),
+         x0, y1, -1,  1,
+         TILE_SIZE * TILE_SIZE * 2},
+        // bottom-right
+        {std::abs(x1 - *x) * std::abs(x1 - *x) + std::abs(y1 - *y) * std::abs(y1 - *y),
+         x1, y1, 1,  1,
+         TILE_SIZE * TILE_SIZE * 2}
+    };
+    constexpr int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
+
+    int closest = -1;
+    for (int current = 0; current < SIDES_COUNT; ++current) {
+        for (int i = 1;
+             !is_tile_empty(tile_x + sides[current].dx * i,
+                            tile_y + sides[current].dy * i);
+             ++i)
+        {
+            sides[current].d += sides[current].dd;
         }
 
-        *x = dxy[closest_side][X];
-        *y = dxy[closest_side][Y];
+        if (closest < 0 || sides[closest].d >= sides[current].d) {
+            closest = current;
+        }
     }
+
+    printf("d:\t%d,\tx: %d,\ty: %d,\tdx:%d,\tdy:%d\n",
+           sides[closest].d,
+           sides[closest].x,
+           sides[closest].y,
+           sides[closest].dx,
+           sides[closest].dy);
+
+    *x = sides[closest].x;
+    *y = sides[closest].y;
 }
 
 void resolve_player_collision(Player *player)
@@ -305,6 +357,8 @@ int main(void)
     bool debug = false;
     constexpr int CURSOR_SIZE = 10;
     SDL_Rect cursor = {};
+    SDL_Rect tile_rect = {};
+
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -338,10 +392,18 @@ int main(void)
             case SDL_MOUSEMOTION: {
                 auto x = event.motion.x;
                 auto y = event.motion.y;
+
                 resolve_point_collision(&x, &y);
+
                 cursor = {
                     x - CURSOR_SIZE, y - CURSOR_SIZE,
                     CURSOR_SIZE * 2, CURSOR_SIZE * 2
+                };
+
+                tile_rect = {
+                    event.motion.x / TILE_SIZE * TILE_SIZE,
+                    event.motion.y / TILE_SIZE * TILE_SIZE,
+                    TILE_SIZE, TILE_SIZE
                 };
             } break;
             }
@@ -375,6 +437,7 @@ int main(void)
 
             sec(SDL_RenderDrawRect(renderer, &player.hitbox));
             sec(SDL_RenderFillRect(renderer, &cursor));
+            sec(SDL_RenderDrawRect(renderer, &tile_rect));
         }
 
         SDL_RenderPresent(renderer);
