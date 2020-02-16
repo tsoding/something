@@ -166,23 +166,24 @@ struct Player
     int dy;
 };
 
+static inline
+bool is_not_oob(int x, int y)
+{
+    return 0 <= x && x < LEVEL_WIDTH && 0 <= y && y < LEVEL_HEIGHT;
+}
+
 void resolve_player_collision(Player *player)
 {
     assert(player);
 
-    int x0 = std::clamp(player->hitbox.x / TILE_SIZE,
-                        0, LEVEL_WIDTH - 1);
-    int x1 = std::clamp((player->hitbox.x + player->hitbox.w) / TILE_SIZE,
-                        0, LEVEL_WIDTH - 1);
-
-    int y = std::clamp((player->hitbox.y + player->hitbox.h) / TILE_SIZE,
-                       0, LEVEL_HEIGHT - 1);
-
+    int x0 = player->hitbox.x / TILE_SIZE;
+    int x1 = (player->hitbox.x + player->hitbox.w) / TILE_SIZE;
+    int y = (player->hitbox.y + player->hitbox.h) / TILE_SIZE;
 
     assert(x0 <= x1);
 
     for (int x = x0; x <= x1; ++x) {
-        if (level[y][x] == Tile::Wall) {
+        if (is_not_oob(x, y) && level[y][x] == Tile::Wall) {
             player->dy = 0;
             player->hitbox.y = y * TILE_SIZE - player->hitbox.h;
             return;
@@ -269,11 +270,17 @@ int main(void)
             case SDL_KEYDOWN: {
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
-                    player.dy = -10;
+                    player.dy = -20;
                 } break;
 
                 case SDLK_q: {
                     debug = !debug;
+                } break;
+
+                case SDLK_r: {
+                    player.hitbox.x = 0;
+                    player.hitbox.y = 0;
+                    player.dy = 0;
                 } break;
                 }
             } break;
