@@ -299,6 +299,26 @@ void resolve_player_collision(Player *player)
     player->hitbox.y = mesh[0][Y];
 }
 
+SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
+                                    TTF_Font *font,
+                                    const char *text,
+                                    SDL_Color color)
+{
+    SDL_Surface *surface = stec(TTF_RenderText_Blended(font, text, color));
+    SDL_Texture *texture = stec(SDL_CreateTextureFromSurface(renderer, surface));
+    SDL_FreeSurface(surface);
+    return texture;
+}
+
+void render_texture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y)
+{
+    int w, h;
+    sec(SDL_QueryTexture(texture, NULL, NULL, &w, &h));
+    SDL_Rect srcrect = {0, 0, w, h};
+    SDL_Rect dstrect = {x, y, w, h};
+    sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -359,13 +379,8 @@ int main(void)
 
     stec(TTF_Init());
     TTF_Font *font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", 69));
-    SDL_Surface *hello_world_surface = stec(
-        TTF_RenderText_Blended(
-            font, "Welcome to my Dungeon", {255, 0, 0, 255}));
-    SDL_Texture *hello_world_texture = stec(
-        SDL_CreateTextureFromSurface(
-            renderer, hello_world_surface));
-    SDL_FreeSurface(hello_world_surface);
+    SDL_Texture *hello_world_texture = 
+        render_text_as_texture(renderer, font, "Welcome to my Dungeon", {255, 0, 0, 255});
 
     Animat *current = &idle;
     int ddy = 1;
@@ -461,21 +476,7 @@ int main(void)
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
         }
 
-        {
-            int w, h;
-            sec(SDL_QueryTexture(
-                    hello_world_texture,
-                    NULL, NULL,
-                    &w, &h));
-
-            SDL_Rect srcrect = {0, 0, w, h};
-            SDL_Rect dstrect = {100, 100, w, h};
-            sec(SDL_RenderCopy(renderer,
-                               hello_world_texture,
-                               &srcrect,
-                               &dstrect));
-        }
-
+        render_texture(renderer, hello_world_texture, 200, 200);
 
         SDL_RenderPresent(renderer);
 
