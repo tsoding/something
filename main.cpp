@@ -2,17 +2,35 @@
 #include <cstdio>
 #include <cstdlib>
 #include <SDL.h>
+#include <SDL_ttf.h>
 
 #include <png.h>
 
-int sec(int code)
+template <typename T>
+T *stec(T *ptr)
+{
+    if (ptr == nullptr) {
+        fprintf(stderr, "SDL_ttf pooped itself: %s\n", TTF_GetError());
+        abort();
+    }
+
+    return ptr;
+}
+
+void stec(int code)
+{
+    if (code < 0) {
+        fprintf(stderr, "SDL_ttf pooped itself: %s\n", TTF_GetError());
+        abort();
+    }
+}
+
+void sec(int code)
 {
     if (code < 0) {
         fprintf(stderr, "SDL pooped itself: %s\n", SDL_GetError());
         abort();
     }
-
-    return code;
 }
 
 template <typename T>
@@ -299,7 +317,7 @@ int main(void)
     // TODO(#8): replace fantasy_tiles.png with our own assets
     SDL_Texture *tileset_texture = load_texture_from_png_file(
         renderer,
-        "fantasy_tiles.png");
+        "assets/fantasy_tiles.png");
 
     Sprite wall_texture = {
         {120, 128, 16, 16},
@@ -309,7 +327,7 @@ int main(void)
     // TODO(#9): baking assets into executable
     SDL_Texture *walking_texture = load_texture_from_png_file(
         renderer,
-        "walking-12px-zoom.png");
+        "assets/walking-12px-zoom.png");
 
     constexpr int walking_frame_count = 4;
     constexpr int walking_frame_size = 48;
@@ -339,6 +357,15 @@ int main(void)
     player.dy = 0;
     player.hitbox = {0, 0, 64, 64};
 
+    stec(TTF_Init());
+    TTF_Font *font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", 69));
+    SDL_Surface *hello_world_surface = stec(
+        TTF_RenderText_Blended(
+            font, "Welcome to my Dungeon", {255, 0, 0, 255}));
+    SDL_Texture *hello_world_texture = stec(
+        SDL_CreateTextureFromSurface(
+            renderer, hello_world_surface));
+    SDL_FreeSurface(hello_world_surface);
 
     Animat *current = &idle;
     int ddy = 1;
@@ -433,6 +460,22 @@ int main(void)
             sec(SDL_RenderFillRect(renderer, &cursor));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
         }
+
+        {
+            int w, h;
+            sec(SDL_QueryTexture(
+                    hello_world_texture,
+                    NULL, NULL,
+                    &w, &h));
+
+            SDL_Rect srcrect = {0, 0, w, h};
+            SDL_Rect dstrect = {100, 100, w, h};
+            sec(SDL_RenderCopy(renderer,
+                               hello_world_texture,
+                               &srcrect,
+                               &dstrect));
+        }
+
 
         SDL_RenderPresent(renderer);
 
