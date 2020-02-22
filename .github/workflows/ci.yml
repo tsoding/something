@@ -9,7 +9,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -qq libsdl2-dev libpng-dev
+          sudo apt-get install -qq libsdl2-dev libpng-dev libsdl2-ttf-dev
       - name: build the game
         run: |
           make
@@ -22,7 +22,7 @@ jobs:
       - name: install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -qq libsdl2-dev libpng-dev
+          sudo apt-get install -qq libsdl2-dev libpng-dev libsdl2-ttf-dev
       - name: build the game
         run: |
           make
@@ -33,7 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: install dependencies
-        run: brew install sdl2 libpng pkg-config
+        run: brew install sdl2 sdl2_ttf libpng pkg-config
       - name: build the game
         run: |
           make
