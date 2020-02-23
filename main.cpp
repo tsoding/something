@@ -391,8 +391,8 @@ int main(void)
     SDL_RendererFlip player_dir = SDL_FLIP_NONE;
     bool quit = false;
     bool debug = false;
-    constexpr int CURSOR_SIZE = 10;
-    SDL_Rect cursor = {};
+    constexpr int COLLISION_PROBE_SIZE = 10;
+    SDL_Rect collision_probe = {};
     Vec2i mouse_position = {};
     SDL_Rect tile_rect = {};
 
@@ -430,9 +430,9 @@ int main(void)
                 Vec2i p = {event.motion.x, event.motion.y};
                 resolve_point_collision(&p);
 
-                cursor = {
-                    p.x - CURSOR_SIZE, p.y - CURSOR_SIZE,
-                    CURSOR_SIZE * 2, CURSOR_SIZE * 2
+                collision_probe = {
+                    p.x - COLLISION_PROBE_SIZE, p.y - COLLISION_PROBE_SIZE,
+                    COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2
                 };
 
                 tile_rect = {
@@ -476,7 +476,7 @@ int main(void)
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
             sec(SDL_RenderDrawRect(renderer, &player.hitbox));
-            sec(SDL_RenderFillRect(renderer, &cursor));
+            sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
 
             const Uint32 t = SDL_GetTicks() - begin;
@@ -492,7 +492,7 @@ int main(void)
             displayf(renderer, debug_font,
                      {255, 0, 0, 255}, vec2(PADDING, 2 * 50 + PADDING),
                      "Collision Probe: (%d, %d)",
-                     cursor.x, cursor.y);
+                     collision_probe.x, collision_probe.y);
         }
 
 
