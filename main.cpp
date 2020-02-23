@@ -368,6 +368,12 @@ void displayf(SDL_Renderer *renderer, TTF_Font *font,
     va_end(args);
 }
 
+enum class Debug_Draw_State {
+    Idle,
+    Create,
+    Delete
+};
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -450,6 +456,7 @@ int main(void)
     SDL_Rect collision_probe = {};
     Vec2i mouse_position = {};
     SDL_Rect tile_rect = {};
+    Debug_Draw_State state = Debug_Draw_State::Idle;
 
     Uint32 fps = 0;
     while (!quit) {
@@ -497,6 +504,19 @@ int main(void)
                 };
 
                 mouse_position = {event.motion.x, event.motion.y};
+
+                Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
+                switch (state) {
+                case Debug_Draw_State::Create: {
+                    level[tile.y][tile.x] = Tile::Wall;
+                } break;
+
+                case Debug_Draw_State::Delete: {
+                    level[tile.y][tile.x] = Tile::Empty;
+                } break;
+
+                default: {}
+                }
             } break;
 
             case SDL_MOUSEBUTTONDOWN: {
@@ -504,12 +524,18 @@ int main(void)
                     Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
                     if (is_not_oob(tile)) {
                         if (level[tile.y][tile.x] == Tile::Empty) {
+                            state = Debug_Draw_State::Create;
                             level[tile.y][tile.x] = Tile::Wall;
                         } else {
+                            state = Debug_Draw_State::Delete;
                             level[tile.y][tile.x] = Tile::Empty;
                         }
                     }
                 }
+            } break;
+
+            case SDL_MOUSEBUTTONUP: {
+                state = Debug_Draw_State::Idle;
             } break;
             }
         }
