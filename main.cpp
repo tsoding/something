@@ -184,6 +184,7 @@ void update_animat(Animat *animat, uint32_t dt)
 struct Player
 {
     SDL_Rect texbox;
+    SDL_Rect hitbox;
     Vec2i pos;
     Vec2i vel;
 
@@ -264,8 +265,8 @@ void resolve_player_collision(Player *player)
 {
     assert(player);
 
-    Vec2i p0 = vec2(player->texbox.x, player->texbox.y) + player->pos;
-    Vec2i p1 = p0 + vec2(player->texbox.w, player->texbox.h);
+    Vec2i p0 = vec2(player->hitbox.x, player->hitbox.y) + player->pos;
+    Vec2i p1 = p0 + vec2(player->hitbox.w, player->hitbox.h);
 
     Vec2i mesh[] = {
         p0,
@@ -287,11 +288,9 @@ void resolve_player_collision(Player *player)
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j] += d;
         }
+
+        player->pos += d;
     }
-
-    static_assert(MESH_COUNT >= 1);
-
-    player->pos = mesh[0];
 }
 
 SDL_Rect player_dstrect(const Player player)
@@ -301,6 +300,15 @@ SDL_Rect player_dstrect(const Player player)
         player.texbox.w, player.texbox.h
     };
     return dstrect;
+}
+
+SDL_Rect player_hitbox(const Player player)
+{
+    SDL_Rect hitbox = {
+        player.hitbox.x + player.pos.x, player.hitbox.y + player.pos.y,
+        player.hitbox.w, player.hitbox.h
+    };
+    return hitbox;
 }
 
 void render_player(SDL_Renderer *renderer, const Player player)
@@ -397,8 +405,17 @@ int main(void)
         walking_frames[i].texture = walking_texture;
     }
 
+    constexpr int PLAYER_TEXBOX_SIZE = 64;
+    constexpr int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
     Player player = {};
-    player.texbox = {0, 0, 64, 64};
+    player.texbox = {
+        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
+        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
+    };
+    player.hitbox = {
+        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
+        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
+    };
     player.walking.frames = walking_frames;
     player.walking.frame_count = 4;
     player.walking.frame_duration = 100;
@@ -488,11 +505,11 @@ int main(void)
         if (keyboard[SDL_SCANCODE_D]) {
             player.vel.x = PLAYER_SPEED;
             player.current = &player.walking;
-            player.dir = SDL_FLIP_HORIZONTAL;
+            player.dir = SDL_FLIP_NONE;
         } else if (keyboard[SDL_SCANCODE_A]) {
             player.vel.x = -PLAYER_SPEED;
             player.current = &player.walking;
-            player.dir = SDL_FLIP_NONE;
+            player.dir = SDL_FLIP_HORIZONTAL;
         } else {
             player.vel.x = 0;
             player.current = &player.idle;
@@ -535,6 +552,10 @@ int main(void)
                      {255, 0, 0, 255}, vec2(PADDING, 2 * 50 + PADDING),
                      "Collision Probe: (%d, %d)",
                      collision_probe.x, collision_probe.y);
+
+            sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+            auto hitbox = player_hitbox(player);
+            sec(SDL_RenderDrawRect(renderer, &hitbox));
         }
 
 
