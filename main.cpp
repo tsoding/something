@@ -90,7 +90,20 @@ void render_sprite(SDL_Renderer *renderer,
             flip));
 }
 
-void render_level(SDL_Renderer *renderer, Sprite wall_texture)
+static inline
+bool is_not_oob(Vec2i p)
+{
+    return 0 <= p.x && p.x < LEVEL_WIDTH && 0 <= p.y && p.y < LEVEL_HEIGHT;
+}
+
+bool is_tile_empty(Vec2i p)
+{
+    return !is_not_oob(p) || level[p.y][p.x] == Tile::Empty;
+}
+
+void render_level(SDL_Renderer *renderer,
+                  Sprite top_ground_texture,
+                  Sprite bottom_ground_texture)
 {
     for (int y = 0; y < LEVEL_HEIGHT; ++y) {
         for (int x = 0; x < LEVEL_WIDTH; ++x) {
@@ -99,10 +112,15 @@ void render_level(SDL_Renderer *renderer, Sprite wall_texture)
             } break;
 
             case Tile::Wall: {
-                sec(SDL_SetRenderDrawColor(renderer, 255, 100, 100, 255));
-                render_sprite(renderer, wall_texture,
-                                    {x * TILE_SIZE, y * TILE_SIZE,
-                                     TILE_SIZE, TILE_SIZE});
+                if (is_tile_empty(vec2(x, y - 1))) {
+                    render_sprite(renderer, top_ground_texture,
+                                  {x * TILE_SIZE, y * TILE_SIZE,
+                                   TILE_SIZE, TILE_SIZE});
+                } else {
+                    render_sprite(renderer, bottom_ground_texture,
+                                  {x * TILE_SIZE, y * TILE_SIZE,
+                                   TILE_SIZE, TILE_SIZE});
+                }
             } break;
             }
         }
@@ -193,17 +211,6 @@ struct Player
     Animat *current;
     SDL_RendererFlip dir;
 };
-
-static inline
-bool is_not_oob(Vec2i p)
-{
-    return 0 <= p.x && p.x < LEVEL_WIDTH && 0 <= p.y && p.y < LEVEL_HEIGHT;
-}
-
-bool is_tile_empty(Vec2i p)
-{
-    return !is_not_oob(p) || level[p.y][p.x] == Tile::Empty;
-}
 
 static inline
 int sqr_dist(Vec2i p0, Vec2i p1)
@@ -381,8 +388,13 @@ int main(void)
         renderer,
         "assets/fantasy_tiles.png");
 
-    Sprite wall_texture = {
+    Sprite ground_grass_texture = {
         {120, 128, 16, 16},
+        tileset_texture
+    };
+
+    Sprite ground_texture = {
+        {120, 128 + 16, 16, 16},
         tileset_texture
     };
 
@@ -524,7 +536,7 @@ int main(void)
         sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
         sec(SDL_RenderClear(renderer));
 
-        render_level(renderer, wall_texture);
+        render_level(renderer, ground_grass_texture, ground_texture);
         render_player(renderer, player);
 
         if (debug) {
