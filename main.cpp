@@ -60,7 +60,7 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
     {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall,  Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Wall , Tile::Wall},
+    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall},
     {Tile::Wall,  Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall , Tile::Empty},
 };
 
@@ -272,20 +272,15 @@ void resolve_player_collision(Player *player)
     constexpr int Y = 1;
 
     for (int i = 0; i < MESH_COUNT; ++i) {
-
         int tx = mesh[i][X];
         int ty = mesh[i][Y];
         resolve_point_collision(&tx, &ty);
         int dx = tx - mesh[i][X];
         int dy = ty - mesh[i][Y];
 
-        if (dy) {
-            player->dy = 0;
-        }
-
-        if (dx) {
-            player->dx = 0;
-        }
+        constexpr int IMPACT_THRESHOLD = 5;
+        if (std::abs(dy) >= IMPACT_THRESHOLD) player->dy = 0;
+        if (std::abs(dx) >= IMPACT_THRESHOLD) player->dx = 0;
 
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j][X] += dx;
@@ -379,7 +374,7 @@ int main(void)
 
     stec(TTF_Init());
     TTF_Font *font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", 69));
-    SDL_Texture *hello_world_texture = 
+    SDL_Texture *hello_world_texture =
         render_text_as_texture(renderer, font, "Welcome to my Dungeon", {255, 0, 0, 255});
 
     Animat *current = &idle;
