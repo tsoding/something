@@ -314,6 +314,24 @@ void render_texture(SDL_Renderer *renderer, SDL_Texture *texture, int x, int y)
     sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
 }
 
+void displayf(SDL_Renderer *renderer, TTF_Font *font,
+              SDL_Color color, int x, int y,
+              const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+
+    char text[256];
+    vsnprintf(text, sizeof(text), format, args);
+
+    SDL_Texture *texture =
+        render_text_as_texture(renderer, font, text, color);
+    render_texture(renderer, texture, x, y);
+    SDL_DestroyTexture(texture);
+
+    va_end(args);
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -374,8 +392,6 @@ int main(void)
 
     stec(TTF_Init());
     TTF_Font *font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", 69));
-    SDL_Texture *hello_world_texture =
-        render_text_as_texture(renderer, font, "Welcome to my Dungeon", {255, 0, 0, 255});
 
     Animat *current = &idle;
     int ddy = 1;
@@ -471,7 +487,10 @@ int main(void)
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
         }
 
-        render_texture(renderer, hello_world_texture, 200, 200);
+        displayf(renderer, font,
+                 {255, 255, 0, 255}, player.hitbox.x, 0,
+                 "Tick: %dms",
+                 SDL_GetTicks() - begin);
 
         SDL_RenderPresent(renderer);
 
