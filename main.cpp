@@ -55,8 +55,11 @@ enum class Tile
     Wall
 };
 
-constexpr int LEVEL_WIDTH = 6;
-constexpr int LEVEL_HEIGHT = 5;
+constexpr int LEVEL_WIDTH = 10;
+constexpr int LEVEL_HEIGHT = 10;
+constexpr SDL_Rect level_boundary = {
+    0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+};
 
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
@@ -491,6 +494,7 @@ int main(void)
             sec(SDL_RenderDrawRect(renderer, &player.hitbox));
             sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
+            sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
             const Uint32 t = SDL_GetTicks() - begin;
             const Uint32 fps = t ? 1000 / t : 0;
