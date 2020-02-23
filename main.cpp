@@ -399,6 +399,7 @@ int main(void)
     Vec2i mouse_position = {};
     SDL_Rect tile_rect = {};
 
+    Uint32 fps = 0;
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -497,7 +498,9 @@ int main(void)
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
             const Uint32 t = SDL_GetTicks() - begin;
-            const Uint32 fps = t ? 1000 / t : 0;
+            const Uint32 fps_snapshot = t ? 1000 / t : 0;
+            fps = (fps + fps_snapshot) / 2;
+
             constexpr int PADDING = 10;
             displayf(renderer, debug_font,
                      {255, 0, 0, 255}, vec2(PADDING, PADDING),
