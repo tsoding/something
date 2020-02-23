@@ -183,7 +183,8 @@ void update_animat(Animat *animat, uint32_t dt)
 
 struct Player
 {
-    SDL_Rect hitbox;
+    SDL_Rect texbox;
+    Vec2i pos;
     Vec2i vel;
 
     Animat idle;
@@ -263,8 +264,8 @@ void resolve_player_collision(Player *player)
 {
     assert(player);
 
-    Vec2i p0 = vec2(player->hitbox.x, player->hitbox.y);
-    Vec2i p1 = p0 + vec2(player->hitbox.w, player->hitbox.h);
+    Vec2i p0 = vec2(player->texbox.x, player->texbox.y) + player->pos;
+    Vec2i p1 = p0 + vec2(player->texbox.w, player->texbox.h);
 
     Vec2i mesh[] = {
         p0,
@@ -290,13 +291,22 @@ void resolve_player_collision(Player *player)
 
     static_assert(MESH_COUNT >= 1);
 
-    player->hitbox.x = mesh[0].x;
-    player->hitbox.y = mesh[0].y;
+    player->pos = mesh[0];
+}
+
+SDL_Rect player_dstrect(const Player player)
+{
+    SDL_Rect dstrect = {
+        player.texbox.x + player.pos.x, player.texbox.y + player.pos.y,
+        player.texbox.w, player.texbox.h
+    };
+    return dstrect;
 }
 
 void render_player(SDL_Renderer *renderer, const Player player)
 {
-    render_animat(renderer, *player.current, player.hitbox, player.dir);
+    auto dstrect = player_dstrect(player);
+    render_animat(renderer, *player.current, dstrect, player.dir);
 }
 
 void update_player(Player *player, uint32_t dt)
@@ -388,7 +398,7 @@ int main(void)
     }
 
     Player player = {};
-    player.hitbox = {0, 0, 64, 64};
+    player.texbox = {0, 0, 64, 64};
     player.walking.frames = walking_frames;
     player.walking.frame_count = 4;
     player.walking.frame_duration = 100;
@@ -436,8 +446,7 @@ int main(void)
                 } break;
 
                 case SDLK_r: {
-                    player.hitbox.x = 0;
-                    player.hitbox.y = 0;
+                    player.pos = vec2(0, 0);
                     player.vel.y = 0;
                 } break;
                 }
@@ -491,8 +500,7 @@ int main(void)
 
         player.vel.y += ddy;
 
-        player.hitbox.x += player.vel.x;
-        player.hitbox.y += player.vel.y;
+        player.pos += player.vel;
 
         resolve_player_collision(&player);
 
@@ -505,7 +513,8 @@ int main(void)
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
-            sec(SDL_RenderDrawRect(renderer, &player.hitbox));
+            auto dstrect = player_dstrect(player);
+            sec(SDL_RenderDrawRect(renderer, &dstrect));
             sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
