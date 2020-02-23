@@ -391,7 +391,8 @@ int main(void)
     player.hitbox = {0, 0, 64, 64};
 
     stec(TTF_Init());
-    TTF_Font *font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", 69));
+    constexpr int DEBUG_FONT_SIZE = 32;
+    TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
     Animat *current = &idle;
     int ddy = 1;
@@ -485,12 +486,15 @@ int main(void)
             sec(SDL_RenderDrawRect(renderer, &player.hitbox));
             sec(SDL_RenderFillRect(renderer, &cursor));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
+
+            const Uint32 t = SDL_GetTicks() - begin;
+            const Uint32 fps = t ? 1000 / t : 0;
+            constexpr int PADDING = 10;
+            displayf(renderer, debug_font,
+                     {255, 0, 0, 255}, PADDING, PADDING,
+                     "FPS: %d", fps);
         }
 
-        displayf(renderer, font,
-                 {255, 255, 0, 255}, player.hitbox.x, 0,
-                 "Tick: %dms",
-                 SDL_GetTicks() - begin);
 
         SDL_RenderPresent(renderer);
 
