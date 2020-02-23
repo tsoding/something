@@ -185,6 +185,11 @@ struct Player
 {
     SDL_Rect hitbox;
     Vec2i vel;
+
+    Animat idle;
+    Animat walking;
+    Animat *current;
+    SDL_RendererFlip dir;
 };
 
 static inline
@@ -371,27 +376,24 @@ int main(void)
         walking_frames[i].texture = walking_texture;
     }
 
-    Animat walking = {};
-    walking.frames = walking_frames;
-    walking.frame_count = 4;
-    walking.frame_duration = 100;
-
-    Animat idle = {};
-    idle.frames = walking_frames + 2;
-    idle.frame_count = 1;
-    idle.frame_duration = 200;
-
     Player player = {};
     player.hitbox = {0, 0, 64, 64};
+    player.walking.frames = walking_frames;
+    player.walking.frame_count = 4;
+    player.walking.frame_duration = 100;
+    player.idle.frames = walking_frames + 2;
+    player.idle.frame_count = 1;
+    player.idle.frame_duration = 200;
+    player.current = &player.idle;
+    player.dir = SDL_FLIP_NONE;
 
     stec(TTF_Init());
     constexpr int DEBUG_FONT_SIZE = 32;
     TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
-    Animat *current = &idle;
     int ddy = 1;
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
-    SDL_RendererFlip player_dir = SDL_FLIP_NONE;
+
     bool quit = false;
     bool debug = false;
     constexpr int COLLISION_PROBE_SIZE = 10;
@@ -465,15 +467,15 @@ int main(void)
 
         if (keyboard[SDL_SCANCODE_D]) {
             player.vel.x = PLAYER_SPEED;
-            current = &walking;
-            player_dir = SDL_FLIP_HORIZONTAL;
+            player.current = &player.walking;
+            player.dir = SDL_FLIP_HORIZONTAL;
         } else if (keyboard[SDL_SCANCODE_A]) {
             player.vel.x = -PLAYER_SPEED;
-            current = &walking;
-            player_dir = SDL_FLIP_NONE;
+            player.current = &player.walking;
+            player.dir = SDL_FLIP_NONE;
         } else {
             player.vel.x = 0;
-            current = &idle;
+            player.current = &player.idle;
         }
 
         player.vel.y += ddy;
@@ -487,7 +489,7 @@ int main(void)
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, wall_texture);
-        render_animat(renderer, *current, player.hitbox, player_dir);
+        render_animat(renderer, *player.current, player.hitbox, player.dir);
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
@@ -520,7 +522,7 @@ int main(void)
 
         const Uint32 dt = SDL_GetTicks() - begin;
 
-        update_animat(current, dt);
+        update_animat(player.current, dt);
     }
     SDL_Quit();
 
