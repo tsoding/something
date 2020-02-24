@@ -508,11 +508,11 @@ int main(void)
                 Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
                 switch (state) {
                 case Debug_Draw_State::Create: {
-                    level[tile.y][tile.x] = Tile::Wall;
+                    if (is_not_oob(tile)) level[tile.y][tile.x] = Tile::Wall;
                 } break;
 
                 case Debug_Draw_State::Delete: {
-                    level[tile.y][tile.x] = Tile::Empty;
+                    if (is_not_oob(tile)) level[tile.y][tile.x] = Tile::Empty;
                 } break;
 
                 default: {}
