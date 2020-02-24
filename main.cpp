@@ -90,6 +90,26 @@ void render_sprite(SDL_Renderer *renderer,
             flip));
 }
 
+void render_sprite(SDL_Renderer *renderer,
+                   Sprite texture,
+                   Vec2i pos,
+                   SDL_RendererFlip flip = SDL_FLIP_NONE)
+{
+    SDL_Rect destrect = {
+        pos.x - texture.srcrect.w / 2, pos.y - texture.srcrect.h / 2,
+        texture.srcrect.w, texture.srcrect.h
+    };
+
+    sec(SDL_RenderCopyEx(
+            renderer,
+            texture.texture,
+            &texture.srcrect,
+            &destrect,
+            0.0,
+            nullptr,
+            flip));
+}
+
 static inline
 bool is_tile_inbounds(Vec2i p)
 {
@@ -186,6 +206,19 @@ void render_animat(SDL_Renderer *renderer,
         renderer,
         animat.frames[animat.frame_current % animat.frame_count],
         dstrect,
+        flip);
+}
+
+static inline
+void render_animat(SDL_Renderer *renderer,
+                   Animat animat,
+                   Vec2i pos,
+                   SDL_RendererFlip flip = SDL_FLIP_NONE)
+{
+    render_sprite(
+        renderer,
+        animat.frames[animat.frame_current % animat.frame_count],
+        pos,
         flip);
 }
 
@@ -452,33 +485,19 @@ void spawn_projectile(Vec2i pos, Vec2i vel, SDL_RendererFlip dir)
 
 void render_projectiles(SDL_Renderer *renderer)
 {
-    const int PROJ_SIZE = 50;
-    const int PROJ_SIZE_HALF = PROJ_SIZE / 2;
-
     for (size_t i = 0; i < projectiles_count; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
-            SDL_Rect dstrect = {
-                projectiles[i].pos.x - PROJ_SIZE_HALF,
-                projectiles[i].pos.y - PROJ_SIZE_HALF,
-                PROJ_SIZE, PROJ_SIZE
-            };
-
             render_animat(renderer,
                           projectiles[i].active_animat,
-                          dstrect,
+                          projectiles[i].pos,
                           projectiles[i].dir);
         } break;
 
         case Projectile_State::Poof: {
-            SDL_Rect dstrect = {
-                projectiles[i].pos.x - PROJ_SIZE_HALF,
-                projectiles[i].pos.y - PROJ_SIZE_HALF,
-                PROJ_SIZE, PROJ_SIZE
-            };
             render_animat(renderer,
                           projectiles[i].poof_animat,
-                          dstrect,
+                          projectiles[i].pos,
                           projectiles[i].dir);
         } break;
 
@@ -494,8 +513,8 @@ void update_projectiles(uint32_t dt)
         case Projectile_State::Active: {
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel;
-            if (!is_tile_empty(projectiles[i].pos / TILE_SIZE) ||
-                !is_tile_inbounds(projectiles[i].pos / TILE_SIZE)) {
+            const auto projectile_tile = projectiles[i].pos / TILE_SIZE;
+            if (!is_tile_empty(projectile_tile) || !is_tile_inbounds(projectile_tile)) {
                 projectiles[i].state = Projectile_State::Poof;
                 projectiles[i].poof_animat.frame_current = 0;
             }
@@ -546,11 +565,11 @@ int main(void)
     };
 
     Animat plasma_pop_animat = load_spritesheet_animat(
-        renderer, 12, 50,
-        "./assets/plasma-poof-sheet.png");
+        renderer, 4, 70,
+        "./assets/Destroy1-sheet.png");
     Animat plasma_bolt_animat = load_spritesheet_animat(
-        renderer, 6, 70,
-        "./assets/plasma-bolt-sheet.png");
+        renderer, 5, 70,
+        "./assets/spark1-sheet.png");
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     // TODO(#9): baking assets into executable
