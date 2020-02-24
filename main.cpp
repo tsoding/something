@@ -209,6 +209,7 @@ struct Player
     Animat idle;
     Animat walking;
     Animat *current;
+    // TODO: special separate type for the Player dir
     SDL_RendererFlip dir;
 };
 
@@ -374,6 +375,146 @@ enum class Debug_Draw_State {
     Delete
 };
 
+Animat load_spritesheet_animat(SDL_Renderer *renderer,
+                               size_t frame_count,
+                               uint32_t frame_duration,
+                               const char *spritesheet_filepath)
+{
+    Animat result = {};
+    result.frames = new Sprite[frame_count];
+    result.frame_count = frame_count;
+    result.frame_duration = frame_duration;
+
+    SDL_Texture *spritesheet = load_texture_from_png_file(renderer, spritesheet_filepath);
+    int spritesheet_w = 0;
+    int spritesheet_h = 0;
+    sec(SDL_QueryTexture(spritesheet, NULL, NULL, &spritesheet_w, &spritesheet_h));
+    int sprite_w = spritesheet_w / frame_count;
+    int sprite_h = spritesheet_h; // NOTE: we only handle horizontal sprites
+
+    for (int i = 0; i < (int) frame_count; ++i) {
+        result.frames[i].texture = spritesheet;
+        result.frames[i].srcrect = {i * sprite_w, 0, sprite_w, sprite_h};
+    }
+
+    return result;
+}
+
+enum class Projectile_State
+{
+    Ded = 0,
+    Active,
+    Poof
+};
+
+struct Projectile
+{
+    Projectile_State state;
+    Vec2i pos;
+    Vec2i vel;
+    Animat active_animat;
+    Animat poof_animat;
+    SDL_RendererFlip dir;
+};
+
+const size_t projectiles_count = 69;
+Projectile projectiles[projectiles_count] = {};
+
+void init_projectiles(Animat active_animat, Animat poof_animat)
+{
+    for (size_t i = 0; i < projectiles_count; ++i) {
+        projectiles[i].active_animat = active_animat;
+        projectiles[i].poof_animat = poof_animat;
+    }
+}
+
+int count_alive_projectiles(void)
+{
+    int res = 0;
+    for (size_t i = 0; i < projectiles_count; ++i) {
+        if (projectiles[i].state != Projectile_State::Ded) ++res;
+    }
+    return res;
+}
+
+void spawn_projectile(Vec2i pos, Vec2i vel, SDL_RendererFlip dir)
+{
+    for (size_t i = 0; i < projectiles_count; ++i) {
+        if (projectiles[i].state == Projectile_State::Ded) {
+            projectiles[i].state = Projectile_State::Active;
+            projectiles[i].pos = pos;
+            projectiles[i].vel = vel;
+            projectiles[i].dir = dir;
+            return;
+        }
+    }
+}
+
+void render_projectiles(SDL_Renderer *renderer)
+{
+    const int PROJ_SIZE = 50;
+    const int PROJ_SIZE_HALF = PROJ_SIZE / 2;
+
+    for (size_t i = 0; i < projectiles_count; ++i) {
+        switch (projectiles[i].state) {
+        case Projectile_State::Active: {
+            SDL_Rect dstrect = {
+                projectiles[i].pos.x - PROJ_SIZE_HALF,
+                projectiles[i].pos.y - PROJ_SIZE_HALF,
+                PROJ_SIZE, PROJ_SIZE
+            };
+
+            render_animat(renderer,
+                          projectiles[i].active_animat,
+                          dstrect,
+                          projectiles[i].dir);
+        } break;
+
+        case Projectile_State::Poof: {
+            SDL_Rect dstrect = {
+                projectiles[i].pos.x - PROJ_SIZE_HALF,
+                projectiles[i].pos.y - PROJ_SIZE_HALF,
+                PROJ_SIZE, PROJ_SIZE
+            };
+            render_animat(renderer,
+                          projectiles[i].poof_animat,
+                          dstrect,
+                          projectiles[i].dir);
+        } break;
+
+        case Projectile_State::Ded: {} break;
+        }
+    }
+}
+
+void update_projectiles(uint32_t dt)
+{
+    for (size_t i = 0; i < projectiles_count; ++i) {
+        switch (projectiles[i].state) {
+        case Projectile_State::Active: {
+            update_animat(&projectiles[i].active_animat, dt);
+            projectiles[i].pos += projectiles[i].vel;
+            if (!is_tile_empty(projectiles[i].pos / TILE_SIZE) ||
+                !is_tile_inbounds(projectiles[i].pos / TILE_SIZE)) {
+                projectiles[i].state = Projectile_State::Poof;
+                projectiles[i].poof_animat.frame_current = 0;
+            }
+        } break;
+
+        case Projectile_State::Poof: {
+            update_animat(&projectiles[i].poof_animat, dt);
+            if (projectiles[i].poof_animat.frame_current ==
+                (projectiles[i].poof_animat.frame_count - 1)) {
+                projectiles[i].state = Projectile_State::Ded;
+            }
+        } break;
+
+        case Projectile_State::Ded: {} break;
+        }
+    }
+
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -404,10 +545,18 @@ int main(void)
         tileset_texture
     };
 
+    Animat plasma_pop_animat = load_spritesheet_animat(
+        renderer, 12, 50,
+        "./assets/plasma-poof-sheet.png");
+    Animat plasma_bolt_animat = load_spritesheet_animat(
+        renderer, 6, 70,
+        "./assets/plasma-bolt-sheet.png");
+    init_projectiles(plasma_bolt_animat, plasma_pop_animat);
+
     // TODO(#9): baking assets into executable
     SDL_Texture *walking_texture = load_texture_from_png_file(
         renderer,
-        "assets/walking-12px-zoom.png");
+        "./assets/walking-12px-zoom.png");
 
     const int walking_frame_count = 4;
     const int walking_frame_size = 48;
@@ -434,6 +583,7 @@ int main(void)
         - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
+    // player.walking = plasma_bolt_animat;
     player.walking.frames = walking_frames;
     player.walking.frame_count = 4;
     player.walking.frame_duration = 100;
@@ -479,6 +629,14 @@ int main(void)
 
                 case SDLK_q: {
                     debug = !debug;
+                } break;
+
+                case SDLK_e: {
+                    if (player.dir == SDL_FLIP_NONE) {
+                        spawn_projectile(player.pos, vec2(10, 0), player.dir);
+                    } else {
+                        spawn_projectile(player.pos, vec2(-10, 0), player.dir);
+                    }
                 } break;
 
                 case SDLK_r: {
@@ -559,11 +717,12 @@ int main(void)
 
         resolve_player_collision(&player);
 
-        sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
+        sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, ground_grass_texture, ground_texture);
         render_player(renderer, player);
+        render_projectiles(renderer);
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
@@ -590,6 +749,11 @@ int main(void)
                      {255, 0, 0, 255}, vec2(PADDING, 2 * 50 + PADDING),
                      "Collision Probe: (%d, %d)",
                      collision_probe.x, collision_probe.y);
+            displayf(renderer, debug_font,
+                     {255, 0, 0, 255}, vec2(PADDING, 3 * 50 + PADDING),
+                     "Projectiles: %d",
+                     count_alive_projectiles());
+
 
             sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
             auto hitbox = player_hitbox(player);
@@ -602,6 +766,7 @@ int main(void)
         const Uint32 dt = SDL_GetTicks() - begin;
 
         update_player(&player, dt);
+        update_projectiles(dt);
     }
     SDL_Quit();
 
