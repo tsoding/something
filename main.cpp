@@ -46,8 +46,8 @@ T *sec(T *ptr)
     return ptr;
 }
 
-constexpr int TILE_SIZE = 128;
-constexpr int TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
+const int TILE_SIZE = 128;
+const int TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 enum class Tile
 {
@@ -55,9 +55,9 @@ enum class Tile
     Wall
 };
 
-constexpr int LEVEL_WIDTH = 10;
-constexpr int LEVEL_HEIGHT = 10;
-constexpr SDL_Rect level_boundary = {
+const int LEVEL_WIDTH = 10;
+const int LEVEL_HEIGHT = 10;
+const SDL_Rect level_boundary = {
     0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
 };
 
@@ -249,7 +249,7 @@ void resolve_point_collision(Vec2i *p)
         {sqr_dist({p0.x, p1.y}, {p->x, p->y}), {p0.x, p1.y}, {-1,  1}, TILE_SIZE_SQR * 2}, // bottom-left
         {sqr_dist({p1.x, p1.y}, {p->x, p->y}), {p1.x, p1.y}, { 1,  1}, TILE_SIZE_SQR * 2}  // bottom-right
     };
-    constexpr int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
+    const int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
 
     int closest = -1;
     for (int current = 0; current < SIDES_COUNT; ++current) {
@@ -281,14 +281,14 @@ void resolve_player_collision(Player *player)
         {p0.x, p1.y},
         p1,
     };
-    constexpr int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+    const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
 
     for (int i = 0; i < MESH_COUNT; ++i) {
         Vec2i t = mesh[i];
         resolve_point_collision(&t);
         Vec2i d = t - mesh[i];
 
-        constexpr int IMPACT_THRESHOLD = 5;
+        const int IMPACT_THRESHOLD = 5;
         if (std::abs(d.y) >= IMPACT_THRESHOLD) player->vel.y = 0;
         if (std::abs(d.x) >= IMPACT_THRESHOLD) player->vel.x = 0;
 
@@ -409,8 +409,8 @@ int main(void)
         renderer,
         "assets/walking-12px-zoom.png");
 
-    constexpr int walking_frame_count = 4;
-    constexpr int walking_frame_size = 48;
+    const int walking_frame_count = 4;
+    const int walking_frame_size = 48;
     Sprite walking_frames[walking_frame_count];
 
     for (int i = 0; i < walking_frame_count; ++i) {
@@ -423,8 +423,8 @@ int main(void)
         walking_frames[i].texture = walking_texture;
     }
 
-    constexpr int PLAYER_TEXBOX_SIZE = 64;
-    constexpr int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
+    const int PLAYER_TEXBOX_SIZE = 64;
+    const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
     Player player = {};
     player.texbox = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
@@ -444,7 +444,7 @@ int main(void)
     player.dir = SDL_FLIP_NONE;
 
     stec(TTF_Init());
-    constexpr int DEBUG_FONT_SIZE = 32;
+    const int DEBUG_FONT_SIZE = 32;
     TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
     int ddy = 1;
@@ -452,7 +452,7 @@ int main(void)
 
     bool quit = false;
     bool debug = false;
-    constexpr int COLLISION_PROBE_SIZE = 10;
+    const int COLLISION_PROBE_SIZE = 10;
     SDL_Rect collision_probe = {};
     Vec2i mouse_position = {};
     SDL_Rect tile_rect = {};
@@ -462,7 +462,7 @@ int main(void)
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
-        constexpr int PLAYER_SPEED = 4;
+        const int PLAYER_SPEED = 4;
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -578,7 +578,7 @@ int main(void)
             const Uint32 fps_snapshot = t ? 1000 / t : 0;
             fps = (fps + fps_snapshot) / 2;
 
-            constexpr int PADDING = 10;
+            const int PADDING = 10;
             displayf(renderer, debug_font,
                      {255, 0, 0, 255}, vec2(PADDING, PADDING),
                      "FPS: %d", fps);
