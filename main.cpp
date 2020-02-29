@@ -238,7 +238,7 @@ enum class Entity_Dir
     Left
 };
 
-struct Player
+struct Entity
 {
     SDL_Rect texbox;
     SDL_Rect hitbox;
@@ -310,12 +310,12 @@ void resolve_point_collision(Vec2i *p)
     *p = sides[closest].np;
 }
 
-void resolve_player_collision(Player *player)
+void resolve_entity_collision(Entity *entity)
 {
-    assert(player);
+    assert(entity);
 
-    Vec2i p0 = vec2(player->hitbox.x, player->hitbox.y) + player->pos;
-    Vec2i p1 = p0 + vec2(player->hitbox.w, player->hitbox.h);
+    Vec2i p0 = vec2(entity->hitbox.x, entity->hitbox.y) + entity->pos;
+    Vec2i p1 = p0 + vec2(entity->hitbox.w, entity->hitbox.h);
 
     Vec2i mesh[] = {
         p0,
@@ -331,49 +331,49 @@ void resolve_player_collision(Player *player)
         Vec2i d = t - mesh[i];
 
         const int IMPACT_THRESHOLD = 5;
-        if (std::abs(d.y) >= IMPACT_THRESHOLD) player->vel.y = 0;
-        if (std::abs(d.x) >= IMPACT_THRESHOLD) player->vel.x = 0;
+        if (std::abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+        if (std::abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j] += d;
         }
 
-        player->pos += d;
+        entity->pos += d;
     }
 }
 
-SDL_Rect player_dstrect(const Player player)
+SDL_Rect entity_dstrect(const Entity entity)
 {
     SDL_Rect dstrect = {
-        player.texbox.x + player.pos.x, player.texbox.y + player.pos.y,
-        player.texbox.w, player.texbox.h
+        entity.texbox.x + entity.pos.x, entity.texbox.y + entity.pos.y,
+        entity.texbox.w, entity.texbox.h
     };
     return dstrect;
 }
 
-SDL_Rect player_hitbox(const Player player)
+SDL_Rect entity_hitbox(const Entity entity)
 {
     SDL_Rect hitbox = {
-        player.hitbox.x + player.pos.x, player.hitbox.y + player.pos.y,
-        player.hitbox.w, player.hitbox.h
+        entity.hitbox.x + entity.pos.x, entity.hitbox.y + entity.pos.y,
+        entity.hitbox.w, entity.hitbox.h
     };
     return hitbox;
 }
 
-void render_player(SDL_Renderer *renderer, const Player player)
+void render_entity(SDL_Renderer *renderer, const Entity entity)
 {
-    const auto dstrect = player_dstrect(player);
+    const auto dstrect = entity_dstrect(entity);
     const SDL_RendererFlip flip =
-        player.dir == Entity_Dir::Right
+        entity.dir == Entity_Dir::Right
         ? SDL_FLIP_NONE
         : SDL_FLIP_HORIZONTAL;
-    render_animat(renderer, *player.current, dstrect, flip);
+    render_animat(renderer, *entity.current, dstrect, flip);
 }
 
-void update_player(Player *player, uint32_t dt)
+void update_entity(Entity *entity, uint32_t dt)
 {
-    assert(player);
-    update_animat(player->current, dt);
+    assert(entity);
+    update_animat(entity->current, dt);
 }
 
 SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
@@ -611,7 +611,7 @@ int main(void)
 
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    Player player = {};
+    Entity player = {};
     player.texbox = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
         PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
@@ -751,19 +751,19 @@ int main(void)
 
         player.pos += player.vel;
 
-        resolve_player_collision(&player);
+        resolve_entity_collision(&player);
 
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, ground_grass_texture, ground_texture);
-        render_player(renderer, player);
+        render_entity(renderer, player);
         render_projectiles(renderer);
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
-            auto dstrect = player_dstrect(player);
+            auto dstrect = entity_dstrect(player);
             sec(SDL_RenderDrawRect(renderer, &dstrect));
             sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
@@ -792,7 +792,7 @@ int main(void)
 
 
             sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-            auto hitbox = player_hitbox(player);
+            auto hitbox = entity_hitbox(player);
             sec(SDL_RenderDrawRect(renderer, &hitbox));
         }
 
@@ -801,7 +801,7 @@ int main(void)
 
         const Uint32 dt = SDL_GetTicks() - begin;
 
-        update_player(&player, dt);
+        update_entity(&player, dt);
         update_projectiles(dt);
     }
     SDL_Quit();
