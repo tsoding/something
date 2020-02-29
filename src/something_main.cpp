@@ -273,9 +273,6 @@ int main(void)
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-
-            auto dstrect = entity_dstrect(entities[PLAYER_ENTITY_INDEX]);
-            sec(SDL_RenderDrawRect(renderer, &dstrect));
             sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
@@ -302,9 +299,17 @@ int main(void)
                      count_alive_projectiles());
 
 
-            sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-            auto hitbox = entity_hitbox(entities[PLAYER_ENTITY_INDEX]);
-            sec(SDL_RenderDrawRect(renderer, &hitbox));
+            for (size_t i = 0; i < entities_count; ++i) {
+                if (entities[i].state == Entity_State::Ded) continue;
+
+                sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+                auto dstrect = entity_dstrect(entities[i]);
+                sec(SDL_RenderDrawRect(renderer, &dstrect));
+
+                sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+                auto hitbox = entity_hitbox(entities[i]);
+                sec(SDL_RenderDrawRect(renderer, &hitbox));
+            }
         }
 
         SDL_RenderPresent(renderer);
