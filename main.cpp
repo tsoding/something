@@ -375,9 +375,14 @@ void render_entity(SDL_Renderer *renderer, const Entity entity)
     render_animat(renderer, *entity.current, dstrect, flip);
 }
 
-void update_entity(Entity *entity, uint32_t dt)
+void update_entity(Entity *entity, Vec2i gravity, uint32_t dt)
 {
     assert(entity);
+
+    entity->vel += gravity;
+    entity->pos += entity->vel;
+    resolve_entity_collision(entity);
+
     update_animat(entity->current, dt);
 }
 
@@ -670,12 +675,15 @@ int main(void)
     supposed_enemy.walking = walking;
     supposed_enemy.idle = idle;
     supposed_enemy.current = &supposed_enemy.idle;
+    static_assert(LEVEL_WIDTH >= 2);
+    supposed_enemy.pos = vec2(LEVEL_WIDTH - 2, 0) * TILE_SIZE;
+    supposed_enemy.dir = Entity_Dir::Left;
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
     TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
-    int ddy = 1;
+    Vec2i gravity = {0, 1};
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
     bool quit = false;
@@ -789,17 +797,13 @@ int main(void)
             player.current = &player.idle;
         }
 
-        player.vel.y += ddy;
-
-        player.pos += player.vel;
-
-        resolve_entity_collision(&player);
 
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, ground_grass_texture, ground_texture);
         render_entity(renderer, player);
+        render_entity(renderer, supposed_enemy);
         render_projectiles(renderer);
 
         if (debug) {
@@ -843,7 +847,8 @@ int main(void)
 
         const Uint32 dt = SDL_GetTicks() - begin;
 
-        update_entity(&player, dt);
+        update_entity(&player, gravity, dt);
+        update_entity(&supposed_enemy, gravity, dt);
         update_projectiles(dt);
     }
     SDL_Quit();
