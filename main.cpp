@@ -257,8 +257,6 @@ struct Entity
     Entity_Dir dir;
 };
 
-
-
 static inline
 int sqr_dist(Vec2i p0, Vec2i p1)
 {
@@ -584,6 +582,28 @@ void dump_level(void)
     std::printf("}\n");
 }
 
+void entity_move(Entity *entity, int speed)
+{
+    assert(entity);
+
+    entity->vel.x = speed;
+
+    if (speed < 0) {
+        entity->dir = Entity_Dir::Left;
+    } else if (speed > 0) {
+        entity->dir = Entity_Dir::Right;
+    }
+
+    entity->current = &entity->walking;
+}
+
+void entity_stop(Entity *entity)
+{
+    assert(entity);
+    entity->vel.x = 0;
+    entity->current = &entity->idle;
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -698,8 +718,6 @@ int main(void)
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
 
-        const int PLAYER_SPEED = 4;
-
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -784,19 +802,15 @@ int main(void)
             }
         }
 
+        entity_move(&supposed_enemy, -1);
+        const int PLAYER_SPEED = 4;
         if (keyboard[SDL_SCANCODE_D]) {
-            player.vel.x = PLAYER_SPEED;
-            player.current = &player.walking;
-            player.dir = Entity_Dir::Right;
+            entity_move(&player, PLAYER_SPEED);
         } else if (keyboard[SDL_SCANCODE_A]) {
-            player.vel.x = -PLAYER_SPEED;
-            player.current = &player.walking;
-            player.dir = Entity_Dir::Left;
+            entity_move(&player, -PLAYER_SPEED);
         } else {
-            player.vel.x = 0;
-            player.current = &player.idle;
+            entity_stop(&player);
         }
-
 
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
@@ -841,7 +855,6 @@ int main(void)
             auto hitbox = entity_hitbox(player);
             sec(SDL_RenderDrawRect(renderer, &hitbox));
         }
-
 
         SDL_RenderPresent(renderer);
 
