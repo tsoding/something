@@ -62,11 +62,16 @@ const SDL_Rect level_boundary = {
 };
 
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall,  Tile::Empty},
-    {Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall,  Tile::Empty, Tile::Wall},
-    {Tile::Wall,  Tile::Wall,  Tile::Empty, Tile::Empty, Tile::Wall , Tile::Empty},
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Wall, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+{Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
 };
 
 struct Sprite
@@ -232,7 +237,13 @@ void update_animat(Animat *animat, uint32_t dt)
     }
 }
 
-struct Player
+enum class Entity_Dir
+{
+    Right = 0,
+    Left
+};
+
+struct Entity
 {
     SDL_Rect texbox;
     SDL_Rect hitbox;
@@ -242,8 +253,9 @@ struct Player
     Animat idle;
     Animat walking;
     Animat *current;
-    // TODO: special separate type for the Player dir
-    SDL_RendererFlip dir;
+    Entity_Dir dir;
+
+    int cooldown_weapon;
 };
 
 static inline
@@ -302,12 +314,12 @@ void resolve_point_collision(Vec2i *p)
     *p = sides[closest].np;
 }
 
-void resolve_player_collision(Player *player)
+void resolve_entity_collision(Entity *entity)
 {
-    assert(player);
+    assert(entity);
 
-    Vec2i p0 = vec2(player->hitbox.x, player->hitbox.y) + player->pos;
-    Vec2i p1 = p0 + vec2(player->hitbox.w, player->hitbox.h);
+    Vec2i p0 = vec2(entity->hitbox.x, entity->hitbox.y) + entity->pos;
+    Vec2i p1 = p0 + vec2(entity->hitbox.w, entity->hitbox.h);
 
     Vec2i mesh[] = {
         p0,
@@ -323,45 +335,56 @@ void resolve_player_collision(Player *player)
         Vec2i d = t - mesh[i];
 
         const int IMPACT_THRESHOLD = 5;
-        if (std::abs(d.y) >= IMPACT_THRESHOLD) player->vel.y = 0;
-        if (std::abs(d.x) >= IMPACT_THRESHOLD) player->vel.x = 0;
+        if (std::abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+        if (std::abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j] += d;
         }
 
-        player->pos += d;
+        entity->pos += d;
     }
 }
 
-SDL_Rect player_dstrect(const Player player)
+SDL_Rect entity_dstrect(const Entity entity)
 {
     SDL_Rect dstrect = {
-        player.texbox.x + player.pos.x, player.texbox.y + player.pos.y,
-        player.texbox.w, player.texbox.h
+        entity.texbox.x + entity.pos.x, entity.texbox.y + entity.pos.y,
+        entity.texbox.w, entity.texbox.h
     };
     return dstrect;
 }
 
-SDL_Rect player_hitbox(const Player player)
+SDL_Rect entity_hitbox(const Entity entity)
 {
     SDL_Rect hitbox = {
-        player.hitbox.x + player.pos.x, player.hitbox.y + player.pos.y,
-        player.hitbox.w, player.hitbox.h
+        entity.hitbox.x + entity.pos.x, entity.hitbox.y + entity.pos.y,
+        entity.hitbox.w, entity.hitbox.h
     };
     return hitbox;
 }
 
-void render_player(SDL_Renderer *renderer, const Player player)
+void render_entity(SDL_Renderer *renderer, const Entity entity)
 {
-    auto dstrect = player_dstrect(player);
-    render_animat(renderer, *player.current, dstrect, player.dir);
+    const auto dstrect = entity_dstrect(entity);
+    const SDL_RendererFlip flip =
+        entity.dir == Entity_Dir::Right
+        ? SDL_FLIP_NONE
+        : SDL_FLIP_HORIZONTAL;
+    render_animat(renderer, *entity.current, dstrect, flip);
 }
 
-void update_player(Player *player, uint32_t dt)
+void update_entity(Entity *entity, Vec2i gravity, uint32_t dt)
 {
-    assert(player);
-    update_animat(player->current, dt);
+    assert(entity);
+
+    entity->vel += gravity;
+    entity->pos += entity->vel;
+    resolve_entity_collision(entity);
+
+    entity->cooldown_weapon -= 1;
+
+    update_animat(entity->current, dt);
 }
 
 SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
@@ -447,7 +470,7 @@ struct Projectile
     Vec2i vel;
     Animat active_animat;
     Animat poof_animat;
-    SDL_RendererFlip dir;
+    Entity_Dir dir;
 };
 
 const size_t projectiles_count = 69;
@@ -470,7 +493,7 @@ int count_alive_projectiles(void)
     return res;
 }
 
-void spawn_projectile(Vec2i pos, Vec2i vel, SDL_RendererFlip dir)
+void spawn_projectile(Vec2i pos, Vec2i vel, Entity_Dir dir)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
@@ -485,20 +508,26 @@ void spawn_projectile(Vec2i pos, Vec2i vel, SDL_RendererFlip dir)
 
 void render_projectiles(SDL_Renderer *renderer)
 {
+
     for (size_t i = 0; i < projectiles_count; ++i) {
+        const SDL_RendererFlip flip =
+            projectiles[i].dir == Entity_Dir::Right
+            ? SDL_FLIP_NONE
+            : SDL_FLIP_HORIZONTAL;
+
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
             render_animat(renderer,
                           projectiles[i].active_animat,
                           projectiles[i].pos,
-                          projectiles[i].dir);
+                          flip);
         } break;
 
         case Projectile_State::Poof: {
             render_animat(renderer,
                           projectiles[i].poof_animat,
                           projectiles[i].pos,
-                          projectiles[i].dir);
+                          flip);
         } break;
 
         case Projectile_State::Ded: {} break;
@@ -532,6 +561,67 @@ void update_projectiles(uint32_t dt)
         }
     }
 
+}
+
+void dump_level(void)
+{
+    std::printf("{\n");
+    for (int y = 0; y < LEVEL_HEIGHT; ++y) {
+        std::printf("{");
+        for (int x = 0; x < LEVEL_WIDTH; ++x) {
+            switch (level[y][x]) {
+            case Tile::Empty: {
+                std::printf("Tile::Empty, ");
+            } break;
+
+            case Tile::Wall: {
+                std::printf("Tile::Wall, ");
+            } break;
+            }
+        }
+        std::printf("},");
+        std::printf("\n");
+    }
+    std::printf("}\n");
+}
+
+void entity_move(Entity *entity, int speed)
+{
+    assert(entity);
+
+    entity->vel.x = speed;
+
+    if (speed < 0) {
+        entity->dir = Entity_Dir::Left;
+    } else if (speed > 0) {
+        entity->dir = Entity_Dir::Right;
+    }
+
+    entity->current = &entity->walking;
+}
+
+void entity_stop(Entity *entity)
+{
+    assert(entity);
+    entity->vel.x = 0;
+    entity->current = &entity->idle;
+}
+
+const int ENTITY_COOLDOWN_WEAPON = 7;
+
+void entity_shoot(Entity *entity)
+{
+    assert(entity);
+
+    if (entity->cooldown_weapon > 0) return;
+
+    if (entity->dir == Entity_Dir::Right) {
+        spawn_projectile(entity->pos, vec2(10, 0), entity->dir);
+    } else {
+        spawn_projectile(entity->pos, vec2(-10, 0), entity->dir);
+    }
+
+    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
 int main(void)
@@ -593,30 +683,47 @@ int main(void)
 
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    Player player = {};
-    player.texbox = {
+    const SDL_Rect texbox = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
         PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
     };
-    player.hitbox = {
+    const SDL_Rect hitbox = {
         - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
-    // player.walking = plasma_bolt_animat;
-    player.walking.frames = walking_frames;
-    player.walking.frame_count = 4;
-    player.walking.frame_duration = 100;
-    player.idle.frames = walking_frames + 2;
-    player.idle.frame_count = 1;
-    player.idle.frame_duration = 200;
+
+    Animat walking = {};
+    walking.frames = walking_frames;
+    walking.frame_count = 4;
+    walking.frame_duration = 100;
+
+    Animat idle = {};
+    idle.frames = walking_frames + 2;
+    idle.frame_count = 1;
+    idle.frame_duration = 200;
+
+    Entity player = {};
+    player.texbox = texbox;
+    player.hitbox = hitbox;
+    player.walking = walking;
+    player.idle = idle;
     player.current = &player.idle;
-    player.dir = SDL_FLIP_NONE;
+
+    Entity supposed_enemy = {};
+    supposed_enemy.texbox = texbox;
+    supposed_enemy.hitbox = hitbox;
+    supposed_enemy.walking = walking;
+    supposed_enemy.idle = idle;
+    supposed_enemy.current = &supposed_enemy.idle;
+    static_assert(LEVEL_WIDTH >= 2);
+    supposed_enemy.pos = vec2(LEVEL_WIDTH - 2, 0) * TILE_SIZE;
+    supposed_enemy.dir = Entity_Dir::Left;
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
     TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
-    int ddy = 1;
+    Vec2i gravity = {0, 1};
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
     bool quit = false;
@@ -630,8 +737,6 @@ int main(void)
     Uint32 fps = 0;
     while (!quit) {
         const Uint32 begin = SDL_GetTicks();
-
-        const int PLAYER_SPEED = 4;
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -651,11 +756,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    if (player.dir == SDL_FLIP_NONE) {
-                        spawn_projectile(player.pos, vec2(10, 0), player.dir);
-                    } else {
-                        spawn_projectile(player.pos, vec2(-10, 0), player.dir);
-                    }
+                    entity_shoot(&player);
                 } break;
 
                 case SDLK_r: {
@@ -717,36 +818,30 @@ int main(void)
             }
         }
 
+        // entity_move(&supposed_enemy, -1);
+        entity_shoot(&supposed_enemy);
+
+        const int PLAYER_SPEED = 4;
         if (keyboard[SDL_SCANCODE_D]) {
-            player.vel.x = PLAYER_SPEED;
-            player.current = &player.walking;
-            player.dir = SDL_FLIP_NONE;
+            entity_move(&player, PLAYER_SPEED);
         } else if (keyboard[SDL_SCANCODE_A]) {
-            player.vel.x = -PLAYER_SPEED;
-            player.current = &player.walking;
-            player.dir = SDL_FLIP_HORIZONTAL;
+            entity_move(&player, -PLAYER_SPEED);
         } else {
-            player.vel.x = 0;
-            player.current = &player.idle;
+            entity_stop(&player);
         }
-
-        player.vel.y += ddy;
-
-        player.pos += player.vel;
-
-        resolve_player_collision(&player);
 
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
         render_level(renderer, ground_grass_texture, ground_texture);
-        render_player(renderer, player);
+        render_entity(renderer, player);
+        render_entity(renderer, supposed_enemy);
         render_projectiles(renderer);
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
-            auto dstrect = player_dstrect(player);
+            auto dstrect = entity_dstrect(player);
             sec(SDL_RenderDrawRect(renderer, &dstrect));
             sec(SDL_RenderFillRect(renderer, &collision_probe));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
@@ -775,19 +870,21 @@ int main(void)
 
 
             sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-            auto hitbox = player_hitbox(player);
+            auto hitbox = entity_hitbox(player);
             sec(SDL_RenderDrawRect(renderer, &hitbox));
         }
-
 
         SDL_RenderPresent(renderer);
 
         const Uint32 dt = SDL_GetTicks() - begin;
 
-        update_player(&player, dt);
+        update_entity(&player, gravity, dt);
+        update_entity(&supposed_enemy, gravity, dt);
         update_projectiles(dt);
     }
     SDL_Quit();
+
+    dump_level();
 
     return 0;
 }
