@@ -604,6 +604,17 @@ void entity_stop(Entity *entity)
     entity->current = &entity->idle;
 }
 
+void entity_shoot(Entity *entity)
+{
+    assert(entity);
+
+    if (entity->dir == Entity_Dir::Right) {
+        spawn_projectile(entity->pos, vec2(10, 0), entity->dir);
+    } else {
+        spawn_projectile(entity->pos, vec2(-10, 0), entity->dir);
+    }
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -736,11 +747,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    if (player.dir == Entity_Dir::Right) {
-                        spawn_projectile(player.pos, vec2(10, 0), player.dir);
-                    } else {
-                        spawn_projectile(player.pos, vec2(-10, 0), player.dir);
-                    }
+                    entity_shoot(&player);
                 } break;
 
                 case SDLK_r: {
