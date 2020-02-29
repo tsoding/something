@@ -24,11 +24,18 @@ template <typename T> Vec2<T> constexpr &operator-=(Vec2<T> &a, Vec2<T> b) { a =
 template <typename T> Vec2<T> constexpr &operator*=(Vec2<T> &a, Vec2<T> b) { a = a * b; return a; }
 template <typename T> Vec2<T> constexpr &operator/=(Vec2<T> &a, Vec2<T> b) { a = a / b; return a; }
 
+static inline
+int sqr_dist(Vec2i p0, Vec2i p1)
+{
+    auto d = p0 - p1;
+    return d.x * d.x + d.y * d.y;
+}
+
 //////////////////////////////
 // Vector x Scalar
 //////////////////////////////
 
-template <typename T> Vec2<T> constexpr operator+(Vec2<T> a, T b) { return {a.x + b, a.y + b}; } 
+template <typename T> Vec2<T> constexpr operator+(Vec2<T> a, T b) { return {a.x + b, a.y + b}; }
 template <typename T> Vec2<T> constexpr operator-(Vec2<T> a, T b) { return {a.x - b, a.y - b}; }
 template <typename T> Vec2<T> constexpr operator*(Vec2<T> a, T b) { return {a.x * b, a.y * b}; }
 template <typename T> Vec2<T> constexpr operator/(Vec2<T> a, T b) { return {a.x / b, a.y / b}; }
