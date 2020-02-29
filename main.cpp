@@ -253,8 +253,9 @@ struct Entity
     Animat idle;
     Animat walking;
     Animat *current;
-    // TODO: special separate type for the Player dir
     Entity_Dir dir;
+
+    int cooldown_weapon;
 };
 
 static inline
@@ -380,6 +381,8 @@ void update_entity(Entity *entity, Vec2i gravity, uint32_t dt)
     entity->vel += gravity;
     entity->pos += entity->vel;
     resolve_entity_collision(entity);
+
+    entity->cooldown_weapon -= 1;
 
     update_animat(entity->current, dt);
 }
@@ -604,15 +607,21 @@ void entity_stop(Entity *entity)
     entity->current = &entity->idle;
 }
 
+const int ENTITY_COOLDOWN_WEAPON = 7;
+
 void entity_shoot(Entity *entity)
 {
     assert(entity);
+
+    if (entity->cooldown_weapon > 0) return;
 
     if (entity->dir == Entity_Dir::Right) {
         spawn_projectile(entity->pos, vec2(10, 0), entity->dir);
     } else {
         spawn_projectile(entity->pos, vec2(-10, 0), entity->dir);
     }
+
+    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
 int main(void)
@@ -809,7 +818,9 @@ int main(void)
             }
         }
 
-        entity_move(&supposed_enemy, -1);
+        // entity_move(&supposed_enemy, -1);
+        entity_shoot(&supposed_enemy);
+
         const int PLAYER_SPEED = 4;
         if (keyboard[SDL_SCANCODE_D]) {
             entity_move(&player, PLAYER_SPEED);
