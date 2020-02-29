@@ -611,23 +611,38 @@ int main(void)
 
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    Entity player = {};
-    player.texbox = {
+    const SDL_Rect texbox = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
         PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
     };
-    player.hitbox = {
+    const SDL_Rect hitbox = {
         - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
-    // player.walking = plasma_bolt_animat;
-    player.walking.frames = walking_frames;
-    player.walking.frame_count = 4;
-    player.walking.frame_duration = 100;
-    player.idle.frames = walking_frames + 2;
-    player.idle.frame_count = 1;
-    player.idle.frame_duration = 200;
+
+    Animat walking = {};
+    walking.frames = walking_frames;
+    walking.frame_count = 4;
+    walking.frame_duration = 100;
+
+    Animat idle = {};
+    idle.frames = walking_frames + 2;
+    idle.frame_count = 1;
+    idle.frame_duration = 200;
+
+    Entity player = {};
+    player.texbox = texbox;
+    player.hitbox = hitbox;
+    player.walking = walking;
+    player.idle = idle;
     player.current = &player.idle;
+
+    Entity supposed_enemy = {};
+    supposed_enemy.texbox = texbox;
+    supposed_enemy.hitbox = hitbox;
+    supposed_enemy.walking = walking;
+    supposed_enemy.idle = idle;
+    supposed_enemy.current = &supposed_enemy.idle;
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
