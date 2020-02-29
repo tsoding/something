@@ -76,6 +76,8 @@ void render_animat(SDL_Renderer *renderer,
 
 void update_animat(Animat *animat, uint32_t dt)
 {
+    assert(animat);
+
     if (dt < animat->frame_cooldown) {
         animat->frame_cooldown -= dt;
     } else {
