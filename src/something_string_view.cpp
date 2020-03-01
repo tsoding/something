@@ -2,6 +2,32 @@ struct String_View
 {
     size_t count;
     const char *data;
+
+    String_View trim_begin(void)
+    {
+        String_View view = *this;
+
+        while (view.count != 0 && isspace(*view.data)) {
+            view.data  += 1;
+            view.count -= 1;
+        }
+        return view;
+    }
+
+    String_View trim_end(void)
+    {
+        String_View view = *this;
+
+        while (view.count != 0 && isspace(*(view.data + view.count - 1))) {
+            view.count -= 1;
+        }
+        return view;
+    }
+
+    String_View trim(void)
+    {
+        return trim_begin().trim_end();
+    }
 };
 
 String_View string_view_of_cstr(const char *cstr)
@@ -18,28 +44,6 @@ String_View operator ""_sv (const char *data, size_t count)
     result.count = count;
     result.data = data;
     return result;
-}
-
-String_View trim_begin(String_View view)
-{
-    while (view.count != 0 && isspace(*view.data)) {
-        view.data  += 1;
-        view.count -= 1;
-    }
-    return view;
-}
-
-String_View trim_end(String_View view)
-{
-    while (view.count != 0 && isspace(*(view.data + view.count - 1))) {
-        view.count -= 1;
-    }
-    return view;
-}
-
-String_View trim(String_View view)
-{
-    return trim_end(trim_begin(view));
 }
 
 String_View chop_by_delim(String_View *view, char delim)

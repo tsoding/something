@@ -191,11 +191,11 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
     while (input.count != 0) {
         auto value = chop_by_delim(&input, '\n');
-        auto key = trim(chop_by_delim(&value, '='));
+        auto key = chop_by_delim(&value, '=').trim();
         if (key.count == 0 || *key.data == '#') continue;
-        value = trim(value);
+        value = value.trim();
 
-        auto subkey = trim(chop_by_delim(&key, '.'));
+        auto subkey = chop_by_delim(&key, '.').trim();
 
         fwrite(subkey.data, 1, subkey.count, stdout);
         fputc('\n', stdout);
@@ -225,7 +225,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames") {
             Result<size_t, void> result = as_number<size_t>(
-                trim(chop_by_delim(&key, '.')));
+                chop_by_delim(&key, '.').trim());
             if (result.is_error) {
                 return fail<Animat>("incorrect frame index");
             }
@@ -240,7 +240,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
             animat.frames[frame_index].texture = spritesheet_texture;
 
             while (key.count) {
-                subkey = trim(chop_by_delim(&key, '.'));
+                subkey = chop_by_delim(&key, '.').trim();
 
                 if (key.count != 0) {
                     return fail<Animat>("unknown subkeys");
