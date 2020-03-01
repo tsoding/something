@@ -86,7 +86,7 @@ void update_animat(Animat *animat, uint32_t dt)
     }
 }
 
-SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *image_filename)
+SDL_Surface *load_png_file_as_surface(const char *image_filename)
 {
     png_image image;
     memset(&image, 0, sizeof(image));
@@ -117,6 +117,13 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
                                      0x0000FF00,
                                      0x00FF0000,
                                      0xFF000000));
+    return image_surface;
+}
+
+SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *image_filename)
+{
+    SDL_Surface *image_surface =
+        load_png_file_as_surface(image_filename);
 
     SDL_Texture *image_texture =
         sec(SDL_CreateTextureFromSurface(renderer,
