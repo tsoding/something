@@ -197,9 +197,6 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
         auto subkey = key.chop_by_delim('.').trim();
 
-        fwrite(subkey.data, 1, subkey.count, stdout);
-        fputc('\n', stdout);
-
         if (subkey == "count") {
             if (animat.frames != nullptr) {
                 return fail<Animat>("count provided twice");
@@ -212,9 +209,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
             animat.frame_count = count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
-            printf("Count is set %ld\n", animat.frame_count);
         } else if (subkey == "sprite") {
-            printf("sprite is set\n");
             spritesheet_texture = load_texture_from_png_file(renderer, value);
         } else if (subkey == "duration") {
             Result<size_t, void> result = as_number<size_t>(value);
@@ -231,8 +226,6 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
             size_t frame_index = result.unwrap;
             if (frame_index >= animat.frame_count) {
-                printf("frame_count: %ld\n", animat.frame_count);
-                printf("frame_index: %ld\n", frame_index);
                 return fail<Animat>("incorrect frame index");
             }
 
