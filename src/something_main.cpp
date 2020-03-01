@@ -249,8 +249,6 @@ int main(void)
             }
         }
 
-        // entity_move(&supposed_enemy, -1);
-        // entity_shoot(&entities[ENEMY_ENTITY_INDEX]);
         for (int i = 0; i < ENEMY_COUNT; ++i) {
             entity_shoot(&entities[ENEMY_ENTITY_INDEX_OFFSET + i]);
         }
