@@ -65,7 +65,7 @@ struct String_View
     }
 
     template <typename Number>
-    Parse_Result<Number> as_number();
+    Parse_Result<Number> parse_number();
 };
 
 template <typename T>
@@ -107,8 +107,9 @@ Parse_Result<T> parse_ok(String_View rest, T unwrap)
 }
 
 template <typename Number>
-Parse_Result<Number> String_View::as_number()
+Parse_Result<Number> String_View::parse_number()
 {
+    // TODO: String_View::parse_number() does not support negative numbers
     Number number = {};
 
     while (count) {
