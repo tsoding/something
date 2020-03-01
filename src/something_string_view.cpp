@@ -1,3 +1,5 @@
+template <typename T> struct Parse_Result;
+
 struct String_View
 {
     size_t count;
@@ -29,6 +31,17 @@ struct String_View
         return trim_begin().trim_end();
     }
 
+    void chop(size_t n)
+    {
+        if (n > count) {
+            data += count;
+            count = 0;
+        } else {
+            data  += n;
+            count -= n;
+        }
+    }
+
     String_View chop_by_delim(char delim)
     {
         assert(data);
@@ -50,7 +63,66 @@ struct String_View
 
         return result;
     }
+
+    template <typename Number>
+    Parse_Result<Number> as_number();
 };
+
+template <typename T>
+struct Parse_Result
+{
+    bool is_error;
+    String_View rest;
+    T unwrap;
+    const char *error;
+
+    template <typename U>
+    Parse_Result<U> refail()
+    {
+        Parse_Result<U> result = {};
+        result.is_error = is_error;
+        result.rest = rest;
+        result.error = error;
+        return result;
+    }
+};
+
+template <typename T>
+Parse_Result<T> parse_fail(String_View rest, const char *error)
+{
+    Parse_Result<T> result = {};
+    result.is_error = true;
+    result.rest = rest;
+    result.error = error;
+    return result;
+}
+
+template <typename T>
+Parse_Result<T> parse_ok(String_View rest, T unwrap)
+{
+    Parse_Result<T> result = {};
+    result.rest = rest;
+    result.unwrap = unwrap;
+    return result;
+}
+
+template <typename Number>
+Parse_Result<Number> String_View::as_number()
+{
+    Number number = {};
+
+    while (count) {
+        if (!isdigit(*data)) {
+            return parse_fail<Number>(*this, "Not a digit");
+        }
+
+        number = number * 10 + (*data - '0');
+
+        chop(1);
+    }
+
+    return parse_ok(*this, number);
+}
 
 String_View string_view_of_cstr(const char *cstr)
 {
@@ -72,22 +144,6 @@ bool operator==(String_View view1, String_View view2)
 {
     if (view1.count != view2.count) return false;
     return memcmp(view1.data, view2.data, view1.count) == 0;
-}
-
-template <typename T>
-Result<T, void> as_number(String_View view)
-{
-    T result = {};
-
-    for (size_t i = 0; i < view.count; ++i) {
-        if (!isdigit(view.data[i])) {
-            return fail<T>();
-        }
-
-        result = result * 10 + (view.data[i] - '0');
-    }
-
-    return ok<T, void>(result);
 }
 
 String_View file_as_string_view(const char *filepath)

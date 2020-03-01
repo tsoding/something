@@ -183,8 +183,7 @@ void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
     }
 }
 
-Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
-                                          String_View input)
+Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
 {
     Animat animat = {};
     SDL_Texture *spritesheet_texture = nullptr;
@@ -199,12 +198,12 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
         if (subkey == "count"_sv) {
             if (animat.frames != nullptr) {
-                return fail<Animat>("count provided twice");
+                return parse_fail<Animat>(input, "`count` provided twice");
             }
 
-            Result<size_t, void> count_result = as_number<size_t>(value);
+            auto count_result = value.as_number<size_t>();
             if (count_result.is_error) {
-                return fail<Animat>("count is not a number");
+                return count_result.refail<Animat>();
             }
 
             animat.frame_count = count_result.unwrap;
@@ -212,21 +211,21 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = load_texture_from_png_file(renderer, value);
         } else if (subkey == "duration"_sv) {
-            Result<size_t, void> result = as_number<size_t>(value);
+            auto result = value.as_number<size_t>();
             if (result.is_error) {
-                return fail<Animat>("duration is not a number");
+                return result.refail<Animat>();
             }
 
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames"_sv) {
-            Result<size_t, void> result = as_number<size_t>(key.chop_by_delim('.').trim());
+            auto result = key.chop_by_delim('.').trim().as_number<size_t>();
             if (result.is_error) {
-                return fail<Animat>("incorrect frame index");
+                return result.refail<Animat>();
             }
 
             size_t frame_index = result.unwrap;
             if (frame_index >= animat.frame_count) {
-                return fail<Animat>("incorrect frame index");
+                return parse_fail<Animat>(input, "frame index is bigger than the `count`");
             }
 
             animat.frames[frame_index].texture = spritesheet_texture;
@@ -235,12 +234,12 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
                 subkey = key.chop_by_delim('.').trim();
 
                 if (key.count != 0) {
-                    return fail<Animat>("unknown subkeys");
+                    return parse_fail<Animat>(input, "unknown subkeys");
                 }
 
-                Result<int, void> result_value = as_number<int>(value);
+                auto result_value = value.as_number<int>();
                 if (result_value.is_error) {
-                    return fail<Animat>("frame parameter is not a number");
+                    return result.refail<Animat>();
                 }
 
                 if (subkey == "x"_sv) {
@@ -252,11 +251,11 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
                 } else if (subkey == "h"_sv) {
                     animat.frames[frame_index].srcrect.h = result_value.unwrap;
                 } else {
-                    return fail<Animat>("unknown subkeys");
+                    return parse_fail<Animat>(input, "unknown subkeys");
                 }
             }
         }
     }
 
-    return ok<Animat, const char *>(animat);
+    return parse_ok<Animat>(input, animat);
 }
