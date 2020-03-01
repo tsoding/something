@@ -74,11 +74,6 @@ bool operator==(String_View view1, String_View view2)
     return memcmp(view1.data, view2.data, view1.count) == 0;
 }
 
-bool operator==(String_View view, const char *cstr)
-{
-    return view == string_view_of_cstr(cstr);
-}
-
 template <typename T>
 Result<T, void> as_number(String_View view)
 {

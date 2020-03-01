@@ -197,7 +197,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
         auto subkey = key.chop_by_delim('.').trim();
 
-        if (subkey == "count") {
+        if (subkey == "count"_sv) {
             if (animat.frames != nullptr) {
                 return fail<Animat>("count provided twice");
             }
@@ -209,16 +209,16 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
 
             animat.frame_count = count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
-        } else if (subkey == "sprite") {
+        } else if (subkey == "sprite"_sv) {
             spritesheet_texture = load_texture_from_png_file(renderer, value);
-        } else if (subkey == "duration") {
+        } else if (subkey == "duration"_sv) {
             Result<size_t, void> result = as_number<size_t>(value);
             if (result.is_error) {
                 return fail<Animat>("duration is not a number");
             }
 
             animat.frame_duration = result.unwrap;
-        } else if (subkey == "frames") {
+        } else if (subkey == "frames"_sv) {
             Result<size_t, void> result = as_number<size_t>(key.chop_by_delim('.').trim());
             if (result.is_error) {
                 return fail<Animat>("incorrect frame index");
@@ -243,13 +243,13 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
                     return fail<Animat>("frame parameter is not a number");
                 }
 
-                if (subkey == "x") {
+                if (subkey == "x"_sv) {
                     animat.frames[frame_index].srcrect.x = result_value.unwrap;
-                } else if (subkey == "y") {
+                } else if (subkey == "y"_sv) {
                     animat.frames[frame_index].srcrect.y = result_value.unwrap;
-                } else if (subkey == "w") {
+                } else if (subkey == "w"_sv) {
                     animat.frames[frame_index].srcrect.w = result_value.unwrap;
-                } else if (subkey == "h") {
+                } else if (subkey == "h"_sv) {
                     animat.frames[frame_index].srcrect.h = result_value.unwrap;
                 } else {
                     return fail<Animat>("unknown subkeys");
