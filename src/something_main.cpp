@@ -42,6 +42,59 @@ enum class Debug_Draw_State {
     Delete
 };
 
+struct RGBA32
+{
+    uint8_t r, g, b, a;
+};
+
+template <typename T>
+T min(T a, T b)
+{
+    return a < b ? a : b;
+}
+
+RGBA32 decode_pixel(Uint32 pixel, SDL_PixelFormat *format)
+{
+    RGBA32 result = {};
+    result.r = ((pixel & format->Rmask) >> format->Rshift) << format->Rloss;
+    result.g = ((pixel & format->Gmask) >> format->Gshift) << format->Gloss;
+    result.b = ((pixel & format->Bmask) >> format->Bshift) << format->Bloss;
+    result.a = ((pixel & format->Amask) >> format->Ashift) << format->Aloss;
+    return result;
+}
+
+Uint32 encode_pixel(RGBA32 pixel, SDL_PixelFormat *format)
+{
+    Uint32 result = 0;
+    result |= (pixel.r >> format->Rloss) << format->Rshift;
+    result |= (pixel.g >> format->Gloss) << format->Gshift;
+    result |= (pixel.b >> format->Bloss) << format->Bshift;
+    result |= (pixel.a >> format->Aloss) << format->Ashift;
+    return result;
+}
+
+void enemy_spritesheet(SDL_Surface *spritesheet_surface)
+{
+    assert(spritesheet_surface);
+    assert(spritesheet_surface->format);
+    assert(spritesheet_surface->format->BytesPerPixel == 4);
+    SDL_LockSurface(spritesheet_surface);
+
+    for (int y = 0; y < spritesheet_surface->h; ++y) {
+        for (int x = 0; x < spritesheet_surface->w; ++x) {
+            const int pixel_index =
+                y * spritesheet_surface->pitch + x * spritesheet_surface->format->BytesPerPixel;
+            Uint32 *pixel = (Uint32*)((Uint8*) spritesheet_surface->pixels + pixel_index);
+
+            auto pixel_rgba32 = decode_pixel(*pixel, spritesheet_surface->format);
+            pixel_rgba32.r = min((Uint32) pixel_rgba32.r + 150u, 255u);
+            *pixel = encode_pixel(pixel_rgba32, spritesheet_surface->format);
+        }
+    }
+
+    SDL_UnlockSurface(spritesheet_surface);
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -81,22 +134,43 @@ int main(void)
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     // TODO(#9): baking assets into executable
-    SDL_Texture *walking_texture = load_texture_from_png_file(
-        renderer,
+    SDL_Surface *walking_surface = load_png_file_as_surface(
         "./assets/walking-12px-zoom.png");
+
+    SDL_Texture *player_walking_texture =
+        sec(SDL_CreateTextureFromSurface(
+                renderer, walking_surface));
+
+    enemy_spritesheet(walking_surface);
+
+    SDL_Texture *enemy_walking_texture =
+        sec(SDL_CreateTextureFromSurface(
+                renderer, walking_surface));
+
+    SDL_FreeSurface(walking_surface);
 
     const int walking_frame_count = 4;
     const int walking_frame_size = 48;
-    Sprite walking_frames[walking_frame_count];
+
+    Sprite player_walking_frames[walking_frame_count];
+    Sprite enemy_walking_frames[walking_frame_count];
 
     for (int i = 0; i < walking_frame_count; ++i) {
-        walking_frames[i].srcrect = {
+        player_walking_frames[i].srcrect = {
             i * walking_frame_size,
             0,
             walking_frame_size,
             walking_frame_size
         };
-        walking_frames[i].texture = walking_texture;
+        player_walking_frames[i].texture = player_walking_texture;
+
+        enemy_walking_frames[i].srcrect = {
+            i * walking_frame_size,
+            0,
+            walking_frame_size,
+            walking_frame_size
+        };
+        enemy_walking_frames[i].texture = enemy_walking_texture;
     }
 
     const int PLAYER_TEXBOX_SIZE = 64;
@@ -110,22 +184,32 @@ int main(void)
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
 
-    Animat walking = {};
-    walking.frames = walking_frames;
-    walking.frame_count = 4;
-    walking.frame_duration = 100;
+    Animat player_walking = {};
+    player_walking.frames = player_walking_frames;
+    player_walking.frame_count = 4;
+    player_walking.frame_duration = 100;
 
-    Animat idle = {};
-    idle.frames = walking_frames + 2;
-    idle.frame_count = 1;
-    idle.frame_duration = 200;
+    Animat enemy_walking = {};
+    enemy_walking.frames = enemy_walking_frames;
+    enemy_walking.frame_count = 4;
+    enemy_walking.frame_duration = 100;
+
+    Animat player_idle = {};
+    player_idle.frames = player_walking_frames + 2;
+    player_idle.frame_count = 1;
+    player_idle.frame_duration = 200;
+
+    Animat enemy_idle = {};
+    enemy_idle.frames = enemy_walking_frames + 2;
+    enemy_idle.frame_count = 1;
+    enemy_idle.frame_duration = 200;
 
     const int PLAYER_ENTITY_INDEX = 0;
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
     entities[PLAYER_ENTITY_INDEX].texbox = texbox;
     entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
-    entities[PLAYER_ENTITY_INDEX].walking = walking;
-    entities[PLAYER_ENTITY_INDEX].idle = idle;
+    entities[PLAYER_ENTITY_INDEX].walking = player_walking;
+    entities[PLAYER_ENTITY_INDEX].idle = player_idle;
     entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
 
     const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -134,8 +218,8 @@ int main(void)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = enemy_walking;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = enemy_idle;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
         static_assert(LEVEL_WIDTH >= 2);
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;
