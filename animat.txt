@@ -1,0 +1,15 @@
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42
+foo.bar.baz.hello.world = 42

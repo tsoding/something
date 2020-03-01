@@ -47,12 +47,6 @@ struct RGBA32
     uint8_t r, g, b, a;
 };
 
-template <typename T>
-T min(T a, T b)
-{
-    return a < b ? a : b;
-}
-
 RGBA32 decode_pixel(Uint32 pixel, SDL_PixelFormat *format)
 {
     RGBA32 result = {};
@@ -95,6 +89,45 @@ void enemy_spritesheet(SDL_Surface *spritesheet_surface)
     SDL_UnlockSurface(spritesheet_surface);
 }
 
+int main2(void)
+{
+    auto input =
+        "  foo.bar.baz.hello.world    = 42  \n"
+        "     \n"
+        "  foo.bar.baz.hello.world   =   42  \n"
+        "   foo.bar.baz.hello.world   =   42  \n"
+        "     foo.bar.baz.hello.world = 42  "_sv;
+
+    while (input.count != 0) {
+        auto value = chop_by_delim(&input, '\n');
+        auto key = trim(chop_by_delim(&value, '='), isspace);
+
+        if (key.count == 0 || *key.data == '#') continue;
+
+        value = trim(value, isspace);
+
+        fputs("Key:\t", stdout);
+        fputc('#', stdout);
+
+        while (key.count != 0) {
+            auto subkey = chop_by_delim(&key, '.');
+            fwrite(subkey.data, 1, subkey.count, stdout);
+            fputc('#', stdout);
+        }
+
+        fputc('#', stdout);
+        fputc('\n', stdout);
+
+        fputs("Value:\t", stdout);
+        fputc('#', stdout);
+        fwrite(value.data, 1, value.count, stdout);
+        fputc('#', stdout);
+        fputc('\n', stdout);
+    }
+
+    return 0;
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -125,52 +158,26 @@ int main(void)
         tileset_texture
     };
 
-    Animat plasma_pop_animat = load_spritesheet_animat(
-        renderer, 4, 70,
-        "./assets/Destroy1-sheet.png");
-    Animat plasma_bolt_animat = load_spritesheet_animat(
-        renderer, 5, 70,
-        "./assets/spark1-sheet.png");
-    init_projectiles(plasma_bolt_animat, plasma_pop_animat);
+    auto plasma_pop_animat = parse_animat(
+        renderer,
+        file_as_string_view("./plasma_pop.txt"));
+    auto plasma_bolt_animat = parse_animat(
+        renderer,
+        file_as_string_view("./plasma_bolt.txt"));
+    init_projectiles(plasma_bolt_animat.unwrap, plasma_pop_animat.unwrap);
 
     // TODO(#9): baking assets into executable
-    SDL_Surface *walking_surface = load_png_file_as_surface(
-        "./assets/walking-12px-zoom.png");
 
-    SDL_Texture *player_walking_texture =
-        sec(SDL_CreateTextureFromSurface(
-                renderer, walking_surface));
+    auto walking = parse_animat(renderer, file_as_string_view("./walking.txt"));
+    if (walking.is_error) {
+        fprintf(stderr, "ERROR while parsing walking.txt: %s\n", walking.error);
+        exit(1);
+    }
 
-    enemy_spritesheet(walking_surface);
-
-    SDL_Texture *enemy_walking_texture =
-        sec(SDL_CreateTextureFromSurface(
-                renderer, walking_surface));
-
-    SDL_FreeSurface(walking_surface);
-
-    const int walking_frame_count = 4;
-    const int walking_frame_size = 48;
-
-    Sprite player_walking_frames[walking_frame_count];
-    Sprite enemy_walking_frames[walking_frame_count];
-
-    for (int i = 0; i < walking_frame_count; ++i) {
-        player_walking_frames[i].srcrect = {
-            i * walking_frame_size,
-            0,
-            walking_frame_size,
-            walking_frame_size
-        };
-        player_walking_frames[i].texture = player_walking_texture;
-
-        enemy_walking_frames[i].srcrect = {
-            i * walking_frame_size,
-            0,
-            walking_frame_size,
-            walking_frame_size
-        };
-        enemy_walking_frames[i].texture = enemy_walking_texture;
+    auto idle = parse_animat(renderer, file_as_string_view("./idle.txt"));
+    if (idle.is_error) {
+        fprintf(stderr, "ERROR while parsing walking.txt: %s\n", walking.error);
+        exit(1);
     }
 
     const int PLAYER_TEXBOX_SIZE = 64;
@@ -184,32 +191,12 @@ int main(void)
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
 
-    Animat player_walking = {};
-    player_walking.frames = player_walking_frames;
-    player_walking.frame_count = 4;
-    player_walking.frame_duration = 100;
-
-    Animat enemy_walking = {};
-    enemy_walking.frames = enemy_walking_frames;
-    enemy_walking.frame_count = 4;
-    enemy_walking.frame_duration = 100;
-
-    Animat player_idle = {};
-    player_idle.frames = player_walking_frames + 2;
-    player_idle.frame_count = 1;
-    player_idle.frame_duration = 200;
-
-    Animat enemy_idle = {};
-    enemy_idle.frames = enemy_walking_frames + 2;
-    enemy_idle.frame_count = 1;
-    enemy_idle.frame_duration = 200;
-
     const int PLAYER_ENTITY_INDEX = 0;
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
     entities[PLAYER_ENTITY_INDEX].texbox = texbox;
     entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
-    entities[PLAYER_ENTITY_INDEX].walking = player_walking;
-    entities[PLAYER_ENTITY_INDEX].idle = player_idle;
+    entities[PLAYER_ENTITY_INDEX].walking = walking.unwrap;
+    entities[PLAYER_ENTITY_INDEX].idle = idle.unwrap;
     entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
 
     const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -218,8 +205,8 @@ int main(void)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = enemy_walking;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = enemy_idle;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking.unwrap;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle.unwrap;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
         static_assert(LEVEL_WIDTH >= 2);
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;

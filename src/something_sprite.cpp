@@ -120,7 +120,8 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
     return image_surface;
 }
 
-SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *image_filename)
+SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
+                                        const char *image_filename)
 {
     SDL_Surface *image_surface =
         load_png_file_as_surface(image_filename);
@@ -131,6 +132,16 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer, const char *imag
     SDL_FreeSurface(image_surface);
 
     return image_texture;
+}
+
+SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
+                                        String_View<char> image_filename)
+{
+    char buffer[256] = {};
+    strncpy(buffer, image_filename.data,
+            min(sizeof(buffer) - 1, image_filename.count));
+
+    return load_texture_from_png_file(renderer, buffer);
 }
 
 Animat load_spritesheet_animat(SDL_Renderer *renderer,
@@ -156,4 +167,104 @@ Animat load_spritesheet_animat(SDL_Renderer *renderer,
     }
 
     return result;
+}
+
+void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
+{
+    fprintf(output, "sprite = %s\n", sprite_filename);
+    fprintf(output, "count = %lu\n", animat.frame_count);
+    fprintf(output, "duration = %u\n", animat.frame_duration);
+    fprintf(output, "\n");
+    for (size_t i = 0; i < animat.frame_count; ++i) {
+        fprintf(output, "frames.%lu.x = %d\n", i, animat.frames[i].srcrect.x);
+        fprintf(output, "frames.%lu.y = %d\n", i, animat.frames[i].srcrect.y);
+        fprintf(output, "frames.%lu.w = %d\n", i, animat.frames[i].srcrect.w);
+        fprintf(output, "frames.%lu.h = %d\n", i, animat.frames[i].srcrect.h);
+    }
+}
+
+Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
+                                          String_View<char> input)
+{
+    Animat animat = {};
+    SDL_Texture *spritesheet_texture = nullptr;
+
+    while (input.count != 0) {
+        String_View<char> value = chop_by_delim(&input, '\n');
+        String_View<char> key = trim(chop_by_delim(&value, '='), isspace);
+        if (key.count == 0 || *key.data == '#') continue;
+        value = trim(value, isspace);
+
+        String_View<char> subkey = trim(chop_by_delim(&key, '.'), isspace);
+
+        fwrite(subkey.data, 1, subkey.count, stdout);
+        fputc('\n', stdout);
+
+        if (subkey == "count") {
+            if (animat.frames != nullptr) {
+                return fail<Animat>("count provided twice");
+            }
+
+            Result<size_t, void> count_result = as_number<size_t>(value);
+            if (count_result.is_error) {
+                return fail<Animat>("count is not a number");
+            }
+
+            animat.frame_count = count_result.unwrap;
+            animat.frames = new Sprite[animat.frame_count];
+            printf("Count is set %ld\n", animat.frame_count);
+        } else if (subkey == "sprite") {
+            printf("sprite is set\n");
+            spritesheet_texture = load_texture_from_png_file(renderer, value);
+        } else if (subkey == "duration") {
+            Result<size_t, void> result = as_number<size_t>(value);
+            if (result.is_error) {
+                return fail<Animat>("duration is not a number");
+            }
+
+            animat.frame_duration = result.unwrap;
+        } else if (subkey == "frames") {
+            Result<size_t, void> result = as_number<size_t>(
+                trim(chop_by_delim<char>(&key, '.'), isspace));
+            if (result.is_error) {
+                return fail<Animat>("incorrect frame index");
+            }
+
+            size_t frame_index = result.unwrap;
+            if (frame_index >= animat.frame_count) {
+                printf("frame_count: %ld\n", animat.frame_count);
+                printf("frame_index: %ld\n", frame_index);
+                return fail<Animat>("incorrect frame index");
+            }
+
+            animat.frames[frame_index].texture = spritesheet_texture;
+
+            while (key.count) {
+                subkey = trim(chop_by_delim<char>(&key, '.'), isspace);
+
+                if (key.count != 0) {
+                    return fail<Animat>("unknown subkeys");
+                }
+
+                Result<int, void> result_value = as_number<int>(value);
+                if (result_value.is_error) {
+                    return fail<Animat>("frame parameter is not a number");
+                }
+
+                if (subkey == "x") {
+                    animat.frames[frame_index].srcrect.x = result_value.unwrap;
+                } else if (subkey == "y") {
+                    animat.frames[frame_index].srcrect.y = result_value.unwrap;
+                } else if (subkey == "w") {
+                    animat.frames[frame_index].srcrect.w = result_value.unwrap;
+                } else if (subkey == "h") {
+                    animat.frames[frame_index].srcrect.h = result_value.unwrap;
+                } else {
+                    return fail<Animat>("unknown subkeys");
+                }
+            }
+        }
+    }
+
+    return ok<Animat, const char *>(animat);
 }
