@@ -3,7 +3,7 @@ struct String_View
     size_t count;
     const char *data;
 
-    String_View trim_begin(void)
+    String_View trim_begin(void) const
     {
         String_View view = *this;
 
@@ -14,7 +14,7 @@ struct String_View
         return view;
     }
 
-    String_View trim_end(void)
+    String_View trim_end(void) const
     {
         String_View view = *this;
 
@@ -24,9 +24,31 @@ struct String_View
         return view;
     }
 
-    String_View trim(void)
+    String_View trim(void) const
     {
         return trim_begin().trim_end();
+    }
+
+    String_View chop_by_delim(char delim)
+    {
+        assert(data);
+
+        size_t i = 0;
+        while (i < count && data[i] != delim) i++;
+
+        String_View result;
+        result.count = i;
+        result.data = data;
+
+        if (i < count) {
+            count -= i + 1;
+            data  += i + 1;
+        } else {
+            count -= i;
+            data  += i;
+        }
+
+        return result;
     }
 };
 
@@ -43,29 +65,6 @@ String_View operator ""_sv (const char *data, size_t count)
     String_View result;
     result.count = count;
     result.data = data;
-    return result;
-}
-
-String_View chop_by_delim(String_View *view, char delim)
-{
-    assert(view);
-    assert(view->data);
-
-    size_t i = 0;
-    while (i < view->count && view->data[i] != delim) i++;
-
-    String_View result;
-    result.count = i;
-    result.data = view->data;
-
-    if (i < view->count) {
-        view->count -= i + 1;
-        view->data  += i + 1;
-    } else {
-        view->count -= i;
-        view->data  += i;
-    }
-
     return result;
 }
 
