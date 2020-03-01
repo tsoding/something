@@ -89,45 +89,6 @@ void enemy_spritesheet(SDL_Surface *spritesheet_surface)
     SDL_UnlockSurface(spritesheet_surface);
 }
 
-int main2(void)
-{
-    auto input =
-        "  foo.bar.baz.hello.world    = 42  \n"
-        "     \n"
-        "  foo.bar.baz.hello.world   =   42  \n"
-        "   foo.bar.baz.hello.world   =   42  \n"
-        "     foo.bar.baz.hello.world = 42  "_sv;
-
-    while (input.count != 0) {
-        auto value = chop_by_delim(&input, '\n');
-        auto key = trim(chop_by_delim(&value, '='), isspace);
-
-        if (key.count == 0 || *key.data == '#') continue;
-
-        value = trim(value, isspace);
-
-        fputs("Key:\t", stdout);
-        fputc('#', stdout);
-
-        while (key.count != 0) {
-            auto subkey = chop_by_delim(&key, '.');
-            fwrite(subkey.data, 1, subkey.count, stdout);
-            fputc('#', stdout);
-        }
-
-        fputc('#', stdout);
-        fputc('\n', stdout);
-
-        fputs("Value:\t", stdout);
-        fputc('#', stdout);
-        fwrite(value.data, 1, value.count, stdout);
-        fputc('#', stdout);
-        fputc('\n', stdout);
-    }
-
-    return 0;
-}
-
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));

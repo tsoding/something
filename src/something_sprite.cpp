@@ -135,7 +135,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
 }
 
 SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
-                                        String_View<char> image_filename)
+                                        String_View image_filename)
 {
     char buffer[256] = {};
     strncpy(buffer, image_filename.data,
@@ -184,18 +184,18 @@ void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
 }
 
 Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
-                                          String_View<char> input)
+                                          String_View input)
 {
     Animat animat = {};
     SDL_Texture *spritesheet_texture = nullptr;
 
     while (input.count != 0) {
-        String_View<char> value = chop_by_delim(&input, '\n');
-        String_View<char> key = trim(chop_by_delim(&value, '='), isspace);
+        auto value = chop_by_delim(&input, '\n');
+        auto key = trim(chop_by_delim(&value, '='));
         if (key.count == 0 || *key.data == '#') continue;
-        value = trim(value, isspace);
+        value = trim(value);
 
-        String_View<char> subkey = trim(chop_by_delim(&key, '.'), isspace);
+        auto subkey = trim(chop_by_delim(&key, '.'));
 
         fwrite(subkey.data, 1, subkey.count, stdout);
         fputc('\n', stdout);
@@ -225,7 +225,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames") {
             Result<size_t, void> result = as_number<size_t>(
-                trim(chop_by_delim<char>(&key, '.'), isspace));
+                trim(chop_by_delim(&key, '.')));
             if (result.is_error) {
                 return fail<Animat>("incorrect frame index");
             }
@@ -240,7 +240,7 @@ Result<Animat, const char *> parse_animat(SDL_Renderer *renderer,
             animat.frames[frame_index].texture = spritesheet_texture;
 
             while (key.count) {
-                subkey = trim(chop_by_delim<char>(&key, '.'), isspace);
+                subkey = trim(chop_by_delim(&key, '.'));
 
                 if (key.count != 0) {
                     return fail<Animat>("unknown subkeys");
