@@ -1,6 +1,7 @@
 #include <cassert>
 #include <cstdio>
 #include <cstdlib>
+#include <cerrno>
 #include <SDL.h>
 #include <SDL_ttf.h>
 

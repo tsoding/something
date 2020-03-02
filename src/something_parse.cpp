@@ -85,87 +85,6 @@ struct String_View
     }
 };
 
-template <typename T>
-struct Parse_Result
-{
-    bool is_error;
-    String_View rest;
-    T unwrap;
-    const char *error;
-
-    template <typename U>
-    Parse_Result<U> refail()
-    {
-        Parse_Result<U> result = {};
-        result.is_error = is_error;
-        result.rest = rest;
-        result.error = error;
-        return result;
-    }
-
-    void print_error(FILE *stream, String_View source,
-                     const char *prefix) const
-    {
-        assert(stream);
-        assert(source.data < rest.data);
-
-        size_t n = rest.data - source.data;
-
-        for (size_t line_number = 1; source.count; ++line_number) {
-            auto line = source.chop_by_delim('\n');
-
-            if (n <= line.count) {
-                fprintf(stream, "%s:%ld: %s\n", prefix, line_number, error);
-                fwrite(line.data, 1, line.count, stream);
-                fputc('\n', stream);
-
-                for (size_t j = 0; j < n; ++j) {
-                    fputc(' ', stream);
-                }
-                fputc('^', stream);
-                fputc('\n', stream);
-                break;
-            }
-
-            n -= line.count + 1;
-        }
-
-        for (int i = 0; source.count && i < 3; ++i) {
-            auto line = source.chop_by_delim('\n');
-            fwrite(line.data, 1, line.count, stream);
-            fputc('\n', stream);
-        }
-    }
-};
-
-template <typename T>
-Parse_Result<T> parse_fail(String_View rest, const char *error)
-{
-    Parse_Result<T> result = {};
-    result.is_error = true;
-    result.rest = rest;
-    result.error = error;
-    return result;
-}
-
-template <typename T>
-Parse_Result<T> parse_ok(String_View rest, T unwrap)
-{
-    Parse_Result<T> result = {};
-    result.rest = rest;
-    result.unwrap = unwrap;
-    return result;
-}
-
-
-String_View string_view_of_cstr(const char *cstr)
-{
-    String_View result = {};
-    result.count = strlen(cstr);
-    result.data = cstr;
-    return result;
-}
-
 String_View operator ""_sv (const char *data, size_t count)
 {
     String_View result;
@@ -187,15 +106,48 @@ String_View file_as_string_view(const char *filepath)
     size_t n = 0;
     String_View result = {};
     FILE *f = fopen(filepath, "rb");
-    assert(f);
+    if (!f) {
+        fprintf(stderr, "Could not open file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
 
-    fseek(f, 0, SEEK_END);
+    int code = fseek(f, 0, SEEK_END);
+    if (code < 0) {
+        fprintf(stderr, "Could find the end of file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
+
     long m = ftell(f);
-    fseek(f, 0, SEEK_SET);
+    if (m < 0) {
+        fprintf(stderr, "Could get the end of file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
     result.count = (size_t) m;
+
+    code = fseek(f, 0, SEEK_SET);
+    if (code < 0) {
+        fprintf(stderr, "Could not find the beginning of file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
+
     char *buffer = new char[result.count];
+    if (!buffer) {
+        fprintf(stderr, "Could not allocate memory for file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
+
     n = fread(buffer, 1, result.count, f);
-    assert(n == result.count);
+    if (n != result.count) {
+        fprintf(stderr, "Could not read file %s: %s\n",
+                filepath, strerror(errno));
+        abort();
+    }
+
     result.data = buffer;
 
     return result;

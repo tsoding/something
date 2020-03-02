@@ -119,29 +119,14 @@ int main(void)
         tileset_texture
     };
 
-    auto plasma_pop_animat = parse_animat(
-        renderer,
-        file_as_string_view("./plasma_pop.txt"));
-    auto plasma_bolt_animat = parse_animat(
-        renderer,
-        file_as_string_view("./plasma_bolt.txt"));
-    init_projectiles(plasma_bolt_animat.unwrap, plasma_pop_animat.unwrap);
-
     // TODO(#9): baking assets into executable
 
-    auto walking_source = file_as_string_view("./walking.txt");
-    auto walking = parse_animat(renderer, walking_source);
-    if (walking.is_error) {
-        walking.print_error(stderr, walking_source, "./walking.txt");
-        exit(1);
-    }
+    auto plasma_pop_animat = parse_animat(renderer, "./plasma_pop.txt");
+    auto plasma_bolt_animat = parse_animat(renderer, "./plasma_bolt.txt");
+    auto walking = parse_animat(renderer, "./walking.txt");
+    auto idle = parse_animat(renderer, "./idle.txt");
 
-    auto idle_source = file_as_string_view("./idle.txt");
-    auto idle = parse_animat(renderer, idle_source);
-    if (idle.is_error) {
-        idle.print_error(stderr, idle_source, "./idle.txt");
-        exit(1);
-    }
+    init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
@@ -158,8 +143,8 @@ int main(void)
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
     entities[PLAYER_ENTITY_INDEX].texbox = texbox;
     entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
-    entities[PLAYER_ENTITY_INDEX].walking = walking.unwrap;
-    entities[PLAYER_ENTITY_INDEX].idle = idle.unwrap;
+    entities[PLAYER_ENTITY_INDEX].walking = walking;
+    entities[PLAYER_ENTITY_INDEX].idle = idle;
     entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
 
     const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -168,8 +153,8 @@ int main(void)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking.unwrap;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle.unwrap;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
         static_assert(LEVEL_WIDTH >= 2);
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;

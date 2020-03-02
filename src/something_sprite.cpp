@@ -183,8 +183,47 @@ void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
     }
 }
 
-Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
+void abort_parse_error(FILE *stream,
+                       String_View source, String_View rest,
+                       const char *prefix, const char *error)
 {
+    assert(stream);
+    assert(source.data < rest.data);
+
+    size_t n = rest.data - source.data;
+
+    for (size_t line_number = 1; source.count; ++line_number) {
+        auto line = source.chop_by_delim('\n');
+
+        if (n <= line.count) {
+            fprintf(stream, "%s:%ld: %s\n", prefix, line_number, error);
+            fwrite(line.data, 1, line.count, stream);
+            fputc('\n', stream);
+
+            for (size_t j = 0; j < n; ++j) {
+                fputc(' ', stream);
+            }
+            fputc('^', stream);
+            fputc('\n', stream);
+            break;
+        }
+
+        n -= line.count + 1;
+    }
+
+    for (int i = 0; source.count && i < 3; ++i) {
+        auto line = source.chop_by_delim('\n');
+        fwrite(line.data, 1, line.count, stream);
+        fputc('\n', stream);
+    }
+
+    abort();
+}
+
+Animat parse_animat(SDL_Renderer *renderer, const char *animat_filepath)
+{
+    String_View source = file_as_string_view(animat_filepath);
+    String_View input = source;
     Animat animat = {};
     SDL_Texture *spritesheet_texture = nullptr;
 
@@ -198,12 +237,14 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
 
         if (subkey == "count"_sv) {
             if (animat.frames != nullptr) {
-                return parse_fail<Animat>(input, "`count` provided twice");
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "`count` provided twice");
             }
 
             auto count_result = value.as_number<size_t>();
             if (!count_result.has_value) {
-                return parse_fail<Animat>(input, "`count` is not a number");
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "`count` is not a number");
             }
 
             animat.frame_count = count_result.unwrap;
@@ -213,19 +254,22 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
         } else if (subkey == "duration"_sv) {
             auto result = value.as_number<size_t>();
             if (!result.has_value) {
-                return parse_fail<Animat>(input, "`duration` is not a number");
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "`duration` is not a number");
             }
 
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames"_sv) {
             auto result = key.chop_by_delim('.').trim().as_number<size_t>();
             if (!result.has_value) {
-                return parse_fail<Animat>(input, "frame index is not a number");
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "frame index is not a number");
             }
 
             size_t frame_index = result.unwrap;
             if (frame_index >= animat.frame_count) {
-                return parse_fail<Animat>(input, "frame index is bigger than the `count`");
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "frame index is bigger than the `count`");
             }
 
             animat.frames[frame_index].texture = spritesheet_texture;
@@ -234,12 +278,14 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                 subkey = key.chop_by_delim('.').trim();
 
                 if (key.count != 0) {
-                    return parse_fail<Animat>(input, "unknown subkey");
+                    abort_parse_error(stderr, source, input, animat_filepath,
+                                      "unknown subkey");
                 }
 
                 auto result_value = value.as_number<int>();
                 if (!result_value.has_value) {
-                    return parse_fail<Animat>(input, "value is not a number");
+                    abort_parse_error(stderr, source, input, animat_filepath,
+                                      "value is not a number");
                 }
 
                 if (subkey == "x"_sv) {
@@ -251,13 +297,17 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                 } else if (subkey == "h"_sv) {
                     animat.frames[frame_index].srcrect.h = result_value.unwrap;
                 } else {
-                    return parse_fail<Animat>(input, "unknown subkey");
+                    abort_parse_error(stderr, source, input, animat_filepath,
+                                      "unknown subkey");
                 }
             }
         } else {
-            return parse_fail<Animat>(input, "unknown subkey");
+            abort_parse_error(stderr, source, input, animat_filepath,
+                              "unknown subkey");
         }
     }
 
-    return parse_ok<Animat>(input, animat);
+    delete[] source.data;
+
+    return animat;
 }
