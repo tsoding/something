@@ -54,4 +54,20 @@ template <typename T> Vec2<T> constexpr operator-(T a, Vec2<T> b) { return {a - 
 template <typename T> Vec2<T> constexpr operator*(T a, Vec2<T> b) { return {a * b.x, a * b.y}; }
 template <typename T> Vec2<T> constexpr operator/(T a, Vec2<T> b) { return {a / b.x, a / b.y}; }
 
+//////////////////////////////
+// Algorithms
+//////////////////////////////
+
+template <typename T>
+T min(T a, T b)
+{
+    return a < b ? a : b;
+}
+
+template <typename T>
+T abs(T x)
+{
+    return x < 0 ? -x : x;
+}
+
 #endif  // VEC_HPP_
