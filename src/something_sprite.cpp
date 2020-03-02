@@ -220,7 +220,7 @@ void abort_parse_error(FILE *stream,
     abort();
 }
 
-Animat parse_animat(SDL_Renderer *renderer, const char *animat_filepath)
+Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
 {
     String_View source = file_as_string_view(animat_filepath);
     String_View input = source;
@@ -250,6 +250,7 @@ Animat parse_animat(SDL_Renderer *renderer, const char *animat_filepath)
             animat.frame_count = count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
+            // TODO: preload all of the animation sprites outside of load_animat_file
             spritesheet_texture = load_texture_from_png_file(renderer, value);
         } else if (subkey == "duration"_sv) {
             auto result = value.as_number<size_t>();

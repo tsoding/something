@@ -121,10 +121,10 @@ int main(void)
 
     // TODO(#9): baking assets into executable
 
-    auto plasma_pop_animat = parse_animat(renderer, "./assets/animats/plasma_pop.txt");
-    auto plasma_bolt_animat = parse_animat(renderer, "./assets/animats/plasma_bolt.txt");
-    auto walking = parse_animat(renderer, "./assets/animats/walking.txt");
-    auto idle = parse_animat(renderer, "./assets/animats/idle.txt");
+    auto plasma_pop_animat = load_animat_file(renderer, "./assets/animats/plasma_pop.txt");
+    auto plasma_bolt_animat = load_animat_file(renderer, "./assets/animats/plasma_bolt.txt");
+    auto walking = load_animat_file(renderer, "./assets/animats/walking.txt");
+    auto idle = load_animat_file(renderer, "./assets/animats/idle.txt");
 
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
