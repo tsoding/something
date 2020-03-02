@@ -69,11 +69,11 @@ struct String_View
         return result;
     }
 
-    template <typename Number>
-    Maybe<Number> as_number() const
+    template <typename Integer>
+    Maybe<Integer> as_integer() const
     {
-        Number sign = 1;
-        Number number = {};
+        Integer sign = 1;
+        Integer number = {};
         String_View view = *this;
 
         if (view.count == 0) {
