@@ -42,53 +42,6 @@ enum class Debug_Draw_State {
     Delete
 };
 
-struct RGBA32
-{
-    uint8_t r, g, b, a;
-};
-
-RGBA32 decode_pixel(Uint32 pixel, SDL_PixelFormat *format)
-{
-    RGBA32 result = {};
-    result.r = ((pixel & format->Rmask) >> format->Rshift) << format->Rloss;
-    result.g = ((pixel & format->Gmask) >> format->Gshift) << format->Gloss;
-    result.b = ((pixel & format->Bmask) >> format->Bshift) << format->Bloss;
-    result.a = ((pixel & format->Amask) >> format->Ashift) << format->Aloss;
-    return result;
-}
-
-Uint32 encode_pixel(RGBA32 pixel, SDL_PixelFormat *format)
-{
-    Uint32 result = 0;
-    result |= (pixel.r >> format->Rloss) << format->Rshift;
-    result |= (pixel.g >> format->Gloss) << format->Gshift;
-    result |= (pixel.b >> format->Bloss) << format->Bshift;
-    result |= (pixel.a >> format->Aloss) << format->Ashift;
-    return result;
-}
-
-void enemy_spritesheet(SDL_Surface *spritesheet_surface)
-{
-    assert(spritesheet_surface);
-    assert(spritesheet_surface->format);
-    assert(spritesheet_surface->format->BytesPerPixel == 4);
-    SDL_LockSurface(spritesheet_surface);
-
-    for (int y = 0; y < spritesheet_surface->h; ++y) {
-        for (int x = 0; x < spritesheet_surface->w; ++x) {
-            const int pixel_index =
-                y * spritesheet_surface->pitch + x * spritesheet_surface->format->BytesPerPixel;
-            Uint32 *pixel = (Uint32*)((Uint8*) spritesheet_surface->pixels + pixel_index);
-
-            auto pixel_rgba32 = decode_pixel(*pixel, spritesheet_surface->format);
-            pixel_rgba32.r = min((Uint32) pixel_rgba32.r + 150u, 255u);
-            *pixel = encode_pixel(pixel_rgba32, spritesheet_surface->format);
-        }
-    }
-
-    SDL_UnlockSurface(spritesheet_surface);
-}
-
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
