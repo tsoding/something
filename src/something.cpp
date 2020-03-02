@@ -6,12 +6,6 @@
 
 #include <png.h>
 
-template <typename T>
-T min(T a, T b)
-{
-    return a < b ? a : b;
-}
-
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "something_error.cpp"
 #include "something_vec.cpp"
