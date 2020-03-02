@@ -127,8 +127,7 @@ int main(void)
 
     bool quit = false;
     bool debug = false;
-    const int COLLISION_PROBE_SIZE = 10;
-    SDL_Rect collision_probe = {};
+    Vec2i collision_probe = {};
     Vec2i mouse_position = {};
     SDL_Rect tile_rect = {};
     Debug_Draw_State state = Debug_Draw_State::Idle;
@@ -173,10 +172,7 @@ int main(void)
                 Vec2i p = {event.motion.x, event.motion.y};
                 resolve_point_collision(&p);
 
-                collision_probe = {
-                    p.x - COLLISION_PROBE_SIZE, p.y - COLLISION_PROBE_SIZE,
-                    COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2
-                };
+                collision_probe = p;
 
                 tile_rect = {
                     event.motion.x / TILE_SIZE * TILE_SIZE,
@@ -242,8 +238,16 @@ int main(void)
         render_projectiles(renderer);
 
         if (debug) {
+            const int COLLISION_PROBE_SIZE = 10;
+            const SDL_Rect collision_probe_rect = {
+                collision_probe.x - COLLISION_PROBE_SIZE,
+                collision_probe.y - COLLISION_PROBE_SIZE,
+                COLLISION_PROBE_SIZE * 2,
+                COLLISION_PROBE_SIZE * 2
+            };
+
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-            sec(SDL_RenderFillRect(renderer, &collision_probe));
+            sec(SDL_RenderFillRect(renderer, &collision_probe_rect));
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
