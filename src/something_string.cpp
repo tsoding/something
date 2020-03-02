@@ -53,18 +53,8 @@ struct String_View
 
         size_t i = 0;
         while (i < count && data[i] != delim) i++;
-
-        String_View result;
-        result.count = i;
-        result.data = data;
-
-        if (i < count) {
-            count -= i + 1;
-            data  += i + 1;
-        } else {
-            count -= i;
-            data  += i;
-        }
+        String_View result = {i, data};
+        chop(i + 1);
 
         return result;
     }
