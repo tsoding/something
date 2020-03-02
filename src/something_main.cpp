@@ -81,7 +81,7 @@ void enemy_spritesheet(SDL_Surface *spritesheet_surface)
             Uint32 *pixel = (Uint32*)((Uint8*) spritesheet_surface->pixels + pixel_index);
 
             auto pixel_rgba32 = decode_pixel(*pixel, spritesheet_surface->format);
-            pixel_rgba32.r = std::min((Uint32) pixel_rgba32.r + 150u, 255u);
+            pixel_rgba32.r = min((Uint32) pixel_rgba32.r + 150u, 255u);
             *pixel = encode_pixel(pixel_rgba32, spritesheet_surface->format);
         }
     }

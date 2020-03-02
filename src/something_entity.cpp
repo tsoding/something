@@ -97,8 +97,8 @@ void resolve_entity_collision(Entity *entity)
         Vec2i d = t - mesh[i];
 
         const int IMPACT_THRESHOLD = 5;
-        if (std::abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
-        if (std::abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
+        if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+        if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j] += d;

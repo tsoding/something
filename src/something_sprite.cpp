@@ -139,7 +139,7 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
 {
     char buffer[256] = {};
     strncpy(buffer, image_filename.data,
-            std::min(sizeof(buffer) - 1, image_filename.count));
+            min(sizeof(buffer) - 1, image_filename.count));
 
     return load_texture_from_png_file(renderer, buffer);
 }
