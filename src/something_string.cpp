@@ -72,18 +72,28 @@ struct String_View
     template <typename Number>
     Maybe<Number> as_number() const
     {
-        // TODO(#19): as_number() does not support negative numbers
+        Number sign = 1;
         Number number = {};
-
         String_View view = *this;
 
+        if (view.count == 0) {
+            return {};
+        }
+
+        if (*view.data == '-') {
+            sign = -1;
+            view.chop(1);
+        }
+
         while (view.count) {
-            if (!isdigit(*view.data)) return {};
+            if (!isdigit(*view.data)) {
+                return {};
+            }
             number = number * 10 + (*view.data - '0');
             view.chop(1);
         }
 
-        return { true, number };
+        return { true, number * sign };
     }
 };
 
