@@ -65,22 +65,22 @@ void render_level(SDL_Renderer *renderer,
 
 void dump_level(void)
 {
-    std::printf("{\n");
+    printf("{\n");
     for (int y = 0; y < LEVEL_HEIGHT; ++y) {
-        std::printf("{");
+        printf("{");
         for (int x = 0; x < LEVEL_WIDTH; ++x) {
             switch (level[y][x]) {
             case Tile::Empty: {
-                std::printf("Tile::Empty, ");
+                printf("Tile::Empty, ");
             } break;
 
             case Tile::Wall: {
-                std::printf("Tile::Wall, ");
+                printf("Tile::Wall, ");
             } break;
             }
         }
-        std::printf("},");
-        std::printf("\n");
+        printf("},");
+        printf("\n");
     }
-    std::printf("}\n");
+    printf("}\n");
 }
