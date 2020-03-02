@@ -129,7 +129,6 @@ int main(void)
     bool debug = false;
     Vec2i collision_probe = {};
     Vec2i mouse_position = {};
-    SDL_Rect tile_rect = {};
     Debug_Draw_State state = Debug_Draw_State::Idle;
 
     Uint32 fps = 0;
@@ -171,15 +170,7 @@ int main(void)
             case SDL_MOUSEMOTION: {
                 Vec2i p = {event.motion.x, event.motion.y};
                 resolve_point_collision(&p);
-
                 collision_probe = p;
-
-                tile_rect = {
-                    event.motion.x / TILE_SIZE * TILE_SIZE,
-                    event.motion.y / TILE_SIZE * TILE_SIZE,
-                    TILE_SIZE, TILE_SIZE
-                };
-
                 mouse_position = {event.motion.x, event.motion.y};
 
                 Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
@@ -238,6 +229,8 @@ int main(void)
         render_projectiles(renderer);
 
         if (debug) {
+            sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+
             const int COLLISION_PROBE_SIZE = 10;
             const SDL_Rect collision_probe_rect = {
                 collision_probe.x - COLLISION_PROBE_SIZE,
@@ -245,10 +238,18 @@ int main(void)
                 COLLISION_PROBE_SIZE * 2,
                 COLLISION_PROBE_SIZE * 2
             };
-
-            sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &collision_probe_rect));
+
+            const SDL_Rect tile_rect = {
+                mouse_position.x / TILE_SIZE * TILE_SIZE,
+                mouse_position.y / TILE_SIZE * TILE_SIZE,
+                TILE_SIZE, TILE_SIZE
+            };
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
+
+            const SDL_Rect level_boundary = {
+                0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+            };
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
             const Uint32 t = SDL_GetTicks() - begin;
