@@ -7,6 +7,8 @@
 
 #include <png.h>
 
+#include <algorithm>
+
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "something_error.cpp"
 #include "something_vec.cpp"
