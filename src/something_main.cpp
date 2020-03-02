@@ -42,53 +42,6 @@ enum class Debug_Draw_State {
     Delete
 };
 
-struct RGBA32
-{
-    uint8_t r, g, b, a;
-};
-
-RGBA32 decode_pixel(Uint32 pixel, SDL_PixelFormat *format)
-{
-    RGBA32 result = {};
-    result.r = ((pixel & format->Rmask) >> format->Rshift) << format->Rloss;
-    result.g = ((pixel & format->Gmask) >> format->Gshift) << format->Gloss;
-    result.b = ((pixel & format->Bmask) >> format->Bshift) << format->Bloss;
-    result.a = ((pixel & format->Amask) >> format->Ashift) << format->Aloss;
-    return result;
-}
-
-Uint32 encode_pixel(RGBA32 pixel, SDL_PixelFormat *format)
-{
-    Uint32 result = 0;
-    result |= (pixel.r >> format->Rloss) << format->Rshift;
-    result |= (pixel.g >> format->Gloss) << format->Gshift;
-    result |= (pixel.b >> format->Bloss) << format->Bshift;
-    result |= (pixel.a >> format->Aloss) << format->Ashift;
-    return result;
-}
-
-void enemy_spritesheet(SDL_Surface *spritesheet_surface)
-{
-    assert(spritesheet_surface);
-    assert(spritesheet_surface->format);
-    assert(spritesheet_surface->format->BytesPerPixel == 4);
-    SDL_LockSurface(spritesheet_surface);
-
-    for (int y = 0; y < spritesheet_surface->h; ++y) {
-        for (int x = 0; x < spritesheet_surface->w; ++x) {
-            const int pixel_index =
-                y * spritesheet_surface->pitch + x * spritesheet_surface->format->BytesPerPixel;
-            Uint32 *pixel = (Uint32*)((Uint8*) spritesheet_surface->pixels + pixel_index);
-
-            auto pixel_rgba32 = decode_pixel(*pixel, spritesheet_surface->format);
-            pixel_rgba32.r = min((Uint32) pixel_rgba32.r + 150u, 255u);
-            *pixel = encode_pixel(pixel_rgba32, spritesheet_surface->format);
-        }
-    }
-
-    SDL_UnlockSurface(spritesheet_surface);
-}
-
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -174,10 +127,8 @@ int main(void)
 
     bool quit = false;
     bool debug = false;
-    const int COLLISION_PROBE_SIZE = 10;
-    SDL_Rect collision_probe = {};
+    Vec2i collision_probe = {};
     Vec2i mouse_position = {};
-    SDL_Rect tile_rect = {};
     Debug_Draw_State state = Debug_Draw_State::Idle;
 
     Uint32 fps = 0;
@@ -217,21 +168,9 @@ int main(void)
             } break;
 
             case SDL_MOUSEMOTION: {
-                Vec2i p = {event.motion.x, event.motion.y};
-                resolve_point_collision(&p);
-
-                collision_probe = {
-                    p.x - COLLISION_PROBE_SIZE, p.y - COLLISION_PROBE_SIZE,
-                    COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2
-                };
-
-                tile_rect = {
-                    event.motion.x / TILE_SIZE * TILE_SIZE,
-                    event.motion.y / TILE_SIZE * TILE_SIZE,
-                    TILE_SIZE, TILE_SIZE
-                };
-
                 mouse_position = {event.motion.x, event.motion.y};
+                collision_probe = mouse_position;
+                resolve_point_collision(&collision_probe);
 
                 Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
                 switch (state) {
@@ -290,8 +229,26 @@ int main(void)
 
         if (debug) {
             sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-            sec(SDL_RenderFillRect(renderer, &collision_probe));
+
+            const int COLLISION_PROBE_SIZE = 10;
+            const SDL_Rect collision_probe_rect = {
+                collision_probe.x - COLLISION_PROBE_SIZE,
+                collision_probe.y - COLLISION_PROBE_SIZE,
+                COLLISION_PROBE_SIZE * 2,
+                COLLISION_PROBE_SIZE * 2
+            };
+            sec(SDL_RenderFillRect(renderer, &collision_probe_rect));
+
+            const SDL_Rect tile_rect = {
+                mouse_position.x / TILE_SIZE * TILE_SIZE,
+                mouse_position.y / TILE_SIZE * TILE_SIZE,
+                TILE_SIZE, TILE_SIZE
+            };
             sec(SDL_RenderDrawRect(renderer, &tile_rect));
+
+            const SDL_Rect level_boundary = {
+                0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+            };
             sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
             const Uint32 t = SDL_GetTicks() - begin;
