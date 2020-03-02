@@ -168,10 +168,9 @@ int main(void)
             } break;
 
             case SDL_MOUSEMOTION: {
-                Vec2i p = {event.motion.x, event.motion.y};
-                resolve_point_collision(&p);
-                collision_probe = p;
                 mouse_position = {event.motion.x, event.motion.y};
+                collision_probe = mouse_position;
+                resolve_point_collision(&collision_probe);
 
                 Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
                 switch (state) {
