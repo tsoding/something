@@ -129,15 +129,17 @@ int main(void)
 
     // TODO(#9): baking assets into executable
 
-    auto walking = parse_animat(renderer, file_as_string_view("./walking.txt"));
+    auto walking_source = file_as_string_view("./walking.txt");
+    auto walking = parse_animat(renderer, walking_source);
     if (walking.is_error) {
-        fprintf(stderr, "ERROR while parsing walking.txt: %s\n", walking.error);
+        walking.print_error(stderr, walking_source, "./walking.txt");
         exit(1);
     }
 
-    auto idle = parse_animat(renderer, file_as_string_view("./idle.txt"));
+    auto idle_source = file_as_string_view("./idle.txt");
+    auto idle = parse_animat(renderer, idle_source);
     if (idle.is_error) {
-        fprintf(stderr, "ERROR while parsing walking.txt: %s\n", walking.error);
+        idle.print_error(stderr, idle_source, "./idle.txt");
         exit(1);
     }
 

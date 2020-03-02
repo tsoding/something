@@ -234,7 +234,7 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                 subkey = key.chop_by_delim('.').trim();
 
                 if (key.count != 0) {
-                    return parse_fail<Animat>(input, "unknown subkeys");
+                    return parse_fail<Animat>(input, "unknown subkey");
                 }
 
                 auto result_value = value.as_number<int>();
@@ -251,9 +251,11 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                 } else if (subkey == "h"_sv) {
                     animat.frames[frame_index].srcrect.h = result_value.unwrap;
                 } else {
-                    return parse_fail<Animat>(input, "unknown subkeys");
+                    return parse_fail<Animat>(input, "unknown subkey");
                 }
             }
+        } else {
+            return parse_fail<Animat>(input, "unknown subkey");
         }
     }
 

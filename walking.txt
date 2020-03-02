@@ -1,6 +1,6 @@
 sprite = ./assets/walking-12px-zoom.png
 count = 4
-duration = 25
+duration = 100
 
 frames.0.x = 0
 frames.0.y = 0

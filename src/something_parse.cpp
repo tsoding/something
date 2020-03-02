@@ -102,6 +102,40 @@ struct Parse_Result
         result.error = error;
         return result;
     }
+
+    void print_error(FILE *stream, String_View source,
+                     const char *prefix) const
+    {
+        assert(stream);
+        assert(source.data < rest.data);
+
+        size_t n = rest.data - source.data;
+
+        for (size_t line_number = 1; source.count; ++line_number) {
+            auto line = source.chop_by_delim('\n');
+
+            if (n <= line.count) {
+                fprintf(stream, "%s:%ld: %s\n", prefix, line_number, error);
+                fwrite(line.data, 1, line.count, stream);
+                fputc('\n', stream);
+
+                for (size_t j = 0; j < n; ++j) {
+                    fputc(' ', stream);
+                }
+                fputc('^', stream);
+                fputc('\n', stream);
+                break;
+            }
+
+            n -= line.count + 1;
+        }
+
+        for (int i = 0; source.count && i < 3; ++i) {
+            auto line = source.chop_by_delim('\n');
+            fwrite(line.data, 1, line.count, stream);
+            fputc('\n', stream);
+        }
+    }
 };
 
 template <typename T>
