@@ -1,4 +1,4 @@
-sprite = ./assets/walking-12px-zoom.png
+sprite = ./assets/sprites/walking-12px-zoom.png
 count = 1
 duration = 200
 

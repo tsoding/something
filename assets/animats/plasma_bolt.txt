@@ -1,4 +1,4 @@
-sprite = ./assets/spark1-sheet.png
+sprite = ./assets/sprites/spark1-sheet.png
 count = 5
 duration = 100
 

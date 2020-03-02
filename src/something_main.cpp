@@ -107,7 +107,7 @@ int main(void)
     // TODO(#8): replace fantasy_tiles.png with our own assets
     SDL_Texture *tileset_texture = load_texture_from_png_file(
         renderer,
-        "assets/fantasy_tiles.png");
+        "assets/sprites/fantasy_tiles.png");
 
     Sprite ground_grass_texture = {
         {120, 128, 16, 16},
@@ -121,10 +121,10 @@ int main(void)
 
     // TODO(#9): baking assets into executable
 
-    auto plasma_pop_animat = parse_animat(renderer, "./plasma_pop.txt");
-    auto plasma_bolt_animat = parse_animat(renderer, "./plasma_bolt.txt");
-    auto walking = parse_animat(renderer, "./walking.txt");
-    auto idle = parse_animat(renderer, "./idle.txt");
+    auto plasma_pop_animat = parse_animat(renderer, "./assets/animats/plasma_pop.txt");
+    auto plasma_bolt_animat = parse_animat(renderer, "./assets/animats/plasma_bolt.txt");
+    auto walking = parse_animat(renderer, "./assets/animats/walking.txt");
+    auto idle = parse_animat(renderer, "./assets/animats/idle.txt");
 
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
@@ -167,7 +167,7 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-    TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
+    TTF_Font *debug_font = stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
     Vec2i gravity = {0, 1};
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
