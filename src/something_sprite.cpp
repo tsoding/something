@@ -201,9 +201,9 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                 return parse_fail<Animat>(input, "`count` provided twice");
             }
 
-            auto count_result = value.parse_number<size_t>();
-            if (count_result.is_error) {
-                return count_result.refail<Animat>();
+            auto count_result = value.as_number<size_t>();
+            if (!count_result.has_value) {
+                return parse_fail<Animat>(input, "`count` is not a number");
             }
 
             animat.frame_count = count_result.unwrap;
@@ -211,16 +211,16 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = load_texture_from_png_file(renderer, value);
         } else if (subkey == "duration"_sv) {
-            auto result = value.parse_number<size_t>();
-            if (result.is_error) {
-                return result.refail<Animat>();
+            auto result = value.as_number<size_t>();
+            if (!result.has_value) {
+                return parse_fail<Animat>(input, "`duration` is not a number");
             }
 
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames"_sv) {
-            auto result = key.chop_by_delim('.').trim().parse_number<size_t>();
-            if (result.is_error) {
-                return result.refail<Animat>();
+            auto result = key.chop_by_delim('.').trim().as_number<size_t>();
+            if (!result.has_value) {
+                return parse_fail<Animat>(input, "frame index is not a number");
             }
 
             size_t frame_index = result.unwrap;
@@ -237,9 +237,9 @@ Parse_Result<Animat> parse_animat(SDL_Renderer *renderer, String_View input)
                     return parse_fail<Animat>(input, "unknown subkeys");
                 }
 
-                auto result_value = value.parse_number<int>();
-                if (result_value.is_error) {
-                    return result.refail<Animat>();
+                auto result_value = value.as_number<int>();
+                if (!result_value.has_value) {
+                    return parse_fail<Animat>(input, "value is not a number");
                 }
 
                 if (subkey == "x"_sv) {

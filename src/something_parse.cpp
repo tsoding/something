@@ -1,4 +1,9 @@
-template <typename T> struct Parse_Result;
+template <typename T>
+struct Maybe
+{
+    bool has_value;
+    T unwrap;
+};
 
 struct String_View
 {
@@ -65,7 +70,19 @@ struct String_View
     }
 
     template <typename Number>
-    Parse_Result<Number> parse_number();
+    Maybe<Number> as_number()
+    {
+        // TODO: as_number() does not support negative numbers
+        Number number = {};
+
+        while (count) {
+            if (!isdigit(*data)) return {};
+            number = number * 10 + (*data - '0');
+            chop(1);
+        }
+
+        return { true, number };
+    }
 };
 
 template <typename T>
@@ -106,24 +123,6 @@ Parse_Result<T> parse_ok(String_View rest, T unwrap)
     return result;
 }
 
-template <typename Number>
-Parse_Result<Number> String_View::parse_number()
-{
-    // TODO: String_View::parse_number() does not support negative numbers
-    Number number = {};
-
-    while (count) {
-        if (!isdigit(*data)) {
-            return parse_fail<Number>(*this, "Not a digit");
-        }
-
-        number = number * 10 + (*data - '0');
-
-        chop(1);
-    }
-
-    return parse_ok(*this, number);
-}
 
 String_View string_view_of_cstr(const char *cstr)
 {
