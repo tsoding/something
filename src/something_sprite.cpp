@@ -241,7 +241,7 @@ Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
                                   "`count` provided twice");
             }
 
-            auto count_result = value.as_number<size_t>();
+            auto count_result = value.as_integer<size_t>();
             if (!count_result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "`count` is not a number");
@@ -253,7 +253,7 @@ Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
             // TODO(#20): preload all of the animation sprites outside of load_animat_file
             spritesheet_texture = load_texture_from_png_file(renderer, value);
         } else if (subkey == "duration"_sv) {
-            auto result = value.as_number<size_t>();
+            auto result = value.as_integer<size_t>();
             if (!result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "`duration` is not a number");
@@ -261,7 +261,7 @@ Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
 
             animat.frame_duration = result.unwrap;
         } else if (subkey == "frames"_sv) {
-            auto result = key.chop_by_delim('.').trim().as_number<size_t>();
+            auto result = key.chop_by_delim('.').trim().as_integer<size_t>();
             if (!result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "frame index is not a number");
@@ -283,7 +283,7 @@ Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
                                       "unknown subkey");
                 }
 
-                auto result_value = value.as_number<int>();
+                auto result_value = value.as_integer<int>();
                 if (!result_value.has_value) {
                     abort_parse_error(stderr, source, input, animat_filepath,
                                       "value is not a number");

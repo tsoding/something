@@ -69,19 +69,31 @@ struct String_View
         return result;
     }
 
-    template <typename Number>
-    Maybe<Number> as_number()
+    template <typename Integer>
+    Maybe<Integer> as_integer() const
     {
-        // TODO(#19): as_number() does not support negative numbers
-        Number number = {};
+        Integer sign = 1;
+        Integer number = {};
+        String_View view = *this;
 
-        while (count) {
-            if (!isdigit(*data)) return {};
-            number = number * 10 + (*data - '0');
-            chop(1);
+        if (view.count == 0) {
+            return {};
         }
 
-        return { true, number };
+        if (*view.data == '-') {
+            sign = -1;
+            view.chop(1);
+        }
+
+        while (view.count) {
+            if (!isdigit(*view.data)) {
+                return {};
+            }
+            number = number * 10 + (*view.data - '0');
+            view.chop(1);
+        }
+
+        return { true, number * sign };
     }
 };
 
