@@ -70,15 +70,17 @@ struct String_View
     }
 
     template <typename Number>
-    Maybe<Number> as_number()
+    Maybe<Number> as_number() const
     {
         // TODO(#19): as_number() does not support negative numbers
         Number number = {};
 
-        while (count) {
-            if (!isdigit(*data)) return {};
-            number = number * 10 + (*data - '0');
-            chop(1);
+        String_View view = *this;
+
+        while (view.count) {
+            if (!isdigit(*view.data)) return {};
+            number = number * 10 + (*view.data - '0');
+            view.chop(1);
         }
 
         return { true, number };
