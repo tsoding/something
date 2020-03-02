@@ -47,12 +47,6 @@ struct RGBA32
     uint8_t r, g, b, a;
 };
 
-template <typename T>
-T min(T a, T b)
-{
-    return a < b ? a : b;
-}
-
 RGBA32 decode_pixel(Uint32 pixel, SDL_PixelFormat *format)
 {
     RGBA32 result = {};
@@ -113,7 +107,7 @@ int main(void)
     // TODO(#8): replace fantasy_tiles.png with our own assets
     SDL_Texture *tileset_texture = load_texture_from_png_file(
         renderer,
-        "assets/fantasy_tiles.png");
+        "assets/sprites/fantasy_tiles.png");
 
     Sprite ground_grass_texture = {
         {120, 128, 16, 16},
@@ -125,53 +119,14 @@ int main(void)
         tileset_texture
     };
 
-    Animat plasma_pop_animat = load_spritesheet_animat(
-        renderer, 4, 70,
-        "./assets/Destroy1-sheet.png");
-    Animat plasma_bolt_animat = load_spritesheet_animat(
-        renderer, 5, 70,
-        "./assets/spark1-sheet.png");
-    init_projectiles(plasma_bolt_animat, plasma_pop_animat);
-
     // TODO(#9): baking assets into executable
-    SDL_Surface *walking_surface = load_png_file_as_surface(
-        "./assets/walking-12px-zoom.png");
 
-    SDL_Texture *player_walking_texture =
-        sec(SDL_CreateTextureFromSurface(
-                renderer, walking_surface));
+    auto plasma_pop_animat = load_animat_file(renderer, "./assets/animats/plasma_pop.txt");
+    auto plasma_bolt_animat = load_animat_file(renderer, "./assets/animats/plasma_bolt.txt");
+    auto walking = load_animat_file(renderer, "./assets/animats/walking.txt");
+    auto idle = load_animat_file(renderer, "./assets/animats/idle.txt");
 
-    enemy_spritesheet(walking_surface);
-
-    SDL_Texture *enemy_walking_texture =
-        sec(SDL_CreateTextureFromSurface(
-                renderer, walking_surface));
-
-    SDL_FreeSurface(walking_surface);
-
-    const int walking_frame_count = 4;
-    const int walking_frame_size = 48;
-
-    Sprite player_walking_frames[walking_frame_count];
-    Sprite enemy_walking_frames[walking_frame_count];
-
-    for (int i = 0; i < walking_frame_count; ++i) {
-        player_walking_frames[i].srcrect = {
-            i * walking_frame_size,
-            0,
-            walking_frame_size,
-            walking_frame_size
-        };
-        player_walking_frames[i].texture = player_walking_texture;
-
-        enemy_walking_frames[i].srcrect = {
-            i * walking_frame_size,
-            0,
-            walking_frame_size,
-            walking_frame_size
-        };
-        enemy_walking_frames[i].texture = enemy_walking_texture;
-    }
+    init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
@@ -184,32 +139,12 @@ int main(void)
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
 
-    Animat player_walking = {};
-    player_walking.frames = player_walking_frames;
-    player_walking.frame_count = 4;
-    player_walking.frame_duration = 100;
-
-    Animat enemy_walking = {};
-    enemy_walking.frames = enemy_walking_frames;
-    enemy_walking.frame_count = 4;
-    enemy_walking.frame_duration = 100;
-
-    Animat player_idle = {};
-    player_idle.frames = player_walking_frames + 2;
-    player_idle.frame_count = 1;
-    player_idle.frame_duration = 200;
-
-    Animat enemy_idle = {};
-    enemy_idle.frames = enemy_walking_frames + 2;
-    enemy_idle.frame_count = 1;
-    enemy_idle.frame_duration = 200;
-
     const int PLAYER_ENTITY_INDEX = 0;
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
     entities[PLAYER_ENTITY_INDEX].texbox = texbox;
     entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
-    entities[PLAYER_ENTITY_INDEX].walking = player_walking;
-    entities[PLAYER_ENTITY_INDEX].idle = player_idle;
+    entities[PLAYER_ENTITY_INDEX].walking = walking;
+    entities[PLAYER_ENTITY_INDEX].idle = idle;
     entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
 
     const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -218,8 +153,8 @@ int main(void)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = enemy_walking;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = enemy_idle;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
         static_assert(LEVEL_WIDTH >= 2);
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;
@@ -232,7 +167,7 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-    TTF_Font *debug_font = stec(TTF_OpenFont("assets/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
+    TTF_Font *debug_font = stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
 
     Vec2i gravity = {0, 1};
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);

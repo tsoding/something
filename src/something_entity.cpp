@@ -48,14 +48,14 @@ void resolve_point_collision(Vec2i *p)
     };
 
     Side sides[] = {
-        {sqr_dist({p0.x, 0},    {p->x, 0}),    {p0.x, p->y}, {-1,  0}, TILE_SIZE_SQR},     // left
-        {sqr_dist({p1.x, 0},    {p->x, 0}),    {p1.x, p->y}, { 1,  0}, TILE_SIZE_SQR},     // right
-        {sqr_dist({0, p0.y},    {0, p->y}),    {p->x, p0.y}, { 0, -1}, TILE_SIZE_SQR},     // top
-        {sqr_dist({0, p1.y},    {0, p->y}),    {p->x, p1.y}, { 0,  1}, TILE_SIZE_SQR},     // bottom
-        {sqr_dist({p0.x, p0.y}, {p->x, p->y}), {p0.x, p0.y}, {-1, -1}, TILE_SIZE_SQR * 2}, // top-left
-        {sqr_dist({p1.x, p0.y}, {p->x, p->y}), {p1.x, p0.y}, { 1, -1}, TILE_SIZE_SQR * 2}, // top-right
-        {sqr_dist({p0.x, p1.y}, {p->x, p->y}), {p0.x, p1.y}, {-1,  1}, TILE_SIZE_SQR * 2}, // bottom-left
-        {sqr_dist({p1.x, p1.y}, {p->x, p->y}), {p1.x, p1.y}, { 1,  1}, TILE_SIZE_SQR * 2}  // bottom-right
+        {sqr_dist<int>({p0.x, 0},    {p->x, 0}),    {p0.x, p->y}, {-1,  0}, TILE_SIZE_SQR},     // left
+        {sqr_dist<int>({p1.x, 0},    {p->x, 0}),    {p1.x, p->y}, { 1,  0}, TILE_SIZE_SQR},     // right
+        {sqr_dist<int>({0, p0.y},    {0, p->y}),    {p->x, p0.y}, { 0, -1}, TILE_SIZE_SQR},     // top
+        {sqr_dist<int>({0, p1.y},    {0, p->y}),    {p->x, p1.y}, { 0,  1}, TILE_SIZE_SQR},     // bottom
+        {sqr_dist<int>({p0.x, p0.y}, {p->x, p->y}), {p0.x, p0.y}, {-1, -1}, TILE_SIZE_SQR * 2}, // top-left
+        {sqr_dist<int>({p1.x, p0.y}, {p->x, p->y}), {p1.x, p0.y}, { 1, -1}, TILE_SIZE_SQR * 2}, // top-right
+        {sqr_dist<int>({p0.x, p1.y}, {p->x, p->y}), {p0.x, p1.y}, {-1,  1}, TILE_SIZE_SQR * 2}, // bottom-left
+        {sqr_dist<int>({p1.x, p1.y}, {p->x, p->y}), {p1.x, p1.y}, { 1,  1}, TILE_SIZE_SQR * 2}  // bottom-right
     };
     const int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
 
@@ -97,8 +97,8 @@ void resolve_entity_collision(Entity *entity)
         Vec2i d = t - mesh[i];
 
         const int IMPACT_THRESHOLD = 5;
-        if (std::abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
-        if (std::abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
+        if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+        if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
         for (int j = 0; j < MESH_COUNT; ++j) {
             mesh[j] += d;
