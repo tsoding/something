@@ -7,7 +7,17 @@
 
 #include <png.h>
 
-#include <algorithm>
+template <typename T>
+T min(T a, T b)
+{
+    return a < b ? a : b;
+}
+
+template <typename T>
+T abs(T x)
+{
+    return x < 0 ? -x : x;
+}
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "something_error.cpp"
