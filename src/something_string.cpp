@@ -87,6 +87,16 @@ struct String_View
     }
 };
 
+void print1(FILE *stream, String_View view)
+{
+    fwrite(view.data, 1, view.count, stream);
+}
+
+String_View cstr_as_string_view(const char *cstr)
+{
+    return String_View {strlen(cstr), cstr};
+}
+
 String_View operator ""_sv (const char *data, size_t count)
 {
     String_View result;
@@ -109,44 +119,44 @@ String_View file_as_string_view(const char *filepath)
     String_View result = {};
     FILE *f = fopen(filepath, "rb");
     if (!f) {
-        fprintf(stderr, "Could not open file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could not open file `", filepath, "`: ",
+                strerror(errno));
         abort();
     }
 
     int code = fseek(f, 0, SEEK_END);
     if (code < 0) {
-        fprintf(stderr, "Could find the end of file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could find the end of file ", filepath, ": ",
+                strerror(errno));
         abort();
     }
 
     long m = ftell(f);
     if (m < 0) {
-        fprintf(stderr, "Could get the end of file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could get the end of file ", filepath, ": ",
+                strerror(errno));
         abort();
     }
     result.count = (size_t) m;
 
     code = fseek(f, 0, SEEK_SET);
     if (code < 0) {
-        fprintf(stderr, "Could not find the beginning of file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could not find the beginning of file ", filepath, ": ",
+                strerror(errno));
         abort();
     }
 
     char *buffer = new char[result.count];
     if (!buffer) {
-        fprintf(stderr, "Could not allocate memory for file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could not allocate memory for file ", filepath, ": ",
+                strerror(errno));
         abort();
     }
 
     n = fread(buffer, 1, result.count, f);
     if (n != result.count) {
-        fprintf(stderr, "Could not read file %s: %s\n",
-                filepath, strerror(errno));
+        println(stderr, "Could not read file ", filepath, ": ",
+                strerror(errno));
         abort();
     }
 
