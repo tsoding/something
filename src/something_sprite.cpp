@@ -170,7 +170,7 @@ SDL_Texture *spritesheet_by_name(String_View filename)
 
     fprintf(stderr,
             "Unknown texture file %.*s. "
-            "You may want to add it to the spritesheets array.",
+            "You may want to add it to the `spritesheets` array.",
             (int)filename.count, filename.data);
     abort();
 
