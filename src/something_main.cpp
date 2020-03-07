@@ -18,6 +18,7 @@ void render_texture(SDL_Renderer *renderer, SDL_Texture *texture, Vec2i p)
     sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
 }
 
+// TODO: Turn displayf into println style
 void displayf(SDL_Renderer *renderer, TTF_Font *font,
               SDL_Color color, Vec2i p,
               const char *format, ...)
@@ -297,7 +298,7 @@ int main(void)
     }
     SDL_Quit();
 
-    dump_level();
+    dump_level(stdout);
 
     return 0;
 }

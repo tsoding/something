@@ -60,24 +60,24 @@ void render_level(SDL_Renderer *renderer,
     }
 }
 
-void dump_level(void)
+void dump_level(FILE *stream)
 {
-    printf("{\n");
+    println(stream, "{");
     for (int y = 0; y < LEVEL_HEIGHT; ++y) {
-        printf("{");
+        print(stream, "{");
         for (int x = 0; x < LEVEL_WIDTH; ++x) {
             switch (level[y][x]) {
             case Tile::Empty: {
-                printf("Tile::Empty, ");
+                print(stream, "Tile::Empty, ");
             } break;
 
             case Tile::Wall: {
-                printf("Tile::Wall, ");
+                print(stream, "Tile::Wall, ");
             } break;
             }
         }
-        printf("},");
-        printf("\n");
+        print(stream, "},");
+        println(stream, "\n");
     }
-    printf("}\n");
+    println(stream, "}\n");
 }

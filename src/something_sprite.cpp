@@ -97,15 +97,14 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
     // TODO(#7): try stb_image.h instead of libpng
     //   https://github.com/nothings/stb/blob/master/stb_image.h
     if (!png_image_begin_read_from_file(&image, image_filename)) {
-        fprintf(stderr, "Could not read file `%s`: %s\n",
-                image_filename, image.message);
+        println(stderr, "Could not read file `", image_filename, "`: ", image.message);
         abort();
     }
     image.format = PNG_FORMAT_RGBA;
     uint32_t *image_pixels = new uint32_t[image.width * image.height];
 
     if (!png_image_finish_read(&image, nullptr, image_pixels, 0, nullptr)) {
-        fprintf(stderr, "libpng pooped itself: %s\n", image.message);
+        println(stderr, "libpng pooped itself: ", image.message);
         abort();
     }
 
@@ -203,15 +202,15 @@ Animat load_spritesheet_animat(SDL_Renderer *renderer,
 
 void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
 {
-    fprintf(output, "sprite = %s\n", sprite_filename);
-    fprintf(output, "count = %lu\n", animat.frame_count);
-    fprintf(output, "duration = %u\n", animat.frame_duration);
-    fprintf(output, "\n");
+    println(output, "sprite = ", sprite_filename);
+    println(output, "count = ", animat.frame_count);
+    println(output, "duration = ", animat.frame_duration);
+    println(output);
     for (size_t i = 0; i < animat.frame_count; ++i) {
-        fprintf(output, "frames.%lu.x = %d\n", i, animat.frames[i].srcrect.x);
-        fprintf(output, "frames.%lu.y = %d\n", i, animat.frames[i].srcrect.y);
-        fprintf(output, "frames.%lu.w = %d\n", i, animat.frames[i].srcrect.w);
-        fprintf(output, "frames.%lu.h = %d\n", i, animat.frames[i].srcrect.h);
+        println(output, "frames.", i, ".x = ", animat.frames[i].srcrect.x);
+        println(output, "frames.", i, ".y = ", animat.frames[i].srcrect.y);
+        println(output, "frames.", i, ".w = ", animat.frames[i].srcrect.w);
+        println(output, "frames.", i, ".h = ", animat.frames[i].srcrect.h);
     }
 }
 
@@ -228,15 +227,9 @@ void abort_parse_error(FILE *stream,
         auto line = source.chop_by_delim('\n');
 
         if (n <= line.count) {
-            fprintf(stream, "%s:%ld: %s\n", prefix, line_number, error);
-            fwrite(line.data, 1, line.count, stream);
-            fputc('\n', stream);
-
-            for (size_t j = 0; j < n; ++j) {
-                fputc(' ', stream);
-            }
-            fputc('^', stream);
-            fputc('\n', stream);
+            println(stream, prefix, ':', line_number, ": ", error);
+            println(stream, line);
+            println(stream, Pad {n, ' '}, '^');
             break;
         }
 
