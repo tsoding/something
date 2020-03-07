@@ -76,8 +76,7 @@ void dump_level(FILE *stream)
             } break;
             }
         }
-        print(stream, "},");
-        println(stream, "\n");
+        println(stream, "},");
     }
     println(stream, "}\n");
 }
