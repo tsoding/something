@@ -61,7 +61,8 @@ const int ENEMY_ENTITY_INDEX_OFFSET = 1;
 const int ENEMY_COUNT = 6;
 const int PLAYER_ENTITY_INDEX = 0;
 
-void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
+void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
+                          int fps)
 {
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
@@ -87,10 +88,9 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
     sec(SDL_RenderDrawRect(renderer, &level_boundary));
 
     const int PADDING = 10;
-    // displayf(renderer, game_state.debug_font,
-    //          {255, 0, 0, 255}, vec2(PADDING, PADDING),
-    //          "FPS: %d", fps);
-    // TODO: FPS rendering is broken
+    displayf(renderer, game_state.debug_font,
+             {255, 0, 0, 255}, vec2(PADDING, PADDING),
+             "FPS: %d", fps);
     displayf(renderer, game_state.debug_font,
              {255, 0, 0, 255}, vec2(PADDING, 50 + PADDING),
              "Mouse Position: (%d, %d)",
@@ -143,6 +143,8 @@ void update_game_state(Game_State game_state, uint32_t dt)
     update_projectiles(dt);
 }
 
+const uint32_t STEP_DEBUG_FPS = 60;
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
@@ -184,7 +186,6 @@ int main(void)
         - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
-
 
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
     entities[PLAYER_ENTITY_INDEX].texbox = texbox;
@@ -229,6 +230,7 @@ int main(void)
 
     bool debug = false;
     bool step_debug = false;
+    Uint32 prev_dt = 0;
     while (!game_state.quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -255,8 +257,7 @@ int main(void)
 
                 case SDLK_x: {
                     if (step_debug) {
-                        const uint32_t FPS = 60;
-                        update_game_state(game_state, 1000 / FPS);
+                        update_game_state(game_state, 1000 / STEP_DEBUG_FPS);
                     }
                 } break;
 
@@ -326,13 +327,15 @@ int main(void)
 
         render_game_state(game_state, renderer);
         if (debug) {
-            render_debug_overlay(game_state, renderer);
+            render_debug_overlay(game_state, renderer,
+                                 step_debug ? STEP_DEBUG_FPS : 1000 / prev_dt);
         }
         SDL_RenderPresent(renderer);
 
         if (!step_debug) {
             const Uint32 dt = SDL_GetTicks() - begin;
             update_game_state(game_state, dt);
+            prev_dt = dt;
         }
     }
     SDL_Quit();
