@@ -87,6 +87,11 @@ struct String_View
     }
 };
 
+String_View cstr_as_string_view(const char *cstr)
+{
+    return String_View {strlen(cstr), cstr};
+}
+
 String_View operator ""_sv (const char *data, size_t count)
 {
     String_View result;

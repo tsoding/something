@@ -4,6 +4,8 @@ struct Sprite
     SDL_Texture *texture;
 };
 
+#define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
+
 void render_sprite(SDL_Renderer *renderer,
                    Sprite texture,
                    SDL_Rect destrect,
@@ -134,14 +136,45 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
-SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
-                                        String_View image_filename)
+struct Spritesheet
 {
-    char buffer[256] = {};
-    strncpy(buffer, image_filename.data,
-            min(sizeof(buffer) - 1, image_filename.count));
+    const char *filename;
+    SDL_Texture *texture;
+};
 
-    return load_texture_from_png_file(renderer, buffer);
+Spritesheet spritesheets[] = {
+    {"./assets/sprites/Destroy1-sheet.png", nullptr},
+    {"./assets/sprites/fantasy_tiles.png", nullptr},
+    {"./assets/sprites/spark1-sheet.png", nullptr},
+    {"./assets/sprites/walking-12px-zoom.png", nullptr},
+};
+
+void load_spritesheets(SDL_Renderer *renderer)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(spritesheets); ++i) {
+        if (spritesheets[i].texture == nullptr) {
+            spritesheets[i].texture = load_texture_from_png_file(
+                renderer,
+                spritesheets[i].filename);
+        }
+    }
+}
+
+SDL_Texture *spritesheet_by_name(String_View filename)
+{
+    for (size_t i = 0; i < ARRAY_SIZE(spritesheets); ++i) {
+        if (filename == cstr_as_string_view(spritesheets[i].filename)) {
+            return spritesheets[i].texture;
+        }
+    }
+
+    fprintf(stderr,
+            "Unknown texture file %.*s. "
+            "You may want to add it to the spritesheets array.",
+            (int)filename.count, filename.data);
+    abort();
+
+    return nullptr;
 }
 
 Animat load_spritesheet_animat(SDL_Renderer *renderer,
@@ -220,7 +253,7 @@ void abort_parse_error(FILE *stream,
     abort();
 }
 
-Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
+Animat load_animat_file(const char *animat_filepath)
 {
     String_View source = file_as_string_view(animat_filepath);
     String_View input = source;
@@ -251,7 +284,7 @@ Animat load_animat_file(SDL_Renderer *renderer, const char *animat_filepath)
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
             // TODO(#20): preload all of the animation sprites outside of load_animat_file
-            spritesheet_texture = load_texture_from_png_file(renderer, value);
+            spritesheet_texture = spritesheet_by_name(value);
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<size_t>();
             if (!result.has_value) {
