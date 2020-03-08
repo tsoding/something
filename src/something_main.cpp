@@ -202,7 +202,7 @@ void update_game_state(Game_State game_state, uint32_t dt)
 
 const uint32_t STEP_DEBUG_FPS = 60;
 
-void init_entities(Animat walking, Animat idle)
+void reset_entities(Animat walking, Animat idle)
 {
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
@@ -270,7 +270,7 @@ int main(void)
     auto walking = load_animat_file("./assets/animats/walking.txt");
     auto idle = load_animat_file("./assets/animats/idle.txt");
 
-    init_entities(walking, idle);
+    reset_entities(walking, idle);
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     stec(TTF_Init());
@@ -331,7 +331,7 @@ int main(void)
                 } break;
 
                 case SDLK_r: {
-                    init_entities(walking, idle);
+                    reset_entities(walking, idle);
                 } break;
                 }
             } break;
