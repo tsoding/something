@@ -174,6 +174,30 @@ void update_game_state(Game_State game_state, uint32_t dt)
 
     update_entities(game_state.gravity, dt);
     update_projectiles(dt);
+
+    for (size_t projectile_index = 0;
+         projectile_index < projectiles_count;
+         ++projectile_index)
+    {
+        auto projectile = projectiles + projectile_index;
+        if (projectile->state != Projectile_State::Active) continue;
+
+        for (size_t entity_index = 0;
+             entity_index < ENTITIES_COUNT;
+             ++entity_index)
+        {
+            auto entity = entities + entity_index;
+
+            if (entity->state != Entity_State::Alive) continue;
+            if (entity_index == projectile->shooter_entity) continue;
+
+            if (rect_contains_vec2i(entity_hitbox(*entity), projectile->pos)) {
+                projectile->state = Projectile_State::Poof;
+                projectile->poof_animat.frame_current = 0;
+                entity->state = Entity_State::Ded;
+            }
+        }
+    }
 }
 
 const uint32_t STEP_DEBUG_FPS = 60;

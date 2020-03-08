@@ -18,7 +18,7 @@ const char *projectile_state_as_cstr(Projectile_State state)
 
 struct Projectile
 {
-    int shooter_entity;
+    size_t shooter_entity;
     Projectile_State state;
     Vec2i pos;
     Vec2i vel;
