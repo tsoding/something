@@ -27,6 +27,7 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
 };
 
+// TODO: Tile coordinates are broken on negative absolute coordinates
 static inline
 bool is_tile_inbounds(Vec2i p)
 {

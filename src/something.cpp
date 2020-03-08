@@ -62,6 +62,7 @@ void println(FILE *stream, T... args)
 #include "something_error.cpp"
 #include "something_math.cpp"
 
+// TODO: free camera support is not implemented
 struct Camera
 {
     Vec2i pos;
