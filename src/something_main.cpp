@@ -112,17 +112,21 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
                  "Velocity: (%d, %d)",
                  projectile.vel.x, projectile.vel.y);
+        displayf(renderer, game_state.debug_font,
+                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
+                 "Shooter Index: %d",
+                 projectile.shooter_entity);
     }
 
-    for (size_t i = 0; i < entities_count; ++i) {
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = entity_dstrect(entities[i]);
+        auto dstrect = entity_texbox_world(entities[i]);
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = entity_hitbox(entities[i]);
+        auto hitbox = entity_hitbox_world(entities[i]);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
@@ -165,14 +169,77 @@ void render_game_state(const Game_State game_state,
 void update_game_state(Game_State game_state, uint32_t dt)
 {
     for (int i = 0; i < ENEMY_COUNT; ++i) {
-        entity_shoot(&entities[ENEMY_ENTITY_INDEX_OFFSET + i]);
+        entity_shoot(ENEMY_ENTITY_INDEX_OFFSET + i);
     }
 
     update_entities(game_state.gravity, dt);
     update_projectiles(dt);
+
+    for (size_t projectile_index = 0;
+         projectile_index < projectiles_count;
+         ++projectile_index)
+    {
+        auto projectile = projectiles + projectile_index;
+        if (projectile->state != Projectile_State::Active) continue;
+
+        for (size_t entity_index = 0;
+             entity_index < ENTITIES_COUNT;
+             ++entity_index)
+        {
+            auto entity = entities + entity_index;
+
+            if (entity->state != Entity_State::Alive) continue;
+            if (entity_index == projectile->shooter_entity) continue;
+
+            if (rect_contains_vec2i(entity_hitbox_world(*entity), projectile->pos)) {
+                projectile->state = Projectile_State::Poof;
+                projectile->poof_animat.frame_current = 0;
+                entity->state = Entity_State::Ded;
+            }
+        }
+    }
 }
 
 const uint32_t STEP_DEBUG_FPS = 60;
+
+void init_entities(Animat walking, Animat idle)
+{
+    const int PLAYER_TEXBOX_SIZE = 64;
+    const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
+    const SDL_Rect texbox_local = {
+        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
+        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
+    };
+    const SDL_Rect hitbox_local = {
+        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
+        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
+    };
+
+    memset(entities + PLAYER_ENTITY_INDEX, 0, sizeof(Entity));
+    entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
+    entities[PLAYER_ENTITY_INDEX].texbox_local = texbox_local;
+    entities[PLAYER_ENTITY_INDEX].hitbox_local = hitbox_local;
+    entities[PLAYER_ENTITY_INDEX].walking = walking;
+    entities[PLAYER_ENTITY_INDEX].idle = idle;
+    entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
+
+    for (int i = 0; i < ENEMY_COUNT; ++i) {
+        memset(entities + ENEMY_ENTITY_INDEX_OFFSET + i, 0, sizeof(Entity));
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox_local = texbox_local;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox_local = hitbox_local;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
+        static_assert(LEVEL_WIDTH >= 2);
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;
+        if (i % 2) {
+            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
+        } else {
+            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Right;
+        }
+    }
+}
 
 int main(void)
 {
@@ -203,41 +270,8 @@ int main(void)
     auto walking = load_animat_file("./assets/animats/walking.txt");
     auto idle = load_animat_file("./assets/animats/idle.txt");
 
+    init_entities(walking, idle);
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
-
-    const int PLAYER_TEXBOX_SIZE = 64;
-    const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    const SDL_Rect texbox = {
-        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
-        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
-    };
-    const SDL_Rect hitbox = {
-        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
-        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
-    };
-
-    entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
-    entities[PLAYER_ENTITY_INDEX].texbox = texbox;
-    entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
-    entities[PLAYER_ENTITY_INDEX].walking = walking;
-    entities[PLAYER_ENTITY_INDEX].idle = idle;
-    entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
-
-    for (int i = 0; i < ENEMY_COUNT; ++i) {
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;
-        static_assert(LEVEL_WIDTH >= 2);
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec2(LEVEL_WIDTH - 2 - i, 0) * TILE_SIZE;
-        if (i % 2) {
-            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
-        } else {
-            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Right;
-        }
-    }
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
@@ -293,16 +327,11 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot(&entities[PLAYER_ENTITY_INDEX]);
+                    entity_shoot(PLAYER_ENTITY_INDEX);
                 } break;
 
                 case SDLK_r: {
-                    entities[PLAYER_ENTITY_INDEX].pos = vec2(0, 0);
-                    entities[PLAYER_ENTITY_INDEX].vel.y = 0;
-                    for (int i = 0; i < ENEMY_COUNT; ++i) {
-                        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos.y = 0;
-                        entities[ENEMY_ENTITY_INDEX_OFFSET + i].vel.y = 0;
-                    }
+                    init_entities(walking, idle);
                 } break;
                 }
             } break;
