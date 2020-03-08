@@ -122,11 +122,11 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = entity_dstrect(entities[i]);
+        auto dstrect = entity_texbox_world(entities[i]);
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = entity_hitbox(entities[i]);
+        auto hitbox = entity_hitbox_world(entities[i]);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
@@ -191,7 +191,7 @@ void update_game_state(Game_State game_state, uint32_t dt)
             if (entity->state != Entity_State::Alive) continue;
             if (entity_index == projectile->shooter_entity) continue;
 
-            if (rect_contains_vec2i(entity_hitbox(*entity), projectile->pos)) {
+            if (rect_contains_vec2i(entity_hitbox_world(*entity), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
                 entity->state = Entity_State::Ded;
@@ -206,19 +206,19 @@ void init_entities(Animat walking, Animat idle)
 {
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    const SDL_Rect texbox = {
+    const SDL_Rect texbox_local = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
         PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
     };
-    const SDL_Rect hitbox = {
+    const SDL_Rect hitbox_local = {
         - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
         PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
     };
 
     memset(entities + PLAYER_ENTITY_INDEX, 0, sizeof(Entity));
     entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
-    entities[PLAYER_ENTITY_INDEX].texbox = texbox;
-    entities[PLAYER_ENTITY_INDEX].hitbox = hitbox;
+    entities[PLAYER_ENTITY_INDEX].texbox_local = texbox_local;
+    entities[PLAYER_ENTITY_INDEX].hitbox_local = hitbox_local;
     entities[PLAYER_ENTITY_INDEX].walking = walking;
     entities[PLAYER_ENTITY_INDEX].idle = idle;
     entities[PLAYER_ENTITY_INDEX].current = &entities[PLAYER_ENTITY_INDEX].idle;
@@ -226,8 +226,8 @@ void init_entities(Animat walking, Animat idle)
     for (int i = 0; i < ENEMY_COUNT; ++i) {
         memset(entities + ENEMY_ENTITY_INDEX_OFFSET + i, 0, sizeof(Entity));
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox = texbox;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox = hitbox;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox_local = texbox_local;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox_local = hitbox_local;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].current = &entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle;

@@ -14,8 +14,8 @@ struct Entity
 {
     Entity_State state;
 
-    SDL_Rect texbox;
-    SDL_Rect hitbox;
+    SDL_Rect texbox_local;
+    SDL_Rect hitbox_local;
     Vec2i pos;
     Vec2i vel;
 
@@ -80,8 +80,8 @@ void resolve_entity_collision(Entity *entity)
 {
     assert(entity);
 
-    Vec2i p0 = vec2(entity->hitbox.x, entity->hitbox.y) + entity->pos;
-    Vec2i p1 = p0 + vec2(entity->hitbox.w, entity->hitbox.h);
+    Vec2i p0 = vec2(entity->hitbox_local.x, entity->hitbox_local.y) + entity->pos;
+    Vec2i p1 = p0 + vec2(entity->hitbox_local.w, entity->hitbox_local.h);
 
     Vec2i mesh[] = {
         p0,
@@ -108,20 +108,20 @@ void resolve_entity_collision(Entity *entity)
     }
 }
 
-SDL_Rect entity_dstrect(const Entity entity)
+SDL_Rect entity_texbox_world(const Entity entity)
 {
     SDL_Rect dstrect = {
-        entity.texbox.x + entity.pos.x, entity.texbox.y + entity.pos.y,
-        entity.texbox.w, entity.texbox.h
+        entity.texbox_local.x + entity.pos.x, entity.texbox_local.y + entity.pos.y,
+        entity.texbox_local.w, entity.texbox_local.h
     };
     return dstrect;
 }
 
-SDL_Rect entity_hitbox(const Entity entity)
+SDL_Rect entity_hitbox_world(const Entity entity)
 {
     SDL_Rect hitbox = {
-        entity.hitbox.x + entity.pos.x, entity.hitbox.y + entity.pos.y,
-        entity.hitbox.w, entity.hitbox.h
+        entity.hitbox_local.x + entity.pos.x, entity.hitbox_local.y + entity.pos.y,
+        entity.hitbox_local.w, entity.hitbox_local.h
     };
     return hitbox;
 }
@@ -132,7 +132,7 @@ void render_entity(SDL_Renderer *renderer, const Entity entity)
 
     if (entity.state == Entity_State::Ded) return;
 
-    const auto dstrect = entity_dstrect(entity);
+    const auto dstrect = entity_texbox_world(entity);
     const SDL_RendererFlip flip =
         entity.dir == Entity_Dir::Right
         ? SDL_FLIP_NONE
