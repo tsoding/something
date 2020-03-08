@@ -112,9 +112,13 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
                  "Velocity: (%d, %d)",
                  projectile.vel.x, projectile.vel.y);
+        displayf(renderer, game_state.debug_font,
+                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
+                 "Shooter Index: %d",
+                 projectile.shooter_entity);
     }
 
-    for (size_t i = 0; i < entities_count; ++i) {
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
@@ -165,7 +169,7 @@ void render_game_state(const Game_State game_state,
 void update_game_state(Game_State game_state, uint32_t dt)
 {
     for (int i = 0; i < ENEMY_COUNT; ++i) {
-        entity_shoot(&entities[ENEMY_ENTITY_INDEX_OFFSET + i]);
+        entity_shoot(ENEMY_ENTITY_INDEX_OFFSET + i);
     }
 
     update_entities(game_state.gravity, dt);
@@ -293,7 +297,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot(&entities[PLAYER_ENTITY_INDEX]);
+                    entity_shoot(PLAYER_ENTITY_INDEX);
                 } break;
 
                 case SDLK_r: {

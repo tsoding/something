@@ -178,35 +178,38 @@ void entity_stop(Entity *entity)
 }
 
 const int ENTITY_COOLDOWN_WEAPON = 7;
+const int ENTITIES_COUNT = 69;
+Entity entities[ENTITIES_COUNT];
 
-void entity_shoot(Entity *entity)
+void entity_shoot(int entity_index)
 {
-    assert(entity);
+    assert(0 <= entity_index);
+    assert(entity_index < ENTITIES_COUNT);
+
+    Entity *entity = &entities[entity_index];
 
     if (entity->cooldown_weapon > 0) return;
 
     if (entity->dir == Entity_Dir::Right) {
-        spawn_projectile(entity->pos, vec2(10, 0));
+        spawn_projectile(entity->pos, vec2(10, 0), entity_index);
     } else {
-        spawn_projectile(entity->pos, vec2(-10, 0));
+        spawn_projectile(entity->pos, vec2(-10, 0), entity_index);
     }
 
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
-const int entities_count = 69;
-Entity entities[entities_count];
 
 void update_entities(Vec2i gravity, uint32_t dt)
 {
-    for (int i = 0; i < entities_count; ++i) {
+    for (int i = 0; i < ENTITIES_COUNT; ++i) {
         update_entity(&entities[i], gravity, dt);
     }
 }
 
 void render_entities(SDL_Renderer *renderer)
 {
-    for (int i = 0; i < entities_count; ++i) {
+    for (int i = 0; i < ENTITIES_COUNT; ++i) {
         render_entity(renderer, entities[i]);
     }
 }
