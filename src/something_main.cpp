@@ -55,6 +55,8 @@ struct Game_State
     Sprite ground_texture;
 
     TTF_Font *debug_font;
+
+    int tracking_projectile_index;
 };
 
 const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -75,17 +77,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
     };
     sec(SDL_RenderFillRect(renderer, &collision_probe_rect));
 
-    const SDL_Rect tile_rect = {
-        game_state.mouse_position.x / TILE_SIZE * TILE_SIZE,
-        game_state.mouse_position.y / TILE_SIZE * TILE_SIZE,
-        TILE_SIZE, TILE_SIZE
-    };
-    sec(SDL_RenderDrawRect(renderer, &tile_rect));
-
-    const SDL_Rect level_boundary = {
-        0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
-    };
-    sec(SDL_RenderDrawRect(renderer, &level_boundary));
+    sec(SDL_RenderDrawRect(renderer, &LEVEL_BOUNDARY));
 
     const int PADDING = 10;
     displayf(renderer, game_state.debug_font,
@@ -106,6 +98,21 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
              "Projectiles: %d",
              count_alive_projectiles());
 
+    if (game_state.tracking_projectile_index >= 0) {
+        auto projectile = projectiles[game_state.tracking_projectile_index];
+        const int SECOND_COLUMN_OFFSET = 500;
+        displayf(renderer, game_state.debug_font,
+                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
+                 "State: %s", projectile_state_as_cstr(projectile.state));
+        displayf(renderer, game_state.debug_font,
+                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 50 + PADDING),
+                 "Position: (%d, %d)",
+                 projectile.pos.x, projectile.pos.y);
+        displayf(renderer, game_state.debug_font,
+                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
+                 "Velocity: (%d, %d)",
+                 projectile.vel.x, projectile.vel.y);
+    }
 
     for (size_t i = 0; i < entities_count; ++i) {
         if (entities[i].state == Entity_State::Ded) continue;
@@ -118,6 +125,28 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
         auto hitbox = entity_hitbox(entities[i]);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
+
+    if (game_state.tracking_projectile_index >= 0) {
+        auto hitbox = hitbox_of_projectile(game_state.tracking_projectile_index);
+        sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+        sec(SDL_RenderDrawRect(renderer, &hitbox));
+    }
+
+    int index = projectile_at_position(game_state.mouse_position);
+    if (index >= 0) {
+        auto hitbox = hitbox_of_projectile(index);
+        sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+        sec(SDL_RenderDrawRect(renderer, &hitbox));
+        return;
+    }
+
+    sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+    const SDL_Rect tile_rect = {
+        game_state.mouse_position.x / TILE_SIZE * TILE_SIZE,
+        game_state.mouse_position.y / TILE_SIZE * TILE_SIZE,
+        TILE_SIZE, TILE_SIZE
+    };
+    sec(SDL_RenderDrawRect(renderer, &tile_rect));
 }
 
 void render_game_state(const Game_State game_state,
@@ -227,10 +256,12 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
+    game_state.tracking_projectile_index = -1;
 
     bool debug = false;
     bool step_debug = false;
     Uint32 prev_dt = 0;
+
     while (!game_state.quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -297,14 +328,18 @@ int main(void)
 
             case SDL_MOUSEBUTTONDOWN: {
                 if (debug) {
-                    Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
-                    if (is_tile_inbounds(tile)) {
-                        if (level[tile.y][tile.x] == Tile::Empty) {
-                            game_state.state = Debug_Draw_State::Create;
-                            level[tile.y][tile.x] = Tile::Wall;
-                        } else {
-                            game_state.state = Debug_Draw_State::Delete;
-                            level[tile.y][tile.x] = Tile::Empty;
+                    game_state.tracking_projectile_index =
+                        projectile_at_position(vec2(event.button.x, event.button.y));
+                    if (game_state.tracking_projectile_index < 0) {
+                        Vec2i tile = vec2(event.button.x, event.button.y) / TILE_SIZE;
+                        if (is_tile_inbounds(tile)) {
+                            if (level[tile.y][tile.x] == Tile::Empty) {
+                                game_state.state = Debug_Draw_State::Create;
+                                level[tile.y][tile.x] = Tile::Wall;
+                            } else {
+                                game_state.state = Debug_Draw_State::Delete;
+                                level[tile.y][tile.x] = Tile::Empty;
+                            }
                         }
                     }
                 }
