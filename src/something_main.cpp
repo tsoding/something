@@ -154,16 +154,18 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer,
 }
 
 void render_game_state(const Game_State game_state,
-                  SDL_Renderer *renderer)
+                       SDL_Renderer *renderer,
+                       Camera camera)
 {
     sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
     sec(SDL_RenderClear(renderer));
 
     render_level(renderer,
+                 camera,
                  game_state.ground_grass_texture,
                  game_state.ground_texture);
-    render_entities(renderer);
-    render_projectiles(renderer);
+    render_entities(renderer, camera);
+    render_projectiles(renderer, camera);
 }
 
 void update_game_state(Game_State game_state, uint32_t dt)
@@ -389,7 +391,11 @@ int main(void)
             entity_stop(&entities[PLAYER_ENTITY_INDEX]);
         }
 
-        render_game_state(game_state, renderer);
+        int w = 0, h = 0;
+        SDL_GetWindowSize(window, &w, &h);
+
+        render_game_state(game_state, renderer,
+                          Camera {entities[PLAYER_ENTITY_INDEX].pos - vec2(w / 2, h / 2)});
         if (debug) {
             render_debug_overlay(game_state, renderer,
                                  step_debug ? STEP_DEBUG_FPS : 1000 / prev_dt);

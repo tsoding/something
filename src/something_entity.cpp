@@ -126,13 +126,15 @@ SDL_Rect entity_hitbox_world(const Entity entity)
     return hitbox;
 }
 
-void render_entity(SDL_Renderer *renderer, const Entity entity)
+void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 {
     assert(renderer);
 
     if (entity.state == Entity_State::Ded) return;
 
-    const auto dstrect = entity_texbox_world(entity);
+    auto dstrect = entity_texbox_world(entity);
+    dstrect.x -= camera.pos.x;
+    dstrect.y -= camera.pos.y;
     const SDL_RendererFlip flip =
         entity.dir == Entity_Dir::Right
         ? SDL_FLIP_NONE
@@ -208,9 +210,9 @@ void update_entities(Vec2i gravity, uint32_t dt)
     }
 }
 
-void render_entities(SDL_Renderer *renderer)
+void render_entities(SDL_Renderer *renderer, Camera camera)
 {
     for (int i = 0; i < ENTITIES_COUNT; ++i) {
-        render_entity(renderer, entities[i]);
+        render_entity(renderer, camera, entities[i]);
     }
 }

@@ -39,6 +39,7 @@ bool is_tile_empty(Vec2i p)
 }
 
 void render_level(SDL_Renderer *renderer,
+                  Camera camera,
                   Sprite top_ground_texture,
                   Sprite bottom_ground_texture)
 {
@@ -51,11 +52,13 @@ void render_level(SDL_Renderer *renderer,
             case Tile::Wall: {
                 if (is_tile_empty(vec2(x, y - 1))) {
                     render_sprite(renderer, top_ground_texture,
-                                  {x * TILE_SIZE, y * TILE_SIZE,
+                                  {x * TILE_SIZE - camera.pos.x,
+                                   y * TILE_SIZE - camera.pos.y,
                                    TILE_SIZE, TILE_SIZE});
                 } else {
                     render_sprite(renderer, bottom_ground_texture,
-                                  {x * TILE_SIZE, y * TILE_SIZE,
+                                  {x * TILE_SIZE - camera.pos.x,
+                                   y * TILE_SIZE - camera.pos.y,
                                    TILE_SIZE, TILE_SIZE});
                 }
             } break;

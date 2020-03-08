@@ -61,6 +61,12 @@ void println(FILE *stream, T... args)
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "something_error.cpp"
 #include "something_math.cpp"
+
+struct Camera
+{
+    Vec2i pos;
+};
+
 #include "something_string.cpp"
 #include "something_sprite.cpp"
 #include "something_level.cpp"

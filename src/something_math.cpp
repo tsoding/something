@@ -61,6 +61,12 @@ template <typename T> Vec2<T> constexpr operator*(T a, Vec2<T> b) { return {a * 
 template <typename T> Vec2<T> constexpr operator/(T a, Vec2<T> b) { return {a / b.x, a / b.y}; }
 
 //////////////////////////////
+// Just Vector
+//////////////////////////////
+
+template <typename T> Vec2<T> constexpr operator-(Vec2<T> a) { return {-a.x, -a.y}; }
+
+//////////////////////////////
 // Algorithms
 //////////////////////////////
 
