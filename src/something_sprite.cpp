@@ -275,7 +275,6 @@ Animat load_animat_file(const char *animat_filepath)
             animat.frame_count = count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
-            // TODO(#20): preload all of the animation sprites outside of load_animat_file
             spritesheet_texture = spritesheet_by_name(value);
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<size_t>();
