@@ -59,7 +59,7 @@ void spawn_projectile(Vec2i pos, Vec2i vel, int shooter_entity)
     }
 }
 
-void render_projectiles(SDL_Renderer *renderer)
+void render_projectiles(SDL_Renderer *renderer, Camera camera)
 {
 
     for (size_t i = 0; i < projectiles_count; ++i) {
@@ -67,13 +67,13 @@ void render_projectiles(SDL_Renderer *renderer)
         case Projectile_State::Active: {
             render_animat(renderer,
                           projectiles[i].active_animat,
-                          projectiles[i].pos);
+                          projectiles[i].pos - camera.pos);
         } break;
 
         case Projectile_State::Poof: {
             render_animat(renderer,
                           projectiles[i].poof_animat,
-                          projectiles[i].pos);
+                          projectiles[i].pos - camera.pos);
         } break;
 
         case Projectile_State::Ded: {} break;
