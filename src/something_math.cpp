@@ -32,6 +32,12 @@ T sqr_dist(Vec2<T> p0, Vec2<T> p1)
     return d.x * d.x + d.y * d.y;
 }
 
+bool rect_contains_vec2i(SDL_Rect rect, Vec2i point)
+{
+    return rect.x <= point.x && point.x < (rect.x + rect.w)
+        && rect.y <= point.y && point.y < (rect.y + rect.h);
+}
+
 //////////////////////////////
 // Vector x Scalar
 //////////////////////////////

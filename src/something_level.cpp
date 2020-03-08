@@ -10,6 +10,10 @@ enum class Tile
 const int LEVEL_WIDTH = 10;
 const int LEVEL_HEIGHT = 10;
 
+const SDL_Rect LEVEL_BOUNDARY = {
+    0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+};
+
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
     {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
