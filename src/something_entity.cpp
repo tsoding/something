@@ -188,6 +188,7 @@ void entity_shoot(int entity_index)
 
     Entity *entity = &entities[entity_index];
 
+    if (entity->state == Entity_State::Ded) return;
     if (entity->cooldown_weapon > 0) return;
 
     if (entity->dir == Entity_Dir::Right) {
