@@ -69,17 +69,12 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
     const int COLLISION_PROBE_SIZE = 10;
-    const SDL_Rect collision_probe_rect = {
-        game_state.collision_probe.x - COLLISION_PROBE_SIZE - camera.pos.x,
-        game_state.collision_probe.y - COLLISION_PROBE_SIZE - camera.pos.y,
-        COLLISION_PROBE_SIZE * 2,
-        COLLISION_PROBE_SIZE * 2
-    };
+    const auto collision_probe_rect = sdl_rect(
+        game_state.collision_probe - COLLISION_PROBE_SIZE - camera.pos,
+        COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2);
     sec(SDL_RenderFillRect(renderer, &collision_probe_rect));
 
-    auto level_boundary_screen = LEVEL_BOUNDARY;
-    level_boundary_screen.x -= camera.pos.x;
-    level_boundary_screen.y -= camera.pos.y;
+    auto level_boundary_screen = LEVEL_BOUNDARY - camera.pos;
     sec(SDL_RenderDrawRect(renderer, &level_boundary_screen));
 
     const int PADDING = 10;
@@ -125,42 +120,32 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = entity_texbox_world(entities[i]);
-        dstrect.x -= camera.pos.x;
-        dstrect.y -= camera.pos.y;
+        auto dstrect = entity_texbox_world(entities[i]) - camera.pos;
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = entity_hitbox_world(entities[i]);
-        hitbox.x -= camera.pos.x;
-        hitbox.y -= camera.pos.y;
+        auto hitbox = entity_hitbox_world(entities[i]) - camera.pos;
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
     if (game_state.tracking_projectile_index >= 0) {
-        auto hitbox = hitbox_of_projectile(game_state.tracking_projectile_index);
-        hitbox.x -= camera.pos.x;
-        hitbox.y -= camera.pos.y;
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+        auto hitbox = hitbox_of_projectile(game_state.tracking_projectile_index) - camera.pos;
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
     int index = projectile_at_position(game_state.mouse_position);
     if (index >= 0) {
-        auto hitbox = hitbox_of_projectile(index);
-        hitbox.x -= camera.pos.x;
-        hitbox.y -= camera.pos.y;
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
+        auto hitbox = hitbox_of_projectile(index) - camera.pos;
         sec(SDL_RenderDrawRect(renderer, &hitbox));
         return;
     }
 
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-    const SDL_Rect tile_rect = {
-        game_state.mouse_position.x / TILE_SIZE * TILE_SIZE - camera.pos.x,
-        game_state.mouse_position.y / TILE_SIZE * TILE_SIZE - camera.pos.y,
-        TILE_SIZE, TILE_SIZE
-    };
+    const auto tile_rect = sdl_rect(
+        game_state.mouse_position / TILE_SIZE * TILE_SIZE - camera.pos,
+        TILE_SIZE, TILE_SIZE);
     sec(SDL_RenderDrawRect(renderer, &tile_rect));
 }
 

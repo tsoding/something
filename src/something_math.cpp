@@ -67,6 +67,15 @@ template <typename T> Vec2<T> constexpr operator/(T a, Vec2<T> b) { return {a / 
 template <typename T> Vec2<T> constexpr operator-(Vec2<T> a) { return {-a.x, -a.y}; }
 
 //////////////////////////////
+// Rect x Vector
+//////////////////////////////
+
+SDL_Rect operator-(SDL_Rect a, Vec2i b)
+{
+    return {a.x - b.x, a.y - b.y, a.w, a.h};
+}
+
+//////////////////////////////
 // Algorithms
 //////////////////////////////
 
@@ -80,6 +89,12 @@ template <typename T>
 T abs(T x)
 {
     return x < 0 ? -x : x;
+}
+
+constexpr
+SDL_Rect sdl_rect(Vec2i pos, int w, int h)
+{
+    return {pos.x, pos.y, w, h};
 }
 
 #endif  // VEC_HPP_
