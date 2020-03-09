@@ -132,14 +132,11 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 
     if (entity.state == Entity_State::Ded) return;
 
-    auto dstrect = entity_texbox_world(entity);
-    dstrect.x -= camera.pos.x;
-    dstrect.y -= camera.pos.y;
     const SDL_RendererFlip flip =
         entity.dir == Entity_Dir::Right
         ? SDL_FLIP_NONE
         : SDL_FLIP_HORIZONTAL;
-    render_animat(renderer, *entity.current, dstrect, flip);
+    render_animat(renderer, *entity.current, entity_texbox_world(entity) - camera.pos, flip);
 }
 
 void update_entity(Entity *entity, Vec2i gravity, uint32_t dt)

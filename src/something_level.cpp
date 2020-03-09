@@ -51,16 +51,13 @@ void render_level(SDL_Renderer *renderer,
             } break;
 
             case Tile::Wall: {
+                const auto dstrect = sdl_rect(
+                    vec2(x, y) * TILE_SIZE - camera.pos,
+                    TILE_SIZE, TILE_SIZE);
                 if (is_tile_empty(vec2(x, y - 1))) {
-                    render_sprite(renderer, top_ground_texture,
-                                  {x * TILE_SIZE - camera.pos.x,
-                                   y * TILE_SIZE - camera.pos.y,
-                                   TILE_SIZE, TILE_SIZE});
+                    render_sprite(renderer, top_ground_texture, dstrect);
                 } else {
-                    render_sprite(renderer, bottom_ground_texture,
-                                  {x * TILE_SIZE - camera.pos.x,
-                                   y * TILE_SIZE - camera.pos.y,
-                                   TILE_SIZE, TILE_SIZE});
+                    render_sprite(renderer, bottom_ground_texture, dstrect);
                 }
             } break;
             }
