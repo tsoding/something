@@ -17,6 +17,11 @@ void print1(FILE *stream, int x)
     fprintf(stream, "%d", x);
 }
 
+void print1(FILE *stream, float x)
+{
+    fprintf(stream, "%f", x);
+}
+
 void print1(FILE *stream, long unsigned int x)
 {
     fprintf(stream, "%lu", x);

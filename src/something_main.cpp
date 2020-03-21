@@ -294,6 +294,7 @@ int main(void)
     bool step_debug = false;
     Uint32 prev_dt = 0;
 
+    float a = 0.0f;          // -> 1.0
     while (!game_state.quit) {
         const Uint32 begin = SDL_GetTicks();
 
@@ -334,6 +335,10 @@ int main(void)
 
                 case SDLK_r: {
                     reset_entities(walking, idle);
+                } break;
+
+                case SDLK_c: {
+                    a += 0.1f;
                 } break;
                 }
             } break;
@@ -396,11 +401,26 @@ int main(void)
             render_debug_overlay(game_state, renderer, camera,
                                  step_debug ? STEP_DEBUG_FPS : 1000 / prev_dt);
         }
+
+
+        {
+            Vec2i anchor = {200, 200};
+            float w = (idle.frames[0].srcrect.w + idle.frames[0].srcrect.w * a) * 2.0f;
+            float h = (idle.frames[0].srcrect.h * (1.0f - a)) * 2.0f;
+            SDL_Rect dstrect = {(int) floorf(anchor.x - w * 0.5f),
+                                (int) floorf(anchor.y - h),
+                                (int) floorf(w),
+                                (int) floorf(h)};
+            render_sprite(renderer, idle.frames[0], dstrect);
+        }
+
         SDL_RenderPresent(renderer);
 
         if (!step_debug) {
             const Uint32 dt = SDL_GetTicks() - begin;
             update_game_state(game_state, dt);
+            println(stdout, dt);
+            // a = fmodf(a + 1.0f * (1.0f / dt), 1.0f);
             prev_dt = dt;
         }
     }
