@@ -1,5 +1,5 @@
-const int TILE_SIZE = 128;
-const int TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
+const float TILE_SIZE = 128.0f;
+const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 enum class Tile
 {
@@ -10,8 +10,8 @@ enum class Tile
 const int LEVEL_WIDTH = 10;
 const int LEVEL_HEIGHT = 10;
 
-const SDL_Rect LEVEL_BOUNDARY = {
-    0, 0, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+const Rectf LEVEL_BOUNDARY = {
+    0.0f, 0.0f, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
 };
 
 Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
@@ -51,8 +51,8 @@ void render_level(SDL_Renderer *renderer,
             } break;
 
             case Tile::Wall: {
-                const auto dstrect = sdl_rect(
-                    vec2(x, y) * TILE_SIZE - camera.pos,
+                const auto dstrect = rect(
+                    vec_cast<float>(vec2(x, y)) * TILE_SIZE - camera.pos,
                     TILE_SIZE, TILE_SIZE);
                 if (is_tile_empty(vec2(x, y - 1))) {
                     render_sprite(renderer, top_ground_texture, dstrect);
