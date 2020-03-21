@@ -257,7 +257,7 @@ void kill_entity(int entity_index)
 {
     Entity *entity = &entities[entity_index];
 
-    // TODO: entity poof animation should use the last alive frame
+    // TODO(#40): entity poof animation should use the last alive frame
     if (entity->state == Entity_State::Alive) {
         entity->state = Entity_State::Poof;
         entity->poof.a = 0.0f;
