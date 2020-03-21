@@ -44,7 +44,7 @@ void render_sprite(SDL_Renderer *renderer,
             flip));
 }
 
-struct Animat
+struct Frame_Animat
 {
     Sprite  *frames;
     size_t   frame_count;
@@ -55,7 +55,7 @@ struct Animat
 
 static inline
 void render_animat(SDL_Renderer *renderer,
-                   Animat animat,
+                   Frame_Animat animat,
                    Rectf dstrect,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
@@ -68,7 +68,7 @@ void render_animat(SDL_Renderer *renderer,
 
 static inline
 void render_animat(SDL_Renderer *renderer,
-                   Animat animat,
+                   Frame_Animat animat,
                    Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
@@ -79,7 +79,7 @@ void render_animat(SDL_Renderer *renderer,
         flip);
 }
 
-void update_animat(Animat *animat, float dt)
+void update_animat(Frame_Animat *animat, float dt)
 {
     assert(animat);
 
@@ -178,12 +178,12 @@ SDL_Texture *spritesheet_by_name(String_View filename)
     return nullptr;
 }
 
-Animat load_spritesheet_animat(SDL_Renderer *renderer,
-                               size_t frame_count,
-                               float frame_duration,
-                               const char *spritesheet_filepath)
+Frame_Animat load_spritesheet_animat(SDL_Renderer *renderer,
+                                     size_t frame_count,
+                                     float frame_duration,
+                                     const char *spritesheet_filepath)
 {
-    Animat result = {};
+    Frame_Animat result = {};
     result.frames = new Sprite[frame_count];
     result.frame_count = frame_count;
     result.frame_duration = frame_duration;
@@ -203,7 +203,7 @@ Animat load_spritesheet_animat(SDL_Renderer *renderer,
     return result;
 }
 
-void dump_animat(Animat animat, const char *sprite_filename, FILE *output)
+void dump_animat(Frame_Animat animat, const char *sprite_filename, FILE *output)
 {
     println(output, "sprite = ", sprite_filename);
     println(output, "count = ", animat.frame_count);
@@ -248,11 +248,31 @@ void abort_parse_error(FILE *stream,
     abort();
 }
 
-Animat load_animat_file(const char *animat_filepath)
+struct Squash_Animat
+{
+    Sprite sprite;
+    float duration;
+    float a;
+
+    void render(SDL_Renderer *renderer, Vec2f pos, Rectf texbox) const
+    {
+        const float w = texbox.w + texbox.w * a;
+        const float h = texbox.h * (1.0f - a);
+        Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
+        render_sprite(renderer, sprite, dstrect);
+    }
+
+    void update(float dt)
+    {
+        a += dt / duration;
+    }
+};
+
+Frame_Animat load_animat_file(const char *animat_filepath)
 {
     String_View source = file_as_string_view(animat_filepath);
     String_View input = source;
-    Animat animat = {};
+    Frame_Animat animat = {};
     SDL_Texture *spritesheet_texture = nullptr;
 
     while (input.count != 0) {

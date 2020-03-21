@@ -22,14 +22,14 @@ struct Projectile
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
-    Animat active_animat;
-    Animat poof_animat;
+    Frame_Animat active_animat;
+    Frame_Animat poof_animat;
 };
 
 const size_t projectiles_count = 69;
 Projectile projectiles[projectiles_count] = {};
 
-void init_projectiles(Animat active_animat, Animat poof_animat)
+void init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         projectiles[i].active_animat = active_animat;
