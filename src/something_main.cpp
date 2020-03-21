@@ -214,7 +214,7 @@ void update_game_state(Game_State game_state, float dt)
 
 const uint32_t STEP_DEBUG_FPS = 60;
 
-void reset_entities(Animat walking, Animat idle)
+void reset_entities(Frame_Animat walking, Frame_Animat idle)
 {
     const int PLAYER_TEXBOX_SIZE = 64;
     const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;

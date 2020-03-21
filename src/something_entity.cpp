@@ -27,8 +27,8 @@ struct Entity
     Vec2f pos;
     Vec2f vel;
 
-    Animat idle;
-    Animat walking;
+    Frame_Animat idle;
+    Frame_Animat walking;
     Squash_Animat poof;
 
     Entity_Dir dir;
