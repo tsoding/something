@@ -123,7 +123,7 @@ Rectf hitbox_of_projectile(int index)
     };
 }
 
-// TODO: introduce an int typedef that indicates Projectile Id
+// TODO(#37): introduce a typedef that indicates Projectile Id
 int projectile_at_position(Vec2f position)
 {
     for (int i = 0; i < (int) projectiles_count; ++i) {
