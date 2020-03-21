@@ -181,7 +181,7 @@ void entity_stop(Entity *entity)
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const int ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
-// TODO: introduce a int typedef that indicates Entity Id
+// TODO(#36): introduce a typedef that indicates Entity Id
 
 void entity_shoot(int entity_index)
 {
