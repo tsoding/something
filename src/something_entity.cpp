@@ -31,14 +31,14 @@ void resolve_point_collision(Vec2f *p)
 {
     assert(p);
 
-    const auto tile = vec_cast<int>(*p / (float) TILE_SIZE);
+    const auto tile = vec_cast<int>(*p / TILE_SIZE);
 
     if (is_tile_empty(tile)) {
         return;
     }
 
-    const auto p0 = vec_cast<float>(tile * TILE_SIZE);
-    const auto p1 = vec_cast<float>((tile + 1) * TILE_SIZE);
+    const auto p0 = vec_cast<float>(tile) * TILE_SIZE;
+    const auto p1 = vec_cast<float>(tile + 1) * TILE_SIZE;
 
     struct Side {
         float d;
