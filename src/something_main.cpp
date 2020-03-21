@@ -190,7 +190,7 @@ void update_game_state(Game_State game_state, float dt)
         auto projectile = projectiles + projectile_index;
         if (projectile->state != Projectile_State::Active) continue;
 
-        for (size_t entity_index = 0;
+        for (int entity_index = 0;
              entity_index < ENTITIES_COUNT;
              ++entity_index)
         {

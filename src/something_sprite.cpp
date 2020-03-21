@@ -113,10 +113,10 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
 
     SDL_Surface* image_surface =
         sec(SDL_CreateRGBSurfaceFrom(image_pixels,
-                                     image.width,
-                                     image.height,
+                                     (int) image.width,
+                                     (int) image.height,
                                      32,
-                                     image.width * 4,
+                                     (int) image.width * 4,
                                      0x000000FF,
                                      0x0000FF00,
                                      0x00FF0000,
@@ -179,7 +179,7 @@ SDL_Texture *spritesheet_by_name(String_View filename)
 }
 
 Animat load_spritesheet_animat(SDL_Renderer *renderer,
-                               int frame_count,
+                               size_t frame_count,
                                float frame_duration,
                                const char *spritesheet_filepath)
 {
@@ -192,7 +192,7 @@ Animat load_spritesheet_animat(SDL_Renderer *renderer,
     int spritesheet_w = 0;
     int spritesheet_h = 0;
     sec(SDL_QueryTexture(spritesheet, NULL, NULL, &spritesheet_w, &spritesheet_h));
-    int sprite_w = spritesheet_w / frame_count;
+    int sprite_w = spritesheet_w / (int) frame_count;
     int sprite_h = spritesheet_h; // NOTE: we only handle horizontal sprites
 
     for (int i = 0; i < (int) frame_count; ++i) {
@@ -224,7 +224,7 @@ void abort_parse_error(FILE *stream,
     assert(stream);
     assert(source.data < rest.data);
 
-    size_t n = rest.data - source.data;
+    size_t n = (size_t) (rest.data - source.data);
 
     for (size_t line_number = 1; source.count; ++line_number) {
         auto line = source.chop_by_delim('\n');
@@ -269,13 +269,13 @@ Animat load_animat_file(const char *animat_filepath)
                                   "`count` provided twice");
             }
 
-            auto count_result = value.as_integer<size_t>();
+            auto count_result = value.as_integer<int>();
             if (!count_result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "`count` is not a number");
             }
 
-            animat.frame_count = count_result.unwrap;
+            animat.frame_count = (size_t) count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = spritesheet_by_name(value);
@@ -288,13 +288,13 @@ Animat load_animat_file(const char *animat_filepath)
 
             animat.frame_duration = (float) result.unwrap / 1000.0f;
         } else if (subkey == "frames"_sv) {
-            auto result = key.chop_by_delim('.').trim().as_integer<size_t>();
+            auto result = key.chop_by_delim('.').trim().as_integer<int>();
             if (!result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "frame index is not a number");
             }
 
-            size_t frame_index = result.unwrap;
+            size_t frame_index = (size_t) result.unwrap;
             if (frame_index >= animat.frame_count) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "frame index is bigger than the `count`");
