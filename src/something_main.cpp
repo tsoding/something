@@ -83,6 +83,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
     }
 
     const float PADDING = 10.0f;
+    // TODO(#38): FPS display is broken
     displayf(renderer, game_state.debug_font,
              {255, 0, 0, 255}, vec2(PADDING, PADDING),
              "FPS: %d", 60);
