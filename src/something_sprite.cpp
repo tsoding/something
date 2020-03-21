@@ -44,6 +44,7 @@ void render_sprite(SDL_Renderer *renderer,
             flip));
 }
 
+// TODO: Animat -> Frame_Animat
 struct Animat
 {
     Sprite  *frames;
@@ -247,6 +248,26 @@ void abort_parse_error(FILE *stream,
 
     abort();
 }
+
+struct Squash_Animat
+{
+    Sprite sprite;
+    float duration;
+    float a;
+
+    void render(SDL_Renderer *renderer, Vec2f pos, Rectf texbox) const
+    {
+        const float w = texbox.w + texbox.w * a;
+        const float h = texbox.h * (1.0f - a);
+        Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
+        render_sprite(renderer, sprite, dstrect);
+    }
+
+    void update(float dt)
+    {
+        a += dt / duration;
+    }
+};
 
 Animat load_animat_file(const char *animat_filepath)
 {

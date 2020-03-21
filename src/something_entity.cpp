@@ -7,12 +7,20 @@ enum class Entity_Dir
 enum class Entity_State
 {
     Ded = 0,
-    Alive
+    Alive,
+    Poof
+};
+
+enum class Alive_State
+{
+    Idle = 0,
+    Walking
 };
 
 struct Entity
 {
     Entity_State state;
+    Alive_State alive_state;
 
     Rectf texbox_local;
     Rectf hitbox_local;
@@ -21,7 +29,8 @@ struct Entity
 
     Animat idle;
     Animat walking;
-    Animat *current;
+    Squash_Animat poof;
+
     Entity_Dir dir;
 
     int cooldown_weapon;
@@ -132,50 +141,92 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 {
     assert(renderer);
 
-    if (entity.state == Entity_State::Ded) return;
-
     const SDL_RendererFlip flip =
         entity.dir == Entity_Dir::Right
         ? SDL_FLIP_NONE
         : SDL_FLIP_HORIZONTAL;
-    render_animat(renderer, *entity.current, entity_texbox_world(entity) - camera.pos, flip);
+
+    switch (entity.state) {
+    case Entity_State::Alive: {
+        switch (entity.alive_state) {
+        case Alive_State::Idle: {
+            render_animat(renderer, entity.idle, entity_texbox_world(entity) - camera.pos, flip);
+        } break;
+
+        case Alive_State::Walking: {
+            render_animat(renderer, entity.walking, entity_texbox_world(entity) - camera.pos, flip);
+        } break;
+        }
+    } break;
+
+    case Entity_State::Poof: {
+        entity.poof.render(renderer,
+                           entity.pos - camera.pos,
+                           entity_texbox_world(entity) - camera.pos);
+    } break;
+
+    case Entity_State::Ded: {} break;
+    }
 }
 
 void update_entity(Entity *entity, Vec2f gravity, float dt)
 {
     assert(entity);
 
-    if (entity->state == Entity_State::Ded) return;
+    switch (entity->state) {
+    case Entity_State::Alive: {
+        entity->vel += gravity * dt;
+        entity->pos += entity->vel * dt;
+        resolve_entity_collision(entity);
+        entity->cooldown_weapon -= 1;
 
-    entity->vel += gravity * dt;
-    entity->pos += entity->vel * dt;
-    resolve_entity_collision(entity);
+        switch (entity->alive_state) {
+        case Alive_State::Idle: {
+            update_animat(&entity->idle, dt);
+        } break;
 
-    entity->cooldown_weapon -= 1;
+        case Alive_State::Walking: {
+            update_animat(&entity->walking, dt);
+        } break;
+        }
+    } break;
 
-    update_animat(entity->current, dt);
+    case Entity_State::Poof: {
+        entity->poof.update(dt);
+        if (entity->poof.a >= 1) {
+            entity->state = Entity_State::Ded;
+        }
+    } break;
+
+    case Entity_State::Ded: {} break;
+    }
 }
 
 void entity_move(Entity *entity, float speed)
 {
     assert(entity);
 
-    entity->vel.x = speed;
+    if (entity->state == Entity_State::Alive) {
+        entity->vel.x = speed;
 
-    if (speed < 0) {
-        entity->dir = Entity_Dir::Left;
-    } else if (speed > 0) {
-        entity->dir = Entity_Dir::Right;
+        if (speed < 0) {
+            entity->dir = Entity_Dir::Left;
+        } else if (speed > 0) {
+            entity->dir = Entity_Dir::Right;
+        }
+
+        entity->alive_state = Alive_State::Walking;
     }
-
-    entity->current = &entity->walking;
 }
 
 void entity_stop(Entity *entity)
 {
     assert(entity);
-    entity->vel.x = 0;
-    entity->current = &entity->idle;
+
+    if (entity->state == Entity_State::Alive) {
+        entity->vel.x = 0;
+        entity->alive_state = Alive_State::Idle;
+    }
 }
 
 const int ENTITY_COOLDOWN_WEAPON = 7;
@@ -190,7 +241,7 @@ void entity_shoot(int entity_index)
 
     Entity *entity = &entities[entity_index];
 
-    if (entity->state == Entity_State::Ded) return;
+    if (entity->state != Entity_State::Alive) return;
     if (entity->cooldown_weapon > 0) return;
 
     if (entity->dir == Entity_Dir::Right) {
@@ -202,6 +253,18 @@ void entity_shoot(int entity_index)
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
+void kill_entity(int entity_index)
+{
+    Entity *entity = &entities[entity_index];
+
+    // TODO: entity poof animation should use the last alive frame
+    if (entity->state == Entity_State::Alive) {
+        entity->state = Entity_State::Poof;
+        entity->poof.a = 0.0f;
+        assert(entity->idle.frame_count > 0);
+        entity->poof.sprite = entity->idle.frames[0];
+    }
+}
 
 void update_entities(Vec2f gravity, float dt)
 {
