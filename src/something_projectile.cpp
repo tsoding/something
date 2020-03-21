@@ -20,8 +20,8 @@ struct Projectile
 {
     size_t shooter_entity;
     Projectile_State state;
-    Vec2i pos;
-    Vec2i vel;
+    Vec2f pos;
+    Vec2f vel;
     Animat active_animat;
     Animat poof_animat;
 };
@@ -46,7 +46,7 @@ int count_alive_projectiles(void)
     return res;
 }
 
-void spawn_projectile(Vec2i pos, Vec2i vel, int shooter_entity)
+void spawn_projectile(Vec2f pos, Vec2f vel, int shooter_entity)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
@@ -81,16 +81,16 @@ void render_projectiles(SDL_Renderer *renderer, Camera camera)
     }
 }
 
-void update_projectiles(uint32_t dt)
+void update_projectiles(float dt)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel;
-            const auto projectile_tile = projectiles[i].pos / TILE_SIZE;
-            if (!is_tile_empty(projectile_tile)
-                || !rect_contains_vec2i(LEVEL_BOUNDARY, projectiles[i].pos)) {
+            const auto projectile_tile = projectiles[i].pos / (float) TILE_SIZE;
+            if (!is_tile_empty(vec_cast<int>(projectile_tile))
+                || !rect_contains_vec2(LEVEL_BOUNDARY, projectiles[i].pos)) {
                 projectiles[i].state = Projectile_State::Poof;
                 projectiles[i].poof_animat.frame_current = 0;
             }
@@ -110,26 +110,27 @@ void update_projectiles(uint32_t dt)
 
 }
 
-const int PROJECTILE_TRACKING_PADDING = 50;
+const float PROJECTILE_TRACKING_PADDING = 50.0f;
 
-SDL_Rect hitbox_of_projectile(size_t index)
+Rectf hitbox_of_projectile(size_t index)
 {
     assert(index < projectiles_count);
-    return SDL_Rect {
-        projectiles[index].pos.x - PROJECTILE_TRACKING_PADDING / 2,
-        projectiles[index].pos.y - PROJECTILE_TRACKING_PADDING / 2,
+    return Rectf {
+        projectiles[index].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
+        projectiles[index].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
         PROJECTILE_TRACKING_PADDING,
         PROJECTILE_TRACKING_PADDING
     };
 }
 
-int projectile_at_position(Vec2i position)
+// TODO: introduce an int typedef that indicates Projectile Id
+int projectile_at_position(Vec2f position)
 {
     for (int i = 0; i < (int) projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
 
-        SDL_Rect hitbox = hitbox_of_projectile(i);
-        if (rect_contains_vec2i(hitbox, position)) {
+        Rectf hitbox = hitbox_of_projectile(i);
+        if (rect_contains_vec2(hitbox, position)) {
             return i;
         }
     }

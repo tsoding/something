@@ -8,14 +8,15 @@ struct Sprite
 
 void render_sprite(SDL_Renderer *renderer,
                    Sprite texture,
-                   SDL_Rect destrect,
+                   Rectf destrect,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
+    SDL_Rect rect = rectf_for_sdl(destrect);
     sec(SDL_RenderCopyEx(
             renderer,
             texture.texture,
             &texture.srcrect,
-            &destrect,
+            &rect,
             0.0,
             nullptr,
             flip));
@@ -23,12 +24,14 @@ void render_sprite(SDL_Renderer *renderer,
 
 void render_sprite(SDL_Renderer *renderer,
                    Sprite texture,
-                   Vec2i pos,
+                   Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
     SDL_Rect destrect = {
-        pos.x - texture.srcrect.w / 2, pos.y - texture.srcrect.h / 2,
-        texture.srcrect.w, texture.srcrect.h
+        (int) floorf(pos.x - (float) texture.srcrect.w * 0.5f),
+        (int) floorf(pos.y - (float) texture.srcrect.h * 0.5f),
+        texture.srcrect.w,
+        texture.srcrect.h
     };
 
     sec(SDL_RenderCopyEx(
@@ -46,14 +49,14 @@ struct Animat
     Sprite  *frames;
     size_t   frame_count;
     size_t   frame_current;
-    uint32_t frame_duration;
-    uint32_t frame_cooldown;
+    float frame_duration;
+    float frame_cooldown;
 };
 
 static inline
 void render_animat(SDL_Renderer *renderer,
                    Animat animat,
-                   SDL_Rect dstrect,
+                   Rectf dstrect,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
     render_sprite(
@@ -66,7 +69,7 @@ void render_animat(SDL_Renderer *renderer,
 static inline
 void render_animat(SDL_Renderer *renderer,
                    Animat animat,
-                   Vec2i pos,
+                   Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
     render_sprite(
@@ -76,7 +79,7 @@ void render_animat(SDL_Renderer *renderer,
         flip);
 }
 
-void update_animat(Animat *animat, uint32_t dt)
+void update_animat(Animat *animat, float dt)
 {
     assert(animat);
 
@@ -176,8 +179,8 @@ SDL_Texture *spritesheet_by_name(String_View filename)
 }
 
 Animat load_spritesheet_animat(SDL_Renderer *renderer,
-                               size_t frame_count,
-                               uint32_t frame_duration,
+                               int frame_count,
+                               float frame_duration,
                                const char *spritesheet_filepath)
 {
     Animat result = {};
@@ -277,13 +280,13 @@ Animat load_animat_file(const char *animat_filepath)
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = spritesheet_by_name(value);
         } else if (subkey == "duration"_sv) {
-            auto result = value.as_integer<size_t>();
+            auto result = value.as_integer<int>();
             if (!result.has_value) {
                 abort_parse_error(stderr, source, input, animat_filepath,
                                   "`duration` is not a number");
             }
 
-            animat.frame_duration = result.unwrap;
+            animat.frame_duration = (float) result.unwrap / 1000.0f;
         } else if (subkey == "frames"_sv) {
             auto result = key.chop_by_delim('.').trim().as_integer<size_t>();
             if (!result.has_value) {

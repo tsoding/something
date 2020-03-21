@@ -70,7 +70,7 @@ void println(FILE *stream, T... args)
 // TODO(#31): free camera support is not implemented
 struct Camera
 {
-    Vec2i pos;
+    Vec2f pos;
 };
 
 #include "something_string.cpp"
