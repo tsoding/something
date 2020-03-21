@@ -8,6 +8,7 @@ struct Vec2
 };
 
 using Vec2f = Vec2<float>;
+using Vec2i = Vec2<int>;
 
 template <typename T> Vec2<T> vec2(T x, T y) { return {x, y}; }
 

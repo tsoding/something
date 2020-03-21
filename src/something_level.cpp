@@ -29,12 +29,12 @@ Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
 
 // TODO(#32): Tile coordinates are broken on negative absolute coordinates
 static inline
-bool is_tile_inbounds(Vec2<int> p)
+bool is_tile_inbounds(Vec2i p)
 {
     return 0 <= p.x && p.x < LEVEL_WIDTH && 0 <= p.y && p.y < LEVEL_HEIGHT;
 }
 
-bool is_tile_empty(Vec2<int> p)
+bool is_tile_empty(Vec2i p)
 {
     return !is_tile_inbounds(p) || level[p.y][p.x] == Tile::Empty;
 }
