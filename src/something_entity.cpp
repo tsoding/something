@@ -38,13 +38,13 @@ struct Entity
 
 struct Entity_Index
 {
-    int unwrap;
+    size_t unwrap;
 };
 
 void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 
 const int ENTITY_COOLDOWN_WEAPON = 7;
-const int ENTITIES_COUNT = 69;
+const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
 // TODO(#36): introduce a typedef that indicates Entity Id
 
@@ -269,7 +269,7 @@ void entity_stop(Entity_Index entity_index)
 
 void entity_shoot(Entity_Index entity_index)
 {
-    assert(0 <= entity_index.unwrap);
+    assert(0 < entity_index.unwrap);
     assert(entity_index.unwrap < ENTITIES_COUNT);
 
     Entity *entity = &entities[entity_index.unwrap];
@@ -302,14 +302,14 @@ void kill_entity(Entity_Index entity_index)
 
 void update_entities(Vec2f gravity, float dt)
 {
-    for (int i = 0; i < ENTITIES_COUNT; ++i) {
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         update_entity(&entities[i], gravity, dt);
     }
 }
 
 void render_entities(SDL_Renderer *renderer, Camera camera)
 {
-    for (int i = 0; i < ENTITIES_COUNT; ++i) {
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         render_entity(renderer, camera, entities[i]);
     }
 }

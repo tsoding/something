@@ -59,9 +59,9 @@ struct Game_State
     Maybe<Projectile_Index> tracking_projectile;
 };
 
-const int ENEMY_ENTITY_INDEX_OFFSET = 1;
-const int ENEMY_COUNT = 6;
-const int PLAYER_ENTITY_INDEX = 0;
+const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
+const size_t ENEMY_COUNT = 6;
+const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera camera)
 {
@@ -180,7 +180,7 @@ void render_game_state(const Game_State game_state,
 
 void update_game_state(Game_State game_state, float dt)
 {
-    for (int i = 0; i < ENEMY_COUNT; ++i) {
+    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
         entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
     }
 
@@ -194,7 +194,7 @@ void update_game_state(Game_State game_state, float dt)
         auto projectile = projectiles + projectile_index;
         if (projectile->state != Projectile_State::Active) continue;
 
-        for (int entity_index = 0;
+        for (size_t entity_index = 0;
              entity_index < ENTITIES_COUNT;
              ++entity_index)
         {
@@ -238,7 +238,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     entities[PLAYER_ENTITY_INDEX].idle = idle;
     entities[PLAYER_ENTITY_INDEX].poof.duration = POOF_DURATION;
 
-    for (int i = 0; i < ENEMY_COUNT; ++i) {
+    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
         memset(entities + ENEMY_ENTITY_INDEX_OFFSET + i, 0, sizeof(Entity));
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].alive_state = Alive_State::Idle;
@@ -247,7 +247,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         static_assert(LEVEL_WIDTH >= 2);
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(LEVEL_WIDTH - 2 - i, 0)) * TILE_SIZE;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(LEVEL_WIDTH - 2 - (int) i, 0)) * TILE_SIZE;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].poof.duration = POOF_DURATION;
         if (i % 2) {
             entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
