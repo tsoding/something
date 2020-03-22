@@ -26,11 +26,17 @@ template <typename T> Vec2<T> constexpr &operator*=(Vec2<T> &a, Vec2<T> b) { a =
 template <typename T> Vec2<T> constexpr &operator/=(Vec2<T> &a, Vec2<T> b) { a = a / b; return a; }
 
 template <typename T>
-static inline
+constexpr
+T sqr_len(Vec2<T> p)
+{
+    return p.x * p.x + p.y * p.y;
+}
+
+template <typename T>
+constexpr
 T sqr_dist(Vec2<T> p0, Vec2<T> p1)
 {
-    auto d = p0 - p1;
-    return d.x * d.x + d.y * d.y;
+    return sqr_len(p0 - p1);
 }
 
 template <typename T>
