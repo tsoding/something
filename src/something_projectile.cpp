@@ -18,12 +18,17 @@ const char *projectile_state_as_cstr(Projectile_State state)
 
 struct Projectile
 {
-    int shooter_entity;
+    Entity_Index shooter;
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
     Frame_Animat active_animat;
     Frame_Animat poof_animat;
+};
+
+struct Projectile_Index
+{
+    size_t unwrap;
 };
 
 const size_t projectiles_count = 69;
@@ -46,14 +51,14 @@ int count_alive_projectiles(void)
     return res;
 }
 
-void spawn_projectile(Vec2f pos, Vec2f vel, int shooter_entity)
+void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
             projectiles[i].state = Projectile_State::Active;
             projectiles[i].pos = pos;
             projectiles[i].vel = vel;
-            projectiles[i].shooter_entity = shooter_entity;
+            projectiles[i].shooter = shooter;
             return;
         }
     }
@@ -112,28 +117,28 @@ void update_projectiles(float dt)
 
 const float PROJECTILE_TRACKING_PADDING = 50.0f;
 
-Rectf hitbox_of_projectile(int index)
+Rectf hitbox_of_projectile(Projectile_Index index)
 {
-    assert((size_t) index < projectiles_count);
+    assert(index.unwrap < projectiles_count);
     return Rectf {
-        projectiles[index].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
-        projectiles[index].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
+        projectiles[index.unwrap].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
+        projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
         PROJECTILE_TRACKING_PADDING,
         PROJECTILE_TRACKING_PADDING
     };
 }
 
 // TODO(#37): introduce a typedef that indicates Projectile Id
-int projectile_at_position(Vec2f position)
+Maybe<Projectile_Index> projectile_at_position(Vec2f position)
 {
-    for (int i = 0; i < (int) projectiles_count; ++i) {
+    for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
 
-        Rectf hitbox = hitbox_of_projectile(i);
+        Rectf hitbox = hitbox_of_projectile({i});
         if (rect_contains_vec2(hitbox, position)) {
-            return i;
+            return {true, {i}};
         }
     }
 
-    return -1;
+    return {};
 }

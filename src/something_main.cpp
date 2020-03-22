@@ -56,12 +56,12 @@ struct Game_State
 
     TTF_Font *debug_font;
 
-    int tracking_projectile_index;
+    Maybe<Projectile_Index> tracking_projectile;
 };
 
-const int ENEMY_ENTITY_INDEX_OFFSET = 1;
-const int ENEMY_COUNT = 6;
-const int PLAYER_ENTITY_INDEX = 0;
+const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
+const size_t ENEMY_COUNT = 6;
+const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera camera)
 {
@@ -102,8 +102,8 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
              "Projectiles: %d",
              count_alive_projectiles());
 
-    if (game_state.tracking_projectile_index >= 0) {
-        auto projectile = projectiles[game_state.tracking_projectile_index];
+    if (game_state.tracking_projectile.has_value) {
+        auto projectile = projectiles[game_state.tracking_projectile.unwrap.unwrap];
         const float SECOND_COLUMN_OFFSET = 700.0f;
         displayf(renderer, game_state.debug_font,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
@@ -119,7 +119,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         displayf(renderer, game_state.debug_font,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
                  "Shooter Index: %d",
-                 projectile.shooter_entity);
+                 projectile.shooter.unwrap);
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -134,18 +134,18 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    if (game_state.tracking_projectile_index >= 0) {
+    if (game_state.tracking_projectile.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(game_state.tracking_projectile_index) - camera.pos);
+            hitbox_of_projectile(game_state.tracking_projectile.unwrap) - camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    int index = projectile_at_position(game_state.mouse_position);
-    if (index >= 0) {
+    auto projectile_index = projectile_at_position(game_state.mouse_position);
+    if (projectile_index.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(index) - camera.pos);
+            hitbox_of_projectile(projectile_index.unwrap) - camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
         return;
     }
@@ -180,8 +180,8 @@ void render_game_state(const Game_State game_state,
 
 void update_game_state(Game_State game_state, float dt)
 {
-    for (int i = 0; i < ENEMY_COUNT; ++i) {
-        entity_shoot(ENEMY_ENTITY_INDEX_OFFSET + i);
+    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
+        entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
     }
 
     update_entities(game_state.gravity, dt);
@@ -194,19 +194,19 @@ void update_game_state(Game_State game_state, float dt)
         auto projectile = projectiles + projectile_index;
         if (projectile->state != Projectile_State::Active) continue;
 
-        for (int entity_index = 0;
+        for (size_t entity_index = 0;
              entity_index < ENTITIES_COUNT;
              ++entity_index)
         {
             auto entity = entities + entity_index;
 
             if (entity->state != Entity_State::Alive) continue;
-            if (entity_index == projectile->shooter_entity) continue;
+            if (entity_index == projectile->shooter.unwrap) continue;
 
             if (rect_contains_vec2(entity_hitbox_world(*entity), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                kill_entity(entity_index);
+                kill_entity({entity_index});
             }
         }
     }
@@ -238,7 +238,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     entities[PLAYER_ENTITY_INDEX].idle = idle;
     entities[PLAYER_ENTITY_INDEX].poof.duration = POOF_DURATION;
 
-    for (int i = 0; i < ENEMY_COUNT; ++i) {
+    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
         memset(entities + ENEMY_ENTITY_INDEX_OFFSET + i, 0, sizeof(Entity));
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].alive_state = Alive_State::Idle;
@@ -247,7 +247,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         static_assert(LEVEL_WIDTH >= 2);
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(LEVEL_WIDTH - 2 - i, 0)) * TILE_SIZE;
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(LEVEL_WIDTH - 2 - (int) i, 0)) * TILE_SIZE;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].poof.duration = POOF_DURATION;
         if (i % 2) {
             entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
@@ -306,7 +306,7 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
-    game_state.tracking_projectile_index = -1;
+    game_state.tracking_projectile = {};
 
     bool debug = false;
     bool step_debug = false;
@@ -350,7 +350,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot(PLAYER_ENTITY_INDEX);
+                    entity_shoot({PLAYER_ENTITY_INDEX});
                 } break;
 
                 case SDLK_r: {
@@ -391,9 +391,10 @@ int main(void)
 
             case SDL_MOUSEBUTTONDOWN: {
                 if (debug) {
-                    game_state.tracking_projectile_index =
+                    game_state.tracking_projectile =
                         projectile_at_position(game_state.mouse_position);
-                    if (game_state.tracking_projectile_index < 0) {
+
+                    if (game_state.tracking_projectile.has_value) {
                         Vec2i tile =
                             vec_cast<int>(game_state.mouse_position / TILE_SIZE);
                         if (is_tile_inbounds(tile)) {
@@ -417,11 +418,11 @@ int main(void)
 
         const float PLAYER_SPEED = 200.0f;
         if (keyboard[SDL_SCANCODE_D]) {
-            entity_move(&entities[PLAYER_ENTITY_INDEX], PLAYER_SPEED);
+            entity_move({PLAYER_ENTITY_INDEX}, PLAYER_SPEED);
         } else if (keyboard[SDL_SCANCODE_A]) {
-            entity_move(&entities[PLAYER_ENTITY_INDEX], -PLAYER_SPEED);
+            entity_move({PLAYER_ENTITY_INDEX}, -PLAYER_SPEED);
         } else {
-            entity_stop(&entities[PLAYER_ENTITY_INDEX]);
+            entity_stop({PLAYER_ENTITY_INDEX});
         }
 
         render_game_state(game_state, renderer, camera);
