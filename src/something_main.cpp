@@ -447,7 +447,7 @@ int main(void)
             const SDL_Rect rect = {
                 (int) floorf(ROOM_BOUNDARY.w - camera.pos.x),
                 0,
-                (int) floorf(window_w + camera.pos.x),
+                (int) floorf((float) window_w + camera.pos.x),
                 window_h
             };
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
