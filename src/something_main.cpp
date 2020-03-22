@@ -394,7 +394,7 @@ int main(void)
                     game_state.tracking_projectile =
                         projectile_at_position(game_state.mouse_position);
 
-                    if (game_state.tracking_projectile.has_value) {
+                    if (!game_state.tracking_projectile.has_value) {
                         Vec2i tile =
                             vec_cast<int>(game_state.mouse_position / TILE_SIZE);
                         if (is_tile_inbounds(tile)) {
