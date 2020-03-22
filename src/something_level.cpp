@@ -76,7 +76,7 @@ struct Room
     }
 };
 
-Room room = {
+Room dummy_room = {
     {
         {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
         {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
@@ -90,3 +90,7 @@ Room room = {
         {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
     }
 };
+
+const size_t ROOM_ROW_COUNT = 8;
+Room room_row[ROOM_ROW_COUNT] = {};
+size_t room_current = 0;

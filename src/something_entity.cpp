@@ -54,7 +54,7 @@ void resolve_point_collision(Vec2f *p)
 
     const auto tile = vec_cast<int>(*p / TILE_SIZE);
 
-    if (room.is_tile_empty(tile)) {
+    if (room_row[room_current].is_tile_empty(tile)) {
         return;
     }
 
@@ -83,7 +83,7 @@ void resolve_point_collision(Vec2f *p)
     int closest = -1;
     for (int current = 0; current < SIDES_COUNT; ++current) {
         for (int i = 1;
-             !room.is_tile_empty(tile + (sides[current].nd * i)) ;
+             !room_row[room_current].is_tile_empty(tile + (sides[current].nd * i)) ;
              ++i)
         {
             sides[current].d += sides[current].dd;
