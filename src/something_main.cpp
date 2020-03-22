@@ -297,7 +297,7 @@ int main(void)
     game_state.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
     game_state.ground_grass_texture = {
-        {256, 176, 16, 16},
+        {120, 128, 16, 16},
         tileset_texture
     };
     game_state.ground_texture = {
