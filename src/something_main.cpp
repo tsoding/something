@@ -76,7 +76,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto level_boundary_screen = LEVEL_BOUNDARY - camera.pos;
+    auto level_boundary_screen = ROOM_BOUNDARY - camera.pos;
     {
         auto rect = rectf_for_sdl(level_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
@@ -167,13 +167,11 @@ void render_game_state(const Game_State game_state,
                        SDL_Renderer *renderer,
                        Camera camera)
 {
-    sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
-    sec(SDL_RenderClear(renderer));
-
-    render_level(renderer,
-                 camera,
-                 game_state.ground_grass_texture,
-                 game_state.ground_texture);
+    room_row[room_current].render(
+        renderer,
+        camera,
+        game_state.ground_grass_texture,
+        game_state.ground_texture);
     render_entities(renderer, camera);
     render_projectiles(renderer, camera);
 }
@@ -246,8 +244,8 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox_local = hitbox_local;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
-        static_assert(LEVEL_WIDTH >= 2);
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(LEVEL_WIDTH - 2 - (int) i, 0)) * TILE_SIZE;
+        static_assert(ROOM_WIDTH >= 2);
+        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE;
         entities[ENEMY_ENTITY_INDEX_OFFSET + i].poof.duration = POOF_DURATION;
         if (i % 2) {
             entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
@@ -307,6 +305,13 @@ int main(void)
         tileset_texture
     };
     game_state.tracking_projectile = {};
+
+    for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
+        for (size_t column_index = 0; column_index < ROOM_WIDTH; ++column_index) {
+            static_assert(ROOM_HEIGHT >= 0);
+            room_row[room_index].tiles[ROOM_HEIGHT - 1][column_index] = Tile::Wall;
+        }
+    }
 
     bool debug = false;
     bool step_debug = false;
@@ -378,11 +383,13 @@ int main(void)
                 Vec2i tile = vec_cast<int>(game_state.mouse_position / TILE_SIZE);
                 switch (game_state.state) {
                 case Debug_Draw_State::Create: {
-                    if (is_tile_inbounds(tile)) level[tile.y][tile.x] = Tile::Wall;
+                    if (room_row[room_current].is_tile_inbounds(tile))
+                        room_row[room_current].tiles[tile.y][tile.x] = Tile::Wall;
                 } break;
 
                 case Debug_Draw_State::Delete: {
-                    if (is_tile_inbounds(tile)) level[tile.y][tile.x] = Tile::Empty;
+                    if (room_row[room_current].is_tile_inbounds(tile))
+                        room_row[room_current].tiles[tile.y][tile.x] = Tile::Empty;
                 } break;
 
                 default: {}
@@ -397,13 +404,13 @@ int main(void)
                     if (!game_state.tracking_projectile.has_value) {
                         Vec2i tile =
                             vec_cast<int>(game_state.mouse_position / TILE_SIZE);
-                        if (is_tile_inbounds(tile)) {
-                            if (level[tile.y][tile.x] == Tile::Empty) {
+                        if (room_row[room_current].is_tile_inbounds(tile)) {
+                            if (room_row[room_current].tiles[tile.y][tile.x] == Tile::Empty) {
                                 game_state.state = Debug_Draw_State::Create;
-                                level[tile.y][tile.x] = Tile::Wall;
+                                room_row[room_current].tiles[tile.y][tile.x] = Tile::Wall;
                             } else {
                                 game_state.state = Debug_Draw_State::Delete;
-                                level[tile.y][tile.x] = Tile::Empty;
+                                room_row[room_current].tiles[tile.y][tile.x] = Tile::Empty;
                             }
                         }
                     }
@@ -425,7 +432,30 @@ int main(void)
             entity_stop({PLAYER_ENTITY_INDEX});
         }
 
+
+        sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
+        sec(SDL_RenderClear(renderer));
+
+        if (room_current == 0) {
+            const SDL_Rect rect = {0, 0, (int)floorf(-camera.pos.x), window_h};
+            sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
+            sec(SDL_RenderFillRect(renderer, &rect));
+        }
+
+        // TODO: the right border of room row is not precisly calculated
+        if (room_current == ROOM_ROW_COUNT - 1) {
+            const SDL_Rect rect = {
+                (int) floorf(ROOM_BOUNDARY.w - camera.pos.x),
+                0,
+                (int) floorf((float) window_w + camera.pos.x),
+                window_h
+            };
+            sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
+            sec(SDL_RenderFillRect(renderer, &rect));
+        }
+
         render_game_state(game_state, renderer, camera);
+
         if (debug) {
             render_debug_overlay(game_state, renderer, camera);
         }
@@ -440,7 +470,7 @@ int main(void)
     }
     SDL_Quit();
 
-    dump_level(stdout);
+    room_row[room_current].dump(stdout);
 
     return 0;
 }

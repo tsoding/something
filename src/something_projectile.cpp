@@ -94,8 +94,8 @@ void update_projectiles(float dt)
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel;
             const auto projectile_tile = projectiles[i].pos / TILE_SIZE;
-            if (!is_tile_empty(vec_cast<int>(projectile_tile))
-                || !rect_contains_vec2(LEVEL_BOUNDARY, projectiles[i].pos)) {
+            if (!room_row[room_current].is_tile_empty(vec_cast<int>(projectile_tile))
+                || !rect_contains_vec2(ROOM_BOUNDARY, projectiles[i].pos)) {
                 projectiles[i].state = Projectile_State::Poof;
                 projectiles[i].poof_animat.frame_current = 0;
             }

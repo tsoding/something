@@ -7,81 +7,90 @@ enum class Tile
     Wall
 };
 
-const int LEVEL_WIDTH = 10;
-const int LEVEL_HEIGHT = 10;
+const int ROOM_WIDTH = 10;
+const int ROOM_HEIGHT = 10;
 
-const Rectf LEVEL_BOUNDARY = {
-    0.0f, 0.0f, LEVEL_WIDTH * TILE_SIZE, LEVEL_HEIGHT * TILE_SIZE
+const Rectf ROOM_BOUNDARY = {
+    0.0f, 0.0f, ROOM_WIDTH * TILE_SIZE, ROOM_HEIGHT * TILE_SIZE
 };
 
-Tile level[LEVEL_HEIGHT][LEVEL_WIDTH] = {
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Wall, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-    {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
-};
-
-// TODO(#32): Tile coordinates are broken on negative absolute coordinates
-static inline
-bool is_tile_inbounds(Vec2i p)
+struct Room
 {
-    return 0 <= p.x && p.x < LEVEL_WIDTH && 0 <= p.y && p.y < LEVEL_HEIGHT;
-}
+    Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
 
-bool is_tile_empty(Vec2i p)
-{
-    return !is_tile_inbounds(p) || level[p.y][p.x] == Tile::Empty;
-}
+    bool is_tile_inbounds(Vec2i p) const
+    {
+        return 0 <= p.x && p.x < ROOM_WIDTH && 0 <= p.y && p.y < ROOM_HEIGHT;
+    }
 
-void render_level(SDL_Renderer *renderer,
-                  Camera camera,
-                  Sprite top_ground_texture,
-                  Sprite bottom_ground_texture)
-{
-    for (int y = 0; y < LEVEL_HEIGHT; ++y) {
-        for (int x = 0; x < LEVEL_WIDTH; ++x) {
-            switch (level[y][x]) {
-            case Tile::Empty: {
-            } break;
+    bool is_tile_empty(Vec2i p) const
+    {
+        return !is_tile_inbounds(p) || tiles[p.y][p.x] == Tile::Empty;
+    }
 
-            case Tile::Wall: {
-                const auto dstrect = rect(
-                    vec_cast<float>(vec2(x, y)) * TILE_SIZE - camera.pos,
-                    TILE_SIZE, TILE_SIZE);
-                if (is_tile_empty(vec2(x, y - 1))) {
-                    render_sprite(renderer, top_ground_texture, dstrect);
-                } else {
-                    render_sprite(renderer, bottom_ground_texture, dstrect);
+    void render(SDL_Renderer *renderer,
+                Camera camera,
+                Sprite top_ground_texture,
+                Sprite bottom_ground_texture)
+    {
+        for (int y = 0; y < ROOM_HEIGHT; ++y) {
+            for (int x = 0; x < ROOM_WIDTH; ++x) {
+                switch (tiles[y][x]) {
+                case Tile::Empty: {
+                } break;
+
+                case Tile::Wall: {
+                    const auto dstrect = rect(
+                        vec_cast<float>(vec2(x, y)) * TILE_SIZE - camera.pos,
+                        TILE_SIZE, TILE_SIZE);
+                    if (is_tile_empty(vec2(x, y - 1))) {
+                        render_sprite(renderer, top_ground_texture, dstrect);
+                    } else {
+                        render_sprite(renderer, bottom_ground_texture, dstrect);
+                    }
+                } break;
                 }
-            } break;
             }
         }
     }
-}
 
-void dump_level(FILE *stream)
-{
-    println(stream, "{");
-    for (int y = 0; y < LEVEL_HEIGHT; ++y) {
-        print(stream, "{");
-        for (int x = 0; x < LEVEL_WIDTH; ++x) {
-            switch (level[y][x]) {
-            case Tile::Empty: {
-                print(stream, "Tile::Empty, ");
-            } break;
+    void dump(FILE *stream)
+    {
+        println(stream, "{");
+        for (int y = 0; y < ROOM_HEIGHT; ++y) {
+            print(stream, "{");
+            for (int x = 0; x < ROOM_WIDTH; ++x) {
+                switch (tiles[y][x]) {
+                case Tile::Empty: {
+                    print(stream, "Tile::Empty, ");
+                } break;
 
-            case Tile::Wall: {
-                print(stream, "Tile::Wall, ");
-            } break;
+                case Tile::Wall: {
+                    print(stream, "Tile::Wall, ");
+                } break;
+                }
             }
+            println(stream, "},");
         }
-        println(stream, "},");
+        println(stream, "}\n");
     }
-    println(stream, "}\n");
-}
+};
+
+Room dummy_room = {
+    {
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Wall, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, Tile::Wall, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Wall, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+        {Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, Tile::Empty, },
+    }
+};
+
+const size_t ROOM_ROW_COUNT = 8;
+Room room_row[ROOM_ROW_COUNT] = {};
+size_t room_current = 0;
