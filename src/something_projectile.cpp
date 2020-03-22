@@ -18,7 +18,7 @@ const char *projectile_state_as_cstr(Projectile_State state)
 
 struct Projectile
 {
-    int shooter_entity;
+    Entity_Index shooter;
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
@@ -46,14 +46,14 @@ int count_alive_projectiles(void)
     return res;
 }
 
-void spawn_projectile(Vec2f pos, Vec2f vel, int shooter_entity)
+void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
             projectiles[i].state = Projectile_State::Active;
             projectiles[i].pos = pos;
             projectiles[i].vel = vel;
-            projectiles[i].shooter_entity = shooter_entity;
+            projectiles[i].shooter = shooter;
             return;
         }
     }

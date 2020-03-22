@@ -119,7 +119,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         displayf(renderer, game_state.debug_font,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
                  "Shooter Index: %d",
-                 projectile.shooter_entity);
+                 projectile.shooter.unwrap);
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -181,7 +181,7 @@ void render_game_state(const Game_State game_state,
 void update_game_state(Game_State game_state, float dt)
 {
     for (int i = 0; i < ENEMY_COUNT; ++i) {
-        entity_shoot(ENEMY_ENTITY_INDEX_OFFSET + i);
+        entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
     }
 
     update_entities(game_state.gravity, dt);
@@ -201,12 +201,12 @@ void update_game_state(Game_State game_state, float dt)
             auto entity = entities + entity_index;
 
             if (entity->state != Entity_State::Alive) continue;
-            if (entity_index == projectile->shooter_entity) continue;
+            if (entity_index == projectile->shooter.unwrap) continue;
 
             if (rect_contains_vec2(entity_hitbox_world(*entity), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                kill_entity(entity_index);
+                kill_entity({entity_index});
             }
         }
     }
@@ -350,7 +350,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot(PLAYER_ENTITY_INDEX);
+                    entity_shoot({PLAYER_ENTITY_INDEX});
                 } break;
 
                 case SDLK_r: {
@@ -417,11 +417,11 @@ int main(void)
 
         const float PLAYER_SPEED = 200.0f;
         if (keyboard[SDL_SCANCODE_D]) {
-            entity_move(&entities[PLAYER_ENTITY_INDEX], PLAYER_SPEED);
+            entity_move({PLAYER_ENTITY_INDEX}, PLAYER_SPEED);
         } else if (keyboard[SDL_SCANCODE_A]) {
-            entity_move(&entities[PLAYER_ENTITY_INDEX], -PLAYER_SPEED);
+            entity_move({PLAYER_ENTITY_INDEX}, -PLAYER_SPEED);
         } else {
-            entity_stop(&entities[PLAYER_ENTITY_INDEX]);
+            entity_stop({PLAYER_ENTITY_INDEX});
         }
 
         render_game_state(game_state, renderer, camera);

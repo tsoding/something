@@ -36,6 +36,13 @@ struct Entity
     int cooldown_weapon;
 };
 
+struct Entity_Index
+{
+    int unwrap;
+};
+
+void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
+
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const int ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
@@ -122,9 +129,9 @@ void resolve_entity_collision(Entity *entity)
     }
 }
 
-Sprite last_alive_frame_of_entity(int entity_index)
+Sprite last_alive_frame_of_entity(Entity_Index entity_index)
 {
-    Entity entity = entities[entity_index];
+    Entity entity = entities[entity_index.unwrap];
 
     assert(entity.state == Entity_State::Alive);
 
@@ -229,9 +236,11 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
     }
 }
 
-void entity_move(Entity *entity, float speed)
+void entity_move(Entity_Index entity_index, float speed)
 {
-    assert(entity);
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+
+    Entity *entity = entities + entity_index.unwrap;
 
     if (entity->state == Entity_State::Alive) {
         entity->vel.x = speed;
@@ -246,9 +255,11 @@ void entity_move(Entity *entity, float speed)
     }
 }
 
-void entity_stop(Entity *entity)
+void entity_stop(Entity_Index entity_index)
 {
-    assert(entity);
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+
+    Entity *entity = entities + entity_index.unwrap;
 
     if (entity->state == Entity_State::Alive) {
         entity->vel.x = 0;
@@ -256,12 +267,12 @@ void entity_stop(Entity *entity)
     }
 }
 
-void entity_shoot(int entity_index)
+void entity_shoot(Entity_Index entity_index)
 {
-    assert(0 <= entity_index);
-    assert(entity_index < ENTITIES_COUNT);
+    assert(0 <= entity_index.unwrap);
+    assert(entity_index.unwrap < ENTITIES_COUNT);
 
-    Entity *entity = &entities[entity_index];
+    Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state != Entity_State::Alive) return;
     if (entity->cooldown_weapon > 0) return;
@@ -275,9 +286,11 @@ void entity_shoot(int entity_index)
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
-void kill_entity(int entity_index)
+void kill_entity(Entity_Index entity_index)
 {
-    Entity *entity = &entities[entity_index];
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+
+    Entity *entity = &entities[entity_index.unwrap];
 
     // TODO(#40): entity poof animation should use the last alive frame
     if (entity->state == Entity_State::Alive) {
