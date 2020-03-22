@@ -254,12 +254,15 @@ struct Squash_Animat
     float duration;
     float a;
 
-    void render(SDL_Renderer *renderer, Vec2f pos, Rectf texbox) const
+    void render(SDL_Renderer *renderer,
+                Vec2f pos,
+                Rectf texbox,
+                SDL_RendererFlip flip = SDL_FLIP_NONE) const
     {
         const float w = texbox.w + texbox.w * a;
         const float h = texbox.h * (1.0f - a);
         Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
-        render_sprite(renderer, sprite, dstrect);
+        render_sprite(renderer, sprite, dstrect, flip);
     }
 
     void update(float dt)

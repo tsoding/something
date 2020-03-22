@@ -36,6 +36,11 @@ struct Entity
     int cooldown_weapon;
 };
 
+const int ENTITY_COOLDOWN_WEAPON = 7;
+const int ENTITIES_COUNT = 69;
+Entity entities[ENTITIES_COUNT];
+// TODO(#36): introduce a typedef that indicates Entity Id
+
 void resolve_point_collision(Vec2f *p)
 {
     assert(p);
@@ -117,6 +122,26 @@ void resolve_entity_collision(Entity *entity)
     }
 }
 
+Sprite last_alive_frame_of_entity(int entity_index)
+{
+    Entity entity = entities[entity_index];
+
+    assert(entity.state == Entity_State::Alive);
+
+    switch (entity.alive_state) {
+    case Alive_State::Idle:
+        assert(entity.idle.frame_count > 0);
+        return entity.idle.frames[entity.idle.frame_current];
+    case Alive_State::Walking:
+        assert(entity.walking.frame_count > 0);
+        return entity.walking.frames[entity.walking.frame_current];
+    }
+
+    assert(0 && "Incorrent Alive_State value");
+
+    return {};
+}
+
 Rectf entity_texbox_world(const Entity entity)
 {
     Rectf dstrect = {
@@ -160,9 +185,11 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
     } break;
 
     case Entity_State::Poof: {
-        entity.poof.render(renderer,
-                           entity.pos - camera.pos,
-                           entity_texbox_world(entity) - camera.pos);
+        entity.poof.render(
+            renderer,
+            entity.pos - camera.pos,
+            entity_texbox_world(entity) - camera.pos,
+            entity.dir == Entity_Dir::Right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -229,11 +256,6 @@ void entity_stop(Entity *entity)
     }
 }
 
-const int ENTITY_COOLDOWN_WEAPON = 7;
-const int ENTITIES_COUNT = 69;
-Entity entities[ENTITIES_COUNT];
-// TODO(#36): introduce a typedef that indicates Entity Id
-
 void entity_shoot(int entity_index)
 {
     assert(0 <= entity_index);
@@ -259,10 +281,9 @@ void kill_entity(int entity_index)
 
     // TODO(#40): entity poof animation should use the last alive frame
     if (entity->state == Entity_State::Alive) {
-        entity->state = Entity_State::Poof;
         entity->poof.a = 0.0f;
-        assert(entity->idle.frame_count > 0);
-        entity->poof.sprite = entity->idle.frames[0];
+        entity->poof.sprite = last_alive_frame_of_entity(entity_index);
+        entity->state = Entity_State::Poof;
     }
 }
 
