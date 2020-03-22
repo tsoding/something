@@ -28,10 +28,10 @@ struct Projectile
 
 struct Projectile_Index
 {
-    int unwrap;
+    size_t unwrap;
 };
 
-const int projectiles_count = 69;
+const size_t projectiles_count = 69;
 Projectile projectiles[projectiles_count] = {};
 
 void init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat)
@@ -131,7 +131,7 @@ Rectf hitbox_of_projectile(Projectile_Index index)
 // TODO(#37): introduce a typedef that indicates Projectile Id
 Maybe<Projectile_Index> projectile_at_position(Vec2f position)
 {
-    for (int i = 0; i < (int) projectiles_count; ++i) {
+    for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
 
         Rectf hitbox = hitbox_of_projectile({i});
