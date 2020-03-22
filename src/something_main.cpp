@@ -56,7 +56,7 @@ struct Game_State
 
     TTF_Font *debug_font;
 
-    int tracking_projectile_index;
+    Maybe<Projectile_Index> tracking_projectile;
 };
 
 const int ENEMY_ENTITY_INDEX_OFFSET = 1;
@@ -102,8 +102,8 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
              "Projectiles: %d",
              count_alive_projectiles());
 
-    if (game_state.tracking_projectile_index >= 0) {
-        auto projectile = projectiles[game_state.tracking_projectile_index];
+    if (game_state.tracking_projectile.has_value) {
+        auto projectile = projectiles[game_state.tracking_projectile.unwrap.unwrap];
         const float SECOND_COLUMN_OFFSET = 700.0f;
         displayf(renderer, game_state.debug_font,
                  {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
@@ -134,18 +134,18 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    if (game_state.tracking_projectile_index >= 0) {
+    if (game_state.tracking_projectile.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(game_state.tracking_projectile_index) - camera.pos);
+            hitbox_of_projectile(game_state.tracking_projectile.unwrap) - camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    int index = projectile_at_position(game_state.mouse_position);
-    if (index >= 0) {
+    auto projectile_index = projectile_at_position(game_state.mouse_position);
+    if (projectile_index.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(index) - camera.pos);
+            hitbox_of_projectile(projectile_index.unwrap) - camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
         return;
     }
@@ -306,7 +306,7 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
-    game_state.tracking_projectile_index = -1;
+    game_state.tracking_projectile = {};
 
     bool debug = false;
     bool step_debug = false;
@@ -391,9 +391,10 @@ int main(void)
 
             case SDL_MOUSEBUTTONDOWN: {
                 if (debug) {
-                    game_state.tracking_projectile_index =
+                    game_state.tracking_projectile =
                         projectile_at_position(game_state.mouse_position);
-                    if (game_state.tracking_projectile_index < 0) {
+
+                    if (game_state.tracking_projectile.has_value) {
                         Vec2i tile =
                             vec_cast<int>(game_state.mouse_position / TILE_SIZE);
                         if (is_tile_inbounds(tile)) {

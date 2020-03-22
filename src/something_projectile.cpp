@@ -26,7 +26,12 @@ struct Projectile
     Frame_Animat poof_animat;
 };
 
-const size_t projectiles_count = 69;
+struct Projectile_Index
+{
+    int unwrap;
+};
+
+const int projectiles_count = 69;
 Projectile projectiles[projectiles_count] = {};
 
 void init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat)
@@ -112,28 +117,28 @@ void update_projectiles(float dt)
 
 const float PROJECTILE_TRACKING_PADDING = 50.0f;
 
-Rectf hitbox_of_projectile(int index)
+Rectf hitbox_of_projectile(Projectile_Index index)
 {
-    assert((size_t) index < projectiles_count);
+    assert(index.unwrap < projectiles_count);
     return Rectf {
-        projectiles[index].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
-        projectiles[index].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
+        projectiles[index.unwrap].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
+        projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
         PROJECTILE_TRACKING_PADDING,
         PROJECTILE_TRACKING_PADDING
     };
 }
 
 // TODO(#37): introduce a typedef that indicates Projectile Id
-int projectile_at_position(Vec2f position)
+Maybe<Projectile_Index> projectile_at_position(Vec2f position)
 {
     for (int i = 0; i < (int) projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
 
-        Rectf hitbox = hitbox_of_projectile(i);
+        Rectf hitbox = hitbox_of_projectile({i});
         if (rect_contains_vec2(hitbox, position)) {
-            return i;
+            return {true, {i}};
         }
     }
 
-    return -1;
+    return {};
 }
