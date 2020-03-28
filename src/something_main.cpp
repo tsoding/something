@@ -401,7 +401,7 @@ int main(void)
                 game_state.mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
                 game_state.collision_probe = game_state.mouse_position;
-                resolve_point_collision(&game_state.collision_probe);
+                room_row[room_current].resolve_point_collision(&game_state.collision_probe);
 
                 Vec2i tile = vec_cast<int>(game_state.mouse_position / TILE_SIZE);
                 switch (game_state.state) {

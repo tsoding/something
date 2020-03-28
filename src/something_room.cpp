@@ -119,6 +119,55 @@ struct Room
         }
         println(stream, "}\n");
     }
+
+    void resolve_point_collision(Vec2f *p)
+    {
+        assert(p);
+
+        const auto tile = vec_cast<int>(*p / TILE_SIZE);
+
+        if (is_tile_empty(tile)) {
+            return;
+        }
+
+        const auto p0 = vec_cast<float>(tile) * TILE_SIZE;
+        const auto p1 = vec_cast<float>(tile + 1) * TILE_SIZE;
+
+        struct Side {
+            float d;
+            Vec2f np;
+            Vec2i nd;
+            float dd;
+        };
+
+        Side sides[] = {
+            {sqr_dist<float>({p0.x, 0},    {p->x, 0}),    {p0.x, p->y}, {-1,  0}, TILE_SIZE_SQR},     // left
+            {sqr_dist<float>({p1.x, 0},    {p->x, 0}),    {p1.x, p->y}, { 1,  0}, TILE_SIZE_SQR},     // right
+            {sqr_dist<float>({0, p0.y},    {0, p->y}),    {p->x, p0.y}, { 0, -1}, TILE_SIZE_SQR},     // top
+            {sqr_dist<float>({0, p1.y},    {0, p->y}),    {p->x, p1.y}, { 0,  1}, TILE_SIZE_SQR},     // bottom
+            {sqr_dist<float>({p0.x, p0.y}, {p->x, p->y}), {p0.x, p0.y}, {-1, -1}, TILE_SIZE_SQR * 2}, // top-left
+            {sqr_dist<float>({p1.x, p0.y}, {p->x, p->y}), {p1.x, p0.y}, { 1, -1}, TILE_SIZE_SQR * 2}, // top-right
+            {sqr_dist<float>({p0.x, p1.y}, {p->x, p->y}), {p0.x, p1.y}, {-1,  1}, TILE_SIZE_SQR * 2}, // bottom-left
+            {sqr_dist<float>({p1.x, p1.y}, {p->x, p->y}), {p1.x, p1.y}, { 1,  1}, TILE_SIZE_SQR * 2}  // bottom-right
+        };
+        const int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
+
+        int closest = -1;
+        for (int current = 0; current < SIDES_COUNT; ++current) {
+            for (int i = 1;
+                 !is_tile_empty(tile + (sides[current].nd * i)) ;
+                 ++i)
+            {
+                sides[current].d += sides[current].dd;
+            }
+
+            if (closest < 0 || sides[closest].d >= sides[current].d) {
+                closest = current;
+            }
+        }
+
+        *p = sides[closest].np;
+    }
 };
 
 Room dummy_room = {
