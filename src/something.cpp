@@ -5,6 +5,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#include <algorithm>
+
 #include <png.h>
 
 void print1(FILE *stream, char c)

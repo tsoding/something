@@ -29,6 +29,11 @@ struct Room
         return !is_tile_inbounds(p) || tiles[p.y][p.x] == Tile::Empty;
     }
 
+    bool is_tile_at_abs_p_empty(Vec2f p) const
+    {
+        return is_tile_empty(vec_cast<int>((p - position) / TILE_SIZE));
+    }
+
     void render(SDL_Renderer *renderer,
                 Camera camera,
                 Sprite top_ground_texture,
@@ -174,4 +179,4 @@ struct Room
 
 const size_t ROOM_ROW_COUNT = 8;
 Room room_row[ROOM_ROW_COUNT] = {};
-size_t room_current = 1;
+// size_t room_current = 1;
