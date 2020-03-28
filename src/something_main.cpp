@@ -345,15 +345,12 @@ int main(void)
             SDL_BLENDMODE_BLEND));
 
     Camera camera = {};
-    Vec2f camera_vel = {};
     while (!game_state.quit) {
         int window_w = 0, window_h = 0;
         SDL_GetWindowSize(window, &window_w, &window_h);
 
-        if (!debug) {
-            camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
-                vec2((float) window_w, (float) window_h) * 0.5f;
-        }
+        camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
+            vec2((float) window_w, (float) window_h) * 0.5f;
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -393,16 +390,6 @@ int main(void)
             } break;
 
             case SDL_MOUSEMOTION: {
-                if (debug) {
-                    camera_vel = vec_cast<float>(vec2(event.motion.x, event.motion.y)) -
-                        vec2((float) window_w, (float) window_h) * 0.5f;
-
-                    const float DEBUG_CAMERA_MOVE_THRESHOLD = 300.0f;
-                    if (sqr_len(camera_vel) < DEBUG_CAMERA_MOVE_THRESHOLD * DEBUG_CAMERA_MOVE_THRESHOLD) {
-                        camera_vel = {};
-                    }
-                }
-
                 game_state.mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
                 game_state.collision_probe = game_state.mouse_position;
@@ -493,7 +480,6 @@ int main(void)
         if (!step_debug) {
             float dt = 1.0f / (float) STEP_DEBUG_FPS;
             update_game_state(game_state, dt);
-            camera.pos += camera_vel * dt;
         }
     }
     SDL_Quit();
