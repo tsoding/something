@@ -32,8 +32,25 @@ struct Room
                 Camera camera,
                 Sprite top_ground_texture,
                 Sprite bottom_ground_texture,
-                Vec2f position = {0.0f, 0.0f})
+                Vec2f position = {0.0f, 0.0f},
+                SDL_Color blend_color = {0, 0, 0, 0})
     {
+        SDL_Color saved_blend_color = {};
+
+        sec(SDL_GetRenderDrawColor(
+                renderer,
+                &saved_blend_color.r,
+                &saved_blend_color.g,
+                &saved_blend_color.b,
+                &saved_blend_color.a));
+
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                blend_color.r,
+                blend_color.g,
+                blend_color.b,
+                blend_color.a));
+
         for (int y = 0; y < ROOM_HEIGHT; ++y) {
             for (int x = 0; x < ROOM_WIDTH; ++x) {
                 switch (tiles[y][x]) {
@@ -49,10 +66,20 @@ struct Room
                     } else {
                         render_sprite(renderer, bottom_ground_texture, dstrect);
                     }
+
+                    SDL_Rect rect = rectf_for_sdl(dstrect);
+                    SDL_RenderFillRect(renderer, &rect);
                 } break;
                 }
             }
         }
+
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                blend_color.r,
+                blend_color.g,
+                blend_color.b,
+                blend_color.a));
     }
 
     void fill_with(Tile tile)

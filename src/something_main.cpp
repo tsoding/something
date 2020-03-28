@@ -168,14 +168,13 @@ void render_game_state(const Game_State game_state,
                        Camera camera)
 {
     if (room_current > 0) {
-        global_texture_dst_color = {0, 0, 0, 100};
         room_row[room_current - 1].render(
             renderer,
             camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
-            {-ROOM_BOUNDARY.w, 0.0f});
-        global_texture_dst_color = {0, 0, 0, 0};
+            {-ROOM_BOUNDARY.w, 0.0f},
+            {0, 0, 0, 100});
     }
 
     room_row[room_current].render(
@@ -185,15 +184,13 @@ void render_game_state(const Game_State game_state,
         game_state.ground_texture);
 
     if (room_current + 1 < ROOM_ROW_COUNT) {
-        global_texture_dst_color = {0, 0, 0, 100};
-        assert(room_current + 1 < ROOM_ROW_COUNT);
         room_row[room_current + 1].render(
             renderer,
             camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
-            {ROOM_BOUNDARY.w, 0.0f});
-        global_texture_dst_color = {0, 0, 0, 0};
+            {ROOM_BOUNDARY.w, 0.0f},
+            {0, 0, 0, 100});
     }
 
     render_entities(renderer, camera);
@@ -334,9 +331,6 @@ int main(void)
         static_assert(ROOM_ROW_COUNT <= ROOM_HEIGHT);
         room_row[room_index].floor_at(Tile::Wall, ROOM_HEIGHT - 1 - room_index);
     }
-
-    room_row[0].fill_with(Tile::Wall);
-    room_row[2].fill_with(Tile::Wall);
 
     bool debug = false;
     bool step_debug = false;
