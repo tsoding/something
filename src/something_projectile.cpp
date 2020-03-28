@@ -24,7 +24,7 @@ struct Projectile
     Vec2f vel;
     Frame_Animat active_animat;
     Frame_Animat poof_animat;
-    // TODO: introduce lifetime to Projectiles
+    // TODO(#46): introduce lifetime to Projectiles
 };
 
 struct Projectile_Index
