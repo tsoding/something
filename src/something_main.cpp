@@ -480,7 +480,7 @@ int main(void)
             sec(SDL_RenderFillRect(renderer, &rect));
         }
 
-        // TODO: there is not right border
+        // TODO(#47): there is not right border
 
         render_game_state(game_state, renderer, camera);
 
