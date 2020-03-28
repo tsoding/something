@@ -35,10 +35,8 @@ struct Entity
 
     int cooldown_weapon;
 
-    void resolve_entity_collision(Room *room)
+    void resolve_entity_collision()
     {
-        assert(room);
-
         Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
         Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
 
@@ -52,7 +50,12 @@ struct Entity
 
         for (int i = 0; i < MESH_COUNT; ++i) {
             Vec2f t = mesh[i];
-            room->resolve_point_collision(&t);
+            int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
+
+            if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
+                room_row[room_index].resolve_point_collision(&t);
+            }
+
             Vec2f d = t - mesh[i];
 
             const int IMPACT_THRESHOLD = 5;
@@ -162,7 +165,7 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
     case Entity_State::Alive: {
         entity->vel += gravity * dt;
         entity->pos += entity->vel * dt;
-        entity->resolve_entity_collision(&room_row[room_current]);
+        entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
 
         switch (entity->alive_state) {

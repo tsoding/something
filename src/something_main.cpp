@@ -173,7 +173,6 @@ void render_game_state(const Game_State game_state,
             camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
-            {-ROOM_BOUNDARY.w, 0.0f},
             {0, 0, 0, 100});
     }
 
@@ -189,7 +188,6 @@ void render_game_state(const Game_State game_state,
             camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
-            {ROOM_BOUNDARY.w, 0.0f},
             {0, 0, 0, 100});
     }
 
@@ -328,6 +326,7 @@ int main(void)
     game_state.tracking_projectile = {};
 
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
+        room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
         static_assert(ROOM_ROW_COUNT <= ROOM_HEIGHT);
         room_row[room_index].floor_at(Tile::Wall, ROOM_HEIGHT - 1 - room_index);
     }
