@@ -92,6 +92,12 @@ Rect<T> operator-(Rect<T> a, Vec2<T> b)
     return {a.x - b.x, a.y - b.y, a.w, a.h};
 }
 
+template <typename T>
+Rect<T> operator+(Rect<T> a, Vec2<T> b)
+{
+    return {a.x + b.x, a.y + b.y, a.w, a.h};
+}
+
 //////////////////////////////
 // Algorithms
 //////////////////////////////

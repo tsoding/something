@@ -27,21 +27,14 @@ void render_sprite(SDL_Renderer *renderer,
                    Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
-    SDL_Rect destrect = {
-        (int) floorf(pos.x - (float) texture.srcrect.w * 0.5f),
-        (int) floorf(pos.y - (float) texture.srcrect.h * 0.5f),
-        texture.srcrect.w,
-        texture.srcrect.h
+    const Rectf destrect = {
+        pos.x - (float) texture.srcrect.w * 0.5f,
+        pos.y - (float) texture.srcrect.h * 0.5f,
+        (float) texture.srcrect.w,
+        (float) texture.srcrect.h
     };
 
-    sec(SDL_RenderCopyEx(
-            renderer,
-            texture.texture,
-            &texture.srcrect,
-            &destrect,
-            0.0,
-            nullptr,
-            flip));
+    render_sprite(renderer, texture, destrect, flip);
 }
 
 struct Frame_Animat

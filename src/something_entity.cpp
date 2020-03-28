@@ -34,6 +34,41 @@ struct Entity
     Entity_Dir dir;
 
     int cooldown_weapon;
+
+    void resolve_entity_collision()
+    {
+        Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
+        Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
+
+        Vec2f mesh[] = {
+            p0,
+            {p1.x, p0.y},
+            {p0.x, p1.y},
+            p1,
+        };
+        const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+
+        for (int i = 0; i < MESH_COUNT; ++i) {
+            Vec2f t = mesh[i];
+            int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
+
+            if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
+                room_row[room_index].resolve_point_collision(&t);
+            }
+
+            Vec2f d = t - mesh[i];
+
+            const int IMPACT_THRESHOLD = 5;
+            if (abs(d.y) >= IMPACT_THRESHOLD) vel.y = 0;
+            if (abs(d.x) >= IMPACT_THRESHOLD) vel.x = 0;
+
+            for (int j = 0; j < MESH_COUNT; ++j) {
+                mesh[j] += d;
+            }
+
+            pos += d;
+        }
+    }
 };
 
 struct Entity_Index
@@ -47,87 +82,6 @@ const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
 // TODO(#36): introduce a typedef that indicates Entity Id
-
-void resolve_point_collision(Vec2f *p)
-{
-    assert(p);
-
-    const auto tile = vec_cast<int>(*p / TILE_SIZE);
-
-    if (room_row[room_current].is_tile_empty(tile)) {
-        return;
-    }
-
-    const auto p0 = vec_cast<float>(tile) * TILE_SIZE;
-    const auto p1 = vec_cast<float>(tile + 1) * TILE_SIZE;
-
-    struct Side {
-        float d;
-        Vec2f np;
-        Vec2i nd;
-        float dd;
-    };
-
-    Side sides[] = {
-        {sqr_dist<float>({p0.x, 0},    {p->x, 0}),    {p0.x, p->y}, {-1,  0}, TILE_SIZE_SQR},     // left
-        {sqr_dist<float>({p1.x, 0},    {p->x, 0}),    {p1.x, p->y}, { 1,  0}, TILE_SIZE_SQR},     // right
-        {sqr_dist<float>({0, p0.y},    {0, p->y}),    {p->x, p0.y}, { 0, -1}, TILE_SIZE_SQR},     // top
-        {sqr_dist<float>({0, p1.y},    {0, p->y}),    {p->x, p1.y}, { 0,  1}, TILE_SIZE_SQR},     // bottom
-        {sqr_dist<float>({p0.x, p0.y}, {p->x, p->y}), {p0.x, p0.y}, {-1, -1}, TILE_SIZE_SQR * 2}, // top-left
-        {sqr_dist<float>({p1.x, p0.y}, {p->x, p->y}), {p1.x, p0.y}, { 1, -1}, TILE_SIZE_SQR * 2}, // top-right
-        {sqr_dist<float>({p0.x, p1.y}, {p->x, p->y}), {p0.x, p1.y}, {-1,  1}, TILE_SIZE_SQR * 2}, // bottom-left
-        {sqr_dist<float>({p1.x, p1.y}, {p->x, p->y}), {p1.x, p1.y}, { 1,  1}, TILE_SIZE_SQR * 2}  // bottom-right
-    };
-    const int SIDES_COUNT = sizeof(sides) / sizeof(sides[0]);
-
-    int closest = -1;
-    for (int current = 0; current < SIDES_COUNT; ++current) {
-        for (int i = 1;
-             !room_row[room_current].is_tile_empty(tile + (sides[current].nd * i)) ;
-             ++i)
-        {
-            sides[current].d += sides[current].dd;
-        }
-
-        if (closest < 0 || sides[closest].d >= sides[current].d) {
-            closest = current;
-        }
-    }
-
-    *p = sides[closest].np;
-}
-
-void resolve_entity_collision(Entity *entity)
-{
-    assert(entity);
-
-    Vec2f p0 = vec2(entity->hitbox_local.x, entity->hitbox_local.y) + entity->pos;
-    Vec2f p1 = p0 + vec2(entity->hitbox_local.w, entity->hitbox_local.h);
-
-    Vec2f mesh[] = {
-        p0,
-        {p1.x, p0.y},
-        {p0.x, p1.y},
-        p1,
-    };
-    const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
-
-    for (int i = 0; i < MESH_COUNT; ++i) {
-        Vec2f t = mesh[i];
-        resolve_point_collision(&t);
-        Vec2f d = t - mesh[i];
-
-        const int IMPACT_THRESHOLD = 5;
-        if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
-        if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
-
-        for (int j = 0; j < MESH_COUNT; ++j) {
-            mesh[j] += d;
-        }
-
-        entity->pos += d;
-    }
-}
 
 Sprite last_alive_frame_of_entity(Entity_Index entity_index)
 {
@@ -211,7 +165,7 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
     case Entity_State::Alive: {
         entity->vel += gravity * dt;
         entity->pos += entity->vel * dt;
-        resolve_entity_collision(entity);
+        entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
 
         switch (entity->alive_state) {

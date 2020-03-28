@@ -24,6 +24,7 @@ struct Projectile
     Vec2f vel;
     Frame_Animat active_animat;
     Frame_Animat poof_animat;
+    // TODO(#46): introduce lifetime to Projectiles
 };
 
 struct Projectile_Index
@@ -93,11 +94,13 @@ void update_projectiles(float dt)
         case Projectile_State::Active: {
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel;
-            const auto projectile_tile = projectiles[i].pos / TILE_SIZE;
-            if (!room_row[room_current].is_tile_empty(vec_cast<int>(projectile_tile))
-                || !rect_contains_vec2(ROOM_BOUNDARY, projectiles[i].pos)) {
-                projectiles[i].state = Projectile_State::Poof;
-                projectiles[i].poof_animat.frame_current = 0;
+
+            int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
+            if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
+                if (!room_row[room_current].is_tile_at_abs_p_empty(projectiles[i].pos)) {
+                    projectiles[i].state = Projectile_State::Poof;
+                    projectiles[i].poof_animat.frame_current = 0;
+                }
             }
         } break;
 
