@@ -24,7 +24,7 @@ struct Projectile
     Vec2f vel;
     Frame_Animat active_animat;
     Frame_Animat poof_animat;
-    // TODO(#46): introduce lifetime to Projectiles
+    float lifetime;
 };
 
 struct Projectile_Index
@@ -54,12 +54,14 @@ int count_alive_projectiles(void)
 
 void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
+    const float PROJECTILE_LIFETIME = 5.0f;
     for (size_t i = 0; i < projectiles_count; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
             projectiles[i].state = Projectile_State::Active;
             projectiles[i].pos = pos;
             projectiles[i].vel = vel;
             projectiles[i].shooter = shooter;
+            projectiles[i].lifetime = PROJECTILE_LIFETIME;
             return;
         }
     }
@@ -101,6 +103,13 @@ void update_projectiles(float dt)
                     projectiles[i].state = Projectile_State::Poof;
                     projectiles[i].poof_animat.frame_current = 0;
                 }
+            }
+
+            projectiles[i].lifetime -= dt;
+
+            if (projectiles[i].lifetime <= 0.0f) {
+                projectiles[i].state = Projectile_State::Poof;
+                projectiles[i].poof_animat.frame_current = 0;
             }
         } break;
 
