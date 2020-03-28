@@ -31,7 +31,8 @@ struct Room
     void render(SDL_Renderer *renderer,
                 Camera camera,
                 Sprite top_ground_texture,
-                Sprite bottom_ground_texture)
+                Sprite bottom_ground_texture,
+                Vec2f position = {0.0f, 0.0f})
     {
         for (int y = 0; y < ROOM_HEIGHT; ++y) {
             for (int x = 0; x < ROOM_WIDTH; ++x) {
@@ -41,7 +42,7 @@ struct Room
 
                 case Tile::Wall: {
                     const auto dstrect = rect(
-                        vec_cast<float>(vec2(x, y)) * TILE_SIZE - camera.pos,
+                        vec_cast<float>(vec2(x, y)) * TILE_SIZE + position - camera.pos,
                         TILE_SIZE, TILE_SIZE);
                     if (is_tile_empty(vec2(x, y - 1))) {
                         render_sprite(renderer, top_ground_texture, dstrect);
@@ -51,6 +52,23 @@ struct Room
                 } break;
                 }
             }
+        }
+    }
+
+    void fill_with(Tile tile)
+    {
+        for (size_t row = 0; row < ROOM_HEIGHT; ++row) {
+            for (size_t col = 0; col < ROOM_WIDTH; ++col) {
+                tiles[row][col] = tile;
+            }
+        }
+    }
+
+    void floor_at(Tile tile, size_t row)
+    {
+        for (size_t column_index = 0; column_index < ROOM_WIDTH; ++column_index) {
+            static_assert(ROOM_HEIGHT >= 0);
+            tiles[row][column_index] = tile;
         }
     }
 
@@ -93,4 +111,4 @@ Room dummy_room = {
 
 const size_t ROOM_ROW_COUNT = 8;
 Room room_row[ROOM_ROW_COUNT] = {};
-size_t room_current = 0;
+size_t room_current = 1;

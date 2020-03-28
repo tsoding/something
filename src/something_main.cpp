@@ -76,9 +76,9 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto level_boundary_screen = ROOM_BOUNDARY - camera.pos;
+    auto room_boundary_screen = ROOM_BOUNDARY - camera.pos;
     {
-        auto rect = rectf_for_sdl(level_boundary_screen);
+        auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
     }
 
@@ -167,11 +167,35 @@ void render_game_state(const Game_State game_state,
                        SDL_Renderer *renderer,
                        Camera camera)
 {
+    if (room_current > 0) {
+        global_texture_dst_color = {0, 0, 0, 100};
+        room_row[room_current - 1].render(
+            renderer,
+            camera,
+            game_state.ground_grass_texture,
+            game_state.ground_texture,
+            {-ROOM_BOUNDARY.w, 0.0f});
+        global_texture_dst_color = {0, 0, 0, 0};
+    }
+
     room_row[room_current].render(
         renderer,
         camera,
         game_state.ground_grass_texture,
         game_state.ground_texture);
+
+    if (room_current + 1 < ROOM_ROW_COUNT) {
+        global_texture_dst_color = {0, 0, 0, 100};
+        assert(room_current + 1 < ROOM_ROW_COUNT);
+        room_row[room_current + 1].render(
+            renderer,
+            camera,
+            game_state.ground_grass_texture,
+            game_state.ground_texture,
+            {ROOM_BOUNDARY.w, 0.0f});
+        global_texture_dst_color = {0, 0, 0, 0};
+    }
+
     render_entities(renderer, camera);
     render_projectiles(renderer, camera);
 }
@@ -307,14 +331,19 @@ int main(void)
     game_state.tracking_projectile = {};
 
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        for (size_t column_index = 0; column_index < ROOM_WIDTH; ++column_index) {
-            static_assert(ROOM_HEIGHT >= 0);
-            room_row[room_index].tiles[ROOM_HEIGHT - 1][column_index] = Tile::Wall;
-        }
+        static_assert(ROOM_ROW_COUNT <= ROOM_HEIGHT);
+        room_row[room_index].floor_at(Tile::Wall, ROOM_HEIGHT - 1 - room_index);
     }
+
+    room_row[0].fill_with(Tile::Wall);
+    room_row[2].fill_with(Tile::Wall);
 
     bool debug = false;
     bool step_debug = false;
+
+    sec(SDL_SetRenderDrawBlendMode(
+            renderer,
+            SDL_BLENDMODE_BLEND));
 
     Camera camera = {};
     Vec2f camera_vel = {};
@@ -423,7 +452,7 @@ int main(void)
             }
         }
 
-        const float PLAYER_SPEED = 200.0f;
+        const float PLAYER_SPEED = 600.0f;
         if (keyboard[SDL_SCANCODE_D]) {
             entity_move({PLAYER_ENTITY_INDEX}, PLAYER_SPEED);
         } else if (keyboard[SDL_SCANCODE_A]) {

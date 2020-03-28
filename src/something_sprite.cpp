@@ -1,3 +1,6 @@
+SDL_BlendMode global_texture_blend_mode = SDL_BLENDMODE_BLEND;
+SDL_Color global_texture_dst_color = {0, 0, 0, 0};
+
 struct Sprite
 {
     SDL_Rect srcrect;
@@ -12,6 +15,31 @@ void render_sprite(SDL_Renderer *renderer,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
     SDL_Rect rect = rectf_for_sdl(destrect);
+
+    SDL_Color saved_texture_dst_color = {};
+
+    sec(SDL_GetRenderDrawColor(
+            renderer,
+            &saved_texture_dst_color.r,
+            &saved_texture_dst_color.g,
+            &saved_texture_dst_color.b,
+            &saved_texture_dst_color.a));
+
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            global_texture_dst_color.r,
+            global_texture_dst_color.g,
+            global_texture_dst_color.b,
+            global_texture_dst_color.a));
+
+    SDL_BlendMode saved_texture_blend_mode = {};
+    sec(SDL_GetTextureBlendMode(
+            texture.texture,
+            &saved_texture_blend_mode));
+    sec(SDL_SetTextureBlendMode(
+            texture.texture,
+            global_texture_blend_mode));
+
     sec(SDL_RenderCopyEx(
             renderer,
             texture.texture,
@@ -20,6 +48,19 @@ void render_sprite(SDL_Renderer *renderer,
             0.0,
             nullptr,
             flip));
+    sec(SDL_RenderFillRect(renderer, &rect));
+
+
+    sec(SDL_SetTextureBlendMode(
+            texture.texture,
+            saved_texture_blend_mode));
+
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            global_texture_dst_color.r,
+            global_texture_dst_color.g,
+            global_texture_dst_color.b,
+            global_texture_dst_color.a));
 }
 
 void render_sprite(SDL_Renderer *renderer,
@@ -27,21 +68,14 @@ void render_sprite(SDL_Renderer *renderer,
                    Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
-    SDL_Rect destrect = {
-        (int) floorf(pos.x - (float) texture.srcrect.w * 0.5f),
-        (int) floorf(pos.y - (float) texture.srcrect.h * 0.5f),
-        texture.srcrect.w,
-        texture.srcrect.h
+    const Rectf destrect = {
+        pos.x - (float) texture.srcrect.w * 0.5f,
+        pos.y - (float) texture.srcrect.h * 0.5f,
+        (float) texture.srcrect.w,
+        (float) texture.srcrect.h
     };
 
-    sec(SDL_RenderCopyEx(
-            renderer,
-            texture.texture,
-            &texture.srcrect,
-            &destrect,
-            0.0,
-            nullptr,
-            flip));
+    render_sprite(renderer, texture, destrect, flip);
 }
 
 struct Frame_Animat
