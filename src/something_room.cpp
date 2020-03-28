@@ -179,4 +179,17 @@ struct Room
 
 const size_t ROOM_ROW_COUNT = 8;
 Room room_row[ROOM_ROW_COUNT] = {};
-// size_t room_current = 1;
+
+struct Room_Index
+{
+    size_t unwrap;
+};
+
+Room_Index room_current(Vec2f p)
+{
+    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
+
+    if (index < 0) return {0};
+    if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
+    return {(size_t) index};
+}

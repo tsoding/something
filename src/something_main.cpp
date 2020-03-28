@@ -167,14 +167,12 @@ void render_game_state(const Game_State game_state,
                        SDL_Renderer *renderer,
                        Camera camera)
 {
-    int room_current = std::clamp(
-        (int) floor(entities[PLAYER_ENTITY_INDEX].pos.x / ROOM_BOUNDARY.w),
-        0, (int) ROOM_ROW_COUNT - 1);
+    auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
 
     const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
 
-    if (room_current > 0) {
-        room_row[room_current - 1].render(
+    if (index.unwrap > 0) {
+        room_row[index.unwrap - 1].render(
             renderer,
             camera,
             game_state.ground_grass_texture,
@@ -182,14 +180,14 @@ void render_game_state(const Game_State game_state,
             {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
     }
 
-    room_row[room_current].render(
+    room_row[index.unwrap].render(
         renderer,
         camera,
         game_state.ground_grass_texture,
         game_state.ground_texture);
 
-    if (room_current + 1 < (int) ROOM_ROW_COUNT) {
-        room_row[room_current + 1].render(
+    if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
+        room_row[index.unwrap + 1].render(
             renderer,
             camera,
             game_state.ground_grass_texture,
@@ -406,22 +404,21 @@ int main(void)
                 game_state.mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
                 game_state.collision_probe = game_state.mouse_position;
-                int room_current = (int) (game_state.collision_probe.x / TILE_SIZE);
 
-                if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
-                    room_row[room_current].resolve_point_collision(&game_state.collision_probe);
-                }
+                auto index = room_current(game_state.collision_probe);
+                room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
-                Vec2i tile = vec_cast<int>(game_state.mouse_position / TILE_SIZE);
+                // TODO: level editing is broken
+                Vec2i tile = vec_cast<int>((game_state.mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
                 switch (game_state.state) {
                 case Debug_Draw_State::Create: {
-                    if (room_row[room_current].is_tile_inbounds(tile))
-                        room_row[room_current].tiles[tile.y][tile.x] = Tile::Wall;
+                    if (room_row[index.unwrap].is_tile_inbounds(tile))
+                        room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
                 } break;
 
                 case Debug_Draw_State::Delete: {
-                    if (room_row[room_current].is_tile_inbounds(tile))
-                        room_row[room_current].tiles[tile.y][tile.x] = Tile::Empty;
+                    if (room_row[index.unwrap].is_tile_inbounds(tile))
+                        room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                 } break;
 
                 default: {}
@@ -435,21 +432,20 @@ int main(void)
 
                     if (!game_state.tracking_projectile.has_value) {
 
-                        int room_current = (int) floorf(game_state.mouse_position.x / TILE_SIZE);
-                        if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
-                            Vec2i tile =
-                                vec_cast<int>(
-                                    (game_state.mouse_position - room_row[room_current].position) /
-                                    TILE_SIZE);
+                        auto index = room_current(game_state.mouse_position);
 
-                            if (room_row[room_current].is_tile_inbounds(tile)) {
-                                if (room_row[room_current].tiles[tile.y][tile.x] == Tile::Empty) {
-                                    game_state.state = Debug_Draw_State::Create;
-                                    room_row[room_current].tiles[tile.y][tile.x] = Tile::Wall;
-                                } else {
-                                    game_state.state = Debug_Draw_State::Delete;
-                                    room_row[room_current].tiles[tile.y][tile.x] = Tile::Empty;
-                                }
+                        Vec2i tile =
+                            vec_cast<int>(
+                                (game_state.mouse_position - room_row[index.unwrap].position) /
+                                TILE_SIZE);
+
+                        if (room_row[index.unwrap].is_tile_inbounds(tile)) {
+                            if (room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
+                                game_state.state = Debug_Draw_State::Create;
+                                room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                            } else {
+                                game_state.state = Debug_Draw_State::Delete;
+                                room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                             }
                         }
                     }
@@ -475,11 +471,9 @@ int main(void)
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
-        int room_current = std::clamp(
-            (int) floor(entities[PLAYER_ENTITY_INDEX].pos.x / ROOM_BOUNDARY.w),
-            0, (int) ROOM_ROW_COUNT - 1);
+        auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
 
-        if (room_current == 0) {
+        if (index.unwrap == 0) {
             const SDL_Rect rect = {0, 0, (int)floorf(-camera.pos.x), window_h};
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &rect));
@@ -502,6 +496,8 @@ int main(void)
         }
     }
     SDL_Quit();
+
+    // TODO: room border is not drawn
 
     return 0;
 }
