@@ -76,7 +76,9 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto room_boundary_screen = ROOM_BOUNDARY - camera.pos;
+    auto index = room_current(game_state.mouse_position);
+    auto room_boundary_screen =
+        (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - camera.pos;
     {
         auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
@@ -408,7 +410,6 @@ int main(void)
                 auto index = room_current(game_state.collision_probe);
                 room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
-                // TODO: level editing is broken
                 Vec2i tile = vec_cast<int>((game_state.mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
                 switch (game_state.state) {
                 case Debug_Draw_State::Create: {
@@ -496,8 +497,6 @@ int main(void)
         }
     }
     SDL_Quit();
-
-    // TODO: room border is not drawn
 
     return 0;
 }
