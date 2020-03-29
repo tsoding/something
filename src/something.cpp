@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
 

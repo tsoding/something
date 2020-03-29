@@ -1,3 +1,5 @@
+const float PI = 3.14159274101f;
+
 SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
                                     TTF_Font *font,
                                     const char *text,
@@ -280,7 +282,189 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     }
 }
 
+struct Note
+{
+    float freq;
+    float duration;
+};
+
+struct Melody
+{
+    size_t notes_size;
+    Note *notes;
+    float t;
+
+    float current_db() const
+    {
+        size_t i = 0;
+        float ti = 0.0f;
+        for (; i < notes_size; ++i)
+        {
+            if (ti + notes[i].duration > t) break;
+            ti += notes[i].duration;
+        }
+
+        const Note note = i < notes_size ? notes[i] : Note {0.0f, 0.0f};
+        const float delta_angle = 2 * PI * note.freq;
+        const float attacc = 32.0f;
+        const float decay = 16.0f;
+        const float volume = fminf(1.0f, ((t - ti) / notes[i].duration) * attacc)
+                              * fminf(1.0f, (1.0f - (t - ti) / notes[i].duration) * decay);
+        return sinf(t * delta_angle) * volume;
+    }
+
+    float duration() const
+    {
+        float result = 0.0f;
+        for (size_t i = 0; i < notes_size; ++i) {
+            result += notes[i].duration;
+        }
+        return result;
+    }
+};
+
+const int BPM = 130;
+
+#define A1  (220.00f * 2.0f)
+#define D1  (146.83f * 2.0f)
+#define D2  (293.66f * 2.0f)
+#define F1  (174.61f * 2.0f)
+#define G1  (196.00f * 2.0f)
+#define GS1 (207.65f * 2.0f)
+#define P 0.0f
+
+#define Dur(n) (float) ((4.0f * (1.0f / (BPM / 60.0))) / (float) (n))
+
+Note megalovania[] = {
+    {D1,  Dur(16)/* - Dur(128)*/},
+    // {P,   Dur(128)},
+    {D1,  Dur(16)},
+    {D2,  Dur(8)},
+    {A1,  Dur(8)},
+    {P,   Dur(16)},
+    {GS1, Dur(16)},
+    {P,   Dur(16)},
+    {G1,  Dur(16)},
+    {P,   Dur(16)},
+    {F1,  Dur(8)},
+    {D1,  Dur(16)},
+    {F1,  Dur(16)},
+    {G1,  Dur(16)},
+};
+size_t megalovania_count = sizeof(megalovania) / sizeof(megalovania[0]);
+
+const int SOMETHING_AUDIO_FREQUENCY = 48000;
+const int SOMETHING_AUDIO_SAMPLES = 4096;
+const float AUDIO_CALLBACK_DT =
+    (float) SOMETHING_AUDIO_SAMPLES / (float) SOMETHING_AUDIO_FREQUENCY;
+const float AUDIO_SAMPLE_DT =
+    AUDIO_CALLBACK_DT / (float) SOMETHING_AUDIO_SAMPLES;
+
+void CancerAudioCallback(void *userdata, Uint8 * stream, int len)
+{
+    (void) userdata;
+    (void) stream;
+
+    float *dt = (float*) userdata;
+    float *output = (float*) stream;
+    int output_len = len / (int) sizeof(*output);
+
+    const float volume = 0.2f;
+    const float step = (float) (rand() % 10) * 0.01f;
+    for (int i = 0; i < output_len; i += 1) {
+        output[i] = sinf(*dt) * volume;
+        *dt = fmodf(*dt + step, 2.0f * PI);
+    }
+
+    println(stdout, len);
+}
+
+void MelodyAudioCallback(void *userdata, Uint8 *stream, int len)
+{
+    Melody *melody = (Melody*) userdata;
+
+    float *output = (float*)stream;
+    int output_len = len / (int) sizeof(*output);
+
+    for (int i = 0; i < output_len; i += 2) {
+        output[i + 1] = output[i] = melody->current_db();
+        melody->t = fmodf(melody->t + AUDIO_SAMPLE_DT, melody->duration());
+    }
+}
+
+void TimingAudioCallback(void *userdata, Uint8 *stream, int len)
+{
+    (void) stream;
+    (void) len;
+
+    Uint32 *begin = (Uint32*) userdata;
+    Uint32 end = SDL_GetTicks();
+
+    println(stdout, end - *begin);
+
+    *begin = end;
+}
+
 int main(void)
+{
+    sec(SDL_Init(SDL_INIT_AUDIO));
+
+    const int iscapture = 0;
+    /*
+    const int count = SDL_GetNumAudioDevices(iscapture);
+
+    for (int i = 0; i < count; ++i) {
+        println(stdout, "Audio device: ", SDL_GetAudioDeviceName(i, iscapture));
+    }
+    */
+
+    // float dt = 0.0f;
+    // Uint32 begin = SDL_GetTicks();
+    Melody melody = {};
+    melody.notes = megalovania;
+    melody.notes_size = megalovania_count;
+
+    SDL_AudioSpec want = {};
+    want.freq = SOMETHING_AUDIO_FREQUENCY;
+    want.format = AUDIO_F32;
+    want.channels = 2;
+    want.samples = SOMETHING_AUDIO_SAMPLES;
+
+    // want.callback = CancerAudioCallback;
+    // want.userdata = &dt;
+
+    // want.callback = TimingAudioCallback;
+    // want.userdata = &begin;
+
+    want.callback = MelodyAudioCallback;
+    want.userdata = &melody;
+
+    SDL_AudioSpec have = {};
+    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
+        NULL,
+        iscapture,
+        &want,
+        &have,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    if (dev == 0) {
+        println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
+        abort();
+    }
+
+    if (have.format != want.format) {
+        println(stderr, "[WARN] We didn't get Float32 audio format.");
+    }
+
+    SDL_PauseAudioDevice(dev, 0);
+    SDL_Delay(10000);
+    SDL_CloseAudioDevice(dev);
+
+    SDL_Quit();
+
+    return 0;
+}
+
+int main_(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO));
 
