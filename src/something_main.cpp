@@ -1,3 +1,5 @@
+const float PI = 3.14159274101f;
+
 SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
                                     TTF_Font *font,
                                     const char *text,
@@ -282,7 +284,40 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
 
 int main(void)
 {
-    sec(SDL_Init(SDL_INIT_VIDEO));
+    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+
+    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/qubodup-cfork-ccby3-jump.wav");
+    Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot.wav");
+
+    Sample_Mixer mixer = {};
+    mixer.volume = 0.2f;
+
+    SDL_AudioSpec want = {};
+    want.freq = SOMETHING_SOUND_FREQ;
+    want.format = SOMETHING_SOUND_FORMAT;
+    want.channels = SOMETHING_SOUND_CHANNELS;
+    want.samples = SOMETHING_SOUND_SAMPLES;
+    want.callback = sample_mixer_audio_callback;
+    want.userdata = &mixer;
+
+    SDL_AudioSpec have = {};
+    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
+        NULL,
+        0,
+        &want,
+        &have,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    // defer(SDL_CloseAudioDevice(dev));
+    if (dev == 0) {
+        println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
+        abort();
+    }
+
+    if (have.format != want.format) {
+        println(stderr, "[WARN] We didn't get expected audio format.");
+        abort();
+    }
+    SDL_PauseAudioDevice(dev, 0);
 
     SDL_Window *window =
         sec(SDL_CreateWindow(
@@ -363,6 +398,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     entities[PLAYER_ENTITY_INDEX].vel.y = game_state.gravity.y * -0.5f;
+                    mixer.play_sample(jump_sample);
                 } break;
 
                 case SDLK_q: {
@@ -381,6 +417,7 @@ int main(void)
 
                 case SDLK_e: {
                     entity_shoot({PLAYER_ENTITY_INDEX});
+                    mixer.play_sample(shoot_sample);
                 } break;
 
                 case SDLK_r: {

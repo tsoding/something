@@ -2,10 +2,12 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cerrno>
+#include <cmath>
 #include <SDL.h>
 #include <SDL_ttf.h>
 
 #include <algorithm>
+#include <limits>
 
 #include <png.h>
 
@@ -80,4 +82,5 @@ struct Camera
 #include "something_room.cpp"
 #include "something_entity.cpp"
 #include "something_projectile.cpp"
+#include "something_sound.cpp"
 #include "something_main.cpp"
