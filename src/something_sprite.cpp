@@ -131,6 +131,14 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
+Sprite load_png_file_as_sprite(SDL_Renderer *renderer, const char *image_filename)
+{
+    Sprite sprite = {};
+    sprite.texture = load_texture_from_png_file(renderer, image_filename);
+    sec(SDL_QueryTexture(sprite.texture, NULL, NULL, &sprite.srcrect.w, &sprite.srcrect.h));
+    return sprite;
+}
+
 struct Spritesheet
 {
     const char *filename;
@@ -240,6 +248,81 @@ void abort_parse_error(FILE *stream,
 
     abort();
 }
+
+struct Rubber_Animat
+{
+    Sprite sprite;
+    float begin;
+    float end;
+    float duration;
+    float t;
+
+    void render(SDL_Renderer *renderer,
+                Vec2f pos,
+                Rectf texbox,
+                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    {
+        const float offset = begin + (end - begin) * (t / duration);
+        const float w = texbox.w + offset * texbox.h;
+        const float h = texbox.h - offset * texbox.h;
+        Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
+        render_sprite(renderer, sprite, dstrect, flip);
+    }
+
+    void update(float dt)
+    {
+        t += dt;
+    }
+
+    bool finished() const
+    {
+        return t >= duration;
+    }
+
+    void reset()
+    {
+        t = 0.0f;
+    }
+};
+
+template <size_t N>
+struct Compose_Rubber_Animat
+{
+    Rubber_Animat rubber_animats[N];
+    size_t current;
+
+    void render(SDL_Renderer *renderer,
+                Vec2f pos,
+                Rectf texbox,
+                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    {
+        rubber_animats[std::min(current, N - 1)].render(renderer, pos, texbox, flip);
+    }
+
+    void update(float dt)
+    {
+        if (finished()) return;
+
+        if (rubber_animats[current].finished()) {
+            current += 1;
+        }
+
+        rubber_animats[current].update(dt);
+    }
+
+    bool finished() const
+    {
+        return current >= N;
+    }
+
+    void reset()
+    {
+        current = 0;
+        for (size_t i = 0; i < N; ++i) {
+            rubber_animats[i].reset();
+        }
+    }
+};
 
 struct Squash_Animat
 {

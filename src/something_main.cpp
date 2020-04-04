@@ -239,10 +239,11 @@ void update_game_state(Game_State game_state, float dt)
 
 const uint32_t STEP_DEBUG_FPS = 60;
 
+const int PLAYER_TEXBOX_SIZE = 64;
+const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
+
 void reset_entities(Frame_Animat walking, Frame_Animat idle)
 {
-    const int PLAYER_TEXBOX_SIZE = 64;
-    const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
     const Rectf texbox_local = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
         PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
@@ -283,6 +284,90 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
 }
 
 int main(void)
+{
+    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+
+    SDL_Window *window =
+        sec(SDL_CreateWindow(
+                "Something",
+                0, 0, 800, 600,
+                SDL_WINDOW_RESIZABLE));
+
+    SDL_Renderer *renderer =
+        sec(SDL_CreateRenderer(
+                window, -1,
+                SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
+
+    auto kkona = load_png_file_as_sprite(renderer, "./KKona.png");
+
+    const size_t PREPARE = 0;
+    const size_t ATTACK = 1;
+    const size_t RECOVER = 2;
+    Compose_Rubber_Animat<3> boingy_kkona = {};
+
+    boingy_kkona.rubber_animats[PREPARE].sprite = kkona;
+    boingy_kkona.rubber_animats[PREPARE].begin = 0.0f;
+    boingy_kkona.rubber_animats[PREPARE].end = 0.2f;
+    boingy_kkona.rubber_animats[PREPARE].duration = 0.5f;
+
+    boingy_kkona.rubber_animats[ATTACK].sprite = kkona;
+    boingy_kkona.rubber_animats[ATTACK].begin = 0.2f;
+    boingy_kkona.rubber_animats[ATTACK].end = -0.2f;
+    boingy_kkona.rubber_animats[ATTACK].duration = 0.1f;
+
+    boingy_kkona.rubber_animats[RECOVER].sprite = kkona;
+    boingy_kkona.rubber_animats[RECOVER].begin = -0.2f;
+    boingy_kkona.rubber_animats[RECOVER].end = 0.0f;
+    boingy_kkona.rubber_animats[RECOVER].duration = 0.2f;
+
+    const auto TEXBOX_SIZE = PLAYER_TEXBOX_SIZE * 4.0f;
+    const Rectf texbox_local = {
+        - (TEXBOX_SIZE / 2), - (TEXBOX_SIZE / 2),
+        TEXBOX_SIZE, TEXBOX_SIZE
+    };
+
+    const float FLOOR = 500.0f;
+    Vec2f gravity = vec2(0.0f, 3000.0f);
+    Vec2f position = vec2(500.0f, FLOOR);
+    Vec2f velocity = vec2(0.0f, 0.0f);
+    for(;;) {
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT: {
+                exit(0);
+            } break;
+            }
+        }
+
+        sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
+        sec(SDL_RenderClear(renderer));
+
+        const float dt = 1.0f / 60.0f;
+        velocity += gravity * dt;
+        position += velocity * dt;
+
+        if (position.y >= FLOOR) {
+            velocity = vec2(0.0f, 0.0f);
+            position.y = FLOOR;
+        }
+
+        boingy_kkona.render(renderer, position, texbox_local);
+        size_t prev = boingy_kkona.current;
+        boingy_kkona.update(dt);
+        if (prev == PREPARE && boingy_kkona.current == ATTACK) {
+            velocity.y = gravity.y * -0.5f;
+        }
+
+        if (boingy_kkona.finished() && fabsf(position.y - FLOOR) <= 1e-3) {
+            boingy_kkona.reset();
+        }
+
+        SDL_RenderPresent(renderer);
+    }
+}
+
+int main_something(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
