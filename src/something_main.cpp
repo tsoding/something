@@ -282,47 +282,87 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     }
 }
 
-struct Sample
+
+struct Sample_S16
 {
-    SDL_AudioFormat format;
-    float volume;
-    Uint8* audio_buf;
+    int16_t* audio_buf;
     Uint32 audio_len;
     Uint32 audio_cur;
+};
 
-    void stop()
-    {
-        audio_cur = audio_len;
-    }
+const size_t SAMPLE_MIXER_CAPACITY = 5;
 
-    void play()
+struct Sample_Mixer
+{
+    float volume;
+    Sample_S16 samples[SAMPLE_MIXER_CAPACITY];
+
+    void play_sample(Sample_S16 sample)
     {
-        audio_cur = 0;
+        for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
+            if (samples[i].audio_cur >= samples[i].audio_len) {
+                samples[i] = sample;
+                samples[i].audio_cur = 0;
+                return;
+            }
+        }
     }
 };
 
-void sample_audio_callback(void *userdata, Uint8 *stream, int len)
-{
-    Sample *sample = (Sample *)userdata;
+const size_t SOMETHING_SOUND_FREQ = 48000;
+const size_t SOMETHING_SOUND_FORMAT = 32784;
+const size_t SOMETHING_SOUND_CHANNELS = 1;
+const size_t SOMETHING_SOUND_SAMPLES = 4096;
 
-    assert(SDL_AUDIO_BITSIZE(sample->format) == 16);
-    assert(SDL_AUDIO_ISLITTLEENDIAN(sample->format));
-    assert(SDL_AUDIO_ISSIGNED(sample->format));
-    assert(SDL_AUDIO_ISINT(sample->format));
+Sample_S16 load_wav_as_sample_s16(const char *file_path)
+{
+    Sample_S16 sample = {};
+    SDL_AudioSpec want = {};
+    if (SDL_LoadWAV(file_path, &want, (Uint8**) &sample.audio_buf, &sample.audio_len) == nullptr) {
+        println(stderr, "SDL pooped itself: Failed to load ", file_path, ": ",
+                SDL_GetError());
+        abort();
+    }
+
+    assert(SDL_AUDIO_BITSIZE(want.format) == 16);
+    assert(SDL_AUDIO_ISLITTLEENDIAN(want.format));
+    assert(SDL_AUDIO_ISSIGNED(want.format));
+    assert(SDL_AUDIO_ISINT(want.format));
+    assert(want.freq == SOMETHING_SOUND_FREQ);
+    assert(want.channels == SOMETHING_SOUND_CHANNELS);
+    assert(want.samples == SOMETHING_SOUND_SAMPLES);
+
+    sample.audio_len /= 2;
+
+    return sample;
+}
+
+void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
+{
+    Sample_Mixer *mixer = (Sample_Mixer *)userdata;
+
+    int16_t *output = (int16_t *)stream;
+    size_t output_len = len / sizeof(*output);
 
     memset(stream, 0, len);
-    if (sample->audio_cur < sample->audio_len) {
-        memcpy(stream, sample->audio_buf + sample->audio_cur,
-               std::min((Uint32) len, sample->audio_len - sample->audio_cur));
-        sample->audio_cur += len;
+    for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
+        for (size_t j = 0; j < output_len; ++j) {
+            int16_t x = 0;
 
-        int16_t *output = (int16_t *)stream;
-        size_t output_len = len / sizeof(*output);
+            if (mixer->samples[i].audio_cur < mixer->samples[i].audio_len) {
+                x = mixer->samples[i].audio_buf[mixer->samples[i].audio_cur];
+                mixer->samples[i].audio_cur += 1;
+            }
 
-
-        for (size_t i = 0; i < output_len; ++i) {
-            output[i] = (int16_t) (output[i] * sample->volume);
+            output[j] = (int16_t) std::clamp(
+                output[j] + x,
+                (int) std::numeric_limits<int16_t>::min(),
+                (int) std::numeric_limits<int16_t>::max());
         }
+    }
+
+    for (size_t i = 0; i < output_len; ++i) {
+        output[i] = (int16_t) (output[i] * mixer->volume);
     }
 }
 
@@ -330,20 +370,19 @@ int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    Sample sample = {};
-    SDL_AudioSpec want = {};
-    const char *jump_sound_file_path = "./assets/sounds/qubodup-cfork-ccby3-jump.wav";
-    if (SDL_LoadWAV(jump_sound_file_path, &want, &sample.audio_buf, &sample.audio_len) == nullptr) {
-        println(stderr, "SDL pooped itself: Failed to load ", jump_sound_file_path, ": ",
-                SDL_GetError());
-        abort();
-    }
-    want.callback = sample_audio_callback;
-    want.userdata = &sample;
+    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/qubodup-cfork-ccby3-jump.wav");
+    Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot.wav");
 
-    sample.format = want.format;
-    sample.volume = 0.1f;
-    sample.stop();
+    Sample_Mixer mixer = {};
+    mixer.volume = 0.2f;
+
+    SDL_AudioSpec want = {};
+    want.freq = SOMETHING_SOUND_FREQ;
+    want.format = SOMETHING_SOUND_FORMAT;
+    want.channels = SOMETHING_SOUND_CHANNELS;
+    want.samples = SOMETHING_SOUND_SAMPLES;
+    want.callback = sample_mixer_audio_callback;
+    want.userdata = &mixer;
 
     SDL_AudioSpec have = {};
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
@@ -443,7 +482,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     entities[PLAYER_ENTITY_INDEX].vel.y = game_state.gravity.y * -0.5f;
-                    sample.play();
+                    mixer.play_sample(jump_sample);
                 } break;
 
                 case SDLK_q: {
@@ -462,6 +501,7 @@ int main(void)
 
                 case SDLK_e: {
                     entity_shoot({PLAYER_ENTITY_INDEX});
+                    mixer.play_sample(shoot_sample);
                 } break;
 
                 case SDLK_r: {

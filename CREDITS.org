@@ -3,3 +3,5 @@
 - https://opengameart.org/content/assorted-fireballs-and-effects
 - https://design.ubuntu.com/font/
 - https://opengameart.org/content/cute-cartoon-jump-sound-effect
+- https://opengameart.org/content/flatshot-complete-sfx-pack
+  - enemy_shot.wav

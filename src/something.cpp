@@ -7,6 +7,7 @@
 #include <SDL_ttf.h>
 
 #include <algorithm>
+#include <limits>
 
 #include <png.h>
 
