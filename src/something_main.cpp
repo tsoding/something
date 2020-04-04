@@ -405,68 +405,87 @@ void TimingAudioCallback(void *userdata, Uint8 *stream, int len)
     *begin = end;
 }
 
+struct Sample
+{
+    SDL_AudioFormat format;
+    float volume;
+    Uint8* audio_buf;
+    Uint32 audio_len;
+    Uint32 audio_cur;
+
+    void stop()
+    {
+        audio_cur = audio_len;
+    }
+
+    void play()
+    {
+        audio_cur = 0;
+    }
+};
+
+void SampleAudioCallback(void *userdata, Uint8 *stream, int len)
+{
+    Sample *sample = (Sample *)userdata;
+
+    assert(SDL_AUDIO_BITSIZE(sample->format) == 16);
+    assert(SDL_AUDIO_ISLITTLEENDIAN(sample->format));
+    assert(SDL_AUDIO_ISSIGNED(sample->format));
+    assert(SDL_AUDIO_ISINT(sample->format));
+
+    memset(stream, 0, len);
+    if (sample->audio_cur < sample->audio_len) {
+        memcpy(stream, sample->audio_buf + sample->audio_cur,
+               std::min((Uint32) len, sample->audio_len - sample->audio_cur));
+        sample->audio_cur += len;
+
+        int16_t *output = (int16_t *)stream;
+        size_t output_len = len / sizeof(*output);
+
+
+        for (size_t i = 0; i < output_len; ++i) {
+            output[i] = (int16_t) (output[i] * sample->volume);
+        }
+    }
+}
+
 int main(void)
 {
-    sec(SDL_Init(SDL_INIT_AUDIO));
+    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    const int iscapture = 0;
-    /*
-    const int count = SDL_GetNumAudioDevices(iscapture);
-
-    for (int i = 0; i < count; ++i) {
-        println(stdout, "Audio device: ", SDL_GetAudioDeviceName(i, iscapture));
-    }
-    */
-
-    // float dt = 0.0f;
-    // Uint32 begin = SDL_GetTicks();
-    Melody melody = {};
-    melody.notes = megalovania;
-    melody.notes_size = megalovania_count;
-
+    Sample sample = {};
     SDL_AudioSpec want = {};
-    want.freq = SOMETHING_AUDIO_FREQUENCY;
-    want.format = AUDIO_F32;
-    want.channels = 2;
-    want.samples = SOMETHING_AUDIO_SAMPLES;
+    const char *jump_sound_file_path = "./assets/sounds/qubodup-cfork-ccby3-jump.wav";
+    if (SDL_LoadWAV(jump_sound_file_path, &want, &sample.audio_buf, &sample.audio_len) == nullptr) {
+        println(stderr, "SDL pooped itself: Failed to load ", jump_sound_file_path, ": ",
+                SDL_GetError());
+        abort();
+    }
+    want.callback = SampleAudioCallback;
+    want.userdata = &sample;
 
-    // want.callback = CancerAudioCallback;
-    // want.userdata = &dt;
-
-    // want.callback = TimingAudioCallback;
-    // want.userdata = &begin;
-
-    want.callback = MelodyAudioCallback;
-    want.userdata = &melody;
+    sample.format = want.format;
+    sample.volume = 0.1f;
+    sample.stop();
 
     SDL_AudioSpec have = {};
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
         NULL,
-        iscapture,
+        0,
         &want,
         &have,
         SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    // defer(SDL_CloseAudioDevice(dev));
     if (dev == 0) {
         println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
         abort();
     }
 
     if (have.format != want.format) {
-        println(stderr, "[WARN] We didn't get Float32 audio format.");
+        println(stderr, "[WARN] We didn't get expected audio format.");
+        abort();
     }
-
     SDL_PauseAudioDevice(dev, 0);
-    SDL_Delay(10000);
-    SDL_CloseAudioDevice(dev);
-
-    SDL_Quit();
-
-    return 0;
-}
-
-int main_(void)
-{
-    sec(SDL_Init(SDL_INIT_VIDEO));
 
     SDL_Window *window =
         sec(SDL_CreateWindow(
@@ -547,6 +566,7 @@ int main_(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     entities[PLAYER_ENTITY_INDEX].vel.y = game_state.gravity.y * -0.5f;
+                    sample.play();
                 } break;
 
                 case SDLK_q: {
