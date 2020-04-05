@@ -230,10 +230,12 @@ void entity_shoot(Entity_Index entity_index)
     if (entity->state != Entity_State::Alive) return;
     if (entity->cooldown_weapon > 0) return;
 
+    const float PROJECTILE_SPEED = 20.0f;
+
     if (entity->dir == Entity_Dir::Right) {
-        spawn_projectile(entity->pos, vec2(10.0f, 0.0f), entity_index);
+        spawn_projectile(entity->pos, vec2(PROJECTILE_SPEED, 0.0f), entity_index);
     } else {
-        spawn_projectile(entity->pos, vec2(-10.0f, 0.0f), entity_index);
+        spawn_projectile(entity->pos, vec2(-PROJECTILE_SPEED, 0.0f), entity_index);
     }
 
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;

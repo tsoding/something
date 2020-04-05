@@ -283,7 +283,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     }
 }
 
-int main(void)
+int main_kkona(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
@@ -440,7 +440,7 @@ int main(void)
     }
 }
 
-int main_something(void)
+int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
