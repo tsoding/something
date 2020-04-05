@@ -251,22 +251,17 @@ void abort_parse_error(FILE *stream,
 
 struct Rubber_Animat
 {
-    Sprite sprite;
     float begin;
     float end;
     float duration;
     float t;
 
-    void render(SDL_Renderer *renderer,
-                Vec2f pos,
-                Rectf texbox,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    Rectf transform_rect(Rectf texbox, Vec2f pos) const
     {
         const float offset = begin + (end - begin) * (t / duration);
         const float w = texbox.w + offset * texbox.h;
         const float h = texbox.h - offset * texbox.h;
-        Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
-        render_sprite(renderer, sprite, dstrect, flip);
+        return {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
     }
 
     void update(float dt)
@@ -291,12 +286,9 @@ struct Compose_Rubber_Animat
     Rubber_Animat rubber_animats[N];
     size_t current;
 
-    void render(SDL_Renderer *renderer,
-                Vec2f pos,
-                Rectf texbox,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    Rectf transform_rect(Rectf texbox, Vec2f pos) const
     {
-        rubber_animats[std::min(current, N - 1)].render(renderer, pos, texbox, flip);
+        return rubber_animats[std::min(current, N - 1)].transform_rect(texbox, pos);
     }
 
     void update(float dt)

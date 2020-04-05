@@ -4,6 +4,13 @@ enum class Entity_Dir
     Left
 };
 
+enum class Jump_State
+{
+    No_Jump = 0,
+    Prepare,
+    Jump
+};
+
 enum class Entity_State
 {
     Ded = 0,
@@ -14,15 +21,14 @@ enum class Entity_State
 enum class Alive_State
 {
     Idle = 0,
-    Walking,
-    Prepare_For_Jump,
-    Jump
+    Walking
 };
 
 struct Entity
 {
     Entity_State state;
     Alive_State alive_state;
+    Jump_State jump_state;
 
     Rectf texbox_local;
     Rectf hitbox_local;
@@ -138,13 +144,29 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 
     switch (entity.state) {
     case Entity_State::Alive: {
+        Rectf texbox = {};
+
+        switch (entity.jump_state) {
+        case Jump_State::No_Jump:
+            texbox = entity_texbox_world(entity);
+            break;
+
+        case Jump_State::Prepare:
+            texbox = entity.prepare_for_jump.transform_rect(entity.texbox_local, entity.pos);
+            break;
+
+        case Jump_State::Jump:
+            texbox = entity.jump.transform_rect(entity.texbox_local, entity.pos);
+            break;
+        }
+
         switch (entity.alive_state) {
         case Alive_State::Idle: {
-            render_animat(renderer, entity.idle, entity_texbox_world(entity) - camera.pos, flip);
+            render_animat(renderer, entity.idle, texbox - camera.pos, flip);
         } break;
 
         case Alive_State::Walking: {
-            render_animat(renderer, entity.walking, entity_texbox_world(entity) - camera.pos, flip);
+            render_animat(renderer, entity.walking, texbox - camera.pos, flip);
         } break;
         }
     } break;
@@ -171,6 +193,22 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
         entity->pos += entity->vel * dt;
         entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
+
+        switch (entity->jump_state) {
+        case Jump_State::No_Jump:
+            break;
+
+        case Jump_State::Prepare:
+            entity->prepare_for_jump.update(dt);
+            break;
+
+        case Jump_State::Jump:
+            entity->jump.update(dt);
+            if (entity->jump.finished()) {
+                entity->jump_state = Jump_State::No_Jump;
+            }
+            break;
+        }
 
         switch (entity->alive_state) {
         case Alive_State::Idle: {
@@ -259,6 +297,34 @@ void kill_entity(Entity_Index entity_index)
     }
 }
 
+void entity_jump(Entity_Index entity_index,
+                 Vec2f gravity,
+                 Sample_Mixer *mixer,
+                 Sample_S16 jump_sample)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+
+    if (entity->state == Entity_State::Alive) {
+        switch (entity->jump_state) {
+        case Jump_State::No_Jump:
+            entity->prepare_for_jump.reset();
+            entity->jump_state = Jump_State::Prepare;
+            break;
+
+        case Jump_State::Prepare:
+            entity->jump.reset();
+            entity->jump_state = Jump_State::Jump;
+            entity->vel.y = gravity.y * -0.5f;
+            mixer->play_sample(jump_sample);
+            break;
+
+        case Jump_State::Jump:
+            break;
+        }
+    }
+}
+
 void update_entities(Vec2f gravity, float dt)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -297,9 +363,23 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].alive_state = Alive_State::Idle;
     entities[index.unwrap].texbox_local = texbox_local;
     entities[index.unwrap].hitbox_local = hitbox_local;
-    entities[index.unwrap].walking = walking;
-    entities[index.unwrap].idle = idle;
     entities[index.unwrap].pos = pos;
     entities[index.unwrap].dir = dir;
     entities[index.unwrap].poof.duration = POOF_DURATION;
+
+    entities[index.unwrap].walking = walking;
+    entities[index.unwrap].idle = idle;
+
+    entities[index.unwrap].prepare_for_jump.begin = 0.0f;
+    entities[index.unwrap].prepare_for_jump.end = 0.2f;
+    entities[index.unwrap].prepare_for_jump.duration = 0.2f;
+
+    entities[index.unwrap].jump.rubber_animats[0].begin = 0.2f;
+    entities[index.unwrap].jump.rubber_animats[0].end = -0.2f;
+    entities[index.unwrap].jump.rubber_animats[0].duration = 0.1f;
+
+    entities[index.unwrap].jump.rubber_animats[1].begin = -0.2f;
+    entities[index.unwrap].jump.rubber_animats[1].end = 0.0f;
+    entities[index.unwrap].jump.rubber_animats[1].duration = 0.2f;
+
 }

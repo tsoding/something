@@ -250,163 +250,6 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle)
     }
 }
 
-int main_kkona(void)
-{
-    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
-
-    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/qubodup-cfork-ccby3-jump.wav");
-
-    Sample_Mixer mixer = {};
-    mixer.volume = 0.2f;
-
-    SDL_AudioSpec want = {};
-    want.freq = SOMETHING_SOUND_FREQ;
-    want.format = SOMETHING_SOUND_FORMAT;
-    want.channels = SOMETHING_SOUND_CHANNELS;
-    want.samples = SOMETHING_SOUND_SAMPLES;
-    want.callback = sample_mixer_audio_callback;
-    want.userdata = &mixer;
-
-    SDL_AudioSpec have = {};
-    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
-        NULL,
-        0,
-        &want,
-        &have,
-        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-    // defer(SDL_CloseAudioDevice(dev));
-    if (dev == 0) {
-        println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
-        abort();
-    }
-
-    if (have.format != want.format) {
-        println(stderr, "[WARN] We didn't get expected audio format.");
-        abort();
-    }
-    SDL_PauseAudioDevice(dev, 0);
-
-    SDL_Window *window =
-        sec(SDL_CreateWindow(
-                "Something",
-                0, 0, 800, 600,
-                SDL_WINDOW_RESIZABLE));
-
-    SDL_Renderer *renderer =
-        sec(SDL_CreateRenderer(
-                window, -1,
-                SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
-
-    auto kkona = load_png_file_as_sprite(renderer, "./KKona.png");
-
-
-    Rubber_Animat prepare_animat = {};
-    prepare_animat.sprite = kkona;
-    prepare_animat.begin = 0.0f;
-    prepare_animat.end = 0.2f;
-    prepare_animat.duration = 0.5f;
-
-    enum Jump_Animat_Phase
-    {
-        ATTACK = 0,
-        RECOVER,
-        N
-    };
-    Compose_Rubber_Animat<N> jump_animat = {};
-    jump_animat.rubber_animats[ATTACK].sprite = kkona;
-    jump_animat.rubber_animats[ATTACK].begin = 0.2f;
-    jump_animat.rubber_animats[ATTACK].end = -0.2f;
-    jump_animat.rubber_animats[ATTACK].duration = 0.1f;
-
-    jump_animat.rubber_animats[RECOVER].sprite = kkona;
-    jump_animat.rubber_animats[RECOVER].begin = -0.2f;
-    jump_animat.rubber_animats[RECOVER].end = 0.0f;
-    jump_animat.rubber_animats[RECOVER].duration = 0.2f;
-
-    // This is hackish
-    jump_animat.current = N - 1;
-    jump_animat.rubber_animats[N - 1].t = jump_animat.rubber_animats[N - 1].duration;
-
-    bool jump = true;
-
-    const auto TEXBOX_SIZE = PLAYER_TEXBOX_SIZE * 4.0f;
-    const Rectf texbox_local = {
-        - (TEXBOX_SIZE / 2), - (TEXBOX_SIZE / 2),
-        TEXBOX_SIZE, TEXBOX_SIZE
-    };
-
-    const float FLOOR = 800.0f;
-    Vec2f gravity = vec2(0.0f, 3000.0f);
-    Vec2f position = vec2(500.0f, FLOOR);
-    Vec2f velocity = vec2(0.0f, 0.0f);
-    for(;;) {
-        SDL_Event event;
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_QUIT: {
-                exit(0);
-            } break;
-
-            case SDL_KEYDOWN: {
-                switch (event.key.keysym.sym) {
-                case SDLK_SPACE: {
-                    if (!event.key.repeat) {
-                        jump = false;
-                        prepare_animat.reset();
-                    }
-                } break;
-                }
-            } break;
-
-            case SDL_KEYUP: {
-                switch (event.key.keysym.sym) {
-                case SDLK_SPACE: {
-                    if (!event.key.repeat) {
-                        jump = true;
-                        jump_animat.reset();
-
-                        velocity.y = gravity.y * -0.5f;
-                        mixer.play_sample(jump_sample);
-                    }
-                } break;
-                }
-            } break;
-            }
-        }
-
-        sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
-        sec(SDL_RenderClear(renderer));
-
-        const float dt = 1.0f / 60.0f;
-        velocity += gravity * dt;
-        position += velocity * dt;
-
-        if (position.y >= FLOOR) {
-            velocity = vec2(0.0f, 0.0f);
-            position.y = FLOOR;
-        }
-
-        if (jump) {
-            jump_animat.render(renderer, position, texbox_local);
-            jump_animat.update(dt);
-        } else {
-            prepare_animat.render(renderer, position, texbox_local);
-            prepare_animat.update(dt);
-        }
-
-        // if (prev == PREPARE && boingy_kkona.current == ATTACK) {
-        //     velocity.y = gravity.y * -0.5f;
-        //     mixer.play_sample(jump_sample);
-        // }
-
-        // if (boingy_kkona.finished() && fabsf(position.y - FLOOR) <= 1e-3) {
-        //     boingy_kkona.reset();
-        // }
-
-        SDL_RenderPresent(renderer);
-    }
-}
-
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
@@ -522,8 +365,9 @@ int main(void)
             case SDL_KEYDOWN: {
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = game_state.gravity.y * -0.5f;
-                    mixer.play_sample(jump_sample);
+                    if (!event.key.repeat) {
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                    }
                 } break;
 
                 case SDLK_q: {
@@ -551,6 +395,15 @@ int main(void)
                 }
             } break;
 
+            case SDL_KEYUP: {
+                switch (event.key.keysym.sym) {
+                case SDLK_SPACE: {
+                    if (!event.key.repeat) {
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                    }
+                } break;
+                }
+            } break;
             case SDL_MOUSEMOTION: {
                 game_state.mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
