@@ -131,6 +131,14 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
+Sprite load_png_file_as_sprite(SDL_Renderer *renderer, const char *image_filename)
+{
+    Sprite sprite = {};
+    sprite.texture = load_texture_from_png_file(renderer, image_filename);
+    sec(SDL_QueryTexture(sprite.texture, NULL, NULL, &sprite.srcrect.w, &sprite.srcrect.h));
+    return sprite;
+}
+
 struct Spritesheet
 {
     const char *filename;
@@ -241,6 +249,74 @@ void abort_parse_error(FILE *stream,
     abort();
 }
 
+struct Rubber_Animat
+{
+    float begin;
+    float end;
+    float duration;
+    float t;
+
+    Rectf transform_rect(Rectf texbox, Vec2f pos) const
+    {
+        const float offset = begin + (end - begin) * (t / duration);
+        const float w = texbox.w + offset * texbox.h;
+        const float h = texbox.h - offset * texbox.h;
+        return {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
+    }
+
+    void update(float dt)
+    {
+        if (!finished()) t += dt;
+    }
+
+    bool finished() const
+    {
+        return t >= duration;
+    }
+
+    void reset()
+    {
+        t = 0.0f;
+    }
+};
+
+template <size_t N>
+struct Compose_Rubber_Animat
+{
+    Rubber_Animat rubber_animats[N];
+    size_t current;
+
+    Rectf transform_rect(Rectf texbox, Vec2f pos) const
+    {
+        return rubber_animats[std::min(current, N - 1)].transform_rect(texbox, pos);
+    }
+
+    void update(float dt)
+    {
+        if (finished()) return;
+
+        if (rubber_animats[current].finished()) {
+            current += 1;
+        }
+
+        rubber_animats[current].update(dt);
+    }
+
+    bool finished() const
+    {
+        return current >= N;
+    }
+
+    void reset()
+    {
+        current = 0;
+        for (size_t i = 0; i < N; ++i) {
+            rubber_animats[i].reset();
+        }
+    }
+};
+
+// TODO(#52): Replace Squash_Animat with Rubber_Animat
 struct Squash_Animat
 {
     Sprite sprite;
@@ -295,6 +371,11 @@ Frame_Animat load_animat_file(const char *animat_filepath)
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = spritesheet_by_name(value);
+            if (spritesheet_texture == nullptr) {
+                println(stderr, "Spritesheet `", value, "` is not loaded. ",
+                        "Did you forget to run `load_spritesheets()`?");
+                abort();
+            }
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<int>();
             if (!result.has_value) {

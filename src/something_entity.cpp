@@ -4,6 +4,13 @@ enum class Entity_Dir
     Left
 };
 
+enum class Jump_State
+{
+    No_Jump = 0,
+    Prepare,
+    Jump
+};
+
 enum class Entity_State
 {
     Ded = 0,
@@ -21,6 +28,7 @@ struct Entity
 {
     Entity_State state;
     Alive_State alive_state;
+    Jump_State jump_state;
 
     Rectf texbox_local;
     Rectf hitbox_local;
@@ -30,6 +38,8 @@ struct Entity
     Frame_Animat idle;
     Frame_Animat walking;
     Squash_Animat poof;
+    Rubber_Animat prepare_for_jump;
+    Compose_Rubber_Animat<2> jump;
 
     Entity_Dir dir;
 
@@ -134,13 +144,29 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 
     switch (entity.state) {
     case Entity_State::Alive: {
+        Rectf texbox = {};
+
+        switch (entity.jump_state) {
+        case Jump_State::No_Jump:
+            texbox = entity_texbox_world(entity);
+            break;
+
+        case Jump_State::Prepare:
+            texbox = entity.prepare_for_jump.transform_rect(entity.texbox_local, entity.pos);
+            break;
+
+        case Jump_State::Jump:
+            texbox = entity.jump.transform_rect(entity.texbox_local, entity.pos);
+            break;
+        }
+
         switch (entity.alive_state) {
         case Alive_State::Idle: {
-            render_animat(renderer, entity.idle, entity_texbox_world(entity) - camera.pos, flip);
+            render_animat(renderer, entity.idle, texbox - camera.pos, flip);
         } break;
 
         case Alive_State::Walking: {
-            render_animat(renderer, entity.walking, entity_texbox_world(entity) - camera.pos, flip);
+            render_animat(renderer, entity.walking, texbox - camera.pos, flip);
         } break;
         }
     } break;
@@ -167,6 +193,22 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
         entity->pos += entity->vel * dt;
         entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
+
+        switch (entity->jump_state) {
+        case Jump_State::No_Jump:
+            break;
+
+        case Jump_State::Prepare:
+            entity->prepare_for_jump.update(dt);
+            break;
+
+        case Jump_State::Jump:
+            entity->jump.update(dt);
+            if (entity->jump.finished()) {
+                entity->jump_state = Jump_State::No_Jump;
+            }
+            break;
+        }
 
         switch (entity->alive_state) {
         case Alive_State::Idle: {
@@ -230,10 +272,12 @@ void entity_shoot(Entity_Index entity_index)
     if (entity->state != Entity_State::Alive) return;
     if (entity->cooldown_weapon > 0) return;
 
+    const float PROJECTILE_SPEED = 20.0f;
+
     if (entity->dir == Entity_Dir::Right) {
-        spawn_projectile(entity->pos, vec2(10.0f, 0.0f), entity_index);
+        spawn_projectile(entity->pos, vec2(PROJECTILE_SPEED, 0.0f), entity_index);
     } else {
-        spawn_projectile(entity->pos, vec2(-10.0f, 0.0f), entity_index);
+        spawn_projectile(entity->pos, vec2(-PROJECTILE_SPEED, 0.0f), entity_index);
     }
 
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
@@ -253,6 +297,34 @@ void kill_entity(Entity_Index entity_index)
     }
 }
 
+void entity_jump(Entity_Index entity_index,
+                 Vec2f gravity,
+                 Sample_Mixer *mixer,
+                 Sample_S16 jump_sample)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+
+    if (entity->state == Entity_State::Alive) {
+        switch (entity->jump_state) {
+        case Jump_State::No_Jump:
+            entity->prepare_for_jump.reset();
+            entity->jump_state = Jump_State::Prepare;
+            break;
+
+        case Jump_State::Prepare: {
+            float a = entity->prepare_for_jump.t / entity->prepare_for_jump.duration;
+            entity->jump_state = Jump_State::Jump;
+            entity->vel.y = gravity.y * -std::min(a, 0.6f);
+            mixer->play_sample(jump_sample);
+        } break;
+
+        case Jump_State::Jump:
+            break;
+        }
+    }
+}
+
 void update_entities(Vec2f gravity, float dt)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -265,4 +337,49 @@ void render_entities(SDL_Renderer *renderer, Camera camera)
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         render_entity(renderer, camera, entities[i]);
     }
+}
+
+const int PLAYER_TEXBOX_SIZE = 64;
+const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
+
+void inplace_spawn_entity(Entity_Index index,
+                          Frame_Animat walking, Frame_Animat idle,
+                          Vec2f pos = {0.0f, 0.0f},
+                          Entity_Dir dir = Entity_Dir::Right)
+{
+    const Rectf texbox_local = {
+        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
+        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
+    };
+    const Rectf hitbox_local = {
+        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
+        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
+    };
+
+    const float POOF_DURATION = 0.2f;
+
+    memset(entities + index.unwrap, 0, sizeof(Entity));
+    entities[index.unwrap].state = Entity_State::Alive;
+    entities[index.unwrap].alive_state = Alive_State::Idle;
+    entities[index.unwrap].texbox_local = texbox_local;
+    entities[index.unwrap].hitbox_local = hitbox_local;
+    entities[index.unwrap].pos = pos;
+    entities[index.unwrap].dir = dir;
+    entities[index.unwrap].poof.duration = POOF_DURATION;
+
+    entities[index.unwrap].walking = walking;
+    entities[index.unwrap].idle = idle;
+
+    entities[index.unwrap].prepare_for_jump.begin = 0.0f;
+    entities[index.unwrap].prepare_for_jump.end = 0.2f;
+    entities[index.unwrap].prepare_for_jump.duration = 0.2f;
+
+    entities[index.unwrap].jump.rubber_animats[0].begin = 0.2f;
+    entities[index.unwrap].jump.rubber_animats[0].end = -0.2f;
+    entities[index.unwrap].jump.rubber_animats[0].duration = 0.1f;
+
+    entities[index.unwrap].jump.rubber_animats[1].begin = -0.2f;
+    entities[index.unwrap].jump.rubber_animats[1].end = 0.0f;
+    entities[index.unwrap].jump.rubber_animats[1].duration = 0.2f;
+
 }

@@ -62,7 +62,7 @@ struct Game_State
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
-const size_t ENEMY_COUNT = 6;
+const size_t ENEMY_COUNT = 5;
 const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera camera)
@@ -241,44 +241,12 @@ const uint32_t STEP_DEBUG_FPS = 60;
 
 void reset_entities(Frame_Animat walking, Frame_Animat idle)
 {
-    const int PLAYER_TEXBOX_SIZE = 64;
-    const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-    const Rectf texbox_local = {
-        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
-        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
-    };
-    const Rectf hitbox_local = {
-        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
-        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
-    };
-
-    const float POOF_DURATION = 0.2f;
-
-    memset(entities + PLAYER_ENTITY_INDEX, 0, sizeof(Entity));
-    entities[PLAYER_ENTITY_INDEX].state = Entity_State::Alive;
-    entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
-    entities[PLAYER_ENTITY_INDEX].texbox_local = texbox_local;
-    entities[PLAYER_ENTITY_INDEX].hitbox_local = hitbox_local;
-    entities[PLAYER_ENTITY_INDEX].walking = walking;
-    entities[PLAYER_ENTITY_INDEX].idle = idle;
-    entities[PLAYER_ENTITY_INDEX].poof.duration = POOF_DURATION;
-
+    inplace_spawn_entity({PLAYER_ENTITY_INDEX}, walking, idle);
     for (size_t i = 0; i < ENEMY_COUNT; ++i) {
-        memset(entities + ENEMY_ENTITY_INDEX_OFFSET + i, 0, sizeof(Entity));
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].state = Entity_State::Alive;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].alive_state = Alive_State::Idle;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].texbox_local = texbox_local;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].hitbox_local = hitbox_local;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].walking = walking;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].idle = idle;
         static_assert(ROOM_WIDTH >= 2);
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos = vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE;
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i].poof.duration = POOF_DURATION;
-        if (i % 2) {
-            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Left;
-        } else {
-            entities[ENEMY_ENTITY_INDEX_OFFSET + i].dir = Entity_Dir::Right;
-        }
+        inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i}, walking, idle,
+                             vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE,
+                             i % 2 ? Entity_Dir::Left : Entity_Dir::Right);
     }
 }
 
@@ -397,8 +365,9 @@ int main(void)
             case SDL_KEYDOWN: {
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = game_state.gravity.y * -0.5f;
-                    mixer.play_sample(jump_sample);
+                    if (!event.key.repeat) {
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                    }
                 } break;
 
                 case SDLK_q: {
@@ -426,6 +395,15 @@ int main(void)
                 }
             } break;
 
+            case SDL_KEYUP: {
+                switch (event.key.keysym.sym) {
+                case SDLK_SPACE: {
+                    if (!event.key.repeat) {
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                    }
+                } break;
+                }
+            } break;
             case SDL_MOUSEMOTION: {
                 game_state.mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
