@@ -14,7 +14,9 @@ enum class Entity_State
 enum class Alive_State
 {
     Idle = 0,
-    Walking
+    Walking,
+    Prepare_For_Jump,
+    Jump
 };
 
 struct Entity
@@ -30,6 +32,8 @@ struct Entity
     Frame_Animat idle;
     Frame_Animat walking;
     Squash_Animat poof;
+    Rubber_Animat prepare_for_jump;
+    Compose_Rubber_Animat<2> jump;
 
     Entity_Dir dir;
 
@@ -267,4 +271,35 @@ void render_entities(SDL_Renderer *renderer, Camera camera)
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         render_entity(renderer, camera, entities[i]);
     }
+}
+
+const int PLAYER_TEXBOX_SIZE = 64;
+const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
+
+void inplace_spawn_entity(Entity_Index index,
+                          Frame_Animat walking, Frame_Animat idle,
+                          Vec2f pos = {0.0f, 0.0f},
+                          Entity_Dir dir = Entity_Dir::Right)
+{
+    const Rectf texbox_local = {
+        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
+        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
+    };
+    const Rectf hitbox_local = {
+        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
+        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
+    };
+
+    const float POOF_DURATION = 0.2f;
+
+    memset(entities + index.unwrap, 0, sizeof(Entity));
+    entities[index.unwrap].state = Entity_State::Alive;
+    entities[index.unwrap].alive_state = Alive_State::Idle;
+    entities[index.unwrap].texbox_local = texbox_local;
+    entities[index.unwrap].hitbox_local = hitbox_local;
+    entities[index.unwrap].walking = walking;
+    entities[index.unwrap].idle = idle;
+    entities[index.unwrap].pos = pos;
+    entities[index.unwrap].dir = dir;
+    entities[index.unwrap].poof.duration = POOF_DURATION;
 }
