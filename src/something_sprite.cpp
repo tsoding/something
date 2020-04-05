@@ -271,7 +271,7 @@ struct Rubber_Animat
 
     void update(float dt)
     {
-        t += dt;
+        if (!finished()) t += dt;
     }
 
     bool finished() const
