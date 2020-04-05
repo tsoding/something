@@ -378,6 +378,11 @@ Frame_Animat load_animat_file(const char *animat_filepath)
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
             spritesheet_texture = spritesheet_by_name(value);
+            if (spritesheet_texture == nullptr) {
+                println(stderr, "Spritesheet `", value, "` is not loaded. ",
+                        "Did you forget to run `load_spritesheets()`?");
+                abort();
+            }
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<int>();
             if (!result.has_value) {
