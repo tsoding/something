@@ -312,12 +312,12 @@ void entity_jump(Entity_Index entity_index,
             entity->jump_state = Jump_State::Prepare;
             break;
 
-        case Jump_State::Prepare:
-            entity->jump.reset();
+        case Jump_State::Prepare: {
+            float a = entity->prepare_for_jump.t / entity->prepare_for_jump.duration;
             entity->jump_state = Jump_State::Jump;
-            entity->vel.y = gravity.y * -0.5f;
+            entity->vel.y = gravity.y * -std::min(a, 0.6f);
             mixer->play_sample(jump_sample);
-            break;
+        } break;
 
         case Jump_State::Jump:
             break;
