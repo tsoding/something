@@ -316,7 +316,7 @@ struct Compose_Rubber_Animat
     }
 };
 
-// TODO: Replace Squash_Animat with Rubber_Animat
+// TODO(#52): Replace Squash_Animat with Rubber_Animat
 struct Squash_Animat
 {
     Sprite sprite;
