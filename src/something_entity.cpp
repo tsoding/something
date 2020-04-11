@@ -38,8 +38,8 @@ struct Entity
     Frame_Animat idle;
     Frame_Animat walking;
     Squash_Animat poof;
-    Rubber_Animat prepare_for_jump;
-    Compose_Rubber_Animat<2> jump;
+    Rubber_Animat prepare_for_jump_animat;
+    Compose_Rubber_Animat<2> jump_animat;
 
     Entity_Dir dir;
 
@@ -152,11 +152,11 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
             break;
 
         case Jump_State::Prepare:
-            texbox = entity.prepare_for_jump.transform_rect(entity.texbox_local, entity.pos);
+            texbox = entity.prepare_for_jump_animat.transform_rect(entity.texbox_local, entity.pos);
             break;
 
         case Jump_State::Jump:
-            texbox = entity.jump.transform_rect(entity.texbox_local, entity.pos);
+            texbox = entity.jump_animat.transform_rect(entity.texbox_local, entity.pos);
             break;
         }
 
@@ -199,12 +199,12 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
             break;
 
         case Jump_State::Prepare:
-            entity->prepare_for_jump.update(dt);
+            entity->prepare_for_jump_animat.update(dt);
             break;
 
         case Jump_State::Jump:
-            entity->jump.update(dt);
-            if (entity->jump.finished()) {
+            entity->jump_animat.update(dt);
+            if (entity->jump_animat.finished()) {
                 entity->jump_state = Jump_State::No_Jump;
             }
             break;
@@ -308,12 +308,13 @@ void entity_jump(Entity_Index entity_index,
     if (entity->state == Entity_State::Alive) {
         switch (entity->jump_state) {
         case Jump_State::No_Jump:
-            entity->prepare_for_jump.reset();
+            entity->prepare_for_jump_animat.reset();
             entity->jump_state = Jump_State::Prepare;
             break;
 
         case Jump_State::Prepare: {
-            float a = entity->prepare_for_jump.t / entity->prepare_for_jump.duration;
+            float a = entity->prepare_for_jump_animat.t / entity->prepare_for_jump_animat.duration;
+            entity->jump_animat.reset();
             entity->jump_state = Jump_State::Jump;
             entity->vel.y = gravity.y * -std::min(a, 0.6f);
             mixer->play_sample(jump_sample);
@@ -370,16 +371,16 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].walking = walking;
     entities[index.unwrap].idle = idle;
 
-    entities[index.unwrap].prepare_for_jump.begin = 0.0f;
-    entities[index.unwrap].prepare_for_jump.end = 0.2f;
-    entities[index.unwrap].prepare_for_jump.duration = 0.2f;
+    entities[index.unwrap].prepare_for_jump_animat.begin = 0.0f;
+    entities[index.unwrap].prepare_for_jump_animat.end = 0.2f;
+    entities[index.unwrap].prepare_for_jump_animat.duration = 0.2f;
 
-    entities[index.unwrap].jump.rubber_animats[0].begin = 0.2f;
-    entities[index.unwrap].jump.rubber_animats[0].end = -0.2f;
-    entities[index.unwrap].jump.rubber_animats[0].duration = 0.1f;
+    entities[index.unwrap].jump_animat.rubber_animats[0].begin = 0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[0].end = -0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[0].duration = 0.1f;
 
-    entities[index.unwrap].jump.rubber_animats[1].begin = -0.2f;
-    entities[index.unwrap].jump.rubber_animats[1].end = 0.0f;
-    entities[index.unwrap].jump.rubber_animats[1].duration = 0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[1].begin = -0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[1].end = 0.0f;
+    entities[index.unwrap].jump_animat.rubber_animats[1].duration = 0.2f;
 
 }
