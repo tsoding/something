@@ -294,11 +294,8 @@ struct Compose_Rubber_Animat
     void update(float dt)
     {
         if (finished()) return;
-
-        if (rubber_animats[current].finished()) {
-            current += 1;
-        }
-
+        if (rubber_animats[current].finished()) current += 1;
+        if (finished()) return;
         rubber_animats[current].update(dt);
     }
 

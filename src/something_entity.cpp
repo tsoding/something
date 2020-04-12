@@ -24,6 +24,8 @@ enum class Alive_State
     Walking
 };
 
+const size_t JUMP_SAMPLES_CAPACITY = 2;
+
 struct Entity
 {
     Entity_State state;
@@ -34,6 +36,8 @@ struct Entity
     Rectf hitbox_local;
     Vec2f pos;
     Vec2f vel;
+    Entity_Dir dir;
+    int cooldown_weapon;
 
     Frame_Animat idle;
     Frame_Animat walking;
@@ -41,9 +45,7 @@ struct Entity
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;
 
-    Entity_Dir dir;
-
-    int cooldown_weapon;
+    Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
 
     void resolve_entity_collision()
     {
@@ -275,8 +277,7 @@ void kill_entity(Entity_Index entity_index)
 
 void entity_jump(Entity_Index entity_index,
                  Vec2f gravity,
-                 Sample_Mixer *mixer,
-                 Sample_S16 jump_sample)
+                 Sample_Mixer *mixer)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
@@ -293,7 +294,7 @@ void entity_jump(Entity_Index entity_index,
             entity->jump_animat.reset();
             entity->jump_state = Jump_State::Jump;
             entity->vel.y = gravity.y * -std::min(a, 0.6f);
-            mixer->play_sample(jump_sample);
+            mixer->play_sample(entity->jump_samples[rand() % 2]);
         } break;
 
         case Jump_State::Jump:
@@ -321,6 +322,7 @@ const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
 
 void inplace_spawn_entity(Entity_Index index,
                           Frame_Animat walking, Frame_Animat idle,
+                          Sample_S16 jump_sample1, Sample_S16 jump_sample2,
                           Vec2f pos = {0.0f, 0.0f},
                           Entity_Dir dir = Entity_Dir::Right)
 {
@@ -359,4 +361,6 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].jump_animat.rubber_animats[1].end = 0.0f;
     entities[index.unwrap].jump_animat.rubber_animats[1].duration = 0.2f;
 
+    entities[index.unwrap].jump_samples[0] = jump_sample1;
+    entities[index.unwrap].jump_samples[1] = jump_sample2;
 }
