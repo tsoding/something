@@ -348,6 +348,7 @@ int main(void)
             SDL_BLENDMODE_BLEND));
 
     Camera camera = {};
+    const float dt = 1.0f / (float) STEP_DEBUG_FPS;
     while (!game_state.quit) {
         int window_w = 0, window_h = 0;
         SDL_GetWindowSize(window, &window_w, &window_h);
@@ -462,14 +463,28 @@ int main(void)
         }
 
         const float PLAYER_SPEED = 600.0f;
+        const float PLAYER_ACCEL = PLAYER_SPEED * 5.0f;
         if (keyboard[SDL_SCANCODE_D]) {
-            entity_move({PLAYER_ENTITY_INDEX}, PLAYER_SPEED);
+            entities[PLAYER_ENTITY_INDEX].vel.x =
+                fminf(
+                    entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * dt,
+                    PLAYER_SPEED);
+            entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
         } else if (keyboard[SDL_SCANCODE_A]) {
-            entity_move({PLAYER_ENTITY_INDEX}, -PLAYER_SPEED);
+            entities[PLAYER_ENTITY_INDEX].vel.x =
+                fmax(
+                    entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * dt,
+                    -PLAYER_SPEED);
+            entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
         } else {
-            entity_stop({PLAYER_ENTITY_INDEX});
+            const float E = 1e-3f;
+            if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > E) {
+                entities[PLAYER_ENTITY_INDEX].vel.x -=
+                    sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * dt;
+            } else {
+                entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
+            }
         }
-
 
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
@@ -493,7 +508,6 @@ int main(void)
         SDL_RenderPresent(renderer);
 
         if (!step_debug) {
-            float dt = 1.0f / (float) STEP_DEBUG_FPS;
             update_game_state(game_state, dt);
         }
     }
