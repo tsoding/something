@@ -239,12 +239,15 @@ void update_game_state(Game_State game_state, float dt)
 
 const uint32_t STEP_DEBUG_FPS = 60;
 
-void reset_entities(Frame_Animat walking, Frame_Animat idle)
+void reset_entities(Frame_Animat walking, Frame_Animat idle,
+                    Sample_S16 jump_sample1, Sample_S16 jump_sample2)
 {
-    inplace_spawn_entity({PLAYER_ENTITY_INDEX}, walking, idle);
+    inplace_spawn_entity({PLAYER_ENTITY_INDEX}, walking, idle, jump_sample1, jump_sample2);
     for (size_t i = 0; i < ENEMY_COUNT; ++i) {
         static_assert(ROOM_WIDTH >= 2);
-        inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i}, walking, idle,
+        inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
+                             walking, idle,
+                             jump_sample1, jump_sample2,
                              vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE,
                              i % 2 ? Entity_Dir::Left : Entity_Dir::Right);
     }
@@ -254,8 +257,8 @@ int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
-    Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000.wav");
+    Sample_S16 jump_sample1 = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
+    Sample_S16 jump_sample2 = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
 
     Sample_Mixer mixer = {};
@@ -313,7 +316,7 @@ int main(void)
     auto walking = load_animat_file("./assets/animats/walking.txt");
     auto idle = load_animat_file("./assets/animats/idle.txt");
 
-    reset_entities(walking, idle);
+    reset_entities(walking, idle, jump_sample1, jump_sample2);
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     stec(TTF_Init());
@@ -368,7 +371,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
                     }
                 } break;
 
@@ -392,7 +395,7 @@ int main(void)
                 } break;
 
                 case SDLK_r: {
-                    reset_entities(walking, idle);
+                    reset_entities(walking, idle, jump_sample1, jump_sample2);
                 } break;
                 }
             } break;
@@ -401,7 +404,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer, jump_sample);
+                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
                     }
                 } break;
                 }
