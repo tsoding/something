@@ -256,6 +256,7 @@ int main(void)
 
     Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000.wav");
+    Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
 
     Sample_Mixer mixer = {};
     mixer.volume = 0.2f;
