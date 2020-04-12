@@ -5,3 +5,7 @@
 - https://opengameart.org/content/cute-cartoon-jump-sound-effect
 - https://opengameart.org/content/flatshot-complete-sfx-pack
   - enemy_shot.wav
+- https://opengameart.org/content/jump-and-run-and-stand
+  - jump.wav
+- https://opengameart.org/content/jumping-man-sounds
+

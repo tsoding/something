@@ -254,7 +254,7 @@ int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/qubodup-cfork-ccby3-jump-48000.wav");
+    Sample_S16 jump_sample = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000.wav");
 
     Sample_Mixer mixer = {};
@@ -462,6 +462,7 @@ int main(void)
             }
         }
 
+        // TODO: inertia implementation is not reusable for other entities
         const float PLAYER_SPEED = 600.0f;
         const float PLAYER_ACCEL = PLAYER_SPEED * 5.0f;
         if (keyboard[SDL_SCANCODE_D]) {
