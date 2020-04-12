@@ -140,4 +140,15 @@ Vec2<int> vec_cast(Vec2<float> v)
     return { (int) floorf(v.x), (int) floorf(v.y) };
 }
 
+template <typename T> T sgn(T val) {
+    return fabsf(val) / val;
+    if (val < 0) {
+        return -1;
+    } else if (val > 0) {
+        return 1;
+    }
+
+    return 0;
+}
+
 #endif  // VEC_HPP_

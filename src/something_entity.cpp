@@ -194,6 +194,13 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
         entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
 
+        const float E = 1e-6f;
+        if (fabsf(entity->vel.x) > E) {
+            entity->alive_state = Alive_State::Walking;
+        } else {
+            entity->alive_state = Alive_State::Idle;
+        }
+
         switch (entity->jump_state) {
         case Jump_State::No_Jump:
             break;
@@ -229,37 +236,6 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
     } break;
 
     case Entity_State::Ded: {} break;
-    }
-}
-
-void entity_move(Entity_Index entity_index, float speed)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-
-    Entity *entity = entities + entity_index.unwrap;
-
-    if (entity->state == Entity_State::Alive) {
-        entity->vel.x = speed;
-
-        if (speed < 0) {
-            entity->dir = Entity_Dir::Left;
-        } else if (speed > 0) {
-            entity->dir = Entity_Dir::Right;
-        }
-
-        entity->alive_state = Alive_State::Walking;
-    }
-}
-
-void entity_stop(Entity_Index entity_index)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-
-    Entity *entity = entities + entity_index.unwrap;
-
-    if (entity->state == Entity_State::Alive) {
-        entity->vel.x = 0;
-        entity->alive_state = Alive_State::Idle;
     }
 }
 
