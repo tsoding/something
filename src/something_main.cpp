@@ -1,5 +1,3 @@
-const float PI = 3.14159274101f;
-
 SDL_Texture *render_text_as_texture(SDL_Renderer *renderer,
                                     TTF_Font *font,
                                     const char *text,
