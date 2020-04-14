@@ -235,7 +235,11 @@ void update_game_state(Game_State game_state, float dt)
     }
 }
 
-const uint32_t STEP_DEBUG_FPS = 60;
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 600;
+
+const int SIMULATION_FPS = 60;
+const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
 
 void reset_entities(Frame_Animat walking, Frame_Animat idle,
                     Sample_S16 jump_sample1, Sample_S16 jump_sample2)
@@ -249,6 +253,12 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle,
                              vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE,
                              i % 2 ? Entity_Dir::Left : Entity_Dir::Right);
     }
+}
+
+template <typename T>
+void print1(FILE *stream, Vec2<T> v)
+{
+    print(stream, '(', v.x, ',', v.y, ')');
 }
 
 int main(void)
@@ -292,7 +302,7 @@ int main(void)
     SDL_Window *window =
         sec(SDL_CreateWindow(
                 "Something",
-                0, 0, 800, 600,
+                0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
                 SDL_WINDOW_RESIZABLE));
 
     SDL_Renderer *renderer =
@@ -350,14 +360,21 @@ int main(void)
             SDL_BLENDMODE_BLEND));
 
     Camera camera = {};
-    const float dt = 1.0f / (float) STEP_DEBUG_FPS;
+    int prev_ticks = SDL_GetTicks();
+    float lag_sec = 0;
     while (!game_state.quit) {
+        int curr_ticks = SDL_GetTicks();
+        float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
+        prev_ticks = curr_ticks;
+        lag_sec += elapsed_sec;
+
         int window_w = 0, window_h = 0;
         SDL_GetWindowSize(window, &window_w, &window_h);
 
         camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
             vec2((float) window_w, (float) window_h) * 0.5f;
 
+        //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
@@ -383,7 +400,7 @@ int main(void)
 
                 case SDLK_x: {
                     if (step_debug) {
-                        update_game_state(game_state, 1.0f / (float) STEP_DEBUG_FPS);
+                        update_game_state(game_state, SIMULATION_DELTA_TIME);
                     }
                 } break;
 
@@ -463,32 +480,47 @@ int main(void)
             } break;
             }
         }
+        //// HANDLE INPUT END //////////////////////////////
 
+        //// UPDATE STATE //////////////////////////////
         // TODO: inertia implementation is not reusable for other entities
-        const float PLAYER_SPEED = 600.0f;
-        const float PLAYER_ACCEL = PLAYER_SPEED * 5.0f;
-        if (keyboard[SDL_SCANCODE_D]) {
-            entities[PLAYER_ENTITY_INDEX].vel.x =
-                fminf(
-                    entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * dt,
-                    PLAYER_SPEED);
-            entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
-        } else if (keyboard[SDL_SCANCODE_A]) {
-            entities[PLAYER_ENTITY_INDEX].vel.x =
-                fmax(
-                    entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * dt,
-                    -PLAYER_SPEED);
-            entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
-        } else {
-            const float E = 1e-3f;
-            if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > E) {
-                entities[PLAYER_ENTITY_INDEX].vel.x -=
-                    sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * dt;
-            } else {
-                entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
-            }
-        }
+        if (!step_debug) {
+            while (lag_sec >= SIMULATION_DELTA_TIME) {
+                const float PLAYER_SPEED = 600.0f;
+                const float PLAYER_ACCEL = PLAYER_SPEED * 8.0f;
+                if (keyboard[SDL_SCANCODE_D]) {
+                    entities[PLAYER_ENTITY_INDEX].vel.x =
+                        fminf(
+                            entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * SIMULATION_DELTA_TIME,
+                            PLAYER_SPEED);
+                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
+                } else if (keyboard[SDL_SCANCODE_A]) {
+                    entities[PLAYER_ENTITY_INDEX].vel.x =
+                        fmax(
+                            entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * SIMULATION_DELTA_TIME,
+                            -PLAYER_SPEED);
+                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
 
+                } else {
+                    const float E = 1e-3f;
+                    if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > E) {
+                        entities[PLAYER_ENTITY_INDEX].vel.x -=
+                            sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * SIMULATION_DELTA_TIME;
+                    } else {
+                        entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
+                    }
+                }
+                update_game_state(game_state, SIMULATION_DELTA_TIME);
+
+                lag_sec -= SIMULATION_DELTA_TIME;
+            }
+
+            camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
+                vec2((float) window_w, (float) window_h) * 0.5f;
+        }
+        //// UPDATE STATE END //////////////////////////////
+
+        //// RENDER //////////////////////////////
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
@@ -499,21 +531,17 @@ int main(void)
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &rect));
         }
-
-        // TODO(#47): there is not right border
+        // TODO(#47): there is no right border
 
         render_game_state(game_state, renderer, camera);
 
         if (debug) {
             render_debug_overlay(game_state, renderer, camera);
         }
-
         SDL_RenderPresent(renderer);
-
-        if (!step_debug) {
-            update_game_state(game_state, dt);
-        }
+        //// RENDER END //////////////////////////////
     }
+
     SDL_Quit();
 
     return 0;
