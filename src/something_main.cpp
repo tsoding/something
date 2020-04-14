@@ -360,10 +360,10 @@ int main(void)
             SDL_BLENDMODE_BLEND));
 
     Camera camera = {};
-    int prev_ticks = SDL_GetTicks();
+    Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
     while (!game_state.quit) {
-        int curr_ticks = SDL_GetTicks();
+        Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
