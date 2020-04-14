@@ -483,7 +483,7 @@ int main(void)
         //// HANDLE INPUT END //////////////////////////////
 
         //// UPDATE STATE //////////////////////////////
-        // TODO: inertia implementation is not reusable for other entities
+        // TODO(#56): inertia implementation is not reusable for other entities
         if (!step_debug) {
             while (lag_sec >= SIMULATION_DELTA_TIME) {
                 const float PLAYER_SPEED = 600.0f;
