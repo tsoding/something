@@ -26,9 +26,19 @@ void print1(FILE *stream, float x)
     fprintf(stream, "%f", x);
 }
 
+void print1(FILE *stream, double x)
+{
+    fprintf(stream, "%lf", x);
+}
+
 void print1(FILE *stream, long unsigned int x)
 {
     fprintf(stream, "%lu", x);
+}
+
+void print1(FILE *stream, long int x)
+{
+    fprintf(stream, "%ld", x);
 }
 
 void print1(FILE *stream, uint32_t x)

@@ -95,7 +95,7 @@ void update_projectiles(float dt)
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
             update_animat(&projectiles[i].active_animat, dt);
-            projectiles[i].pos += projectiles[i].vel;
+            projectiles[i].pos += projectiles[i].vel * dt;
 
             int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
             if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {

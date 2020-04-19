@@ -1,5 +1,4 @@
-#ifndef VEC_HPP_
-#define VEC_HPP_
+const float PI = 3.14159274101f;
 
 template <typename T>
 struct Vec2
@@ -150,5 +149,3 @@ template <typename T> T sgn(T val) {
 
     return 0;
 }
-
-#endif  // VEC_HPP_
