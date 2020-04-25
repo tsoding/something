@@ -376,6 +376,8 @@ int main(void)
     }
 
     bool debug = false;
+    SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
+
     bool step_debug = false;
 
     sec(SDL_SetRenderDrawBlendMode(
@@ -414,6 +416,7 @@ int main(void)
 
                 case SDLK_q: {
                     debug = !debug;
+                    SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
                 } break;
 
                 case SDLK_z: {
