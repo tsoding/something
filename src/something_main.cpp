@@ -267,7 +267,11 @@ const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
 void reset_entities(Frame_Animat walking, Frame_Animat idle,
                     Sample_S16 jump_sample1, Sample_S16 jump_sample2)
 {
-    inplace_spawn_entity({PLAYER_ENTITY_INDEX}, walking, idle, jump_sample1, jump_sample2);
+    inplace_spawn_entity(
+        {PLAYER_ENTITY_INDEX},
+        walking, idle,
+        jump_sample1, jump_sample2,
+        vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
     for (size_t i = 0; i < ENEMY_COUNT; ++i) {
         static_assert(ROOM_WIDTH >= 2);
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
