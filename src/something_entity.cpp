@@ -269,7 +269,7 @@ void entity_render_gun(SDL_Renderer *renderer,
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
 
-    // TODO: file with variables
+    // TODO(#61): file with variables
     const float GUN_LENGTH = 50.0f;
 
     // TODO(#59): Proper gun rendering
