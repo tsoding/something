@@ -196,13 +196,6 @@ void update_entity(Entity *entity, Vec2f gravity, float dt)
         entity->resolve_entity_collision();
         entity->cooldown_weapon -= 1;
 
-        const float E = 1e-6f;
-        if (fabsf(entity->vel.x) > E) {
-            entity->alive_state = Alive_State::Walking;
-        } else {
-            entity->alive_state = Alive_State::Idle;
-        }
-
         switch (entity->jump_state) {
         case Jump_State::No_Jump:
             break;

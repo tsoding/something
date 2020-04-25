@@ -86,40 +86,53 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
 
     const float PADDING = 10.0f;
     // TODO(#38): FPS display is broken
+    const SDL_Color GENERAL_DEBUG_COLOR = {255, 0, 0, 255};
     displayf(renderer, game_state.debug_font,
-             {255, 0, 0, 255}, vec2(PADDING, PADDING),
+             GENERAL_DEBUG_COLOR, vec2(PADDING, PADDING),
              "FPS: %d", 60);
     displayf(renderer, game_state.debug_font,
-             {255, 0, 0, 255}, vec2(PADDING, 50 + PADDING),
+             GENERAL_DEBUG_COLOR, vec2(PADDING, 50 + PADDING),
              "Mouse Position: (%.4f, %.4f)",
              game_state.mouse_position.x,
              game_state.mouse_position.y);
     displayf(renderer, game_state.debug_font,
-             {255, 0, 0, 255}, vec2(PADDING, 2 * 50 + PADDING),
+             GENERAL_DEBUG_COLOR, vec2(PADDING, 2 * 50 + PADDING),
              "Collision Probe: (%.4f, %.4f)",
              game_state.collision_probe.x,
              game_state.collision_probe.y);
     displayf(renderer, game_state.debug_font,
-             {255, 0, 0, 255}, vec2(PADDING, 3 * 50 + PADDING),
+             GENERAL_DEBUG_COLOR, vec2(PADDING, 3 * 50 + PADDING),
              "Projectiles: %d",
              count_alive_projectiles());
+    displayf(renderer, game_state.debug_font,
+             GENERAL_DEBUG_COLOR, vec2(PADDING, 4 * 50 + PADDING),
+             "Player position: (%.4f, %.4f)",
+             entities[PLAYER_ENTITY_INDEX].pos.x,
+             entities[PLAYER_ENTITY_INDEX].pos.y);
+    displayf(renderer, game_state.debug_font,
+             GENERAL_DEBUG_COLOR, vec2(PADDING, 5 * 50 + PADDING),
+             "Player velocity: (%.4f, %.4f)",
+             entities[PLAYER_ENTITY_INDEX].vel.x,
+             entities[PLAYER_ENTITY_INDEX].vel.y);
+
 
     if (game_state.tracking_projectile.has_value) {
         auto projectile = projectiles[game_state.tracking_projectile.unwrap.unwrap];
         const float SECOND_COLUMN_OFFSET = 700.0f;
+        const SDL_Color TRACKING_DEBUG_COLOR = {255, 255, 0, 255};
         displayf(renderer, game_state.debug_font,
-                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
+                 TRACKING_DEBUG_COLOR, vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
                  "State: %s", projectile_state_as_cstr(projectile.state));
         displayf(renderer, game_state.debug_font,
-                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 50 + PADDING),
+                 TRACKING_DEBUG_COLOR, vec2(PADDING + SECOND_COLUMN_OFFSET, 50 + PADDING),
                  "Position: (%.4f, %.4f)",
                  projectile.pos.x, projectile.pos.y);
         displayf(renderer, game_state.debug_font,
-                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
+                 TRACKING_DEBUG_COLOR, vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
                  "Velocity: (%.4f, %.4f)",
                  projectile.vel.x, projectile.vel.y);
         displayf(renderer, game_state.debug_font,
-                 {255, 255, 0, 255}, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
+                 TRACKING_DEBUG_COLOR, vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
                  "Shooter Index: %d",
                  projectile.shooter.unwrap);
     }
@@ -487,28 +500,30 @@ int main(void)
         if (!step_debug) {
             while (lag_sec >= SIMULATION_DELTA_TIME) {
                 const float PLAYER_SPEED = 600.0f;
-                const float PLAYER_ACCEL = PLAYER_SPEED * 8.0f;
+                const float PLAYER_ACCEL = PLAYER_SPEED * 6.0f;
                 if (keyboard[SDL_SCANCODE_D]) {
                     entities[PLAYER_ENTITY_INDEX].vel.x =
                         fminf(
                             entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             PLAYER_SPEED);
                     entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
+                    entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else if (keyboard[SDL_SCANCODE_A]) {
                     entities[PLAYER_ENTITY_INDEX].vel.x =
                         fmax(
                             entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             -PLAYER_SPEED);
                     entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
-
+                    entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else {
-                    const float E = 1e-3f;
-                    if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > E) {
+                    const float PLAYER_STOP_THRESHOLD = 100.0f;
+                    if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > PLAYER_STOP_THRESHOLD) {
                         entities[PLAYER_ENTITY_INDEX].vel.x -=
                             sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * SIMULATION_DELTA_TIME;
                     } else {
                         entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
                     }
+                    entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
                 }
                 update_game_state(game_state, SIMULATION_DELTA_TIME);
 
