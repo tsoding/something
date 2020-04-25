@@ -61,7 +61,7 @@ struct Game_State
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
-const size_t ENEMY_COUNT = 5;
+const size_t ENEMY_COUNT = 0;
 const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
@@ -400,6 +400,7 @@ int main(void)
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
+        const char * const ROOM_FILE_PATH = "room.bin";
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT: {
@@ -430,7 +431,31 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    // TODO: dump current room
+                    FILE *room_file = fopen(ROOM_FILE_PATH, "wb");
+                    if (!room_file) {
+                        fprintf(stderr, "Could not save room to `%s`: %s\n",
+                                ROOM_FILE_PATH, strerror(errno));
+                        abort();
+                    }
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    room_row[room_index.unwrap].dump(room_file);
+                    fclose(room_file);
+                    fprintf(stderr, "Saved room %lu to `%s`\n",
+                            room_index.unwrap, ROOM_FILE_PATH);
+                } break;
+
+                case SDLK_i: {
+                    FILE *room_file = fopen(ROOM_FILE_PATH, "rb");
+                    if (!room_file) {
+                        fprintf(stderr, "Could not load room from `%s`: %s\n",
+                                ROOM_FILE_PATH, strerror(errno));
+                        abort();
+                    }
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    room_row[room_index.unwrap].load(room_file);
+                    fclose(room_file);
+                    fprintf(stderr, "Load room %lu from `%s`\n",
+                            room_index.unwrap, ROOM_FILE_PATH);
                 } break;
 
                 case SDLK_r: {

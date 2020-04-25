@@ -106,23 +106,14 @@ struct Room
 
     void dump(FILE *stream)
     {
-        println(stream, "{");
-        for (int y = 0; y < ROOM_HEIGHT; ++y) {
-            print(stream, "{");
-            for (int x = 0; x < ROOM_WIDTH; ++x) {
-                switch (tiles[y][x]) {
-                case Tile::Empty: {
-                    print(stream, "Tile::Empty, ");
-                } break;
+        size_t n = fwrite(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+        assert(n == ROOM_WIDTH * ROOM_HEIGHT);
+    }
 
-                case Tile::Wall: {
-                    print(stream, "Tile::Wall, ");
-                } break;
-                }
-            }
-            println(stream, "},");
-        }
-        println(stream, "}\n");
+    void load(FILE *stream)
+    {
+        size_t n = fread(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+        assert(n == ROOM_WIDTH * ROOM_HEIGHT);
     }
 
     void resolve_point_collision(Vec2f *origin)
