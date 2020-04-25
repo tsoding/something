@@ -104,25 +104,40 @@ struct Room
         }
     }
 
-    void dump(FILE *stream)
+    void dump_file(const char *file_path)
     {
-        println(stream, "{");
-        for (int y = 0; y < ROOM_HEIGHT; ++y) {
-            print(stream, "{");
-            for (int x = 0; x < ROOM_WIDTH; ++x) {
-                switch (tiles[y][x]) {
-                case Tile::Empty: {
-                    print(stream, "Tile::Empty, ");
-                } break;
-
-                case Tile::Wall: {
-                    print(stream, "Tile::Wall, ");
-                } break;
-                }
-            }
-            println(stream, "},");
+        FILE *room_file = fopen(file_path, "wb");
+        if (!room_file) {
+            fprintf(stderr, "Could not save room to `%s`: %s\n",
+                    file_path, strerror(errno));
+            abort();
         }
-        println(stream, "}\n");
+        dump_stream(room_file);
+        fclose(room_file);
+    }
+
+    void load_file(const char *file_path)
+    {
+        FILE *room_file = fopen(file_path, "rb");
+        if (!room_file) {
+            fprintf(stderr, "Could not load room from `%s`: %s\n",
+                    file_path, strerror(errno));
+            abort();
+        }
+        load_stream(room_file);
+        fclose(room_file);
+    }
+
+    void dump_stream(FILE *stream)
+    {
+        size_t n = fwrite(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+        assert(n == ROOM_WIDTH * ROOM_HEIGHT);
+    }
+
+    void load_stream(FILE *stream)
+    {
+        size_t n = fread(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+        assert(n == ROOM_WIDTH * ROOM_HEIGHT);
     }
 
     void resolve_point_collision(Vec2f *origin)
@@ -185,7 +200,7 @@ struct Room_Index
     size_t unwrap;
 };
 
-Room_Index room_current(Vec2f p)
+Room_Index room_index_at(Vec2f p)
 {
     int index = (int) floor(p.x / ROOM_BOUNDARY.w);
 

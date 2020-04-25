@@ -61,7 +61,6 @@ struct Game_State
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
-const size_t ENEMY_COUNT = 5;
 const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
@@ -77,7 +76,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto index = room_current(game_state.debug_mouse_position);
+    auto index = room_index_at(game_state.debug_mouse_position);
     auto room_boundary_screen =
         (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - game_state.camera.pos;
     {
@@ -182,7 +181,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 void render_game_state(const Game_State game_state,
                        SDL_Renderer *renderer)
 {
-    auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
+    auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
     const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
 
@@ -223,7 +222,7 @@ void update_game_state(Game_State game_state, float dt)
         {PLAYER_ENTITY_INDEX},
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
-    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
+    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entity_point_gun_at(
             {ENEMY_ENTITY_INDEX_OFFSET + i},
             entities[PLAYER_ENTITY_INDEX].pos);
@@ -267,14 +266,16 @@ const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
 void reset_entities(Frame_Animat walking, Frame_Animat idle,
                     Sample_S16 jump_sample1, Sample_S16 jump_sample2)
 {
-    inplace_spawn_entity({PLAYER_ENTITY_INDEX}, walking, idle, jump_sample1, jump_sample2);
-    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
-        static_assert(ROOM_WIDTH >= 2);
+    inplace_spawn_entity(
+        {PLAYER_ENTITY_INDEX},
+        walking, idle,
+        jump_sample1, jump_sample2,
+        vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
+    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              walking, idle,
                              jump_sample1, jump_sample2,
-                             vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE,
-                             i % 2 ? Entity_Dir::Left : Entity_Dir::Right);
+                             vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + room_row[i + 1].position);
     }
 }
 
@@ -282,6 +283,12 @@ template <typename T>
 void print1(FILE *stream, Vec2<T> v)
 {
     print(stream, '(', v.x, ',', v.y, ')');
+}
+
+char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
+{
+    snprintf(buffer, buffer_size, "assets/rooms/room-%lu.bin", index.unwrap);
+    return buffer;
 }
 
 int main(void)
@@ -347,7 +354,6 @@ int main(void)
     auto walking = load_animat_file("./assets/animats/walking.txt");
     auto idle = load_animat_file("./assets/animats/idle.txt");
 
-    reset_entities(walking, idle, jump_sample1, jump_sample2);
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     stec(TTF_Init());
@@ -369,11 +375,17 @@ int main(void)
     };
     game_state.tracking_projectile = {};
 
+    char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
         room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
-        static_assert(ROOM_ROW_COUNT <= ROOM_HEIGHT);
-        room_row[room_index].floor_at(Tile::Wall, ROOM_HEIGHT - 1 - room_index);
+        room_row[room_index].load_file(
+            file_path_of_room(
+                room_file_path,
+                sizeof(room_file_path),
+                {room_index}));
     }
+
+    reset_entities(walking, idle, jump_sample1, jump_sample2);
 
     bool debug = false;
     SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
@@ -430,8 +442,25 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot({PLAYER_ENTITY_INDEX});
-                    mixer.play_sample(shoot_sample);
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    room_row[room_index.unwrap].dump_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index));
+                    fprintf(stderr, "Saved room %lu to `%s`\n",
+                            room_index.unwrap, room_file_path);
+                } break;
+
+                case SDLK_i: {
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    room_row[room_index.unwrap].load_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index));
+                    fprintf(stderr, "Load room %lu from `%s`\n",
+                            room_index.unwrap, room_file_path);
                 } break;
 
                 case SDLK_r: {
@@ -449,12 +478,13 @@ int main(void)
                 } break;
                 }
             } break;
+
             case SDL_MOUSEMOTION: {
                 game_state.debug_mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + game_state.camera.pos;
                 game_state.collision_probe = game_state.debug_mouse_position;
 
-                auto index = room_current(game_state.collision_probe);
+                auto index = room_index_at(game_state.collision_probe);
                 room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
                 Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
@@ -482,7 +512,7 @@ int main(void)
 
                         if (!game_state.tracking_projectile.has_value) {
 
-                            auto index = room_current(game_state.debug_mouse_position);
+                            auto index = room_index_at(game_state.debug_mouse_position);
 
                             Vec2i tile =
                                 vec_cast<int>(
@@ -564,7 +594,7 @@ int main(void)
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
-        auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
+        auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
         if (index.unwrap == 0) {
             const SDL_Rect rect = {0, 0, (int)floorf(-game_state.camera.pos.x), window_h};
