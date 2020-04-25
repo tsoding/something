@@ -37,7 +37,7 @@ struct Entity
     Vec2f pos;
     Vec2f vel;
     Entity_Dir dir;
-    // TODO: weapon cooldown should not be bound to framerate
+    // TODO(#58): weapon cooldown should not be bound to framerate
     int cooldown_weapon;
     Vec2f gun_dir;
 
