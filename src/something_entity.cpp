@@ -37,7 +37,9 @@ struct Entity
     Vec2f pos;
     Vec2f vel;
     Entity_Dir dir;
+    // TODO(#58): weapon cooldown should not be bound to framerate
     int cooldown_weapon;
+    Vec2f gun_dir;
 
     Frame_Animat idle;
     Frame_Animat walking;
@@ -245,13 +247,45 @@ void entity_shoot(Entity_Index entity_index)
 
     const float PROJECTILE_SPEED = 1200.0f;
 
-    if (entity->dir == Entity_Dir::Right) {
-        spawn_projectile(entity->pos, vec2(PROJECTILE_SPEED, 0.0f), entity_index);
-    } else {
-        spawn_projectile(entity->pos, vec2(-PROJECTILE_SPEED, 0.0f), entity_index);
-    }
-
+    spawn_projectile(
+        entity->pos,
+        entity->gun_dir * PROJECTILE_SPEED,
+        entity_index);
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+}
+
+void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
+{
+    sec(SDL_RenderDrawLine(
+            renderer,
+            (int) floorf(begin.x), (int) floorf(begin.y),
+            (int) floorf(end.x),   (int) floorf(end.y)));
+}
+
+void entity_render_gun(SDL_Renderer *renderer,
+                       Camera camera,
+                       Entity_Index entity_index)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+
+    const float GUN_LENGTH = 100.0f;
+
+    // TODO(#59): Proper gun rendering
+
+    Vec2f gun_begin = entity->pos;
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    render_line(
+        renderer,
+        gun_begin - camera.pos,
+        gun_begin + normalize(entity->gun_dir) * GUN_LENGTH - camera.pos);
+}
+
+void entity_point_gun_at(Entity_Index entity_index, Vec2f pos)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+    entity->gun_dir = normalize(pos - entity->pos);
 }
 
 void kill_entity(Entity_Index entity_index)
@@ -337,6 +371,7 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].hitbox_local = hitbox_local;
     entities[index.unwrap].pos = pos;
     entities[index.unwrap].dir = dir;
+    entities[index.unwrap].gun_dir = dir == Entity_Dir::Left ? vec2(-1.0f, 0.0f) : vec2(1.0f, 0.0f);
     entities[index.unwrap].poof.duration = POOF_DURATION;
 
     entities[index.unwrap].walking = walking;
