@@ -284,6 +284,12 @@ void print1(FILE *stream, Vec2<T> v)
     print(stream, '(', v.x, ',', v.y, ')');
 }
 
+char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
+{
+    snprintf(buffer, buffer_size, "assets/rooms/room-%lu.bin", index.unwrap);
+    return buffer;
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
@@ -369,10 +375,14 @@ int main(void)
     };
     game_state.tracking_projectile = {};
 
+    char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
         room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
-        static_assert(ROOM_ROW_COUNT <= ROOM_HEIGHT);
-        room_row[room_index].floor_at(Tile::Wall, ROOM_HEIGHT - 1 - room_index);
+        room_row[room_index].load_file(
+            file_path_of_room(
+                room_file_path,
+                sizeof(room_file_path),
+                {room_index}));
     }
 
     bool debug = false;
@@ -400,7 +410,6 @@ int main(void)
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
-        char room_file_path[256];
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT: {
@@ -432,34 +441,22 @@ int main(void)
 
                 case SDLK_e: {
                     auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    snprintf(room_file_path, sizeof(room_file_path),
-                             "room-%lu.bin", room_index.unwrap);
-
-                    FILE *room_file = fopen(room_file_path, "wb");
-                    if (!room_file) {
-                        fprintf(stderr, "Could not save room to `%s`: %s\n",
-                                room_file_path, strerror(errno));
-                        abort();
-                    }
-                    room_row[room_index.unwrap].dump(room_file);
-                    fclose(room_file);
+                    room_row[room_index.unwrap].dump_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index));
                     fprintf(stderr, "Saved room %lu to `%s`\n",
                             room_index.unwrap, room_file_path);
                 } break;
 
                 case SDLK_i: {
                     auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    snprintf(room_file_path, sizeof(room_file_path),
-                             "room-%lu.bin", room_index.unwrap);
-
-                    FILE *room_file = fopen(room_file_path, "rb");
-                    if (!room_file) {
-                        fprintf(stderr, "Could not load room from `%s`: %s\n",
-                                room_file_path, strerror(errno));
-                        abort();
-                    }
-                    room_row[room_index.unwrap].load(room_file);
-                    fclose(room_file);
+                    room_row[room_index.unwrap].load_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index));
                     fprintf(stderr, "Load room %lu from `%s`\n",
                             room_index.unwrap, room_file_path);
                 } break;

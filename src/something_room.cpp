@@ -104,13 +104,37 @@ struct Room
         }
     }
 
-    void dump(FILE *stream)
+    void dump_file(const char *file_path)
+    {
+        FILE *room_file = fopen(file_path, "wb");
+        if (!room_file) {
+            fprintf(stderr, "Could not save room to `%s`: %s\n",
+                    file_path, strerror(errno));
+            abort();
+        }
+        dump_stream(room_file);
+        fclose(room_file);
+    }
+
+    void load_file(const char *file_path)
+    {
+        FILE *room_file = fopen(file_path, "rb");
+        if (!room_file) {
+            fprintf(stderr, "Could not load room from `%s`: %s\n",
+                    file_path, strerror(errno));
+            abort();
+        }
+        load_stream(room_file);
+        fclose(room_file);
+    }
+
+    void dump_stream(FILE *stream)
     {
         size_t n = fwrite(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
         assert(n == ROOM_WIDTH * ROOM_HEIGHT);
     }
 
-    void load(FILE *stream)
+    void load_stream(FILE *stream)
     {
         size_t n = fread(tiles, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
         assert(n == ROOM_WIDTH * ROOM_HEIGHT);
