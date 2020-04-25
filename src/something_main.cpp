@@ -61,7 +61,6 @@ struct Game_State
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
-const size_t ENEMY_COUNT = 0;
 const size_t PLAYER_ENTITY_INDEX = 0;
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
@@ -223,7 +222,7 @@ void update_game_state(Game_State game_state, float dt)
         {PLAYER_ENTITY_INDEX},
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
-    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
+    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entity_point_gun_at(
             {ENEMY_ENTITY_INDEX_OFFSET + i},
             entities[PLAYER_ENTITY_INDEX].pos);
@@ -272,13 +271,11 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle,
         walking, idle,
         jump_sample1, jump_sample2,
         vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
-    for (size_t i = 0; i < ENEMY_COUNT; ++i) {
-        static_assert(ROOM_WIDTH >= 2);
+    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              walking, idle,
                              jump_sample1, jump_sample2,
-                             vec_cast<float>(vec2(ROOM_WIDTH - 2 - (int) i, 0)) * TILE_SIZE,
-                             i % 2 ? Entity_Dir::Left : Entity_Dir::Right);
+                             vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + room_row[i + 1].position);
     }
 }
 
@@ -357,7 +354,6 @@ int main(void)
     auto walking = load_animat_file("./assets/animats/walking.txt");
     auto idle = load_animat_file("./assets/animats/idle.txt");
 
-    reset_entities(walking, idle, jump_sample1, jump_sample2);
     init_projectiles(plasma_bolt_animat, plasma_pop_animat);
 
     stec(TTF_Init());
@@ -388,6 +384,8 @@ int main(void)
                 sizeof(room_file_path),
                 {room_index}));
     }
+
+    reset_entities(walking, idle, jump_sample1, jump_sample2);
 
     bool debug = false;
     SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
