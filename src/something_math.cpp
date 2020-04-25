@@ -139,6 +139,11 @@ Vec2<int> vec_cast(Vec2<float> v)
     return { (int) floorf(v.x), (int) floorf(v.y) };
 }
 
+Vec2<float> normalize(Vec2<float> a)
+{
+    return a / sqrtf(sqr_len(a));
+}
+
 template <typename T> T sgn(T val) {
     return fabsf(val) / val;
     if (val < 0) {

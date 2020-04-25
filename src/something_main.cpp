@@ -48,8 +48,9 @@ struct Game_State
     Vec2f gravity;
     bool quit;
     Vec2f collision_probe;
-    Vec2f mouse_position;
+    Vec2f debug_mouse_position;
     Debug_Draw_State state;
+    Camera camera;
 
     Sprite ground_grass_texture;
     Sprite ground_texture;
@@ -63,22 +64,22 @@ const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
 const size_t ENEMY_COUNT = 5;
 const size_t PLAYER_ENTITY_INDEX = 0;
 
-void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera camera)
+void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 {
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
     const float COLLISION_PROBE_SIZE = 10.0f;
     const auto collision_probe_rect = rect(
-        game_state.collision_probe - COLLISION_PROBE_SIZE - camera.pos,
+        game_state.collision_probe - COLLISION_PROBE_SIZE - game_state.camera.pos,
         COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2);
     {
         auto rect = rectf_for_sdl(collision_probe_rect);
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto index = room_current(game_state.mouse_position);
+    auto index = room_current(game_state.debug_mouse_position);
     auto room_boundary_screen =
-        (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - camera.pos;
+        (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - game_state.camera.pos;
     {
         auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
@@ -93,8 +94,8 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
     displayf(renderer, game_state.debug_font,
              GENERAL_DEBUG_COLOR, vec2(PADDING, 50 + PADDING),
              "Mouse Position: (%.4f, %.4f)",
-             game_state.mouse_position.x,
-             game_state.mouse_position.y);
+             game_state.debug_mouse_position.x,
+             game_state.debug_mouse_position.y);
     displayf(renderer, game_state.debug_font,
              GENERAL_DEBUG_COLOR, vec2(PADDING, 2 * 50 + PADDING),
              "Collision Probe: (%.4f, %.4f)",
@@ -141,34 +142,34 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = rectf_for_sdl(entity_texbox_world(entities[i]) - camera.pos);
+        auto dstrect = rectf_for_sdl(entity_texbox_world(entities[i]) - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = rectf_for_sdl(entity_hitbox_world(entities[i]) - camera.pos);
+        auto hitbox = rectf_for_sdl(entity_hitbox_world(entities[i]) - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
     if (game_state.tracking_projectile.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(game_state.tracking_projectile.unwrap) - camera.pos);
+            hitbox_of_projectile(game_state.tracking_projectile.unwrap) - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    auto projectile_index = projectile_at_position(game_state.mouse_position);
+    auto projectile_index = projectile_at_position(game_state.debug_mouse_position);
     if (projectile_index.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(projectile_index.unwrap) - camera.pos);
+            hitbox_of_projectile(projectile_index.unwrap) - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
         return;
     }
 
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
     const Rectf tile_rect = {
-        floorf(game_state.mouse_position.x / TILE_SIZE) * TILE_SIZE - camera.pos.x,
-        floorf(game_state.mouse_position.y / TILE_SIZE) * TILE_SIZE - camera.pos.y,
+        floorf(game_state.debug_mouse_position.x / TILE_SIZE) * TILE_SIZE - game_state.camera.pos.x,
+        floorf(game_state.debug_mouse_position.y / TILE_SIZE) * TILE_SIZE - game_state.camera.pos.y,
         TILE_SIZE,
         TILE_SIZE
     };
@@ -179,8 +180,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer, Camera 
 }
 
 void render_game_state(const Game_State game_state,
-                       SDL_Renderer *renderer,
-                       Camera camera)
+                       SDL_Renderer *renderer)
 {
     auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
 
@@ -189,7 +189,7 @@ void render_game_state(const Game_State game_state,
     if (index.unwrap > 0) {
         room_row[index.unwrap - 1].render(
             renderer,
-            camera,
+            game_state.camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
             {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
@@ -197,26 +197,36 @@ void render_game_state(const Game_State game_state,
 
     room_row[index.unwrap].render(
         renderer,
-        camera,
+        game_state.camera,
         game_state.ground_grass_texture,
         game_state.ground_texture);
 
     if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
         room_row[index.unwrap + 1].render(
             renderer,
-            camera,
+            game_state.camera,
             game_state.ground_grass_texture,
             game_state.ground_texture,
             {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
     }
 
-    render_entities(renderer, camera);
-    render_projectiles(renderer, camera);
+    render_entities(renderer, game_state.camera);
+    render_projectiles(renderer, game_state.camera);
+    entity_render_gun(renderer, game_state.camera, {PLAYER_ENTITY_INDEX});
 }
 
 void update_game_state(Game_State game_state, float dt)
 {
+    int mouse_x, mouse_y;
+    SDL_GetMouseState(&mouse_x, &mouse_y);
+    entity_point_gun_at(
+        {PLAYER_ENTITY_INDEX},
+        vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
+
     for (size_t i = 0; i < ENEMY_COUNT; ++i) {
+        entity_point_gun_at(
+            {ENEMY_ENTITY_INDEX_OFFSET + i},
+            entities[PLAYER_ENTITY_INDEX].pos);
         entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
     }
 
@@ -372,7 +382,6 @@ int main(void)
             renderer,
             SDL_BLENDMODE_BLEND));
 
-    Camera camera = {};
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
     while (!game_state.quit) {
@@ -384,7 +393,7 @@ int main(void)
         int window_w = 0, window_h = 0;
         SDL_GetWindowSize(window, &window_w, &window_h);
 
-        camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
+        game_state.camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
             vec2((float) window_w, (float) window_h) * 0.5f;
 
         //// HANDLE INPUT //////////////////////////////
@@ -438,14 +447,14 @@ int main(void)
                 }
             } break;
             case SDL_MOUSEMOTION: {
-                game_state.mouse_position =
-                    vec_cast<float>(vec2(event.motion.x, event.motion.y)) + camera.pos;
-                game_state.collision_probe = game_state.mouse_position;
+                game_state.debug_mouse_position =
+                    vec_cast<float>(vec2(event.motion.x, event.motion.y)) + game_state.camera.pos;
+                game_state.collision_probe = game_state.debug_mouse_position;
 
                 auto index = room_current(game_state.collision_probe);
                 room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
-                Vec2i tile = vec_cast<int>((game_state.mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
+                Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
                 switch (game_state.state) {
                 case Debug_Draw_State::Create: {
                     if (room_row[index.unwrap].is_tile_inbounds(tile))
@@ -462,34 +471,47 @@ int main(void)
             } break;
 
             case SDL_MOUSEBUTTONDOWN: {
-                if (debug) {
-                    game_state.tracking_projectile =
-                        projectile_at_position(game_state.mouse_position);
+                switch (event.button.button) {
+                case SDL_BUTTON_RIGHT: {
+                    if (debug) {
+                        game_state.tracking_projectile =
+                            projectile_at_position(game_state.debug_mouse_position);
 
-                    if (!game_state.tracking_projectile.has_value) {
+                        if (!game_state.tracking_projectile.has_value) {
 
-                        auto index = room_current(game_state.mouse_position);
+                            auto index = room_current(game_state.debug_mouse_position);
 
-                        Vec2i tile =
-                            vec_cast<int>(
-                                (game_state.mouse_position - room_row[index.unwrap].position) /
-                                TILE_SIZE);
+                            Vec2i tile =
+                                vec_cast<int>(
+                                    (game_state.debug_mouse_position - room_row[index.unwrap].position) /
+                                    TILE_SIZE);
 
-                        if (room_row[index.unwrap].is_tile_inbounds(tile)) {
-                            if (room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
-                                game_state.state = Debug_Draw_State::Create;
-                                room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
-                            } else {
-                                game_state.state = Debug_Draw_State::Delete;
-                                room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                            if (room_row[index.unwrap].is_tile_inbounds(tile)) {
+                                if (room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
+                                    game_state.state = Debug_Draw_State::Create;
+                                    room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                                } else {
+                                    game_state.state = Debug_Draw_State::Delete;
+                                    room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                                }
                             }
                         }
                     }
+                } break;
+
+                case SDL_BUTTON_LEFT: {
+                    entity_shoot({PLAYER_ENTITY_INDEX});
+                    mixer.play_sample(shoot_sample);
+                } break;
                 }
             } break;
 
             case SDL_MOUSEBUTTONUP: {
-                game_state.state = Debug_Draw_State::Idle;
+                switch (event.button.button) {
+                case SDL_BUTTON_RIGHT: {
+                    game_state.state = Debug_Draw_State::Idle;
+                } break;
+                }
             } break;
             }
         }
@@ -530,7 +552,7 @@ int main(void)
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
 
-            camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
+            game_state.camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
                 vec2((float) window_w, (float) window_h) * 0.5f;
         }
         //// UPDATE STATE END //////////////////////////////
@@ -542,16 +564,16 @@ int main(void)
         auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
 
         if (index.unwrap == 0) {
-            const SDL_Rect rect = {0, 0, (int)floorf(-camera.pos.x), window_h};
+            const SDL_Rect rect = {0, 0, (int)floorf(-game_state.camera.pos.x), window_h};
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &rect));
         }
         // TODO(#47): there is no right border
 
-        render_game_state(game_state, renderer, camera);
+        render_game_state(game_state, renderer);
 
         if (debug) {
-            render_debug_overlay(game_state, renderer, camera);
+            render_debug_overlay(game_state, renderer);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
