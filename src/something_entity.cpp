@@ -271,7 +271,7 @@ void entity_render_gun(SDL_Renderer *renderer,
 
     const float GUN_LENGTH = 100.0f;
 
-    // TODO: Proper gun rendering
+    // TODO(#59): Proper gun rendering
 
     Vec2f gun_begin = entity->pos;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
