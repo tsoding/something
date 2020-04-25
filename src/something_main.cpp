@@ -400,7 +400,7 @@ int main(void)
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
-        const char * const ROOM_FILE_PATH = "room.bin";
+        char room_file_path[256];
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT: {
@@ -431,31 +431,37 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    FILE *room_file = fopen(ROOM_FILE_PATH, "wb");
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    snprintf(room_file_path, sizeof(room_file_path),
+                             "room-%lu.bin", room_index.unwrap);
+
+                    FILE *room_file = fopen(room_file_path, "wb");
                     if (!room_file) {
                         fprintf(stderr, "Could not save room to `%s`: %s\n",
-                                ROOM_FILE_PATH, strerror(errno));
+                                room_file_path, strerror(errno));
                         abort();
                     }
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
                     room_row[room_index.unwrap].dump(room_file);
                     fclose(room_file);
                     fprintf(stderr, "Saved room %lu to `%s`\n",
-                            room_index.unwrap, ROOM_FILE_PATH);
+                            room_index.unwrap, room_file_path);
                 } break;
 
                 case SDLK_i: {
-                    FILE *room_file = fopen(ROOM_FILE_PATH, "rb");
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    snprintf(room_file_path, sizeof(room_file_path),
+                             "room-%lu.bin", room_index.unwrap);
+
+                    FILE *room_file = fopen(room_file_path, "rb");
                     if (!room_file) {
                         fprintf(stderr, "Could not load room from `%s`: %s\n",
-                                ROOM_FILE_PATH, strerror(errno));
+                                room_file_path, strerror(errno));
                         abort();
                     }
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
                     room_row[room_index.unwrap].load(room_file);
                     fclose(room_file);
                     fprintf(stderr, "Load room %lu from `%s`\n",
-                            room_index.unwrap, ROOM_FILE_PATH);
+                            room_index.unwrap, room_file_path);
                 } break;
 
                 case SDLK_r: {
@@ -473,6 +479,7 @@ int main(void)
                 } break;
                 }
             } break;
+
             case SDL_MOUSEMOTION: {
                 game_state.debug_mouse_position =
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + game_state.camera.pos;
