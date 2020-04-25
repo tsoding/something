@@ -407,9 +407,6 @@ int main(void)
         int window_w = 0, window_h = 0;
         SDL_GetWindowSize(window, &window_w, &window_h);
 
-        game_state.camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
-            vec2((float) window_w, (float) window_h) * 0.5f;
-
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
