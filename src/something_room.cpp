@@ -185,7 +185,7 @@ struct Room_Index
     size_t unwrap;
 };
 
-Room_Index room_current(Vec2f p)
+Room_Index room_index_at(Vec2f p)
 {
     int index = (int) floor(p.x / ROOM_BOUNDARY.w);
 

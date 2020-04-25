@@ -77,7 +77,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto index = room_current(game_state.debug_mouse_position);
+    auto index = room_index_at(game_state.debug_mouse_position);
     auto room_boundary_screen =
         (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - game_state.camera.pos;
     {
@@ -182,7 +182,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 void render_game_state(const Game_State game_state,
                        SDL_Renderer *renderer)
 {
-    auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
+    auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
     const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
 
@@ -430,8 +430,7 @@ int main(void)
                 } break;
 
                 case SDLK_e: {
-                    entity_shoot({PLAYER_ENTITY_INDEX});
-                    mixer.play_sample(shoot_sample);
+                    // TODO: dump current room
                 } break;
 
                 case SDLK_r: {
@@ -454,7 +453,7 @@ int main(void)
                     vec_cast<float>(vec2(event.motion.x, event.motion.y)) + game_state.camera.pos;
                 game_state.collision_probe = game_state.debug_mouse_position;
 
-                auto index = room_current(game_state.collision_probe);
+                auto index = room_index_at(game_state.collision_probe);
                 room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
                 Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
@@ -482,7 +481,7 @@ int main(void)
 
                         if (!game_state.tracking_projectile.has_value) {
 
-                            auto index = room_current(game_state.debug_mouse_position);
+                            auto index = room_index_at(game_state.debug_mouse_position);
 
                             Vec2i tile =
                                 vec_cast<int>(
@@ -564,7 +563,7 @@ int main(void)
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
 
-        auto index = room_current(entities[PLAYER_ENTITY_INDEX].pos);
+        auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
         if (index.unwrap == 0) {
             const SDL_Rect rect = {0, 0, (int)floorf(-game_state.camera.pos.x), window_h};
