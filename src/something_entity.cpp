@@ -352,6 +352,7 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].texbox_local = texbox_local;
     entities[index.unwrap].hitbox_local = hitbox_local;
     entities[index.unwrap].pos = pos;
+    entities[index.unwrap].gun_dir = vec2(1.0f, 0.0f);
     entities[index.unwrap].poof.duration = POOF_DURATION;
 
     entities[index.unwrap].walking = walking;
