@@ -47,6 +47,7 @@ struct Game_State
 {
     Vec2f gravity;
     bool quit;
+    bool debug;
     Vec2f collision_probe;
     Vec2f debug_mouse_position;
     Debug_Draw_State state;
@@ -114,6 +115,13 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
              "Player velocity: (%.4f, %.4f)",
              entities[PLAYER_ENTITY_INDEX].vel.x,
              entities[PLAYER_ENTITY_INDEX].vel.y);
+
+    const auto minimap_position = vec2(PADDING, 6 * 50 + PADDING);
+    render_room_row_minimap(renderer, minimap_position);
+    render_entity_on_minimap(
+        renderer,
+        vec2((float) minimap_position.x, (float) minimap_position.y),
+        entities[PLAYER_ENTITY_INDEX].pos);
 
 
     if (game_state.tracking_projectile.has_value) {
@@ -221,14 +229,16 @@ void update_game_state(Game_State game_state, float dt)
         {PLAYER_ENTITY_INDEX},
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
-    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
-        size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
-        if (player_index == enemy_index) {
-            entity_point_gun_at(
-                {ENEMY_ENTITY_INDEX_OFFSET + i},
-                entities[PLAYER_ENTITY_INDEX].pos);
-            entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+    if (!game_state.debug) {
+        for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
+            size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
+            size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
+            if (player_index == enemy_index) {
+                entity_point_gun_at(
+                    {ENEMY_ENTITY_INDEX_OFFSET + i},
+                    entities[PLAYER_ENTITY_INDEX].pos);
+                entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+            }
         }
     }
 
@@ -274,6 +284,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle,
         walking, idle,
         jump_sample1, jump_sample2,
         vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
+
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              walking, idle,
@@ -390,8 +401,7 @@ int main(void)
 
     reset_entities(walking, idle, jump_sample1, jump_sample2);
 
-    bool debug = false;
-    SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
+    SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
 
     bool step_debug = false;
 
@@ -419,53 +429,65 @@ int main(void)
             } break;
 
             case SDL_KEYDOWN: {
-                switch (event.key.keysym.sym) {
-                case SDLK_SPACE: {
-                    if (!event.key.repeat) {
-                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                if (isdigit(event.key.keysym.sym)) {
+                    if (game_state.debug) {
+                        int room_index = event.key.keysym.sym - '0' - 1;
+                        if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
+                            auto room_center =
+                                vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) +
+                                room_row[room_index].position;
+                            entities[PLAYER_ENTITY_INDEX].pos = room_center;
+                        }
                     }
-                } break;
+                } else {
+                    switch (event.key.keysym.sym) {
+                    case SDLK_SPACE: {
+                        if (!event.key.repeat) {
+                            entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                        }
+                    } break;
 
-                case SDLK_q: {
-                    debug = !debug;
-                    SDL_SetWindowGrab(window, debug ? SDL_FALSE : SDL_TRUE);
-                } break;
+                    case SDLK_q: {
+                        game_state.debug = !game_state.debug;
+                        SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
+                    } break;
 
-                case SDLK_z: {
-                    step_debug = !step_debug;
-                } break;
+                    case SDLK_z: {
+                        step_debug = !step_debug;
+                    } break;
 
-                case SDLK_x: {
-                    if (step_debug) {
-                        update_game_state(game_state, SIMULATION_DELTA_TIME);
+                    case SDLK_x: {
+                        if (step_debug) {
+                            update_game_state(game_state, SIMULATION_DELTA_TIME);
+                        }
+                    } break;
+
+                    case SDLK_e: {
+                        auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                        room_row[room_index.unwrap].dump_file(
+                            file_path_of_room(
+                                room_file_path,
+                                sizeof(room_file_path),
+                                room_index));
+                        fprintf(stderr, "Saved room %lu to `%s`\n",
+                                room_index.unwrap, room_file_path);
+                    } break;
+
+                    case SDLK_i: {
+                        auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                        room_row[room_index.unwrap].load_file(
+                            file_path_of_room(
+                                room_file_path,
+                                sizeof(room_file_path),
+                                room_index));
+                        fprintf(stderr, "Load room %lu from `%s`\n",
+                                room_index.unwrap, room_file_path);
+                    } break;
+
+                    case SDLK_r: {
+                        reset_entities(walking, idle, jump_sample1, jump_sample2);
+                    } break;
                     }
-                } break;
-
-                case SDLK_e: {
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    room_row[room_index.unwrap].dump_file(
-                        file_path_of_room(
-                            room_file_path,
-                            sizeof(room_file_path),
-                            room_index));
-                    fprintf(stderr, "Saved room %lu to `%s`\n",
-                            room_index.unwrap, room_file_path);
-                } break;
-
-                case SDLK_i: {
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    room_row[room_index.unwrap].load_file(
-                        file_path_of_room(
-                            room_file_path,
-                            sizeof(room_file_path),
-                            room_index));
-                    fprintf(stderr, "Load room %lu from `%s`\n",
-                            room_index.unwrap, room_file_path);
-                } break;
-
-                case SDLK_r: {
-                    reset_entities(walking, idle, jump_sample1, jump_sample2);
-                } break;
                 }
             } break;
 
@@ -506,7 +528,7 @@ int main(void)
             case SDL_MOUSEBUTTONDOWN: {
                 switch (event.button.button) {
                 case SDL_BUTTON_RIGHT: {
-                    if (debug) {
+                    if (game_state.debug) {
                         game_state.tracking_projectile =
                             projectile_at_position(game_state.debug_mouse_position);
 
@@ -603,7 +625,7 @@ int main(void)
 
         render_game_state(game_state, renderer);
 
-        if (debug) {
+        if (game_state.debug) {
             render_debug_overlay(game_state, renderer);
         }
         SDL_RenderPresent(renderer);
