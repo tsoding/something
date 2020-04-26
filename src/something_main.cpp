@@ -211,7 +211,6 @@ void render_game_state(const Game_State game_state,
 
     render_entities(renderer, game_state.camera);
     render_projectiles(renderer, game_state.camera);
-    entity_render_gun(renderer, game_state.camera, {PLAYER_ENTITY_INDEX});
 }
 
 void update_game_state(Game_State game_state, float dt)
@@ -223,10 +222,14 @@ void update_game_state(Game_State game_state, float dt)
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        entity_point_gun_at(
-            {ENEMY_ENTITY_INDEX_OFFSET + i},
-            entities[PLAYER_ENTITY_INDEX].pos);
-        entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+        size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
+        size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
+        if (player_index == enemy_index) {
+            entity_point_gun_at(
+                {ENEMY_ENTITY_INDEX_OFFSET + i},
+                entities[PLAYER_ENTITY_INDEX].pos);
+            entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+        }
     }
 
     update_entities(game_state.gravity, dt);
@@ -558,14 +561,12 @@ int main(void)
                         fminf(
                             entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             PLAYER_SPEED);
-                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else if (keyboard[SDL_SCANCODE_A]) {
                     entities[PLAYER_ENTITY_INDEX].vel.x =
                         fmax(
                             entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             -PLAYER_SPEED);
-                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else {
                     const float PLAYER_STOP_THRESHOLD = 100.0f;
