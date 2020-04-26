@@ -140,6 +140,11 @@ struct Room
         assert(n == ROOM_WIDTH * ROOM_HEIGHT);
     }
 
+    void copy_from(Room *room)
+    {
+        memcpy(tiles, room->tiles, ROOM_WIDTH * ROOM_HEIGHT * sizeof(Tile));
+    }
+
     void resolve_point_collision(Vec2f *origin)
     {
         assert(origin);
