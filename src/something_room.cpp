@@ -192,6 +192,13 @@ struct Room
     }
 };
 
+const int MINIMAP_TILE_SIZE = 10;
+const Rect<int> MINIMAP_ROOM_BOUNDARY = {
+    0, 0,
+    ROOM_WIDTH * MINIMAP_TILE_SIZE,
+    ROOM_HEIGHT * MINIMAP_TILE_SIZE
+};
+
 const size_t ROOM_ROW_COUNT = 8;
 Room room_row[ROOM_ROW_COUNT] = {};
 
@@ -207,4 +214,62 @@ Room_Index room_index_at(Vec2f p)
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
     return {(size_t) index};
+}
+
+void render_room_minimap(SDL_Renderer *renderer,
+                         Room_Index index,
+                         Vec2<int> position)
+{
+    assert(index.unwrap < ROOM_ROW_COUNT);
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for (int row = 0; row < ROOM_HEIGHT; ++row) {
+        for (int col = 0; col < ROOM_WIDTH; ++col) {
+            if (room_row[index.unwrap].tiles[row][col] == Tile::Wall) {
+                SDL_Rect rect = {
+                    position.x + col * MINIMAP_TILE_SIZE,
+                    position.y + row * MINIMAP_TILE_SIZE,
+                    MINIMAP_TILE_SIZE,
+                    MINIMAP_TILE_SIZE
+                };
+                sec(SDL_RenderFillRect(renderer, &rect));
+            }
+        }
+    }
+}
+
+void render_room_row_minimap(SDL_Renderer *renderer,
+                             Vec2<int> position)
+{
+    for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
+        render_room_minimap(
+            renderer,
+            {i},
+            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (int) i, 0));
+    }
+}
+
+const float MINIMAP_ENTITY_SIZE = MINIMAP_TILE_SIZE;
+
+void render_entity_on_minimap(SDL_Renderer *renderer,
+                              Vec2f position,
+                              Vec2f entity_position)
+{
+    const Vec2f minimap_position =
+        entity_position /
+        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
+
+    const Vec2f screen_position =
+        minimap_position + position;
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+
+    SDL_Rect rect = {
+        (int) (screen_position.x - MINIMAP_ENTITY_SIZE * 0.5f),
+        (int) (screen_position.y - MINIMAP_ENTITY_SIZE * 0.5f),
+        (int) MINIMAP_ENTITY_SIZE,
+        (int) MINIMAP_ENTITY_SIZE
+    };
+    sec(SDL_RenderFillRect(renderer, &rect));
 }

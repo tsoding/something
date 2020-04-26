@@ -116,6 +116,13 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
              entities[PLAYER_ENTITY_INDEX].vel.x,
              entities[PLAYER_ENTITY_INDEX].vel.y);
 
+    const auto minimap_position = vec2((int)PADDING, (int)(6 * 50 + PADDING));
+    render_room_row_minimap(renderer, minimap_position);
+    render_entity_on_minimap(
+        renderer,
+        vec2((float) minimap_position.x, (float) minimap_position.y),
+        entities[PLAYER_ENTITY_INDEX].pos);
+
 
     if (game_state.tracking_projectile.has_value) {
         auto projectile = projectiles[game_state.tracking_projectile.unwrap.unwrap];
