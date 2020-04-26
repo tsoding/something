@@ -557,14 +557,12 @@ int main(void)
                         fminf(
                             entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             PLAYER_SPEED);
-                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Right;
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else if (keyboard[SDL_SCANCODE_A]) {
                     entities[PLAYER_ENTITY_INDEX].vel.x =
                         fmax(
                             entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * SIMULATION_DELTA_TIME,
                             -PLAYER_SPEED);
-                    entities[PLAYER_ENTITY_INDEX].dir = Entity_Dir::Left;
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
                 } else {
                     const float PLAYER_STOP_THRESHOLD = 100.0f;

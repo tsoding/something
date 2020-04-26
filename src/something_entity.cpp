@@ -1,9 +1,3 @@
-enum class Entity_Dir
-{
-    Right = 0,
-    Left
-};
-
 enum class Jump_State
 {
     No_Jump = 0,
@@ -36,7 +30,6 @@ struct Entity
     Rectf hitbox_local;
     Vec2f pos;
     Vec2f vel;
-    Entity_Dir dir;
     // TODO(#58): weapon cooldown should not be bound to framerate
     int cooldown_weapon;
     Vec2f gun_dir;
@@ -149,10 +142,7 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 {
     assert(renderer);
 
-    const SDL_RendererFlip flip =
-        entity.dir == Entity_Dir::Right
-        ? SDL_FLIP_NONE
-        : SDL_FLIP_HORIZONTAL;
+    const SDL_RendererFlip flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
 
     switch (entity.state) {
     case Entity_State::Alive: {
@@ -200,7 +190,7 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
             renderer,
             entity.pos - camera.pos,
             entity_texbox_world(entity) - camera.pos,
-            entity.dir == Entity_Dir::Right ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
+            entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -343,8 +333,7 @@ const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
 void inplace_spawn_entity(Entity_Index index,
                           Frame_Animat walking, Frame_Animat idle,
                           Sample_S16 jump_sample1, Sample_S16 jump_sample2,
-                          Vec2f pos = {0.0f, 0.0f},
-                          Entity_Dir dir = Entity_Dir::Right)
+                          Vec2f pos = {0.0f, 0.0f})
 {
     const Rectf texbox_local = {
         - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
@@ -363,8 +352,6 @@ void inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].texbox_local = texbox_local;
     entities[index.unwrap].hitbox_local = hitbox_local;
     entities[index.unwrap].pos = pos;
-    entities[index.unwrap].dir = dir;
-    entities[index.unwrap].gun_dir = dir == Entity_Dir::Left ? vec2(-1.0f, 0.0f) : vec2(1.0f, 0.0f);
     entities[index.unwrap].poof.duration = POOF_DURATION;
 
     entities[index.unwrap].walking = walking;
