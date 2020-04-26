@@ -192,8 +192,8 @@ struct Room
     }
 };
 
-const int MINIMAP_TILE_SIZE = 10;
-const Rect<int> MINIMAP_ROOM_BOUNDARY = {
+const float MINIMAP_TILE_SIZE = 10.0f;
+const Rectf MINIMAP_ROOM_BOUNDARY = {
     0, 0,
     ROOM_WIDTH * MINIMAP_TILE_SIZE,
     ROOM_HEIGHT * MINIMAP_TILE_SIZE
@@ -218,7 +218,7 @@ Room_Index room_index_at(Vec2f p)
 
 void render_room_minimap(SDL_Renderer *renderer,
                          Room_Index index,
-                         Vec2<int> position)
+                         Vec2f position)
 {
     assert(index.unwrap < ROOM_ROW_COUNT);
 
@@ -227,10 +227,10 @@ void render_room_minimap(SDL_Renderer *renderer,
         for (int col = 0; col < ROOM_WIDTH; ++col) {
             if (room_row[index.unwrap].tiles[row][col] == Tile::Wall) {
                 SDL_Rect rect = {
-                    position.x + col * MINIMAP_TILE_SIZE,
-                    position.y + row * MINIMAP_TILE_SIZE,
-                    MINIMAP_TILE_SIZE,
-                    MINIMAP_TILE_SIZE
+                    (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
+                    (int) (position.y + (float) row * MINIMAP_TILE_SIZE),
+                    (int) MINIMAP_TILE_SIZE,
+                    (int) MINIMAP_TILE_SIZE
                 };
                 sec(SDL_RenderFillRect(renderer, &rect));
             }
@@ -239,13 +239,13 @@ void render_room_minimap(SDL_Renderer *renderer,
 }
 
 void render_room_row_minimap(SDL_Renderer *renderer,
-                             Vec2<int> position)
+                             Vec2f position)
 {
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
             renderer,
             {i},
-            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (int) i, 0));
+            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (float) i, 0.0f));
     }
 }
 
