@@ -411,6 +411,7 @@ int main(void)
 
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
+    Room_Index room_index_clipboard = {0};
     while (!game_state.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
@@ -444,6 +445,19 @@ int main(void)
                     case SDLK_SPACE: {
                         if (!event.key.repeat) {
                             entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                        }
+                    } break;
+
+                    case SDLK_c: {
+                        if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
+                            room_index_clipboard = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                        }
+                    } break;
+
+                    case SDLK_v: {
+                        if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
+                            room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap]
+                                .copy_from(&room_row[room_index_clipboard.unwrap]);
                         }
                     } break;
 
