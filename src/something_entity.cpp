@@ -137,6 +137,14 @@ Rectf entity_hitbox_world(const Entity entity)
     return hitbox;
 }
 
+void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
+{
+    sec(SDL_RenderDrawLine(
+            renderer,
+            (int) floorf(begin.x), (int) floorf(begin.y),
+            (int) floorf(end.x),   (int) floorf(end.y)));
+}
+
 void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 {
     assert(renderer);
@@ -173,6 +181,18 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
             render_animat(renderer, entity.walking, texbox - camera.pos, flip);
         } break;
         }
+
+        // TODO(#61): file with variables
+        const float GUN_LENGTH = 50.0f;
+
+        // TODO(#59): Proper gun rendering
+
+        Vec2f gun_begin = entity.pos;
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        render_line(
+            renderer,
+            gun_begin - camera.pos,
+            gun_begin + normalize(entity.gun_dir) * GUN_LENGTH - camera.pos);
     } break;
 
     case Entity_State::Poof: {
@@ -252,34 +272,6 @@ void entity_shoot(Entity_Index entity_index)
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-}
-
-void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
-{
-    sec(SDL_RenderDrawLine(
-            renderer,
-            (int) floorf(begin.x), (int) floorf(begin.y),
-            (int) floorf(end.x),   (int) floorf(end.y)));
-}
-
-void entity_render_gun(SDL_Renderer *renderer,
-                       Camera camera,
-                       Entity_Index entity_index)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-    Entity *entity = &entities[entity_index.unwrap];
-
-    // TODO(#61): file with variables
-    const float GUN_LENGTH = 50.0f;
-
-    // TODO(#59): Proper gun rendering
-
-    Vec2f gun_begin = entity->pos;
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    render_line(
-        renderer,
-        gun_begin - camera.pos,
-        gun_begin + normalize(entity->gun_dir) * GUN_LENGTH - camera.pos);
 }
 
 void entity_point_gun_at(Entity_Index entity_index, Vec2f pos)

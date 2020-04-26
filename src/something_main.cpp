@@ -211,7 +211,6 @@ void render_game_state(const Game_State game_state,
 
     render_entities(renderer, game_state.camera);
     render_projectiles(renderer, game_state.camera);
-    entity_render_gun(renderer, game_state.camera, {PLAYER_ENTITY_INDEX});
 }
 
 void update_game_state(Game_State game_state, float dt)
