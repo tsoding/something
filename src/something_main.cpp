@@ -222,10 +222,14 @@ void update_game_state(Game_State game_state, float dt)
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        entity_point_gun_at(
-            {ENEMY_ENTITY_INDEX_OFFSET + i},
-            entities[PLAYER_ENTITY_INDEX].pos);
-        entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+        size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
+        size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
+        if (player_index == enemy_index) {
+            entity_point_gun_at(
+                {ENEMY_ENTITY_INDEX_OFFSET + i},
+                entities[PLAYER_ENTITY_INDEX].pos);
+            entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+        }
     }
 
     update_entities(game_state.gravity, dt);
