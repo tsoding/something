@@ -20,6 +20,14 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
+void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
+{
+    sec(SDL_RenderDrawLine(
+            renderer,
+            (int) floorf(begin.x), (int) floorf(begin.y),
+            (int) floorf(end.x),   (int) floorf(end.y)));
+}
+
 struct Entity
 {
     Entity_State state;
@@ -119,6 +127,58 @@ struct Entity
         return hitbox;
     }
 
+    void render(SDL_Renderer *renderer, Camera camera) const
+    {
+        const SDL_RendererFlip flip = gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
+
+        switch (state) {
+        case Entity_State::Alive: {
+            Rectf texbox = {};
+
+            switch (jump_state) {
+            case Jump_State::No_Jump:
+                texbox = texbox_world();
+                break;
+
+            case Jump_State::Prepare:
+                texbox = prepare_for_jump_animat.transform_rect(texbox_local, pos);
+                break;
+
+            case Jump_State::Jump:
+                texbox = jump_animat.transform_rect(texbox_local, pos);
+                break;
+            }
+
+            switch (alive_state) {
+            case Alive_State::Idle: {
+                render_animat(renderer, idle, texbox - camera.pos, flip);
+            } break;
+
+            case Alive_State::Walking: {
+                render_animat(renderer, walking, texbox - camera.pos, flip);
+            } break;
+            }
+
+            // TODO(#61): file with variables
+            const float GUN_LENGTH = 50.0f;
+
+            // TODO(#59): Proper gun rendering
+
+            Vec2f gun_begin = pos;
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            render_line(
+                renderer,
+                gun_begin - camera.pos,
+                gun_begin + normalize(gun_dir) * GUN_LENGTH - camera.pos);
+        } break;
+
+        case Entity_State::Poof: {
+            poof.render(renderer, pos - camera.pos, texbox_world() - camera.pos, flip);
+        } break;
+
+        case Entity_State::Ded: {} break;
+        }
+    }
 };
 
 struct Entity_Index
@@ -131,73 +191,6 @@ void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
-
-void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
-{
-    sec(SDL_RenderDrawLine(
-            renderer,
-            (int) floorf(begin.x), (int) floorf(begin.y),
-            (int) floorf(end.x),   (int) floorf(end.y)));
-}
-
-void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
-{
-    assert(renderer);
-
-    const SDL_RendererFlip flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-
-    switch (entity.state) {
-    case Entity_State::Alive: {
-        Rectf texbox = {};
-
-        switch (entity.jump_state) {
-        case Jump_State::No_Jump:
-            texbox = entity.texbox_world();
-            break;
-
-        case Jump_State::Prepare:
-            texbox = entity.prepare_for_jump_animat.transform_rect(entity.texbox_local, entity.pos);
-            break;
-
-        case Jump_State::Jump:
-            texbox = entity.jump_animat.transform_rect(entity.texbox_local, entity.pos);
-            break;
-        }
-
-        switch (entity.alive_state) {
-        case Alive_State::Idle: {
-            render_animat(renderer, entity.idle, texbox - camera.pos, flip);
-        } break;
-
-        case Alive_State::Walking: {
-            render_animat(renderer, entity.walking, texbox - camera.pos, flip);
-        } break;
-        }
-
-        // TODO(#61): file with variables
-        const float GUN_LENGTH = 50.0f;
-
-        // TODO(#59): Proper gun rendering
-
-        Vec2f gun_begin = entity.pos;
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        render_line(
-            renderer,
-            gun_begin - camera.pos,
-            gun_begin + normalize(entity.gun_dir) * GUN_LENGTH - camera.pos);
-    } break;
-
-    case Entity_State::Poof: {
-        entity.poof.render(
-            renderer,
-            entity.pos - camera.pos,
-            entity.texbox_world() - camera.pos,
-            entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
-    } break;
-
-    case Entity_State::Ded: {} break;
-    }
-}
 
 void update_entity(Entity *entity, Vec2f gravity, float dt)
 {
@@ -311,7 +304,7 @@ void update_entities(Vec2f gravity, float dt)
 void render_entities(SDL_Renderer *renderer, Camera camera)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        render_entity(renderer, camera, entities[i]);
+        entities[i].render(renderer, camera);
     }
 }
 
