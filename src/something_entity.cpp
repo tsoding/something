@@ -90,6 +90,15 @@ struct Entity
 
         return {};
     }
+
+    void kill()
+    {
+        if (state == Entity_State::Alive) {
+            poof.a = 0.0f;
+            poof.sprite = last_alive_frame();
+            state = Entity_State::Poof;
+        }
+    }
 };
 
 struct Entity_Index
@@ -262,19 +271,6 @@ void entity_point_gun_at(Entity_Index entity_index, Vec2f pos)
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
     entity->gun_dir = normalize(pos - entity->pos);
-}
-
-void kill_entity(Entity_Index entity_index)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-
-    Entity *entity = &entities[entity_index.unwrap];
-
-    if (entity->state == Entity_State::Alive) {
-        entity->poof.a = 0.0f;
-        entity->poof.sprite = entity->last_alive_frame();
-        entity->state = Entity_State::Poof;
-    }
 }
 
 void entity_jump(Entity_Index entity_index,

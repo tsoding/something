@@ -264,7 +264,7 @@ void update_game_state(Game_State game_state, float dt)
             if (rect_contains_vec2(entity_hitbox_world(*entity), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                kill_entity({entity_index});
+                entity->kill();
             }
         }
     }
