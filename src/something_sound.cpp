@@ -69,10 +69,7 @@ void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
                 mixer->samples[i].audio_cur += 1;
             }
 
-            output[j] = (int16_t) std::clamp(
-                output[j] + x,
-                (int) std::numeric_limits<int16_t>::min(),
-                (int) std::numeric_limits<int16_t>::max());
+            output[j] = (int16_t) clamp(output[j] + x, (int) INT16_MIN, (int) INT16_MAX);
         }
     }
 
