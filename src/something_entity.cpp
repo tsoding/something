@@ -231,6 +231,29 @@ struct Entity
     {
         gun_dir = normalize(target - pos);
     }
+
+    void jump(Vec2f gravity, Sample_Mixer *mixer)
+    {
+        if (state == Entity_State::Alive) {
+            switch (jump_state) {
+            case Jump_State::No_Jump: {
+                prepare_for_jump_animat.reset();
+                jump_state = Jump_State::Prepare;
+            } break;
+
+            case Jump_State::Prepare: {
+                float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
+                jump_animat.reset();
+                jump_state = Jump_State::Jump;
+                vel.y = gravity.y * -std::min(a, 0.6f);
+                mixer->play_sample(jump_samples[rand() % 2]);
+            } break;
+
+            case Jump_State::Jump:
+                break;
+            }
+        }
+    }
 };
 
 struct Entity_Index
@@ -260,35 +283,6 @@ void entity_shoot(Entity_Index entity_index)
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-}
-
-
-void entity_jump(Entity_Index entity_index,
-                 Vec2f gravity,
-                 Sample_Mixer *mixer)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-    Entity *entity = &entities[entity_index.unwrap];
-
-    if (entity->state == Entity_State::Alive) {
-        switch (entity->jump_state) {
-        case Jump_State::No_Jump:
-            entity->prepare_for_jump_animat.reset();
-            entity->jump_state = Jump_State::Prepare;
-            break;
-
-        case Jump_State::Prepare: {
-            float a = entity->prepare_for_jump_animat.t / entity->prepare_for_jump_animat.duration;
-            entity->jump_animat.reset();
-            entity->jump_state = Jump_State::Jump;
-            entity->vel.y = gravity.y * -std::min(a, 0.6f);
-            mixer->play_sample(entity->jump_samples[rand() % 2]);
-        } break;
-
-        case Jump_State::Jump:
-            break;
-        }
-    }
 }
 
 void update_entities(Vec2f gravity, float dt)

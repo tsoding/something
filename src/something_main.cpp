@@ -442,7 +442,7 @@ int main(void)
                     switch (event.key.keysym.sym) {
                     case SDLK_SPACE: {
                         if (!event.key.repeat) {
-                            entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                            entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
                         }
                     } break;
 
@@ -507,7 +507,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                        entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
                     }
                 } break;
                 }
