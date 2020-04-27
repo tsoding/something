@@ -77,25 +77,24 @@ struct Entity
         }
     }
 
-    Sprite last_alive_frame()
-    {
-        switch (alive_state) {
-        case Alive_State::Idle:
-            assert(idle.frame_count > 0);
-            return idle.frames[idle.frame_current];
-        case Alive_State::Walking:
-            assert(walking.frame_count > 0);
-            return walking.frames[walking.frame_current];
-        }
-
-        return {};
-    }
-
     void kill()
     {
         if (state == Entity_State::Alive) {
             poof.a = 0.0f;
-            poof.sprite = last_alive_frame();
+
+            switch (alive_state) {
+            case Alive_State::Idle:
+                if (idle.frame_current < idle.frame_count) {
+                    poof.sprite = idle.frames[idle.frame_current];
+                }
+                break;
+            case Alive_State::Walking:
+                if (walking.frame_current < walking.frame_count) {
+                    poof.sprite = walking.frames[walking.frame_current];
+                }
+                break;
+            }
+
             state = Entity_State::Poof;
         }
     }
