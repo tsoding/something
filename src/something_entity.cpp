@@ -226,6 +226,11 @@ struct Entity
         case Entity_State::Ded: {} break;
         }
     }
+
+    void point_gun_at(Vec2f target)
+    {
+        gun_dir = normalize(target - pos);
+    }
 };
 
 struct Entity_Index
@@ -257,12 +262,6 @@ void entity_shoot(Entity_Index entity_index)
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 }
 
-void entity_point_gun_at(Entity_Index entity_index, Vec2f pos)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-    Entity *entity = &entities[entity_index.unwrap];
-    entity->gun_dir = normalize(pos - entity->pos);
-}
 
 void entity_jump(Entity_Index entity_index,
                  Vec2f gravity,

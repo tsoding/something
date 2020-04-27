@@ -225,8 +225,7 @@ void update_game_state(Game_State game_state, float dt)
 {
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
-    entity_point_gun_at(
-        {PLAYER_ENTITY_INDEX},
+    entities[PLAYER_ENTITY_INDEX].point_gun_at(
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
     if (!game_state.debug) {
@@ -234,8 +233,7 @@ void update_game_state(Game_State game_state, float dt)
             size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
             size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
             if (player_index == enemy_index) {
-                entity_point_gun_at(
-                    {ENEMY_ENTITY_INDEX_OFFSET + i},
+                entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
                     entities[PLAYER_ENTITY_INDEX].pos);
                 entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
             }
