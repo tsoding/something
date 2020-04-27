@@ -140,7 +140,6 @@ Rectf hitbox_of_projectile(Projectile_Index index)
     };
 }
 
-// TODO(#37): introduce a typedef that indicates Projectile Id
 Maybe<Projectile_Index> projectile_at_position(Vec2f position)
 {
     for (size_t i = 0; i < projectiles_count; ++i) {

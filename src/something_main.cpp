@@ -149,11 +149,11 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = rectf_for_sdl(entity_texbox_world(entities[i]) - game_state.camera.pos);
+        auto dstrect = rectf_for_sdl(entities[i].texbox_world() - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = rectf_for_sdl(entity_hitbox_world(entities[i]) - game_state.camera.pos);
+        auto hitbox = rectf_for_sdl(entities[i].hitbox_world() - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
@@ -225,8 +225,7 @@ void update_game_state(Game_State game_state, float dt)
 {
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
-    entity_point_gun_at(
-        {PLAYER_ENTITY_INDEX},
+    entities[PLAYER_ENTITY_INDEX].point_gun_at(
         vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
 
     if (!game_state.debug) {
@@ -234,8 +233,7 @@ void update_game_state(Game_State game_state, float dt)
             size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
             size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
             if (player_index == enemy_index) {
-                entity_point_gun_at(
-                    {ENEMY_ENTITY_INDEX_OFFSET + i},
+                entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
                     entities[PLAYER_ENTITY_INDEX].pos);
                 entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
             }
@@ -261,10 +259,10 @@ void update_game_state(Game_State game_state, float dt)
             if (entity->state != Entity_State::Alive) continue;
             if (entity_index == projectile->shooter.unwrap) continue;
 
-            if (rect_contains_vec2(entity_hitbox_world(*entity), projectile->pos)) {
+            if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                kill_entity({entity_index});
+                entity->kill();
             }
         }
     }
@@ -444,7 +442,7 @@ int main(void)
                     switch (event.key.keysym.sym) {
                     case SDLK_SPACE: {
                         if (!event.key.repeat) {
-                            entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                            entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
                         }
                     } break;
 
@@ -509,7 +507,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        entity_jump({PLAYER_ENTITY_INDEX}, game_state.gravity, &mixer);
+                        entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
                     }
                 } break;
                 }
