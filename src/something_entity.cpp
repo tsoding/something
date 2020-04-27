@@ -98,6 +98,27 @@ struct Entity
             state = Entity_State::Poof;
         }
     }
+
+    Rectf texbox_world() const
+    {
+        Rectf dstrect = {
+            texbox_local.x + pos.x,
+            texbox_local.y + pos.y,
+            texbox_local.w,
+            texbox_local.h
+        };
+        return dstrect;
+    }
+
+    Rectf hitbox_world() const
+    {
+        Rectf hitbox = {
+            hitbox_local.x + pos.x, hitbox_local.y + pos.y,
+            hitbox_local.w, hitbox_local.h
+        };
+        return hitbox;
+    }
+
 };
 
 struct Entity_Index
@@ -110,26 +131,6 @@ void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
-
-Rectf entity_texbox_world(const Entity entity)
-{
-    Rectf dstrect = {
-        entity.texbox_local.x + entity.pos.x,
-        entity.texbox_local.y + entity.pos.y,
-        entity.texbox_local.w,
-        entity.texbox_local.h
-    };
-    return dstrect;
-}
-
-Rectf entity_hitbox_world(const Entity entity)
-{
-    Rectf hitbox = {
-        entity.hitbox_local.x + entity.pos.x, entity.hitbox_local.y + entity.pos.y,
-        entity.hitbox_local.w, entity.hitbox_local.h
-    };
-    return hitbox;
-}
 
 void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
 {
@@ -151,7 +152,7 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
 
         switch (entity.jump_state) {
         case Jump_State::No_Jump:
-            texbox = entity_texbox_world(entity);
+            texbox = entity.texbox_world();
             break;
 
         case Jump_State::Prepare:
@@ -190,7 +191,7 @@ void render_entity(SDL_Renderer *renderer, Camera camera, const Entity entity)
         entity.poof.render(
             renderer,
             entity.pos - camera.pos,
-            entity_texbox_world(entity) - camera.pos,
+            entity.texbox_world() - camera.pos,
             entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL);
     } break;
 

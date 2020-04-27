@@ -149,11 +149,11 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = rectf_for_sdl(entity_texbox_world(entities[i]) - game_state.camera.pos);
+        auto dstrect = rectf_for_sdl(entities[i].texbox_world() - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = rectf_for_sdl(entity_hitbox_world(entities[i]) - game_state.camera.pos);
+        auto hitbox = rectf_for_sdl(entities[i].hitbox_world() - game_state.camera.pos);
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
@@ -261,7 +261,7 @@ void update_game_state(Game_State game_state, float dt)
             if (entity->state != Entity_State::Alive) continue;
             if (entity_index == projectile->shooter.unwrap) continue;
 
-            if (rect_contains_vec2(entity_hitbox_world(*entity), projectile->pos)) {
+            if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
                 entity->kill();
