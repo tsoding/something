@@ -102,7 +102,6 @@ void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
-// TODO(#36): introduce a typedef that indicates Entity Id
 
 Rectf entity_texbox_world(const Entity entity)
 {
