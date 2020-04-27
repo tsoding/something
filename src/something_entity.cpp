@@ -179,6 +179,53 @@ struct Entity
         case Entity_State::Ded: {} break;
         }
     }
+
+    void update_entity(Vec2f gravity, float dt)
+    {
+        switch (state) {
+        case Entity_State::Alive: {
+            vel += gravity * dt;
+            pos += vel * dt;
+            resolve_entity_collision();
+            cooldown_weapon -= 1;
+
+            switch (jump_state) {
+            case Jump_State::No_Jump:
+                break;
+
+            case Jump_State::Prepare:
+                prepare_for_jump_animat.update(dt);
+                break;
+
+            case Jump_State::Jump:
+                jump_animat.update(dt);
+                if (jump_animat.finished()) {
+                    jump_state = Jump_State::No_Jump;
+                }
+                break;
+            }
+
+            switch (alive_state) {
+            case Alive_State::Idle:
+                update_animat(&idle, dt);
+                break;
+
+            case Alive_State::Walking:
+                update_animat(&walking, dt);
+                break;
+            }
+        } break;
+
+        case Entity_State::Poof: {
+            poof.update(dt);
+            if (poof.a >= 1) {
+                state = Entity_State::Ded;
+            }
+        } break;
+
+        case Entity_State::Ded: {} break;
+        }
+    }
 };
 
 struct Entity_Index
@@ -191,55 +238,6 @@ void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
-
-void update_entity(Entity *entity, Vec2f gravity, float dt)
-{
-    assert(entity);
-
-    switch (entity->state) {
-    case Entity_State::Alive: {
-        entity->vel += gravity * dt;
-        entity->pos += entity->vel * dt;
-        entity->resolve_entity_collision();
-        entity->cooldown_weapon -= 1;
-
-        switch (entity->jump_state) {
-        case Jump_State::No_Jump:
-            break;
-
-        case Jump_State::Prepare:
-            entity->prepare_for_jump_animat.update(dt);
-            break;
-
-        case Jump_State::Jump:
-            entity->jump_animat.update(dt);
-            if (entity->jump_animat.finished()) {
-                entity->jump_state = Jump_State::No_Jump;
-            }
-            break;
-        }
-
-        switch (entity->alive_state) {
-        case Alive_State::Idle: {
-            update_animat(&entity->idle, dt);
-        } break;
-
-        case Alive_State::Walking: {
-            update_animat(&entity->walking, dt);
-        } break;
-        }
-    } break;
-
-    case Entity_State::Poof: {
-        entity->poof.update(dt);
-        if (entity->poof.a >= 1) {
-            entity->state = Entity_State::Ded;
-        }
-    } break;
-
-    case Entity_State::Ded: {} break;
-    }
-}
 
 void entity_shoot(Entity_Index entity_index)
 {
@@ -297,7 +295,7 @@ void entity_jump(Entity_Index entity_index,
 void update_entities(Vec2f gravity, float dt)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        update_entity(&entities[i], gravity, dt);
+        entities[i].update_entity(gravity, dt);
     }
 }
 
