@@ -186,7 +186,7 @@ void Entity::jump(Vec2f gravity, Sample_Mixer *mixer)
             float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
             jump_animat.reset();
             jump_state = Jump_State::Jump;
-            vel.y = gravity.y * -std::min(a, 0.6f);
+            vel.y = gravity.y * -min(a, 0.6f);
             mixer->play_sample(jump_samples[rand() % 2]);
         } break;
 

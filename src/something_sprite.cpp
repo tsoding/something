@@ -288,7 +288,7 @@ struct Compose_Rubber_Animat
 
     Rectf transform_rect(Rectf texbox, Vec2f pos) const
     {
-        return rubber_animats[std::min(current, N - 1)].transform_rect(texbox, pos);
+        return rubber_animats[min(current, N - 1)].transform_rect(texbox, pos);
     }
 
     void update(float dt)
