@@ -1,24 +1,4 @@
-enum class Jump_State
-{
-    No_Jump = 0,
-    Prepare,
-    Jump
-};
-
-enum class Entity_State
-{
-    Ded = 0,
-    Alive,
-    Poof
-};
-
-enum class Alive_State
-{
-    Idle = 0,
-    Walking
-};
-
-const size_t JUMP_SAMPLES_CAPACITY = 2;
+#include "./something_entity.hpp"
 
 void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
 {
@@ -28,243 +8,196 @@ void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
             (int) floorf(end.x),   (int) floorf(end.y)));
 }
 
-struct Entity
+void Entity::resolve_entity_collision()
 {
-    Entity_State state;
-    Alive_State alive_state;
-    Jump_State jump_state;
+    Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
+    Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
 
-    Rectf texbox_local;
-    Rectf hitbox_local;
-    Vec2f pos;
-    Vec2f vel;
-    // TODO(#58): weapon cooldown should not be bound to framerate
-    int cooldown_weapon;
-    Vec2f gun_dir;
+    Vec2f mesh[] = {
+        p0,
+        {p1.x, p0.y},
+        {p0.x, p1.y},
+        p1,
+    };
+    const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
 
-    Frame_Animat idle;
-    Frame_Animat walking;
-    Squash_Animat poof;
-    Rubber_Animat prepare_for_jump_animat;
-    Compose_Rubber_Animat<2> jump_animat;
+    for (int i = 0; i < MESH_COUNT; ++i) {
+        Vec2f t = mesh[i];
+        int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
 
-    Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
-
-    void resolve_entity_collision()
-    {
-        Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
-        Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
-
-        Vec2f mesh[] = {
-            p0,
-            {p1.x, p0.y},
-            {p0.x, p1.y},
-            p1,
-        };
-        const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
-
-        for (int i = 0; i < MESH_COUNT; ++i) {
-            Vec2f t = mesh[i];
-            int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
-
-            if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
-                room_row[room_index].resolve_point_collision(&t);
-            }
-
-            Vec2f d = t - mesh[i];
-
-            const int IMPACT_THRESHOLD = 5;
-            if (abs(d.y) >= IMPACT_THRESHOLD) vel.y = 0;
-            if (abs(d.x) >= IMPACT_THRESHOLD) vel.x = 0;
-
-            for (int j = 0; j < MESH_COUNT; ++j) {
-                mesh[j] += d;
-            }
-
-            pos += d;
+        if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
+            room_row[room_index].resolve_point_collision(&t);
         }
-    }
 
-    void kill()
-    {
-        if (state == Entity_State::Alive) {
-            poof.a = 0.0f;
+        Vec2f d = t - mesh[i];
 
-            switch (alive_state) {
-            case Alive_State::Idle:
-                if (idle.frame_current < idle.frame_count) {
-                    poof.sprite = idle.frames[idle.frame_current];
-                }
-                break;
-            case Alive_State::Walking:
-                if (walking.frame_current < walking.frame_count) {
-                    poof.sprite = walking.frames[walking.frame_current];
-                }
-                break;
-            }
+        const int IMPACT_THRESHOLD = 5;
+        if (abs(d.y) >= IMPACT_THRESHOLD) vel.y = 0;
+        if (abs(d.x) >= IMPACT_THRESHOLD) vel.x = 0;
 
-            state = Entity_State::Poof;
+        for (int j = 0; j < MESH_COUNT; ++j) {
+            mesh[j] += d;
         }
+
+        pos += d;
     }
+}
 
-    Rectf texbox_world() const
-    {
-        Rectf dstrect = {
-            texbox_local.x + pos.x,
-            texbox_local.y + pos.y,
-            texbox_local.w,
-            texbox_local.h
-        };
-        return dstrect;
-    }
-
-    Rectf hitbox_world() const
-    {
-        Rectf hitbox = {
-            hitbox_local.x + pos.x, hitbox_local.y + pos.y,
-            hitbox_local.w, hitbox_local.h
-        };
-        return hitbox;
-    }
-
-    void render(SDL_Renderer *renderer, Camera camera) const
-    {
-        const SDL_RendererFlip flip = gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_HORIZONTAL;
-
-        switch (state) {
-        case Entity_State::Alive: {
-            Rectf texbox = {};
-
-            switch (jump_state) {
-            case Jump_State::No_Jump:
-                texbox = texbox_world();
-                break;
-
-            case Jump_State::Prepare:
-                texbox = prepare_for_jump_animat.transform_rect(texbox_local, pos);
-                break;
-
-            case Jump_State::Jump:
-                texbox = jump_animat.transform_rect(texbox_local, pos);
-                break;
-            }
-
-            switch (alive_state) {
-            case Alive_State::Idle: {
-                render_animat(renderer, idle, texbox - camera.pos, flip);
-            } break;
-
-            case Alive_State::Walking: {
-                render_animat(renderer, walking, texbox - camera.pos, flip);
-            } break;
-            }
-
-            // TODO(#61): file with variables
-            const float GUN_LENGTH = 50.0f;
-
-            // TODO(#59): Proper gun rendering
-
-            Vec2f gun_begin = pos;
-            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-            render_line(
-                renderer,
-                gun_begin - camera.pos,
-                gun_begin + normalize(gun_dir) * GUN_LENGTH - camera.pos);
-        } break;
-
-        case Entity_State::Poof: {
-            poof.render(renderer, pos - camera.pos, texbox_world() - camera.pos, flip);
-        } break;
-
-        case Entity_State::Ded: {} break;
-        }
-    }
-
-    void update(Vec2f gravity, float dt)
-    {
-        switch (state) {
-        case Entity_State::Alive: {
-            vel += gravity * dt;
-            pos += vel * dt;
-            resolve_entity_collision();
-            cooldown_weapon -= 1;
-
-            switch (jump_state) {
-            case Jump_State::No_Jump:
-                break;
-
-            case Jump_State::Prepare:
-                prepare_for_jump_animat.update(dt);
-                break;
-
-            case Jump_State::Jump:
-                jump_animat.update(dt);
-                if (jump_animat.finished()) {
-                    jump_state = Jump_State::No_Jump;
-                }
-                break;
-            }
-
-            switch (alive_state) {
-            case Alive_State::Idle:
-                update_animat(&idle, dt);
-                break;
-
-            case Alive_State::Walking:
-                update_animat(&walking, dt);
-                break;
-            }
-        } break;
-
-        case Entity_State::Poof: {
-            poof.update(dt);
-            if (poof.a >= 1) {
-                state = Entity_State::Ded;
-            }
-        } break;
-
-        case Entity_State::Ded: {} break;
-        }
-    }
-
-    void point_gun_at(Vec2f target)
-    {
-        gun_dir = normalize(target - pos);
-    }
-
-    void jump(Vec2f gravity, Sample_Mixer *mixer)
-    {
-        if (state == Entity_State::Alive) {
-            switch (jump_state) {
-            case Jump_State::No_Jump: {
-                prepare_for_jump_animat.reset();
-                jump_state = Jump_State::Prepare;
-            } break;
-
-            case Jump_State::Prepare: {
-                float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
-                jump_animat.reset();
-                jump_state = Jump_State::Jump;
-                vel.y = gravity.y * -std::min(a, 0.6f);
-                mixer->play_sample(jump_samples[rand() % 2]);
-            } break;
-
-            case Jump_State::Jump:
-                break;
-            }
-        }
-    }
-};
-
-struct Entity_Index
+void Entity::kill()
 {
-    size_t unwrap;
-};
+    if (state == Entity_State::Alive) {
+        poof.a = 0.0f;
+
+        switch (alive_state) {
+        case Alive_State::Idle:
+            if (idle.frame_current < idle.frame_count) {
+                poof.sprite = idle.frames[idle.frame_current];
+            }
+            break;
+        case Alive_State::Walking:
+            if (walking.frame_current < walking.frame_count) {
+                poof.sprite = walking.frames[walking.frame_current];
+            }
+            break;
+        }
+
+        state = Entity_State::Poof;
+    }
+}
+
+void Entity::render(SDL_Renderer *renderer, Camera camera) const
+{
+    const SDL_RendererFlip flip =
+        gun_dir.x > 0.0f ?
+        SDL_FLIP_NONE :
+        SDL_FLIP_HORIZONTAL;
+
+    switch (state) {
+    case Entity_State::Alive: {
+        Rectf texbox = {};
+
+        switch (jump_state) {
+        case Jump_State::No_Jump:
+            texbox = texbox_world();
+            break;
+
+        case Jump_State::Prepare:
+            texbox = prepare_for_jump_animat.transform_rect(texbox_local, pos);
+            break;
+
+        case Jump_State::Jump:
+            texbox = jump_animat.transform_rect(texbox_local, pos);
+            break;
+        }
+
+        switch (alive_state) {
+        case Alive_State::Idle: {
+            render_animat(renderer, idle, texbox - camera.pos, flip);
+        } break;
+
+        case Alive_State::Walking: {
+            render_animat(renderer, walking, texbox - camera.pos, flip);
+        } break;
+        }
+
+        // TODO(#61): file with variables
+        const float GUN_LENGTH = 50.0f;
+
+        // TODO(#59): Proper gun rendering
+
+        Vec2f gun_begin = pos;
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        render_line(
+            renderer,
+            gun_begin - camera.pos,
+            gun_begin + normalize(gun_dir) * GUN_LENGTH - camera.pos);
+    } break;
+
+    case Entity_State::Poof: {
+        poof.render(renderer, pos - camera.pos, texbox_world() - camera.pos, flip);
+    } break;
+
+    case Entity_State::Ded: {} break;
+    }
+}
+
+void Entity::update(Vec2f gravity, float dt)
+{
+    switch (state) {
+    case Entity_State::Alive: {
+        vel += gravity * dt;
+        pos += vel * dt;
+        resolve_entity_collision();
+        cooldown_weapon -= 1;
+
+        switch (jump_state) {
+        case Jump_State::No_Jump:
+            break;
+
+        case Jump_State::Prepare:
+            prepare_for_jump_animat.update(dt);
+            break;
+
+        case Jump_State::Jump:
+            jump_animat.update(dt);
+            if (jump_animat.finished()) {
+                jump_state = Jump_State::No_Jump;
+            }
+            break;
+        }
+
+        switch (alive_state) {
+        case Alive_State::Idle:
+            update_animat(&idle, dt);
+            break;
+
+        case Alive_State::Walking:
+            update_animat(&walking, dt);
+            break;
+        }
+    } break;
+
+    case Entity_State::Poof: {
+        poof.update(dt);
+        if (poof.a >= 1) {
+            state = Entity_State::Ded;
+        }
+    } break;
+
+    case Entity_State::Ded: {} break;
+    }
+}
+
+void Entity::point_gun_at(Vec2f target)
+{
+    gun_dir = normalize(target - pos);
+}
+
+void Entity::jump(Vec2f gravity, Sample_Mixer *mixer)
+{
+    if (state == Entity_State::Alive) {
+        switch (jump_state) {
+        case Jump_State::No_Jump: {
+            prepare_for_jump_animat.reset();
+            jump_state = Jump_State::Prepare;
+        } break;
+
+        case Jump_State::Prepare: {
+            float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
+            jump_animat.reset();
+            jump_state = Jump_State::Jump;
+            vel.y = gravity.y * -std::min(a, 0.6f);
+            mixer->play_sample(jump_samples[rand() % 2]);
+        } break;
+
+        case Jump_State::Jump:
+            break;
+        }
+    }
+}
 
 void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 
-const int ENTITY_COOLDOWN_WEAPON = 7;
-const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
 
 void entity_shoot(Entity_Index entity_index)
@@ -278,6 +211,7 @@ void entity_shoot(Entity_Index entity_index)
 
     const float PROJECTILE_SPEED = 1200.0f;
 
+    const int ENTITY_COOLDOWN_WEAPON = 7;
     spawn_projectile(
         entity->pos,
         entity->gun_dir * PROJECTILE_SPEED,
@@ -299,21 +233,23 @@ void render_entities(SDL_Renderer *renderer, Camera camera)
     }
 }
 
-const int PLAYER_TEXBOX_SIZE = 64;
-const int PLAYER_HITBOX_SIZE = PLAYER_TEXBOX_SIZE - 20;
-
 void inplace_spawn_entity(Entity_Index index,
-                          Frame_Animat walking, Frame_Animat idle,
-                          Sample_S16 jump_sample1, Sample_S16 jump_sample2,
-                          Vec2f pos = {0.0f, 0.0f})
+                          Frame_Animat walking,
+                          Frame_Animat idle,
+                          Sample_S16 jump_sample1,
+                          Sample_S16 jump_sample2,
+                          Vec2f pos)
 {
+    const int ENTITY_TEXBOX_SIZE = 64;
+    const int ENTITY_HITBOX_SIZE = ENTITY_TEXBOX_SIZE - 20;
+
     const Rectf texbox_local = {
-        - (PLAYER_TEXBOX_SIZE / 2), - (PLAYER_TEXBOX_SIZE / 2),
-        PLAYER_TEXBOX_SIZE, PLAYER_TEXBOX_SIZE
+        - (ENTITY_TEXBOX_SIZE / 2), - (ENTITY_TEXBOX_SIZE / 2),
+        ENTITY_TEXBOX_SIZE, ENTITY_TEXBOX_SIZE
     };
     const Rectf hitbox_local = {
-        - (PLAYER_HITBOX_SIZE / 2), - (PLAYER_HITBOX_SIZE / 2),
-        PLAYER_HITBOX_SIZE, PLAYER_HITBOX_SIZE
+        - (ENTITY_HITBOX_SIZE / 2), - (ENTITY_HITBOX_SIZE / 2),
+        ENTITY_HITBOX_SIZE, ENTITY_HITBOX_SIZE
     };
 
     const float POOF_DURATION = 0.2f;
