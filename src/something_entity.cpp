@@ -180,7 +180,7 @@ struct Entity
         }
     }
 
-    void update_entity(Vec2f gravity, float dt)
+    void update(Vec2f gravity, float dt)
     {
         switch (state) {
         case Entity_State::Alive: {
@@ -294,7 +294,7 @@ void entity_jump(Entity_Index entity_index,
 void update_entities(Vec2f gravity, float dt)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update_entity(gravity, dt);
+        entities[i].update(gravity, dt);
     }
 }
 
