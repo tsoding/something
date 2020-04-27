@@ -76,6 +76,20 @@ struct Entity
             pos += d;
         }
     }
+
+    Sprite last_alive_frame()
+    {
+        switch (alive_state) {
+        case Alive_State::Idle:
+            assert(idle.frame_count > 0);
+            return idle.frames[idle.frame_current];
+        case Alive_State::Walking:
+            assert(walking.frame_count > 0);
+            return walking.frames[walking.frame_current];
+        }
+
+        return {};
+    }
 };
 
 struct Entity_Index
@@ -89,26 +103,6 @@ const int ENTITY_COOLDOWN_WEAPON = 7;
 const size_t ENTITIES_COUNT = 69;
 Entity entities[ENTITIES_COUNT];
 // TODO(#36): introduce a typedef that indicates Entity Id
-
-Sprite last_alive_frame_of_entity(Entity_Index entity_index)
-{
-    Entity entity = entities[entity_index.unwrap];
-
-    assert(entity.state == Entity_State::Alive);
-
-    switch (entity.alive_state) {
-    case Alive_State::Idle:
-        assert(entity.idle.frame_count > 0);
-        return entity.idle.frames[entity.idle.frame_current];
-    case Alive_State::Walking:
-        assert(entity.walking.frame_count > 0);
-        return entity.walking.frames[entity.walking.frame_current];
-    }
-
-    assert(0 && "Incorrent Alive_State value");
-
-    return {};
-}
 
 Rectf entity_texbox_world(const Entity entity)
 {
@@ -280,7 +274,7 @@ void kill_entity(Entity_Index entity_index)
     // TODO(#40): entity poof animation should use the last alive frame
     if (entity->state == Entity_State::Alive) {
         entity->poof.a = 0.0f;
-        entity->poof.sprite = last_alive_frame_of_entity(entity_index);
+        entity->poof.sprite = entity->last_alive_frame();
         entity->state = Entity_State::Poof;
     }
 }
