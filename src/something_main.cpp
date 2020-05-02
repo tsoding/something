@@ -416,10 +416,12 @@ int main(void)
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
 
-        SDL_GetWindowSize(
-            window,
-            &game_state.camera.window_width,
-            &game_state.camera.window_height);
+        {
+            int w, h;
+            SDL_GetWindowSize(window, &w, &h);
+            game_state.camera.width = (float) w;
+            game_state.camera.height = (float) h;
+        }
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
@@ -642,7 +644,7 @@ int main(void)
             const SDL_Rect rect = {
                 0, 0,
                 (int)floorf(-game_state.camera.pos.x),
-                game_state.camera.window_height};
+                (int)floorf(game_state.camera.height)};
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &rect));
         }
