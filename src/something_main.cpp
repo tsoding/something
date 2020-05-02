@@ -614,13 +614,19 @@ int main(void)
                     }
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
                 }
-                const float CAMERA_ACCELERATION = 10.0f;
-                const Vec2f CAMERA_OFFSET = vec2(200.0f, -200.0f);
-                game_state.camera.vel =
-                    (entities[PLAYER_ENTITY_INDEX].pos + CAMERA_OFFSET - game_state.camera.pos) * CAMERA_ACCELERATION;
-                game_state.camera.update(SIMULATION_DELTA_TIME);
-                update_game_state(game_state, SIMULATION_DELTA_TIME);
 
+                const float PLAYER_CAMERA_FORCE = 2.0f;
+                const float CENTER_CAMERA_FORCE = PLAYER_CAMERA_FORCE * 2.0f;
+
+                const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
+                const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
+
+                game_state.camera.vel =
+                    (player_pos - game_state.camera.pos) * PLAYER_CAMERA_FORCE +
+                    (room_center - game_state.camera.pos) * CENTER_CAMERA_FORCE;
+                game_state.camera.update(SIMULATION_DELTA_TIME);
+
+                update_game_state(game_state, SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
         }
