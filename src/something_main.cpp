@@ -432,9 +432,15 @@ int main(void)
             } break;
 
             case SDL_KEYDOWN: {
-                if (isdigit(event.key.keysym.sym)) {
+                // The reason we are not using isdigit here is because
+                // isdigit(event.key.keysym.sym) maybe crash on
+                // clang++ with -O0. Probably because SDL_Keycode is
+                // not a char and can be bigger than char and that
+                // kills isdigit if it's not optimized away?
+                const auto sym = event.key.keysym.sym;
+                if ('0' <= sym && sym <= '9') {
                     if (game_state.debug) {
-                        int room_index = event.key.keysym.sym - '0' - 1;
+                        int room_index = sym - '0' - 1;
                         if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
                             auto room_center =
                                 vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) +
