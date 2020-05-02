@@ -1,6 +1,7 @@
 struct Camera
 {
     Vec2f pos;
+    Vec2f vel;
     int window_width;
     int window_height;
 
@@ -22,5 +23,10 @@ struct Camera
     Rectf to_world(Rectf screen_rect)
     {
         return screen_rect + (pos - vec2((float) window_width * 0.5f, (float) window_height * 0.5f));
+    }
+
+    void update(float delta_time)
+    {
+        pos += vel * delta_time;
     }
 };

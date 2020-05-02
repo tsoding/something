@@ -614,13 +614,15 @@ int main(void)
                     }
                     entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
                 }
+                const float CAMERA_ACCELERATION = 10.0f;
+                const Vec2f CAMERA_OFFSET = vec2(200.0f, -200.0f);
+                game_state.camera.vel =
+                    (entities[PLAYER_ENTITY_INDEX].pos + CAMERA_OFFSET - game_state.camera.pos) * CAMERA_ACCELERATION;
+                game_state.camera.update(SIMULATION_DELTA_TIME);
                 update_game_state(game_state, SIMULATION_DELTA_TIME);
 
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
-
-            auto current_room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-            game_state.camera.pos = room_row[current_room_index.unwrap].center();
         }
         //// UPDATE STATE END //////////////////////////////
 
