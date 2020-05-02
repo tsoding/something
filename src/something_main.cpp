@@ -43,6 +43,9 @@ enum class Debug_Draw_State {
     Delete
 };
 
+const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
+const size_t PLAYER_ENTITY_INDEX = 0;
+
 struct Game_State
 {
     Vec2f gravity;
@@ -59,10 +62,88 @@ struct Game_State
     TTF_Font *debug_font;
 
     Maybe<Projectile_Index> tracking_projectile;
-};
 
-const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
-const size_t PLAYER_ENTITY_INDEX = 0;
+    void update(float dt)
+    {
+        int mouse_x, mouse_y;
+        SDL_GetMouseState(&mouse_x, &mouse_y);
+        entities[PLAYER_ENTITY_INDEX].point_gun_at(
+            camera.to_world(vec2((float) mouse_x, (float) mouse_y)));
+
+        if (!debug) {
+            for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
+                size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
+                size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
+                if (player_index == enemy_index) {
+                    entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
+                        entities[PLAYER_ENTITY_INDEX].pos);
+                    entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+                }
+            }
+        }
+
+        update_entities(gravity, dt);
+        update_projectiles(dt);
+
+        for (size_t projectile_index = 0;
+             projectile_index < projectiles_count;
+             ++projectile_index)
+        {
+            auto projectile = projectiles + projectile_index;
+            if (projectile->state != Projectile_State::Active) continue;
+
+            for (size_t entity_index = 0;
+                 entity_index < ENTITIES_COUNT;
+                 ++entity_index)
+            {
+                auto entity = entities + entity_index;
+
+                if (entity->state != Entity_State::Alive) continue;
+                if (entity_index == projectile->shooter.unwrap) continue;
+
+                if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
+                    projectile->state = Projectile_State::Poof;
+                    projectile->poof_animat.frame_current = 0;
+                    entity->kill();
+                }
+            }
+        }
+    }
+
+    void render(SDL_Renderer *renderer)
+    {
+        auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+
+        const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
+
+        if (index.unwrap > 0) {
+            room_row[index.unwrap - 1].render(
+                renderer,
+                camera,
+                ground_grass_texture,
+                ground_texture,
+                {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
+        }
+
+        room_row[index.unwrap].render(
+            renderer,
+            camera,
+            ground_grass_texture,
+            ground_texture);
+
+        if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
+            room_row[index.unwrap + 1].render(
+                renderer,
+                camera,
+                ground_grass_texture,
+                ground_texture,
+                {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
+        }
+
+        render_entities(renderer, camera);
+        render_projectiles(renderer, camera);
+    }
+};
 
 void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 {
@@ -183,88 +264,6 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
     {
         auto rect = rectf_for_sdl(game_state.camera.to_screen(tile_rect));
         sec(SDL_RenderDrawRect(renderer, &rect));
-    }
-}
-
-void render_game_state(const Game_State game_state,
-                       SDL_Renderer *renderer)
-{
-    auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-
-    const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
-
-    if (index.unwrap > 0) {
-        room_row[index.unwrap - 1].render(
-            renderer,
-            game_state.camera,
-            game_state.ground_grass_texture,
-            game_state.ground_texture,
-            {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
-    }
-
-    room_row[index.unwrap].render(
-        renderer,
-        game_state.camera,
-        game_state.ground_grass_texture,
-        game_state.ground_texture);
-
-    if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
-        room_row[index.unwrap + 1].render(
-            renderer,
-            game_state.camera,
-            game_state.ground_grass_texture,
-            game_state.ground_texture,
-            {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
-    }
-
-    render_entities(renderer, game_state.camera);
-    render_projectiles(renderer, game_state.camera);
-}
-
-void update_game_state(Game_State game_state, float dt)
-{
-    int mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
-    entities[PLAYER_ENTITY_INDEX].point_gun_at(
-        game_state.camera.to_world(vec2((float) mouse_x, (float) mouse_y)));
-
-    if (!game_state.debug) {
-        for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-            size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
-            size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
-            if (player_index == enemy_index) {
-                entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
-                    entities[PLAYER_ENTITY_INDEX].pos);
-                entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
-            }
-        }
-    }
-
-    update_entities(game_state.gravity, dt);
-    update_projectiles(dt);
-
-    for (size_t projectile_index = 0;
-         projectile_index < projectiles_count;
-         ++projectile_index)
-    {
-        auto projectile = projectiles + projectile_index;
-        if (projectile->state != Projectile_State::Active) continue;
-
-        for (size_t entity_index = 0;
-             entity_index < ENTITIES_COUNT;
-             ++entity_index)
-        {
-            auto entity = entities + entity_index;
-
-            if (entity->state != Entity_State::Alive) continue;
-            if (entity_index == projectile->shooter.unwrap) continue;
-
-            if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
-                projectile->state = Projectile_State::Poof;
-                projectile->poof_animat.frame_current = 0;
-                entity->kill();
-            }
-        }
     }
 }
 
@@ -480,7 +479,7 @@ int main(void)
 
                     case SDLK_x: {
                         if (step_debug) {
-                            update_game_state(game_state, SIMULATION_DELTA_TIME);
+                            game_state.update(SIMULATION_DELTA_TIME);
                         }
                     } break;
 
@@ -634,7 +633,7 @@ int main(void)
                     (room_center - game_state.camera.pos) * CENTER_CAMERA_FORCE;
                 game_state.camera.update(SIMULATION_DELTA_TIME);
 
-                update_game_state(game_state, SIMULATION_DELTA_TIME);
+                game_state.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
         }
@@ -656,7 +655,7 @@ int main(void)
         }
         // TODO(#47): there is no right border
 
-        render_game_state(game_state, renderer);
+        game_state.render(renderer);
 
         if (game_state.debug) {
             render_debug_overlay(game_state, renderer);
