@@ -74,22 +74,5 @@ struct Entity
     void jump(Vec2f gravity, Sample_Mixer *mixer);
 };
 
-const size_t ENTITIES_COUNT = 69;
-extern Entity entities[ENTITIES_COUNT];
-
-struct Entity_Index
-{
-    size_t unwrap;
-};
-
-void entity_shoot(Entity_Index entity_index);
-void update_entities(Vec2f gravity, float dt);
-void render_entities(SDL_Renderer *renderer, Camera camera);
-void inplace_spawn_entity(Entity_Index index,
-                          Frame_Animat walking,
-                          Frame_Animat idle,
-                          Sample_S16 jump_sample1,
-                          Sample_S16 jump_sample2,
-                          Vec2f pos = {0.0f, 0.0f});
 
 #endif  // SOMETHING_ENTITY_H_

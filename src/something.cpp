@@ -18,5 +18,4 @@
 #include "something_room.cpp"
 #include "something_sound.cpp"
 #include "something_entity.cpp"
-#include "something_projectile.cpp"
 #include "something_main.cpp"
