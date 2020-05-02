@@ -92,11 +92,11 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
 
         switch (alive_state) {
         case Alive_State::Idle: {
-            render_animat(renderer, idle, texbox - camera.pos, flip);
+            render_animat(renderer, idle, camera.to_screen(texbox), flip);
         } break;
 
         case Alive_State::Walking: {
-            render_animat(renderer, walking, texbox - camera.pos, flip);
+            render_animat(renderer, walking, camera.to_screen(texbox), flip);
         } break;
         }
 
@@ -109,12 +109,12 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         render_line(
             renderer,
-            gun_begin - camera.pos,
-            gun_begin + normalize(gun_dir) * GUN_LENGTH - camera.pos);
+            camera.to_screen(gun_begin),
+            camera.to_screen(gun_begin + normalize(gun_dir) * GUN_LENGTH));
     } break;
 
     case Entity_State::Poof: {
-        poof.render(renderer, pos - camera.pos, texbox_world() - camera.pos, flip);
+        poof.render(renderer, camera.to_screen(pos), camera.to_screen(texbox_world()), flip);
     } break;
 
     case Entity_State::Ded: {} break;
