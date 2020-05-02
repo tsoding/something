@@ -416,7 +416,6 @@ int main(void)
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
 
-        // TODO: It's probably a bad idea to get the size of the window on each frame.
         SDL_GetWindowSize(
             window,
             &game_state.camera.window_width,
