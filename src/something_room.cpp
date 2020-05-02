@@ -19,6 +19,11 @@ struct Room
     Vec2f position;
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
 
+    Vec2f center() const
+    {
+        return vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + position;
+    }
+
     bool is_tile_inbounds(Vec2i p) const
     {
         return 0 <= p.x && p.x < ROOM_WIDTH && 0 <= p.y && p.y < ROOM_HEIGHT;
@@ -64,7 +69,7 @@ struct Room
 
                 case Tile::Wall: {
                     const auto dstrect = rect(
-                        vec_cast<float>(vec2(x, y)) * TILE_SIZE + position - camera.pos,
+                        camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position),
                         TILE_SIZE, TILE_SIZE);
                     if (is_tile_empty(vec2(x, y - 1))) {
                         render_sprite(renderer, top_ground_texture, dstrect);

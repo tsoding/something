@@ -75,13 +75,13 @@ void render_projectiles(SDL_Renderer *renderer, Camera camera)
         case Projectile_State::Active: {
             render_animat(renderer,
                           projectiles[i].active_animat,
-                          projectiles[i].pos - camera.pos);
+                          camera.to_screen(projectiles[i].pos));
         } break;
 
         case Projectile_State::Poof: {
             render_animat(renderer,
                           projectiles[i].poof_animat,
-                          projectiles[i].pos - camera.pos);
+                          camera.to_screen(projectiles[i].pos));
         } break;
 
         case Projectile_State::Ded: {} break;

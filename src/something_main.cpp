@@ -70,7 +70,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 
     const float COLLISION_PROBE_SIZE = 10.0f;
     const auto collision_probe_rect = rect(
-        game_state.collision_probe - COLLISION_PROBE_SIZE - game_state.camera.pos,
+        game_state.camera.to_screen(game_state.collision_probe - COLLISION_PROBE_SIZE),
         COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2);
     {
         auto rect = rectf_for_sdl(collision_probe_rect);
@@ -79,7 +79,7 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
 
     auto index = room_index_at(game_state.debug_mouse_position);
     auto room_boundary_screen =
-        (ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f)) - game_state.camera.pos;
+        game_state.camera.to_screen(ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f));
     {
         auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
@@ -149,18 +149,18 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
         if (entities[i].state == Entity_State::Ded) continue;
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-        auto dstrect = rectf_for_sdl(entities[i].texbox_world() - game_state.camera.pos);
+        auto dstrect = rectf_for_sdl(game_state.camera.to_screen(entities[i].texbox_world()));
         sec(SDL_RenderDrawRect(renderer, &dstrect));
 
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
-        auto hitbox = rectf_for_sdl(entities[i].hitbox_world() - game_state.camera.pos);
+        auto hitbox = rectf_for_sdl(game_state.camera.to_screen(entities[i].hitbox_world()));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
     if (game_state.tracking_projectile.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(game_state.tracking_projectile.unwrap) - game_state.camera.pos);
+            game_state.camera.to_screen(hitbox_of_projectile(game_state.tracking_projectile.unwrap)));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
@@ -168,20 +168,20 @@ void render_debug_overlay(Game_State game_state, SDL_Renderer *renderer)
     if (projectile_index.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
-            hitbox_of_projectile(projectile_index.unwrap) - game_state.camera.pos);
+            game_state.camera.to_screen(hitbox_of_projectile(projectile_index.unwrap)));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
         return;
     }
 
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
     const Rectf tile_rect = {
-        floorf(game_state.debug_mouse_position.x / TILE_SIZE) * TILE_SIZE - game_state.camera.pos.x,
-        floorf(game_state.debug_mouse_position.y / TILE_SIZE) * TILE_SIZE - game_state.camera.pos.y,
+        floorf(game_state.debug_mouse_position.x / TILE_SIZE) * TILE_SIZE,
+        floorf(game_state.debug_mouse_position.y / TILE_SIZE) * TILE_SIZE,
         TILE_SIZE,
         TILE_SIZE
     };
     {
-        auto rect = rectf_for_sdl(tile_rect);
+        auto rect = rectf_for_sdl(game_state.camera.to_screen(tile_rect));
         sec(SDL_RenderDrawRect(renderer, &rect));
     }
 }
@@ -226,7 +226,7 @@ void update_game_state(Game_State game_state, float dt)
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(
-        vec2((float) mouse_x, (float) mouse_y) + game_state.camera.pos);
+        game_state.camera.to_world(vec2((float) mouse_x, (float) mouse_y)));
 
     if (!game_state.debug) {
         for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
@@ -287,7 +287,7 @@ void reset_entities(Frame_Animat walking, Frame_Animat idle,
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              walking, idle,
                              jump_sample1, jump_sample2,
-                             vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + room_row[i + 1].position);
+                             room_row[i + 1].center());
     }
 }
 
@@ -416,8 +416,11 @@ int main(void)
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
 
-        int window_w = 0, window_h = 0;
-        SDL_GetWindowSize(window, &window_w, &window_h);
+        // TODO: It's probably a bad idea to get the size of the window on each frame.
+        SDL_GetWindowSize(
+            window,
+            &game_state.camera.window_width,
+            &game_state.camera.window_height);
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
@@ -515,7 +518,7 @@ int main(void)
 
             case SDL_MOUSEMOTION: {
                 game_state.debug_mouse_position =
-                    vec_cast<float>(vec2(event.motion.x, event.motion.y)) + game_state.camera.pos;
+                    game_state.camera.to_world(vec_cast<float>(vec2(event.motion.x, event.motion.y)));
                 game_state.collision_probe = game_state.debug_mouse_position;
 
                 auto index = room_index_at(game_state.collision_probe);
@@ -617,8 +620,8 @@ int main(void)
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
 
-            game_state.camera.pos = entities[PLAYER_ENTITY_INDEX].pos -
-                vec2((float) window_w, (float) window_h) * 0.5f;
+            auto current_room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+            game_state.camera.pos = room_row[current_room_index.unwrap].center();
         }
         //// UPDATE STATE END //////////////////////////////
 
@@ -629,7 +632,10 @@ int main(void)
         auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
         if (index.unwrap == 0) {
-            const SDL_Rect rect = {0, 0, (int)floorf(-game_state.camera.pos.x), window_h};
+            const SDL_Rect rect = {
+                0, 0,
+                (int)floorf(-game_state.camera.pos.x),
+                game_state.camera.window_height};
             sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
             sec(SDL_RenderFillRect(renderer, &rect));
         }
