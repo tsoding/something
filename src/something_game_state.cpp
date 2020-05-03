@@ -159,8 +159,6 @@ void Game_State::entity_shoot(Entity_Index entity_index)
 }
 
 void Game_State::inplace_spawn_entity(Entity_Index index,
-                                      Frame_Animat walking,
-                                      Frame_Animat idle,
                                       Sample_S16 jump_sample1,
                                       Sample_S16 jump_sample2,
                                       Vec2f pos)
@@ -188,8 +186,8 @@ void Game_State::inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].gun_dir = vec2(1.0f, 0.0f);
     entities[index.unwrap].poof.duration = POOF_DURATION;
 
-    entities[index.unwrap].walking = walking;
-    entities[index.unwrap].idle = idle;
+    entities[index.unwrap].walking = entity_walking_animat;
+    entities[index.unwrap].idle = entity_idle_animat;
 
     entities[index.unwrap].prepare_for_jump_animat.begin = 0.0f;
     entities[index.unwrap].prepare_for_jump_animat.end = 0.2f;
@@ -207,18 +205,15 @@ void Game_State::inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].jump_samples[1] = jump_sample2;
 }
 
-void Game_State::reset_entities(Frame_Animat walking, Frame_Animat idle,
-                                Sample_S16 jump_sample1, Sample_S16 jump_sample2)
+void Game_State::reset_entities(Sample_S16 jump_sample1, Sample_S16 jump_sample2)
 {
     inplace_spawn_entity(
         {PLAYER_ENTITY_INDEX},
-        walking, idle,
         jump_sample1, jump_sample2,
         vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
 
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
-                             walking, idle,
                              jump_sample1, jump_sample2,
                              room_row[i + 1].center());
     }

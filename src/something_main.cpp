@@ -78,8 +78,6 @@ int main(void)
 
     auto plasma_pop_animat = load_animat_file("./assets/animats/plasma_pop.txt");
     auto plasma_bolt_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
-    auto walking = load_animat_file("./assets/animats/walking.txt");
-    auto idle = load_animat_file("./assets/animats/idle.txt");
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
@@ -97,6 +95,8 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
+    game_state.entity_walking_animat = load_animat_file("./assets/animats/walking.txt");
+    game_state.entity_idle_animat = load_animat_file("./assets/animats/idle.txt");
     game_state.tracking_projectile = {};
 
     game_state.init_projectiles(plasma_bolt_animat, plasma_pop_animat);
@@ -111,7 +111,7 @@ int main(void)
                 {room_index}));
     }
 
-    game_state.reset_entities(walking, idle, jump_sample1, jump_sample2);
+    game_state.reset_entities(jump_sample1, jump_sample2);
 
     SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
 
@@ -221,7 +221,7 @@ int main(void)
                     } break;
 
                     case SDLK_r: {
-                        game_state.reset_entities(walking, idle, jump_sample1, jump_sample2);
+                        game_state.reset_entities(jump_sample1, jump_sample2);
                     } break;
                     }
                 }

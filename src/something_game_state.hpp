@@ -54,6 +54,9 @@ struct Game_State
     Sprite ground_grass_texture;
     Sprite ground_texture;
 
+    Frame_Animat entity_walking_animat;
+    Frame_Animat entity_idle_animat;
+
     TTF_Font *debug_font;
 
     Maybe<Projectile_Index> tracking_projectile;
@@ -66,12 +69,9 @@ struct Game_State
     void render_debug_overlay(SDL_Renderer *renderer);
 
     // Entities of the Game
-    void reset_entities(Frame_Animat walking, Frame_Animat idle,
-                        Sample_S16 jump_sample1, Sample_S16 jump_sample2);
+    void reset_entities(Sample_S16 jump_sample1, Sample_S16 jump_sample2);
     void entity_shoot(Entity_Index entity_index);
     void inplace_spawn_entity(Entity_Index index,
-                              Frame_Animat walking,
-                              Frame_Animat idle,
                               Sample_S16 jump_sample1,
                               Sample_S16 jump_sample2,
                               Vec2f pos);
