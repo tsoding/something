@@ -142,7 +142,6 @@ void Game_State::render(SDL_Renderer *renderer)
 void Game_State::entity_shoot(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
-
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state != Entity_State::Alive) return;
@@ -156,6 +155,14 @@ void Game_State::entity_shoot(Entity_Index entity_index)
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+
+    mixer.play_sample(player_shoot_sample);
+}
+
+void Game_State::entity_jump(Entity_Index entity_index)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    entities[entity_index.unwrap].jump(gravity, &mixer);
 }
 
 void Game_State::inplace_spawn_entity(Entity_Index index,

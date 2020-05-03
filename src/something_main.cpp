@@ -1,3 +1,15 @@
+template <typename F>
+struct Defer
+{
+    Defer(F f): f(f) {}
+    ~Defer() { f(); }
+    F f;
+};
+
+#define CONCAT0(a, b) a##b
+#define CONCAT(a, b) CONCAT0(a, b)
+#define defer(body) Defer CONCAT(defer, __LINE__)([&]() { body; })
+
 const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 
@@ -22,38 +34,6 @@ int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
-
-    Sample_Mixer mixer = {};
-    mixer.volume = 0.2f;
-
-    SDL_AudioSpec want = {};
-    want.freq = SOMETHING_SOUND_FREQ;
-    want.format = SOMETHING_SOUND_FORMAT;
-    want.channels = SOMETHING_SOUND_CHANNELS;
-    want.samples = SOMETHING_SOUND_SAMPLES;
-    want.callback = sample_mixer_audio_callback;
-    want.userdata = &mixer;
-
-    SDL_AudioSpec have = {};
-    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
-        NULL,
-        0,
-        &want,
-        &have,
-        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
-    // defer(SDL_CloseAudioDevice(dev));
-    if (dev == 0) {
-        println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
-        abort();
-    }
-
-    if (have.format != want.format) {
-        println(stderr, "[WARN] We didn't get expected audio format.");
-        abort();
-    }
-    SDL_PauseAudioDevice(dev, 0);
-
     SDL_Window *window =
         sec(SDL_CreateWindow(
                 "Something",
@@ -74,12 +54,12 @@ int main(void)
 
     load_spritesheets(renderer);
 
-
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
 
     const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
+    game_state.mixer.volume = 0.2f;
     game_state.gravity = {0.0, 2500.0f};
     game_state.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
@@ -91,12 +71,42 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
+    game_state.player_shoot_sample      = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
     game_state.entity_walking_animat    = load_animat_file("./assets/animats/walking.txt");
     game_state.entity_idle_animat       = load_animat_file("./assets/animats/idle.txt");
     game_state.entity_jump_sample1      = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
     game_state.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     game_state.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
     game_state.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
+
+    // SOUND //////////////////////////////
+    SDL_AudioSpec want = {};
+    want.freq = SOMETHING_SOUND_FREQ;
+    want.format = SOMETHING_SOUND_FORMAT;
+    want.channels = SOMETHING_SOUND_CHANNELS;
+    want.samples = SOMETHING_SOUND_SAMPLES;
+    want.callback = sample_mixer_audio_callback;
+    want.userdata = &game_state.mixer;
+
+    SDL_AudioSpec have = {};
+    SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
+        NULL,
+        0,
+        &want,
+        &have,
+        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+    defer(SDL_CloseAudioDevice(dev));
+    if (dev == 0) {
+        println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
+        abort();
+    }
+    if (have.format != want.format) {
+        println(stderr, "[WARN] We didn't get expected audio format.");
+        abort();
+    }
+    SDL_PauseAudioDevice(dev, 0);
+    // SOUND END //////////////////////////////
+
 
     char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
@@ -163,7 +173,7 @@ int main(void)
                     switch (event.key.keysym.sym) {
                     case SDLK_SPACE: {
                         if (!event.key.repeat) {
-                            game_state.entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
+                            game_state.entity_jump({PLAYER_ENTITY_INDEX});
                         }
                     } break;
 
@@ -228,7 +238,7 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        game_state.entities[PLAYER_ENTITY_INDEX].jump(game_state.gravity, &mixer);
+                        game_state.entity_jump({PLAYER_ENTITY_INDEX});
                     }
                 } break;
                 }
@@ -289,7 +299,7 @@ int main(void)
 
                 case SDL_BUTTON_LEFT: {
                     game_state.entity_shoot({PLAYER_ENTITY_INDEX});
-                    mixer.play_sample(shoot_sample);
+
                 } break;
                 }
             } break;

@@ -51,6 +51,7 @@ struct Game_State
     Maybe<Projectile_Index> tracking_projectile;
     Debug_Draw_State state;
     Camera camera;
+    Sample_Mixer mixer;
 
     Sprite ground_grass_texture;
     Sprite ground_texture;
@@ -59,6 +60,7 @@ struct Game_State
     Frame_Animat entity_idle_animat;
     Sample_S16 entity_jump_sample1;
     Sample_S16 entity_jump_sample2;
+    Sample_S16 player_shoot_sample;
 
     Frame_Animat projectile_active_animat;
     Frame_Animat projectile_poof_animat;
@@ -76,6 +78,7 @@ struct Game_State
     // Entities of the Game
     void reset_entities();
     void entity_shoot(Entity_Index entity_index);
+    void entity_jump(Entity_Index entity_index);
     void inplace_spawn_entity(Entity_Index index, Vec2f pos);
 
     // Projectiles of the Game
