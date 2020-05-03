@@ -299,7 +299,6 @@ int main(void)
 
                 case SDL_BUTTON_LEFT: {
                     game_state.entity_shoot({PLAYER_ENTITY_INDEX});
-
                 } break;
                 }
             } break;
@@ -318,7 +317,6 @@ int main(void)
         //// UPDATE STATE //////////////////////////////
         if (!step_debug) {
             while (lag_sec >= SIMULATION_DELTA_TIME) {
-
                 game_state.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
@@ -328,21 +326,7 @@ int main(void)
         //// RENDER //////////////////////////////
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
-
-        auto index = room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
-
-        if (index.unwrap == 0) {
-            const SDL_Rect rect = {
-                0, 0,
-                (int)floorf(-game_state.camera.pos.x),
-                (int)floorf(game_state.camera.height)};
-            sec(SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255));
-            sec(SDL_RenderFillRect(renderer, &rect));
-        }
-        // TODO(#47): there is no right border
-
         game_state.render(renderer);
-
         if (game_state.debug) {
             game_state.render_debug_overlay(renderer);
         }
