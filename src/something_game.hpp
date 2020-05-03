@@ -47,6 +47,20 @@ const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
 const size_t ROOM_ROW_COUNT = 8;
 
+const size_t POPUP_BUFFER_CAPACITY = 256;
+
+struct Popup
+{
+    char buffer[POPUP_BUFFER_CAPACITY];
+    int buffer_size;
+    TTF_Font *font;
+    float a;
+
+    void notify(const char *format, ...);
+    void render(SDL_Renderer *renderer, const Camera *camera);
+    void update(float delta_time);
+};
+
 struct Game
 {
     Vec2f gravity;
@@ -59,6 +73,7 @@ struct Game
     Camera camera;
     Sample_Mixer mixer;
     const Uint8 *keyboard;
+    Popup popup;
 
     Sprite ground_grass_texture;
     Sprite ground_texture;

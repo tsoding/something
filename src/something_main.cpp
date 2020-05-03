@@ -56,13 +56,15 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-
+    const int POPUP_FONT_SIZE = 32 + 16;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
     game.gravity = {0.0, 2500.0f};
     game.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
+    game.popup.font =
+        stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", POPUP_FONT_SIZE));
     game.ground_grass_texture = {
         {120, 128, 16, 16},
         tileset_texture
@@ -212,8 +214,9 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        fprintf(stderr, "Saved room %lu to `%s`\n",
-                                room_index.unwrap, room_file_path);
+                        game.popup.notify("Saved room %lu to `%s`",
+                                          room_index.unwrap,
+                                          room_file_path);
                     } break;
 
                     case SDLK_i: {
@@ -223,8 +226,9 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        fprintf(stderr, "Load room %lu from `%s`\n",
-                                room_index.unwrap, room_file_path);
+                        game.popup.notify("Load room %lu from `%s`\n",
+                                          room_index.unwrap,
+                                          room_file_path);
                     } break;
 
                     case SDLK_r: {
