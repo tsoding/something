@@ -1,4 +1,4 @@
-#include "something_game_state.hpp"
+#include "something_game.hpp"
 
 const char *projectile_state_as_cstr(Projectile_State state)
 {
@@ -50,7 +50,7 @@ void displayf(SDL_Renderer *renderer, TTF_Font *font,
     va_end(args);
 }
 
-void Game_State::update(float dt)
+void Game::update(float dt)
 {
     // Update Player's gun direction //////////////////////////////
     int mouse_x, mouse_y;
@@ -141,7 +141,7 @@ void Game_State::update(float dt)
     camera.update(dt);
 }
 
-void Game_State::render(SDL_Renderer *renderer)
+void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
@@ -178,7 +178,7 @@ void Game_State::render(SDL_Renderer *renderer)
     render_projectiles(renderer, camera);
 }
 
-void Game_State::entity_shoot(Entity_Index entity_index)
+void Game::entity_shoot(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
@@ -198,14 +198,14 @@ void Game_State::entity_shoot(Entity_Index entity_index)
     mixer.play_sample(entity->shoot_sample);
 }
 
-void Game_State::entity_jump(Entity_Index entity_index)
+void Game::entity_jump(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     entities[entity_index.unwrap].jump(gravity, &mixer);
 }
 
-void Game_State::inplace_spawn_entity(Entity_Index index,
-                                      Vec2f pos)
+void Game::inplace_spawn_entity(Entity_Index index,
+                                Vec2f pos)
 {
     const int ENTITY_TEXBOX_SIZE = 64;
     const int ENTITY_HITBOX_SIZE = ENTITY_TEXBOX_SIZE - 20;
@@ -249,7 +249,7 @@ void Game_State::inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].jump_samples[1] = entity_jump_sample2;
 }
 
-void Game_State::reset_entities()
+void Game::reset_entities()
 {
     static_assert(ROOM_ROW_COUNT > 0);
     inplace_spawn_entity({PLAYER_ENTITY_INDEX},
@@ -262,7 +262,7 @@ void Game_State::reset_entities()
     }
 }
 
-void Game_State::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     const float PROJECTILE_LIFETIME = 5.0f;
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
@@ -279,7 +279,7 @@ void Game_State::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     }
 }
 
-void Game_State::render_debug_overlay(SDL_Renderer *renderer)
+void Game::render_debug_overlay(SDL_Renderer *renderer)
 {
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
@@ -401,7 +401,7 @@ void Game_State::render_debug_overlay(SDL_Renderer *renderer)
     }
 }
 
-int Game_State::count_alive_projectiles(void)
+int Game::count_alive_projectiles(void)
 {
     int res = 0;
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
@@ -410,7 +410,7 @@ int Game_State::count_alive_projectiles(void)
     return res;
 }
 
-void Game_State::render_projectiles(SDL_Renderer *renderer, Camera camera)
+void Game::render_projectiles(SDL_Renderer *renderer, Camera camera)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
@@ -431,7 +431,7 @@ void Game_State::render_projectiles(SDL_Renderer *renderer, Camera camera)
     }
 }
 
-void Game_State::update_projectiles(float dt)
+void Game::update_projectiles(float dt)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
@@ -470,7 +470,7 @@ void Game_State::update_projectiles(float dt)
 
 const float PROJECTILE_TRACKING_PADDING = 50.0f;
 
-Rectf Game_State::hitbox_of_projectile(Projectile_Index index)
+Rectf Game::hitbox_of_projectile(Projectile_Index index)
 {
     assert(index.unwrap < PROJECTILES_COUNT);
     return Rectf {
@@ -481,7 +481,7 @@ Rectf Game_State::hitbox_of_projectile(Projectile_Index index)
             };
 }
 
-Maybe<Projectile_Index> Game_State::projectile_at_position(Vec2f position)
+Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
@@ -495,7 +495,7 @@ Maybe<Projectile_Index> Game_State::projectile_at_position(Vec2f position)
     return {};
 }
 
-Room_Index Game_State::room_index_at(Vec2f p)
+Room_Index Game::room_index_at(Vec2f p)
 {
     int index = (int) floor(p.x / ROOM_BOUNDARY.w);
 
@@ -504,9 +504,9 @@ Room_Index Game_State::room_index_at(Vec2f p)
     return {(size_t) index};
 }
 
-void Game_State::render_room_minimap(SDL_Renderer *renderer,
-                                     Room_Index index,
-                                     Vec2f position)
+void Game::render_room_minimap(SDL_Renderer *renderer,
+                               Room_Index index,
+                               Vec2f position)
 {
     assert(index.unwrap < ROOM_ROW_COUNT);
 
@@ -526,8 +526,8 @@ void Game_State::render_room_minimap(SDL_Renderer *renderer,
     }
 }
 
-void Game_State::render_room_row_minimap(SDL_Renderer *renderer,
-                                         Vec2f position)
+void Game::render_room_row_minimap(SDL_Renderer *renderer,
+                                   Vec2f position)
 {
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
@@ -537,9 +537,9 @@ void Game_State::render_room_row_minimap(SDL_Renderer *renderer,
     }
 }
 
-void Game_State::render_entity_on_minimap(SDL_Renderer *renderer,
-                                          Vec2f position,
-                                          Vec2f entity_position)
+void Game::render_entity_on_minimap(SDL_Renderer *renderer,
+                                    Vec2f position,
+                                    Vec2f entity_position)
 {
     const Vec2f minimap_position =
         entity_position /

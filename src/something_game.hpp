@@ -1,5 +1,5 @@
-#ifndef SOMETHING_GAME_STATE_HPP_
-#define SOMETHING_GAME_STATE_HPP_
+#ifndef SOMETHING_GAME_HPP_
+#define SOMETHING_GAME_HPP_
 
 enum class Debug_Draw_State {
     Idle = 0,
@@ -47,7 +47,7 @@ const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
 const size_t ROOM_ROW_COUNT = 8;
 
-struct Game_State
+struct Game
 {
     Vec2f gravity;
     bool quit;
@@ -109,4 +109,4 @@ struct Game_State
                                   Vec2f entity_position);
 };
 
-#endif  // SOMETHING_GAME_STATE_HPP_
+#endif  // SOMETHING_GAME_HPP_

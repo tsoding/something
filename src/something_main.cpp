@@ -28,7 +28,7 @@ char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
     return buffer;
 }
 
-Game_State game_state = {};
+Game game = {};
 
 int main(void)
 {
@@ -58,26 +58,26 @@ int main(void)
     const int DEBUG_FONT_SIZE = 32;
 
 
-    game_state.mixer.volume = 0.2f;
-    game_state.keyboard = SDL_GetKeyboardState(NULL);
-    game_state.gravity = {0.0, 2500.0f};
-    game_state.debug_font =
+    game.mixer.volume = 0.2f;
+    game.keyboard = SDL_GetKeyboardState(NULL);
+    game.gravity = {0.0, 2500.0f};
+    game.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
-    game_state.ground_grass_texture = {
+    game.ground_grass_texture = {
         {120, 128, 16, 16},
         tileset_texture
     };
-    game_state.ground_texture = {
+    game.ground_texture = {
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
-    game_state.player_shoot_sample      = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
-    game_state.entity_walking_animat    = load_animat_file("./assets/animats/walking.txt");
-    game_state.entity_idle_animat       = load_animat_file("./assets/animats/idle.txt");
-    game_state.entity_jump_sample1      = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
-    game_state.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
-    game_state.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
-    game_state.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
+    game.player_shoot_sample      = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
+    game.entity_walking_animat    = load_animat_file("./assets/animats/walking.txt");
+    game.entity_idle_animat       = load_animat_file("./assets/animats/idle.txt");
+    game.entity_jump_sample1      = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
+    game.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
+    game.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
+    game.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
@@ -86,7 +86,7 @@ int main(void)
     want.channels = SOMETHING_SOUND_CHANNELS;
     want.samples = SOMETHING_SOUND_SAMPLES;
     want.callback = sample_mixer_audio_callback;
-    want.userdata = &game_state.mixer;
+    want.userdata = &game.mixer;
 
     SDL_AudioSpec have = {};
     SDL_AudioDeviceID dev = SDL_OpenAudioDevice(
@@ -110,17 +110,17 @@ int main(void)
 
     char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        game_state.room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
-        game_state.room_row[room_index].load_file(
+        game.room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
+        game.room_row[room_index].load_file(
             file_path_of_room(
                 room_file_path,
                 sizeof(room_file_path),
                 {room_index}));
     }
 
-    game_state.reset_entities();
+    game.reset_entities();
 
-    SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
+    SDL_SetWindowGrab(window, game.debug ? SDL_FALSE : SDL_TRUE);
 
     bool step_debug = false;
 
@@ -131,7 +131,7 @@ int main(void)
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
     Room_Index room_index_clipboard = {0};
-    while (!game_state.quit) {
+    while (!game.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
         prev_ticks = curr_ticks;
@@ -140,8 +140,8 @@ int main(void)
         {
             int w, h;
             SDL_GetWindowSize(window, &w, &h);
-            game_state.camera.width = (float) w;
-            game_state.camera.height = (float) h;
+            game.camera.width = (float) w;
+            game.camera.height = (float) h;
         }
 
         //// HANDLE INPUT //////////////////////////////
@@ -149,7 +149,7 @@ int main(void)
         while (SDL_PollEvent(&event)) {
             switch (event.type) {
             case SDL_QUIT: {
-                game_state.quit = true;
+                game.quit = true;
             } break;
 
             case SDL_KEYDOWN: {
@@ -160,39 +160,39 @@ int main(void)
                 // kills isdigit if it's not optimized away?
                 const auto sym = event.key.keysym.sym;
                 if ('0' <= sym && sym <= '9') {
-                    if (game_state.debug) {
+                    if (game.debug) {
                         int room_index = sym - '0' - 1;
                         if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
                             auto room_center =
                                 vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) +
-                                game_state.room_row[room_index].position;
-                            game_state.entities[PLAYER_ENTITY_INDEX].pos = room_center;
+                                game.room_row[room_index].position;
+                            game.entities[PLAYER_ENTITY_INDEX].pos = room_center;
                         }
                     }
                 } else {
                     switch (event.key.keysym.sym) {
                     case SDLK_SPACE: {
                         if (!event.key.repeat) {
-                            game_state.entity_jump({PLAYER_ENTITY_INDEX});
+                            game.entity_jump({PLAYER_ENTITY_INDEX});
                         }
                     } break;
 
                     case SDLK_c: {
-                        if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
-                            room_index_clipboard = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
+                        if (game.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
+                            room_index_clipboard = game.room_index_at(game.entities[PLAYER_ENTITY_INDEX].pos);
                         }
                     } break;
 
                     case SDLK_v: {
-                        if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
-                            game_state.room_row[game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos).unwrap]
-                                .copy_from(&game_state.room_row[room_index_clipboard.unwrap]);
+                        if (game.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
+                            game.room_row[game.room_index_at(game.entities[PLAYER_ENTITY_INDEX].pos).unwrap]
+                                .copy_from(&game.room_row[room_index_clipboard.unwrap]);
                         }
                     } break;
 
                     case SDLK_q: {
-                        game_state.debug = !game_state.debug;
-                        SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
+                        game.debug = !game.debug;
+                        SDL_SetWindowGrab(window, game.debug ? SDL_FALSE : SDL_TRUE);
                     } break;
 
                     case SDLK_z: {
@@ -201,13 +201,13 @@ int main(void)
 
                     case SDLK_x: {
                         if (step_debug) {
-                            game_state.update(SIMULATION_DELTA_TIME);
+                            game.update(SIMULATION_DELTA_TIME);
                         }
                     } break;
 
                     case SDLK_e: {
-                        auto room_index = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
-                        game_state.room_row[room_index.unwrap].dump_file(
+                        auto room_index = game.room_index_at(game.entities[PLAYER_ENTITY_INDEX].pos);
+                        game.room_row[room_index.unwrap].dump_file(
                             file_path_of_room(
                                 room_file_path,
                                 sizeof(room_file_path),
@@ -217,8 +217,8 @@ int main(void)
                     } break;
 
                     case SDLK_i: {
-                        auto room_index = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
-                        game_state.room_row[room_index.unwrap].load_file(
+                        auto room_index = game.room_index_at(game.entities[PLAYER_ENTITY_INDEX].pos);
+                        game.room_row[room_index.unwrap].load_file(
                             file_path_of_room(
                                 room_file_path,
                                 sizeof(room_file_path),
@@ -228,7 +228,7 @@ int main(void)
                     } break;
 
                     case SDLK_r: {
-                        game_state.reset_entities();
+                        game.reset_entities();
                     } break;
                     }
                 }
@@ -238,30 +238,30 @@ int main(void)
                 switch (event.key.keysym.sym) {
                 case SDLK_SPACE: {
                     if (!event.key.repeat) {
-                        game_state.entity_jump({PLAYER_ENTITY_INDEX});
+                        game.entity_jump({PLAYER_ENTITY_INDEX});
                     }
                 } break;
                 }
             } break;
 
             case SDL_MOUSEMOTION: {
-                game_state.debug_mouse_position =
-                    game_state.camera.to_world(vec_cast<float>(vec2(event.motion.x, event.motion.y)));
-                game_state.collision_probe = game_state.debug_mouse_position;
+                game.debug_mouse_position =
+                    game.camera.to_world(vec_cast<float>(vec2(event.motion.x, event.motion.y)));
+                game.collision_probe = game.debug_mouse_position;
 
-                auto index = game_state.room_index_at(game_state.collision_probe);
-                game_state.room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
+                auto index = game.room_index_at(game.collision_probe);
+                game.room_row[index.unwrap].resolve_point_collision(&game.collision_probe);
 
-                Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - game_state.room_row[index.unwrap].position) / TILE_SIZE);
-                switch (game_state.state) {
+                Vec2i tile = vec_cast<int>((game.debug_mouse_position - game.room_row[index.unwrap].position) / TILE_SIZE);
+                switch (game.state) {
                 case Debug_Draw_State::Create: {
-                    if (game_state.room_row[index.unwrap].is_tile_inbounds(tile))
-                        game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                    if (game.room_row[index.unwrap].is_tile_inbounds(tile))
+                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
                 } break;
 
                 case Debug_Draw_State::Delete: {
-                    if (game_state.room_row[index.unwrap].is_tile_inbounds(tile))
-                        game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                    if (game.room_row[index.unwrap].is_tile_inbounds(tile))
+                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                 } break;
 
                 default: {}
@@ -271,26 +271,26 @@ int main(void)
             case SDL_MOUSEBUTTONDOWN: {
                 switch (event.button.button) {
                 case SDL_BUTTON_RIGHT: {
-                    if (game_state.debug) {
-                        game_state.tracking_projectile =
-                            game_state.projectile_at_position(game_state.debug_mouse_position);
+                    if (game.debug) {
+                        game.tracking_projectile =
+                            game.projectile_at_position(game.debug_mouse_position);
 
-                        if (!game_state.tracking_projectile.has_value) {
+                        if (!game.tracking_projectile.has_value) {
 
-                            auto index = game_state.room_index_at(game_state.debug_mouse_position);
+                            auto index = game.room_index_at(game.debug_mouse_position);
 
                             Vec2i tile =
                                 vec_cast<int>(
-                                    (game_state.debug_mouse_position - game_state.room_row[index.unwrap].position) /
+                                    (game.debug_mouse_position - game.room_row[index.unwrap].position) /
                                     TILE_SIZE);
 
-                            if (game_state.room_row[index.unwrap].is_tile_inbounds(tile)) {
-                                if (game_state.room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
-                                    game_state.state = Debug_Draw_State::Create;
-                                    game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                            if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {
+                                if (game.room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
+                                    game.state = Debug_Draw_State::Create;
+                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
                                 } else {
-                                    game_state.state = Debug_Draw_State::Delete;
-                                    game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                                    game.state = Debug_Draw_State::Delete;
+                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                                 }
                             }
                         }
@@ -298,7 +298,7 @@ int main(void)
                 } break;
 
                 case SDL_BUTTON_LEFT: {
-                    game_state.entity_shoot({PLAYER_ENTITY_INDEX});
+                    game.entity_shoot({PLAYER_ENTITY_INDEX});
                 } break;
                 }
             } break;
@@ -306,7 +306,7 @@ int main(void)
             case SDL_MOUSEBUTTONUP: {
                 switch (event.button.button) {
                 case SDL_BUTTON_RIGHT: {
-                    game_state.state = Debug_Draw_State::Idle;
+                    game.state = Debug_Draw_State::Idle;
                 } break;
                 }
             } break;
@@ -317,7 +317,7 @@ int main(void)
         //// UPDATE STATE //////////////////////////////
         if (!step_debug) {
             while (lag_sec >= SIMULATION_DELTA_TIME) {
-                game_state.update(SIMULATION_DELTA_TIME);
+                game.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
             }
         }
@@ -326,9 +326,9 @@ int main(void)
         //// RENDER //////////////////////////////
         sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
         sec(SDL_RenderClear(renderer));
-        game_state.render(renderer);
-        if (game_state.debug) {
-            game_state.render_debug_overlay(renderer);
+        game.render(renderer);
+        if (game.debug) {
+            game.render_debug_overlay(renderer);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
