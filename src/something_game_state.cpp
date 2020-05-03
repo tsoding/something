@@ -156,7 +156,7 @@ void Game_State::entity_shoot(Entity_Index entity_index)
         entity_index);
     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
-    mixer.play_sample(player_shoot_sample);
+    mixer.play_sample(entity->shoot_sample);
 }
 
 void Game_State::entity_jump(Entity_Index entity_index)
@@ -215,6 +215,7 @@ void Game_State::reset_entities()
     static_assert(ROOM_ROW_COUNT > 0);
     inplace_spawn_entity({PLAYER_ENTITY_INDEX},
                          room_row[0].center());
+    entities[PLAYER_ENTITY_INDEX].shoot_sample = player_shoot_sample;
 
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},

@@ -44,6 +44,7 @@ struct Entity
     Compose_Rubber_Animat<2> jump_animat;
 
     Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
+    Sample_S16 shoot_sample;
 
     void resolve_entity_collision();
     void kill();
