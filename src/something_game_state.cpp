@@ -159,8 +159,6 @@ void Game_State::entity_shoot(Entity_Index entity_index)
 }
 
 void Game_State::inplace_spawn_entity(Entity_Index index,
-                                      Sample_S16 jump_sample1,
-                                      Sample_S16 jump_sample2,
                                       Vec2f pos)
 {
     const int ENTITY_TEXBOX_SIZE = 64;
@@ -201,20 +199,18 @@ void Game_State::inplace_spawn_entity(Entity_Index index,
     entities[index.unwrap].jump_animat.rubber_animats[1].end = 0.0f;
     entities[index.unwrap].jump_animat.rubber_animats[1].duration = 0.2f;
 
-    entities[index.unwrap].jump_samples[0] = jump_sample1;
-    entities[index.unwrap].jump_samples[1] = jump_sample2;
+    entities[index.unwrap].jump_samples[0] = entity_jump_sample1;
+    entities[index.unwrap].jump_samples[1] = entity_jump_sample2;
 }
 
-void Game_State::reset_entities(Sample_S16 jump_sample1, Sample_S16 jump_sample2)
+void Game_State::reset_entities()
 {
-    inplace_spawn_entity(
-        {PLAYER_ENTITY_INDEX},
-        jump_sample1, jump_sample2,
-        vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f));
+    static_assert(ROOM_ROW_COUNT > 0);
+    inplace_spawn_entity({PLAYER_ENTITY_INDEX},
+                         room_row[0].center());
 
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
-                             jump_sample1, jump_sample2,
                              room_row[i + 1].center());
     }
 }

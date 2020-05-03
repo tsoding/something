@@ -48,6 +48,7 @@ struct Game_State
     bool debug;
     Vec2f collision_probe;
     Vec2f debug_mouse_position;
+    Maybe<Projectile_Index> tracking_projectile;
     Debug_Draw_State state;
     Camera camera;
 
@@ -56,25 +57,23 @@ struct Game_State
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
+    Sample_S16 entity_jump_sample1;
+    Sample_S16 entity_jump_sample2;
 
     TTF_Font *debug_font;
 
-    Maybe<Projectile_Index> tracking_projectile;
-
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
+
     // Whole Game State
     void update(float dt);
     void render(SDL_Renderer *renderer);
     void render_debug_overlay(SDL_Renderer *renderer);
 
     // Entities of the Game
-    void reset_entities(Sample_S16 jump_sample1, Sample_S16 jump_sample2);
+    void reset_entities();
     void entity_shoot(Entity_Index entity_index);
-    void inplace_spawn_entity(Entity_Index index,
-                              Sample_S16 jump_sample1,
-                              Sample_S16 jump_sample2,
-                              Vec2f pos);
+    void inplace_spawn_entity(Entity_Index index, Vec2f pos);
 
     // Projectiles of the Game
     void init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat);

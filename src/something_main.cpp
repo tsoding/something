@@ -22,8 +22,6 @@ int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
-    Sample_S16 jump_sample1 = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
-    Sample_S16 jump_sample2 = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     Sample_S16 shoot_sample = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
 
     Sample_Mixer mixer = {};
@@ -97,6 +95,9 @@ int main(void)
     };
     game_state.entity_walking_animat = load_animat_file("./assets/animats/walking.txt");
     game_state.entity_idle_animat = load_animat_file("./assets/animats/idle.txt");
+    game_state.entity_jump_sample1 = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
+    game_state.entity_jump_sample2 = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
+
     game_state.tracking_projectile = {};
 
     game_state.init_projectiles(plasma_bolt_animat, plasma_pop_animat);
@@ -111,7 +112,7 @@ int main(void)
                 {room_index}));
     }
 
-    game_state.reset_entities(jump_sample1, jump_sample2);
+    game_state.reset_entities();
 
     SDL_SetWindowGrab(window, game_state.debug ? SDL_FALSE : SDL_TRUE);
 
@@ -221,7 +222,7 @@ int main(void)
                     } break;
 
                     case SDLK_r: {
-                        game_state.reset_entities(jump_sample1, jump_sample2);
+                        game_state.reset_entities();
                     } break;
                     }
                 }
