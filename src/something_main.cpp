@@ -226,8 +226,9 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        fprintf(stderr, "Load room %lu from `%s`\n",
-                                room_index.unwrap, room_file_path);
+                        game.popup.notify("Load room %lu from `%s`\n",
+                                          room_index.unwrap,
+                                          room_file_path);
                     } break;
 
                     case SDLK_r: {
