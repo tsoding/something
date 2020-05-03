@@ -65,20 +65,20 @@ void render_animat(SDL_Renderer *renderer,
                    Vec2f pos,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
-    render_sprite(
-        renderer,
-        animat.frames[animat.frame_current % animat.frame_count],
-        pos,
-        flip);
+    if (animat.frame_count > 0) {
+        render_sprite(
+            renderer,
+            animat.frames[animat.frame_current % animat.frame_count],
+            pos,
+            flip);
+    }
 }
 
 void update_animat(Frame_Animat *animat, float dt)
 {
-    assert(animat);
-
     if (dt < animat->frame_cooldown) {
         animat->frame_cooldown -= dt;
-    } else {
+    } else if (animat->frame_count > 0) {
         animat->frame_current = (animat->frame_current + 1) % animat->frame_count;
         animat->frame_cooldown = animat->frame_duration;
     }

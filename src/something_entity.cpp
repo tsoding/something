@@ -8,7 +8,7 @@ void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
             (int) floorf(end.x),   (int) floorf(end.y)));
 }
 
-void Entity::resolve_entity_collision()
+void Entity::resolve_entity_collision(Room *room_row, size_t room_row_count)
 {
     Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
     Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
@@ -25,7 +25,7 @@ void Entity::resolve_entity_collision()
         Vec2f t = mesh[i];
         int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
 
-        if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
+        if (0 <= room_index && room_index < (int) room_row_count) {
             room_row[room_index].resolve_point_collision(&t);
         }
 
@@ -121,13 +121,13 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(Vec2f gravity, float dt)
+void Entity::update(Vec2f gravity, float dt, Room *room_row, size_t room_row_count)
 {
     switch (state) {
     case Entity_State::Alive: {
         vel += gravity * dt;
         pos += vel * dt;
-        resolve_entity_collision();
+        resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= 1;
 
         switch (jump_state) {
@@ -194,90 +194,4 @@ void Entity::jump(Vec2f gravity, Sample_Mixer *mixer)
             break;
         }
     }
-}
-
-void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
-
-Entity entities[ENTITIES_COUNT];
-
-void entity_shoot(Entity_Index entity_index)
-{
-    assert(entity_index.unwrap < ENTITIES_COUNT);
-
-    Entity *entity = &entities[entity_index.unwrap];
-
-    if (entity->state != Entity_State::Alive) return;
-    if (entity->cooldown_weapon > 0) return;
-
-    const float PROJECTILE_SPEED = 1200.0f;
-
-    const int ENTITY_COOLDOWN_WEAPON = 7;
-    spawn_projectile(
-        entity->pos,
-        entity->gun_dir * PROJECTILE_SPEED,
-        entity_index);
-    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-}
-
-void update_entities(Vec2f gravity, float dt)
-{
-    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(gravity, dt);
-    }
-}
-
-void render_entities(SDL_Renderer *renderer, Camera camera)
-{
-    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].render(renderer, camera);
-    }
-}
-
-void inplace_spawn_entity(Entity_Index index,
-                          Frame_Animat walking,
-                          Frame_Animat idle,
-                          Sample_S16 jump_sample1,
-                          Sample_S16 jump_sample2,
-                          Vec2f pos)
-{
-    const int ENTITY_TEXBOX_SIZE = 64;
-    const int ENTITY_HITBOX_SIZE = ENTITY_TEXBOX_SIZE - 20;
-
-    const Rectf texbox_local = {
-        - (ENTITY_TEXBOX_SIZE / 2), - (ENTITY_TEXBOX_SIZE / 2),
-        ENTITY_TEXBOX_SIZE, ENTITY_TEXBOX_SIZE
-    };
-    const Rectf hitbox_local = {
-        - (ENTITY_HITBOX_SIZE / 2), - (ENTITY_HITBOX_SIZE / 2),
-        ENTITY_HITBOX_SIZE, ENTITY_HITBOX_SIZE
-    };
-
-    const float POOF_DURATION = 0.2f;
-
-    memset(entities + index.unwrap, 0, sizeof(Entity));
-    entities[index.unwrap].state = Entity_State::Alive;
-    entities[index.unwrap].alive_state = Alive_State::Idle;
-    entities[index.unwrap].texbox_local = texbox_local;
-    entities[index.unwrap].hitbox_local = hitbox_local;
-    entities[index.unwrap].pos = pos;
-    entities[index.unwrap].gun_dir = vec2(1.0f, 0.0f);
-    entities[index.unwrap].poof.duration = POOF_DURATION;
-
-    entities[index.unwrap].walking = walking;
-    entities[index.unwrap].idle = idle;
-
-    entities[index.unwrap].prepare_for_jump_animat.begin = 0.0f;
-    entities[index.unwrap].prepare_for_jump_animat.end = 0.2f;
-    entities[index.unwrap].prepare_for_jump_animat.duration = 0.2f;
-
-    entities[index.unwrap].jump_animat.rubber_animats[0].begin = 0.2f;
-    entities[index.unwrap].jump_animat.rubber_animats[0].end = -0.2f;
-    entities[index.unwrap].jump_animat.rubber_animats[0].duration = 0.1f;
-
-    entities[index.unwrap].jump_animat.rubber_animats[1].begin = -0.2f;
-    entities[index.unwrap].jump_animat.rubber_animats[1].end = 0.0f;
-    entities[index.unwrap].jump_animat.rubber_animats[1].duration = 0.2f;
-
-    entities[index.unwrap].jump_samples[0] = jump_sample1;
-    entities[index.unwrap].jump_samples[1] = jump_sample2;
 }
