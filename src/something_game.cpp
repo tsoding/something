@@ -598,7 +598,12 @@ void Popup::notify(const char *format, ...)
 {
     va_list args;
     va_start(args, format);
+
     buffer_size = vsnprintf(buffer, POPUP_BUFFER_CAPACITY, format, args);
+    if (buffer_size < 0) {
+        println(stderr, "[WARN] Popup::notify encountered an error");
+    }
+
     a = 1.0f;
     va_end(args);
 }

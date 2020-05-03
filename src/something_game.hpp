@@ -52,7 +52,7 @@ const size_t POPUP_BUFFER_CAPACITY = 256;
 struct Popup
 {
     char buffer[POPUP_BUFFER_CAPACITY];
-    size_t buffer_size;
+    int buffer_size;
     TTF_Font *font;
     float a;
 
