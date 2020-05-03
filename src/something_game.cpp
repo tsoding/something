@@ -603,28 +603,18 @@ void Popup::notify(const char *format, ...)
     va_end(args);
 }
 
+Vec2f shadow_offset_dir(TTF_Font *font, float ratio)
+{
+    int h = TTF_FontHeight(font);
+    return vec2((float) h * ratio, (float) h * ratio);
+}
+
 void Popup::render(SDL_Renderer *renderer, const Camera *camera)
 {
     if (buffer_size > 0 && a > 1e-6) {
         const Uint8 alpha      = (Uint8) floorf(255.0f * fminf(a, 1.0f));
-        SDL_Color color        = DEBUG_FONT_COLOR;
-        color.a                = alpha;
-        SDL_Color shadow_color = DEBUG_FONT_SHADOW_COLOR;
-        shadow_color.a         = alpha;
-
         int w, h;
         stec(TTF_SizeText(font, buffer, &w, &h));
-
-        const float shadow_offset_ratio = 0.05f;
-        const Vec2f shadow_offset_dir = vec2(
-            (float) h * shadow_offset_ratio,
-            (float) h * shadow_offset_ratio);
-
-        SDL_Texture *texture =
-            render_text_as_texture(renderer, font, buffer, color);
-        SDL_Texture *shadow_texture =
-            render_text_as_texture(renderer, font, buffer, shadow_color);
-
         SDL_Rect srcrect = {0, 0, w, h};
         SDL_Rect dstrect = {
             (int) floorf(camera->width  * 0.5f - (float) w * 0.5f),
@@ -632,15 +622,30 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
             w, h
         };
 
+        // SHADOW //////////////////////////////
+        SDL_Color shadow_color = DEBUG_FONT_SHADOW_COLOR;
+        shadow_color.a         = alpha;
+
+        SDL_Texture *shadow_texture =
+            render_text_as_texture(renderer, font, buffer, shadow_color);
+
         SDL_Rect shadow_dstrect = dstrect;
-        shadow_dstrect.x -= (int) shadow_offset_dir.x;
-        shadow_dstrect.y -= (int) shadow_offset_dir.y;
+        const Vec2f offset = shadow_offset_dir(font, 0.05f);
+        shadow_dstrect.x -= (int) offset.x;
+        shadow_dstrect.y -= (int) offset.y;
 
         sec(SDL_RenderCopy(renderer, shadow_texture, &srcrect, &shadow_dstrect));
-        sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
-
-        SDL_DestroyTexture(texture);
         SDL_DestroyTexture(shadow_texture);
+
+        // TEXT   //////////////////////////////
+        SDL_Color color        = DEBUG_FONT_COLOR;
+        color.a                = alpha;
+
+        SDL_Texture *texture =
+            render_text_as_texture(renderer, font, buffer, color);
+
+        sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
+        SDL_DestroyTexture(texture);
     }
 }
 
