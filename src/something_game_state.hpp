@@ -60,6 +60,9 @@ struct Game_State
     Sample_S16 entity_jump_sample1;
     Sample_S16 entity_jump_sample2;
 
+    Frame_Animat projectile_active_animat;
+    Frame_Animat projectile_poof_animat;
+
     TTF_Font *debug_font;
 
     Entity entities[ENTITIES_COUNT];
@@ -76,7 +79,6 @@ struct Game_State
     void inplace_spawn_entity(Entity_Index index, Vec2f pos);
 
     // Projectiles of the Game
-    void init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat);
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
     int count_alive_projectiles(void);
     void render_projectiles(SDL_Renderer *renderer, Camera camera);

@@ -74,8 +74,6 @@ int main(void)
 
     load_spritesheets(renderer);
 
-    auto plasma_pop_animat = load_animat_file("./assets/animats/plasma_pop.txt");
-    auto plasma_bolt_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
@@ -93,14 +91,12 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
-    game_state.entity_walking_animat = load_animat_file("./assets/animats/walking.txt");
-    game_state.entity_idle_animat = load_animat_file("./assets/animats/idle.txt");
-    game_state.entity_jump_sample1 = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
-    game_state.entity_jump_sample2 = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
-
-    game_state.tracking_projectile = {};
-
-    game_state.init_projectiles(plasma_bolt_animat, plasma_pop_animat);
+    game_state.entity_walking_animat    = load_animat_file("./assets/animats/walking.txt");
+    game_state.entity_idle_animat       = load_animat_file("./assets/animats/idle.txt");
+    game_state.entity_jump_sample1      = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
+    game_state.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
+    game_state.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
+    game_state.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
 
     char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {

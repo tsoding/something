@@ -225,6 +225,8 @@ void Game_State::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
             projectiles[i].vel = vel;
             projectiles[i].shooter = shooter;
             projectiles[i].lifetime = PROJECTILE_LIFETIME;
+            projectiles[i].active_animat = projectile_active_animat;
+            projectiles[i].poof_animat = projectile_poof_animat;
             return;
         }
     }
@@ -349,14 +351,6 @@ void Game_State::render_debug_overlay(SDL_Renderer *renderer)
     {
         auto rect = rectf_for_sdl(camera.to_screen(tile_rect));
         sec(SDL_RenderDrawRect(renderer, &rect));
-    }
-}
-
-void Game_State::init_projectiles(Frame_Animat active_animat, Frame_Animat poof_animat)
-{
-    for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
-        projectiles[i].active_animat = active_animat;
-        projectiles[i].poof_animat = poof_animat;
     }
 }
 
