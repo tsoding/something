@@ -612,16 +612,19 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
         SDL_Color shadow_color = DEBUG_FONT_SHADOW_COLOR;
         shadow_color.a         = alpha;
 
+        int w, h;
+        stec(TTF_SizeText(font, buffer, &w, &h));
+
+        const float shadow_offset_ratio = 0.05f;
+        const Vec2f shadow_offset_dir = vec2(
+            (float) h * shadow_offset_ratio,
+            (float) h * shadow_offset_ratio);
+
         SDL_Texture *texture =
             render_text_as_texture(renderer, font, buffer, color);
         SDL_Texture *shadow_texture =
             render_text_as_texture(renderer, font, buffer, shadow_color);
 
-        // I'm making an assumption that the size of texture is equal
-        // to size of shadow_texture
-
-        int w, h;
-        sec(SDL_QueryTexture(texture, NULL, NULL, &w, &h));
         SDL_Rect srcrect = {0, 0, w, h};
         SDL_Rect dstrect = {
             (int) floorf(camera->width  * 0.5f - (float) w * 0.5f),
@@ -629,13 +632,12 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
             w, h
         };
 
-        const int shadow_offset = 4;
         SDL_Rect shadow_dstrect = dstrect;
-        shadow_dstrect.x -= shadow_offset;
-        shadow_dstrect.y -= shadow_offset;
+        shadow_dstrect.x -= (int) shadow_offset_dir.x;
+        shadow_dstrect.y -= (int) shadow_offset_dir.y;
 
-        sec(SDL_RenderCopy(renderer, shadow_texture, &srcrect, &dstrect));
-        sec(SDL_RenderCopy(renderer, texture, &srcrect, &shadow_dstrect));
+        sec(SDL_RenderCopy(renderer, shadow_texture, &srcrect, &shadow_dstrect));
+        sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
 
         SDL_DestroyTexture(texture);
         SDL_DestroyTexture(shadow_texture);

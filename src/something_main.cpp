@@ -56,7 +56,7 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-
+    const int POPUP_FONT_SIZE = 32 + 16;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
@@ -64,7 +64,7 @@ int main(void)
     game.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
     game.popup.font =
-        stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", 32 + 16));
+        stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", POPUP_FONT_SIZE));
     game.ground_grass_texture = {
         {120, 128, 16, 16},
         tileset_texture
