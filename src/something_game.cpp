@@ -139,6 +139,9 @@ void Game::update(float dt)
         (player_pos - camera.pos) * PLAYER_CAMERA_FORCE +
         (room_center - camera.pos) * CENTER_CAMERA_FORCE;
     camera.update(dt);
+
+    // Popup //////////////////////////////
+    popup.update(dt);
 }
 
 void Game::render(SDL_Renderer *renderer)
@@ -176,6 +179,8 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     render_projectiles(renderer, camera);
+
+    popup.render(renderer, &camera);
 }
 
 void Game::entity_shoot(Entity_Index entity_index)
@@ -558,4 +563,59 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
         (int) MINIMAP_ENTITY_SIZE
     };
     sec(SDL_RenderFillRect(renderer, &rect));
+}
+
+void Popup::notify(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    buffer_size = vsnprintf(buffer, POPUP_BUFFER_CAPACITY, format, args);
+    a = 1.0f;
+    va_end(args);
+}
+
+void Popup::render(SDL_Renderer *renderer, const Camera *camera)
+{
+    if (buffer_size > 0 && a > 1e-6) {
+        const Uint8 alpha            = (Uint8) floorf(255.0f * fminf(a, 1.0f));
+        const SDL_Color color        = {255, 150, 150, alpha};
+        const SDL_Color shadow_color = {0, 0, 0, alpha};
+
+        SDL_Texture *texture =
+            render_text_as_texture(renderer, font, buffer, color);
+        SDL_Texture *shadow_texture =
+            render_text_as_texture(renderer, font, buffer, shadow_color);
+
+        // I'm making an assumption that the size of texture is equal
+        // to size of shadow_texture
+
+        int w, h;
+        sec(SDL_QueryTexture(texture, NULL, NULL, &w, &h));
+        SDL_Rect srcrect = {0, 0, w, h};
+        SDL_Rect dstrect = {
+            (int) floorf(camera->width  * 0.5f - (float) w * 0.5f),
+            (int) floorf(camera->height * 0.5f - (float) h * 0.5f),
+            w, h
+        };
+
+        const int shadow_offset = 4;
+        SDL_Rect shadow_dstrect = dstrect;
+        shadow_dstrect.x -= shadow_offset;
+        shadow_dstrect.y -= shadow_offset;
+
+        sec(SDL_RenderCopy(renderer, shadow_texture, &srcrect, &dstrect));
+        sec(SDL_RenderCopy(renderer, texture, &srcrect, &shadow_dstrect));
+
+        SDL_DestroyTexture(texture);
+        SDL_DestroyTexture(shadow_texture);
+    }
+}
+
+const float POPUP_FADEOUT_RATE = 0.5f;
+
+void Popup::update(float delta_time)
+{
+    if (a > 0.0f) {
+        a -= POPUP_FADEOUT_RATE * delta_time;
+    }
 }
