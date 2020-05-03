@@ -17,6 +17,11 @@ struct Projectile_Index
     size_t unwrap;
 };
 
+struct Room_Index
+{
+    size_t unwrap;
+};
+
 enum class Projectile_State
 {
     Ded = 0,
@@ -40,6 +45,7 @@ const size_t PLAYER_ENTITY_INDEX = 0;
 
 const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
+const size_t ROOM_ROW_COUNT = 8;
 
 struct Game_State
 {
@@ -70,6 +76,7 @@ struct Game_State
 
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
+    Room room_row[ROOM_ROW_COUNT];
 
     // Whole Game State
     void update(float dt);
@@ -89,6 +96,17 @@ struct Game_State
     void update_projectiles(float dt);
     Rectf hitbox_of_projectile(Projectile_Index index);
     Maybe<Projectile_Index> projectile_at_position(Vec2f position);
+
+    // Rooms of the Game
+    Room_Index room_index_at(Vec2f p);
+    void render_room_minimap(SDL_Renderer *renderer,
+                             Room_Index index,
+                             Vec2f position);
+    void render_room_row_minimap(SDL_Renderer *renderer,
+                                 Vec2f position);
+    void render_entity_on_minimap(SDL_Renderer *renderer,
+                                  Vec2f position,
+                                  Vec2f entity_position);
 };
 
 #endif  // SOMETHING_GAME_STATE_HPP_

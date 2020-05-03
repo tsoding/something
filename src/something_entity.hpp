@@ -46,7 +46,7 @@ struct Entity
     Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16 shoot_sample;
 
-    void resolve_entity_collision();
+    void resolve_entity_collision(Room *room_row, size_t room_row_count);
     void kill();
 
     inline Rectf texbox_world() const
@@ -70,7 +70,7 @@ struct Entity
     }
 
     void render(SDL_Renderer *renderer, Camera camera) const;
-    void update(Vec2f gravity, float dt);
+    void update(Vec2f gravity, float dt, Room *room_row, size_t room_row_count);
     void point_gun_at(Vec2f target);
     void jump(Vec2f gravity, Sample_Mixer *mixer);
 };

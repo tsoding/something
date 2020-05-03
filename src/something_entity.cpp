@@ -8,7 +8,7 @@ void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
             (int) floorf(end.x),   (int) floorf(end.y)));
 }
 
-void Entity::resolve_entity_collision()
+void Entity::resolve_entity_collision(Room *room_row, size_t room_row_count)
 {
     Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
     Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
@@ -25,7 +25,7 @@ void Entity::resolve_entity_collision()
         Vec2f t = mesh[i];
         int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
 
-        if (0 <= room_index && room_index < (int) ROOM_ROW_COUNT) {
+        if (0 <= room_index && room_index < (int) room_row_count) {
             room_row[room_index].resolve_point_collision(&t);
         }
 
@@ -121,13 +121,13 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(Vec2f gravity, float dt)
+void Entity::update(Vec2f gravity, float dt, Room *room_row, size_t room_row_count)
 {
     switch (state) {
     case Entity_State::Alive: {
         vel += gravity * dt;
         pos += vel * dt;
-        resolve_entity_collision();
+        resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= 1;
 
         switch (jump_state) {

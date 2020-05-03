@@ -110,8 +110,8 @@ int main(void)
 
     char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
-        room_row[room_index].load_file(
+        game_state.room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
+        game_state.room_row[room_index].load_file(
             file_path_of_room(
                 room_file_path,
                 sizeof(room_file_path),
@@ -165,7 +165,7 @@ int main(void)
                         if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
                             auto room_center =
                                 vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) +
-                                room_row[room_index].position;
+                                game_state.room_row[room_index].position;
                             game_state.entities[PLAYER_ENTITY_INDEX].pos = room_center;
                         }
                     }
@@ -179,14 +179,14 @@ int main(void)
 
                     case SDLK_c: {
                         if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
-                            room_index_clipboard = room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
+                            room_index_clipboard = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
                         }
                     } break;
 
                     case SDLK_v: {
                         if (game_state.debug && (event.key.keysym.mod & KMOD_LCTRL)) {
-                            room_row[room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos).unwrap]
-                                .copy_from(&room_row[room_index_clipboard.unwrap]);
+                            game_state.room_row[game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos).unwrap]
+                                .copy_from(&game_state.room_row[room_index_clipboard.unwrap]);
                         }
                     } break;
 
@@ -206,8 +206,8 @@ int main(void)
                     } break;
 
                     case SDLK_e: {
-                        auto room_index = room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
-                        room_row[room_index.unwrap].dump_file(
+                        auto room_index = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
+                        game_state.room_row[room_index.unwrap].dump_file(
                             file_path_of_room(
                                 room_file_path,
                                 sizeof(room_file_path),
@@ -217,8 +217,8 @@ int main(void)
                     } break;
 
                     case SDLK_i: {
-                        auto room_index = room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
-                        room_row[room_index.unwrap].load_file(
+                        auto room_index = game_state.room_index_at(game_state.entities[PLAYER_ENTITY_INDEX].pos);
+                        game_state.room_row[room_index.unwrap].load_file(
                             file_path_of_room(
                                 room_file_path,
                                 sizeof(room_file_path),
@@ -249,19 +249,19 @@ int main(void)
                     game_state.camera.to_world(vec_cast<float>(vec2(event.motion.x, event.motion.y)));
                 game_state.collision_probe = game_state.debug_mouse_position;
 
-                auto index = room_index_at(game_state.collision_probe);
-                room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
+                auto index = game_state.room_index_at(game_state.collision_probe);
+                game_state.room_row[index.unwrap].resolve_point_collision(&game_state.collision_probe);
 
-                Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - room_row[index.unwrap].position) / TILE_SIZE);
+                Vec2i tile = vec_cast<int>((game_state.debug_mouse_position - game_state.room_row[index.unwrap].position) / TILE_SIZE);
                 switch (game_state.state) {
                 case Debug_Draw_State::Create: {
-                    if (room_row[index.unwrap].is_tile_inbounds(tile))
-                        room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                    if (game_state.room_row[index.unwrap].is_tile_inbounds(tile))
+                        game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
                 } break;
 
                 case Debug_Draw_State::Delete: {
-                    if (room_row[index.unwrap].is_tile_inbounds(tile))
-                        room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                    if (game_state.room_row[index.unwrap].is_tile_inbounds(tile))
+                        game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                 } break;
 
                 default: {}
@@ -277,20 +277,20 @@ int main(void)
 
                         if (!game_state.tracking_projectile.has_value) {
 
-                            auto index = room_index_at(game_state.debug_mouse_position);
+                            auto index = game_state.room_index_at(game_state.debug_mouse_position);
 
                             Vec2i tile =
                                 vec_cast<int>(
-                                    (game_state.debug_mouse_position - room_row[index.unwrap].position) /
+                                    (game_state.debug_mouse_position - game_state.room_row[index.unwrap].position) /
                                     TILE_SIZE);
 
-                            if (room_row[index.unwrap].is_tile_inbounds(tile)) {
-                                if (room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
+                            if (game_state.room_row[index.unwrap].is_tile_inbounds(tile)) {
+                                if (game_state.room_row[index.unwrap].tiles[tile.y][tile.x] == Tile::Empty) {
                                     game_state.state = Debug_Draw_State::Create;
-                                    room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
+                                    game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Wall;
                                 } else {
                                     game_state.state = Debug_Draw_State::Delete;
-                                    room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
+                                    game_state.room_row[index.unwrap].tiles[tile.y][tile.x] = Tile::Empty;
                                 }
                             }
                         }

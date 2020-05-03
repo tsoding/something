@@ -73,7 +73,7 @@ void Game_State::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(gravity, dt);
+        entities[i].update(gravity, dt, room_row, ROOM_ROW_COUNT);
     }
 
     // Update All Projectiles //////////////////////////////
@@ -493,4 +493,69 @@ Maybe<Projectile_Index> Game_State::projectile_at_position(Vec2f position)
     }
 
     return {};
+}
+
+Room_Index Game_State::room_index_at(Vec2f p)
+{
+    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
+
+    if (index < 0) return {0};
+    if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
+    return {(size_t) index};
+}
+
+void Game_State::render_room_minimap(SDL_Renderer *renderer,
+                                     Room_Index index,
+                                     Vec2f position)
+{
+    assert(index.unwrap < ROOM_ROW_COUNT);
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for (int row = 0; row < ROOM_HEIGHT; ++row) {
+        for (int col = 0; col < ROOM_WIDTH; ++col) {
+            if (room_row[index.unwrap].tiles[row][col] == Tile::Wall) {
+                SDL_Rect rect = {
+                    (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
+                    (int) (position.y + (float) row * MINIMAP_TILE_SIZE),
+                    (int) MINIMAP_TILE_SIZE,
+                    (int) MINIMAP_TILE_SIZE
+                };
+                sec(SDL_RenderFillRect(renderer, &rect));
+            }
+        }
+    }
+}
+
+void Game_State::render_room_row_minimap(SDL_Renderer *renderer,
+                                         Vec2f position)
+{
+    for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
+        render_room_minimap(
+            renderer,
+            {i},
+            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (float) i, 0.0f));
+    }
+}
+
+void Game_State::render_entity_on_minimap(SDL_Renderer *renderer,
+                                          Vec2f position,
+                                          Vec2f entity_position)
+{
+    const Vec2f minimap_position =
+        entity_position /
+        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
+
+    const Vec2f screen_position =
+        minimap_position + position;
+
+    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+
+    SDL_Rect rect = {
+        (int) (screen_position.x - MINIMAP_ENTITY_SIZE * 0.5f),
+        (int) (screen_position.y - MINIMAP_ENTITY_SIZE * 0.5f),
+        (int) MINIMAP_ENTITY_SIZE,
+        (int) MINIMAP_ENTITY_SIZE
+    };
+    sec(SDL_RenderFillRect(renderer, &rect));
 }
