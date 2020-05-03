@@ -52,6 +52,7 @@ struct Game_State
     Debug_Draw_State state;
     Camera camera;
     Sample_Mixer mixer;
+    const Uint8 *keyboard;
 
     Sprite ground_grass_texture;
     Sprite ground_texture;

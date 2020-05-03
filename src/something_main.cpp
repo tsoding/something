@@ -57,9 +57,9 @@ int main(void)
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
 
-    const Uint8 *keyboard = SDL_GetKeyboardState(NULL);
 
     game_state.mixer.volume = 0.2f;
+    game_state.keyboard = SDL_GetKeyboardState(NULL);
     game_state.gravity = {0.0, 2500.0f};
     game_state.debug_font =
         stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
@@ -316,44 +316,8 @@ int main(void)
         //// HANDLE INPUT END //////////////////////////////
 
         //// UPDATE STATE //////////////////////////////
-        // TODO(#56): inertia implementation is not reusable for other entities
         if (!step_debug) {
             while (lag_sec >= SIMULATION_DELTA_TIME) {
-                const float PLAYER_SPEED = 600.0f;
-                const float PLAYER_ACCEL = PLAYER_SPEED * 6.0f;
-                if (keyboard[SDL_SCANCODE_D]) {
-                    game_state.entities[PLAYER_ENTITY_INDEX].vel.x =
-                        fminf(
-                            game_state.entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * SIMULATION_DELTA_TIME,
-                            PLAYER_SPEED);
-                    game_state.entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
-                } else if (keyboard[SDL_SCANCODE_A]) {
-                    game_state.entities[PLAYER_ENTITY_INDEX].vel.x =
-                        fmax(
-                            game_state.entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * SIMULATION_DELTA_TIME,
-                            -PLAYER_SPEED);
-                    game_state.entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
-                } else {
-                    const float PLAYER_STOP_THRESHOLD = 100.0f;
-                    if (fabs(game_state.entities[PLAYER_ENTITY_INDEX].vel.x) > PLAYER_STOP_THRESHOLD) {
-                        game_state.entities[PLAYER_ENTITY_INDEX].vel.x -=
-                            sgn(game_state.entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * SIMULATION_DELTA_TIME;
-                    } else {
-                        game_state.entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
-                    }
-                    game_state.entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
-                }
-
-                const float PLAYER_CAMERA_FORCE = 2.0f;
-                const float CENTER_CAMERA_FORCE = PLAYER_CAMERA_FORCE * 2.0f;
-
-                const auto player_pos = game_state.entities[PLAYER_ENTITY_INDEX].pos;
-                const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
-
-                game_state.camera.vel =
-                    (player_pos - game_state.camera.pos) * PLAYER_CAMERA_FORCE +
-                    (room_center - game_state.camera.pos) * CENTER_CAMERA_FORCE;
-                game_state.camera.update(SIMULATION_DELTA_TIME);
 
                 game_state.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;

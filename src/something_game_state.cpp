@@ -52,13 +52,13 @@ void displayf(SDL_Renderer *renderer, TTF_Font *font,
 
 void Game_State::update(float dt)
 {
-    // Update Player's gun direction
+    // Update Player's gun direction //////////////////////////////
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(
         camera.to_world(vec2((float) mouse_x, (float) mouse_y)));
 
-    // Enemy AI
+    // Enemy AI //////////////////////////////
     if (!debug) {
         for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
             size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
@@ -71,15 +71,15 @@ void Game_State::update(float dt)
         }
     }
 
-    // Update All Entities
+    // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(gravity, dt);
     }
 
-    // Update All Projectiles
+    // Update All Projectiles //////////////////////////////
     update_projectiles(dt);
 
-    // Entities/Projectiles interaction
+    // Entities/Projectiles interaction //////////////////////////////
     for (size_t index = 0; index < PROJECTILES_COUNT; ++index) {
         auto projectile = projectiles + index;
         if (projectile->state != Projectile_State::Active) continue;
@@ -100,6 +100,45 @@ void Game_State::update(float dt)
             }
         }
     }
+
+    // Player Movement //////////////////////////////
+    // TODO(#56): inertia implementation is not reusable for other entities
+    const float PLAYER_SPEED = 600.0f;
+    const float PLAYER_ACCEL = PLAYER_SPEED * 6.0f;
+    if (keyboard[SDL_SCANCODE_D]) {
+        entities[PLAYER_ENTITY_INDEX].vel.x =
+            fminf(
+                entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * dt,
+                PLAYER_SPEED);
+        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
+    } else if (keyboard[SDL_SCANCODE_A]) {
+        entities[PLAYER_ENTITY_INDEX].vel.x =
+            fmax(
+                entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * dt,
+                -PLAYER_SPEED);
+        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
+    } else {
+        const float PLAYER_STOP_THRESHOLD = 100.0f;
+        if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > PLAYER_STOP_THRESHOLD) {
+            entities[PLAYER_ENTITY_INDEX].vel.x -=
+                sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * dt;
+        } else {
+            entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
+        }
+        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
+    }
+
+    // Camera "Physics" //////////////////////////////
+    const float PLAYER_CAMERA_FORCE = 2.0f;
+    const float CENTER_CAMERA_FORCE = PLAYER_CAMERA_FORCE * 2.0f;
+
+    const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
+    const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
+
+    camera.vel =
+        (player_pos - camera.pos) * PLAYER_CAMERA_FORCE +
+        (room_center - camera.pos) * CENTER_CAMERA_FORCE;
+    camera.update(dt);
 }
 
 void Game_State::render(SDL_Renderer *renderer)
@@ -427,7 +466,6 @@ void Game_State::update_projectiles(float dt)
         case Projectile_State::Ded: {} break;
         }
     }
-
 }
 
 const float PROJECTILE_TRACKING_PADDING = 50.0f;
