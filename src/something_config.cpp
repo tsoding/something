@@ -32,6 +32,9 @@ Config_Def config_defs[CONFIG_VAR_CAPACITY] = {
 
 Config_Value config[CONFIG_VAR_CAPACITY] = {};
 
+const size_t CONFIG_FILE_CAPACITY = 1 * 1024 * 1024;
+char config_file_buffer[CONFIG_FILE_CAPACITY];
+
 Config_Var string_view_as_config_var(String_View name)
 {
     for (int var = 0; var < CONFIG_VAR_CAPACITY; ++var) {
@@ -59,8 +62,6 @@ int string_view_as_int(String_View input)
 
 void parse_config_text(String_View input)
 {
-    memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
-
     while (input.count > 0) {
         String_View line = input.chop_by_delim('\n').trim();
 
@@ -95,7 +96,20 @@ void parse_config_text(String_View input)
     }
 }
 
-void parse_config_file(const char *file_path)
+void reload_config_file(const char *file_path)
 {
-    parse_config_text(file_as_string_view(file_path));
+    FILE *f = fopen(file_path, "rb");
+    if (!f) {
+        println(stderr, "Could not open file `", file_path, "`: ",
+                strerror(errno));
+        abort();
+    }
+
+    String_View input = {};
+    input.count = fread(config_file_buffer, 1, CONFIG_FILE_CAPACITY, f);
+    input.data = config_file_buffer;
+    fclose(f);
+
+    memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
+    parse_config_text(input);
 }
