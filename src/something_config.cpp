@@ -1,4 +1,4 @@
-// TODO: integrate config vars into the code
+// TODO(#70): integrate config vars into the code
 // TODO: hot reloading the vars
 
 enum Config_Type
