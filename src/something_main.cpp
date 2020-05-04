@@ -32,7 +32,7 @@ Game game = {};
 
 int main(void)
 {
-    parse_config_file("./assets/config.vars");
+    reload_config_file("./assets/config.vars");
 
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
@@ -192,6 +192,11 @@ int main(void)
                             game.room_row[game.room_index_at(game.entities[PLAYER_ENTITY_INDEX].pos).unwrap]
                                 .copy_from(&game.room_row[room_index_clipboard.unwrap]);
                         }
+                    } break;
+
+                    case SDLK_u: {
+                        reload_config_file("./assets/config.vars");
+                        game.popup.notify("Reloaded config file `%s`", "./assets/config.vars");
                     } break;
 
                     case SDLK_q: {
