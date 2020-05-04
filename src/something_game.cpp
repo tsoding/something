@@ -204,12 +204,11 @@ void Game::entity_shoot(Entity_Index entity_index)
 
     const float PROJECTILE_SPEED = 1200.0f;
 
-    const int ENTITY_COOLDOWN_WEAPON = 7;
     spawn_projectile(
         entity->pos,
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
-    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+    entity->cooldown_weapon = config[ENTITY_COOLDOWN_WEAPON].float_value;
 
     mixer.play_sample(entity->shoot_sample);
 }

@@ -128,7 +128,7 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
         vel.y += config[GRAVITY].float_value * dt;
         pos += vel * dt;
         resolve_entity_collision(room_row, room_row_count);
-        cooldown_weapon -= 1;
+        cooldown_weapon -= dt;
 
         switch (jump_state) {
         case Jump_State::No_Jump:
