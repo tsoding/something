@@ -1,4 +1,3 @@
-
 enum Config_Type
 {
     CONFIG_TYPE_INT,
@@ -8,6 +7,8 @@ enum Config_Type
 enum Config_Var
 {
     PLAYER_SPEED = 0,
+    GRAVITY,
+
     CONFIG_VAR_CAPACITY,
     CONFIG_VAR_UNKNOWN,
 };
@@ -25,7 +26,8 @@ union Config_Value
 };
 
 Config_Def config_defs[CONFIG_VAR_CAPACITY] = {
-    {"PLAYER_SPEED"_sv, CONFIG_TYPE_FLOAT},
+    {"PLAYER_SPEED"_sv , CONFIG_TYPE_FLOAT},
+    {"GRAVITY"_sv      , CONFIG_TYPE_FLOAT},
 };
 
 Config_Value config[CONFIG_VAR_CAPACITY] = {};

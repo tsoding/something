@@ -65,7 +65,6 @@ int main(void)
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
-    game.gravity = {0.0, 2500.0f};
     game.debug_font =
         stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
     game.popup.font =

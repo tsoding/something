@@ -121,11 +121,11 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(Vec2f gravity, float dt, Room *room_row, size_t room_row_count)
+void Entity::update(float dt, Room *room_row, size_t room_row_count)
 {
     switch (state) {
     case Entity_State::Alive: {
-        vel += gravity * dt;
+        vel.y += config[GRAVITY].float_value * dt;
         pos += vel * dt;
         resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= 1;
@@ -173,7 +173,7 @@ void Entity::point_gun_at(Vec2f target)
     gun_dir = normalize(target - pos);
 }
 
-void Entity::jump(Vec2f gravity, Sample_Mixer *mixer)
+void Entity::jump(Sample_Mixer *mixer)
 {
     if (state == Entity_State::Alive) {
         switch (jump_state) {
@@ -186,7 +186,7 @@ void Entity::jump(Vec2f gravity, Sample_Mixer *mixer)
             float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
             jump_animat.reset();
             jump_state = Jump_State::Jump;
-            vel.y = gravity.y * -min(a, 0.6f);
+            vel.y = config[GRAVITY].float_value * -min(a, 0.6f);
             mixer->play_sample(jump_samples[rand() % 2]);
         } break;
 

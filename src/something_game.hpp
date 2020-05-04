@@ -63,7 +63,6 @@ struct Popup
 
 struct Game
 {
-    Vec2f gravity;
     bool quit;
     bool debug;
     Vec2f collision_probe;

@@ -83,7 +83,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(gravity, dt, room_row, ROOM_ROW_COUNT);
+        entities[i].update(dt, room_row, ROOM_ROW_COUNT);
     }
 
     // Update All Projectiles //////////////////////////////
@@ -215,7 +215,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 void Game::entity_jump(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
-    entities[entity_index.unwrap].jump(gravity, &mixer);
+    entities[entity_index.unwrap].jump(&mixer);
 }
 
 void Game::inplace_spawn_entity(Entity_Index index,

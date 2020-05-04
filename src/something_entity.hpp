@@ -70,9 +70,9 @@ struct Entity
     }
 
     void render(SDL_Renderer *renderer, Camera camera) const;
-    void update(Vec2f gravity, float dt, Room *room_row, size_t room_row_count);
+    void update(float dt, Room *room_row, size_t room_row_count);
     void point_gun_at(Vec2f target);
-    void jump(Vec2f gravity, Sample_Mixer *mixer);
+    void jump(Sample_Mixer *mixer);
 };
 
 
