@@ -14,6 +14,7 @@
 #include "something_math.cpp"
 #include "something_camera.cpp"
 #include "something_string.cpp"
+#include "something_config.cpp"
 #include "something_sprite.cpp"
 #include "something_room.cpp"
 #include "something_sound.cpp"
