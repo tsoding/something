@@ -54,9 +54,10 @@ struct Popup
     char buffer[POPUP_BUFFER_CAPACITY];
     int buffer_size;
     TTF_Font *font;
+    SDL_Color color;
     float a;
 
-    void notify(const char *format, ...);
+    void notify(SDL_Color color, const char *format, ...);
     void render(SDL_Renderer *renderer, const Camera *camera);
     void update(float delta_time);
 };

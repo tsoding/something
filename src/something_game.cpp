@@ -1,6 +1,8 @@
 #include "something_game.hpp"
 
-const SDL_Color DEBUG_FONT_COLOR = {255, 150, 150, 255};
+const SDL_Color DEBUG_FONT_COLOR = {220, 220, 220, 255};
+const SDL_Color SUCCESS_FONT_COLOR = {150, 255, 150, 255};
+const SDL_Color FAILURE_FONT_COLOR = {255, 150, 150, 255};
 const SDL_Color DEBUG_FONT_SHADOW_COLOR = {0, 0, 0, 255};
 
 const char *projectile_state_as_cstr(Projectile_State state)
@@ -593,7 +595,7 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
     sec(SDL_RenderFillRect(renderer, &rect));
 }
 
-void Popup::notify(const char *format, ...)
+void Popup::notify(SDL_Color color, const char *format, ...)
 {
     va_list args;
     va_start(args, format);
@@ -604,6 +606,7 @@ void Popup::notify(const char *format, ...)
     }
 
     a = 1.0f;
+    this->color = color;
     va_end(args);
 }
 
@@ -642,11 +645,11 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
         SDL_DestroyTexture(shadow_texture);
 
         // TEXT   //////////////////////////////
-        SDL_Color color        = DEBUG_FONT_COLOR;
-        color.a                = alpha;
+        SDL_Color front_color = color;
+        color.a               = alpha;
 
         SDL_Texture *texture =
-            render_text_as_texture(renderer, font, buffer, color);
+            render_text_as_texture(renderer, font, buffer, front_color);
 
         sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
         SDL_DestroyTexture(texture);

@@ -35,8 +35,6 @@ const char *const FONT_FILE_PATH = "./assets/fonts/UbuntuMono-R.ttf";
 
 int main(void)
 {
-    reload_config_file(CONFIG_VARS_FILE_PATH);
-
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
     SDL_Window *window =
@@ -84,6 +82,14 @@ int main(void)
     game.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
     game.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
     game.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
+
+    {
+        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+        if (result.is_error) {
+            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+            game.popup.notify(DEBUG_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+        }
+    }
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
@@ -196,9 +202,14 @@ int main(void)
                         }
                     } break;
 
-                    case SDLK_u: {
-                        reload_config_file("./assets/config.vars");
-                        game.popup.notify("Reloaded config file `%s`", "./assets/config.vars");
+                    case SDLK_F5: {
+                        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+                        if (result.is_error) {
+                            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                            game.popup.notify(DEBUG_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                        } else {
+                            game.popup.notify(SUCCESS_FONT_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
+                        }
                     } break;
 
                     case SDLK_q: {
@@ -223,7 +234,8 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        game.popup.notify("Saved room %lu to `%s`",
+                        game.popup.notify(SUCCESS_FONT_COLOR,
+                                          "Saved room %lu to `%s`",
                                           room_index.unwrap,
                                           room_file_path);
                     } break;
@@ -235,7 +247,8 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        game.popup.notify("Load room %lu from `%s`\n",
+                        game.popup.notify(SUCCESS_FONT_COLOR,
+                                          "Load room %lu from `%s`\n",
                                           room_index.unwrap,
                                           room_file_path);
                     } break;
