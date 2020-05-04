@@ -1,4 +1,3 @@
-// TODO(#70): integrate config vars into the code
 
 enum Config_Type
 {
