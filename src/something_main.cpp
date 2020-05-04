@@ -30,9 +30,12 @@ char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
 
 Game game = {};
 
+const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
+const char *const FONT_FILE_PATH = "./assets/fonts/UbuntuMono-R.ttf";
+
 int main(void)
 {
-    reload_config_file("./assets/config.vars");
+    reload_config_file(CONFIG_VARS_FILE_PATH);
 
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
@@ -64,9 +67,9 @@ int main(void)
     game.keyboard = SDL_GetKeyboardState(NULL);
     game.gravity = {0.0, 2500.0f};
     game.debug_font =
-        stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", DEBUG_FONT_SIZE));
+        stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
     game.popup.font =
-        stec(TTF_OpenFont("./assets/fonts/UbuntuMono-R.ttf", POPUP_FONT_SIZE));
+        stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
     game.ground_grass_texture = {
         {120, 128, 16, 16},
         tileset_texture
