@@ -72,7 +72,7 @@ void parse_config_text(String_View input)
         String_View name = line.chop_by_delim('=').trim();
         String_View value = line.trim();
 
-        // TODO: better error reporting
+        // TODO: better error reporting on parsing config vars
 
         auto var = string_view_as_config_var(name);
         if (var >= CONFIG_VAR_UNKNOWN) {
