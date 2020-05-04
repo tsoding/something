@@ -35,7 +35,12 @@ const char *const FONT_FILE_PATH = "./assets/fonts/UbuntuMono-R.ttf";
 
 int main(void)
 {
-    reload_config_file(CONFIG_VARS_FILE_PATH);
+    {
+        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+        if (result.is_error) {
+            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+        }
+    }
 
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
@@ -197,8 +202,13 @@ int main(void)
                     } break;
 
                     case SDLK_u: {
-                        reload_config_file("./assets/config.vars");
-                        game.popup.notify("Reloaded config file `%s`", "./assets/config.vars");
+                        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+                        if (result.is_error) {
+                            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                            game.popup.notify("%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                        } else {
+                            game.popup.notify("Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
+                        }
                     } break;
 
                     case SDLK_q: {

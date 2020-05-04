@@ -60,31 +60,53 @@ int string_view_as_int(String_View input)
     return atoi(buffer);
 }
 
-void parse_config_text(String_View input)
+struct Config_Parse_Result
 {
-    while (input.count > 0) {
+    bool is_error;
+    const char *message;
+    size_t line;
+};
+
+inline
+Config_Parse_Result parse_success()
+{
+    Config_Parse_Result result = {};
+    return result;
+}
+
+inline
+Config_Parse_Result parse_failure(const char *message, size_t line)
+{
+    Config_Parse_Result result = {};
+    result.is_error = true;
+    result.message = message;
+    result.line = line;
+    return result;
+}
+
+Config_Parse_Result parse_config_text(String_View input)
+{
+    for (size_t line_number = 1; input.count > 0; ++line_number) {
         String_View line = input.chop_by_delim('\n').trim();
 
-        if (line.count == 0) continue;
-        if (*line.data == '#') continue;
+        if (line.count == 0) continue;   // Empty line
+        if (*line.data == '#') continue; // Comment
 
         String_View name = line.chop_by_delim('=').trim();
-        String_View value = line.trim();
-
-        // TODO(#72): better error reporting on parsing config vars
+        // We are choping value by '#' for a potention comment on the
+        // same line as the definition.
+        String_View value = line.chop_by_delim('#').trim();
 
         auto var = string_view_as_config_var(name);
         if (var >= CONFIG_VAR_UNKNOWN) {
-            println(stderr, "Unknown variable `", name, "`");
-            abort();
+            return parse_failure("Unknown variable", line_number);
         }
 
         switch (config_defs[var].type) {
         case CONFIG_TYPE_INT: {
             auto x = value.as_integer<int>();
             if (!x.has_value) {
-                println(stderr, "`", name, "` is not a valid integer");
-                abort();
+                return parse_failure("Value is not a valid integer", line_number);
             }
             config[var].int_value = x.unwrap;
         } break;
@@ -94,9 +116,11 @@ void parse_config_text(String_View input)
         } break;
         }
     }
+
+    return parse_success();
 }
 
-void reload_config_file(const char *file_path)
+Config_Parse_Result reload_config_file(const char *file_path)
 {
     FILE *f = fopen(file_path, "rb");
     if (!f) {
@@ -111,5 +135,5 @@ void reload_config_file(const char *file_path)
     fclose(f);
 
     memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
-    parse_config_text(input);
+    return parse_config_text(input);
 }
