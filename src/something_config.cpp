@@ -53,13 +53,6 @@ float string_view_as_float(String_View input)
     return strtof(buffer, NULL);
 }
 
-int string_view_as_int(String_View input)
-{
-    char buffer[300] = {};
-    memcpy(buffer, input.data, min(sizeof(buffer) - 1, input.count));
-    return atoi(buffer);
-}
-
 struct Config_Parse_Result
 {
     bool is_error;
