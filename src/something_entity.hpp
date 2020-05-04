@@ -33,8 +33,7 @@ struct Entity
     Rectf hitbox_local;
     Vec2f pos;
     Vec2f vel;
-    // TODO(#58): weapon cooldown should not be bound to framerate
-    int cooldown_weapon;
+    float cooldown_weapon;
     Vec2f gun_dir;
 
     Frame_Animat idle;
