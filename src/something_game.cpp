@@ -1,7 +1,8 @@
 #include "something_game.hpp"
 
-const SDL_Color DEBUG_FONT_COLOR = {255, 150, 150, 255};
+const SDL_Color DEBUG_FONT_COLOR = {220, 220, 220, 255};
 const SDL_Color SUCCESS_FONT_COLOR = {150, 255, 150, 255};
+const SDL_Color FAILURE_FONT_COLOR = {255, 150, 150, 255};
 const SDL_Color DEBUG_FONT_SHADOW_COLOR = {0, 0, 0, 255};
 
 const char *projectile_state_as_cstr(Projectile_State state)
