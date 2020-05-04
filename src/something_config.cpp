@@ -1,5 +1,5 @@
 // TODO(#70): integrate config vars into the code
-// TODO: hot reloading the vars
+// TODO(#71): hot reloading the vars
 
 enum Config_Type
 {
