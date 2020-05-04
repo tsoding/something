@@ -32,6 +32,8 @@ Game game = {};
 
 int main(void)
 {
+    parse_config_file("./assets/config.vars");
+
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
     SDL_Window *window =
