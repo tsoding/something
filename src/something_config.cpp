@@ -1,32 +1,49 @@
 // TODO: integrate config vars into the code
 // TODO: hot reloading the vars
 
-const size_t CONFIG_VAR_CAPACITY = 256;
-const size_t CONFIG_NAME_CAPACITY = 50;
+enum Config_Type
+{
+    CONFIG_TYPE_INT,
+    CONFIG_TYPE_FLOAT
+};
+
+enum Config_Var
+{
+    X = 0,
+    Y,
+    CONFIG_VAR_CAPACITY,
+    CONFIG_VAR_UNKNOWN,
+};
+
+struct Config_Def
+{
+    String_View name;
+    Config_Type type;
+};
 
 union Config_Value
 {
     float float_value;
     int int_value;
-
-    template <typename T> T as();
 };
 
-template <>
-float Config_Value::as()
-{
-    return float_value;
-}
+Config_Def config_defs[CONFIG_VAR_CAPACITY] = {
+    {"X"_sv, CONFIG_TYPE_FLOAT},
+    {"Y"_sv, CONFIG_TYPE_INT  },
+};
 
-template <>
-int Config_Value::as()
-{
-    return int_value;
-}
+Config_Value config[CONFIG_VAR_CAPACITY] = {};
 
-String_View names[CONFIG_VAR_CAPACITY] = {};
-Config_Value values[CONFIG_VAR_CAPACITY] = {};
-size_t config_size = 0;
+Config_Var string_view_as_config_var(String_View name)
+{
+    for (int var = 0; var < CONFIG_VAR_CAPACITY; ++var) {
+        if (name == config_defs[var].name) {
+            return (Config_Var) var;
+        }
+    }
+
+    return CONFIG_VAR_UNKNOWN;
+}
 
 float string_view_as_float(String_View input)
 {
@@ -44,7 +61,7 @@ int string_view_as_int(String_View input)
 
 void parse_config_text(String_View input)
 {
-    config_size = 0;
+    memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
 
     while (input.count > 0) {
         String_View line = input.chop_by_delim('\n').trim();
@@ -52,40 +69,35 @@ void parse_config_text(String_View input)
         if (line.count == 0) continue;
         if (*line.data == '#') continue;
 
-        String_View name = line.chop_by_delim(':').trim();
-        String_View type = line.chop_by_delim('=').trim();
+        String_View name = line.chop_by_delim('=').trim();
         String_View value = line.trim();
 
-        assert(config_size < CONFIG_VAR_CAPACITY);
-        names[config_size] = name;
-        if (type == "float"_sv) {
-            values[config_size].float_value = string_view_as_float(value);
-        } else if (type == "int"_sv) {
-            values[config_size].int_value = string_view_as_int(value);
-        } else {
-            println(stderr, "Unexpected type `", type, "`");
+        // TODO: better error reporting
+
+        auto var = string_view_as_config_var(name);
+        if (var >= CONFIG_VAR_UNKNOWN) {
+            println(stderr, "Unknown variable `", name, "`");
             abort();
         }
 
-        config_size++;
+        switch (config_defs[var].type) {
+        case CONFIG_TYPE_INT: {
+            auto x = value.as_integer<int>();
+            if (!x.has_value) {
+                println(stderr, "`", name, "` is not a valid integer");
+                abort();
+            }
+            config[var].int_value = x.unwrap;
+        } break;
+
+        case CONFIG_TYPE_FLOAT: {
+            config[var].float_value = string_view_as_float(value);
+        } break;
+        }
     }
 }
 
 void parse_config_file(const char *file_path)
 {
     parse_config_text(file_as_string_view(file_path));
-}
-
-template <typename T>
-T get_config_var(const char *name)
-{
-    // TODO: better asymptotic for get_config_var
-    for (size_t i = 0; i < config_size; ++i) {
-        if (names[i] == cstr_as_string_view(name)) {
-            return values[i].as<T>();
-        }
-    }
-
-    assert(0 && "Non-existing config variable");
-    return T();
 }
