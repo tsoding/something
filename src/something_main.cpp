@@ -201,7 +201,7 @@ int main(void)
                         }
                     } break;
 
-                    case SDLK_u: {
+                    case SDLK_F5: {
                         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
                         if (result.is_error) {
                             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
