@@ -147,3 +147,6 @@ Config_Parse_Result reload_config_file(const char *file_path)
     memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
     return parse_config_text(input);
 }
+
+#define CONFIG_INT(x) config[x].int_value
+#define CONFIG_FLOAT(x) config[x].float_value

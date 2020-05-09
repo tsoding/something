@@ -115,18 +115,18 @@ void Game::update(float dt)
 
     // Player Movement //////////////////////////////
     // TODO(#56): inertia implementation is not reusable for other entities
-    const float PLAYER_ACCEL = config[PLAYER_SPEED].float_value * 6.0f;
+    const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 6.0f;
     if (keyboard[SDL_SCANCODE_D]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fminf(
                 entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * dt,
-                config[PLAYER_SPEED].float_value);
+                CONFIG_FLOAT(PLAYER_SPEED));
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else if (keyboard[SDL_SCANCODE_A]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fmax(
                 entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * dt,
-                -config[PLAYER_SPEED].float_value);
+                -CONFIG_FLOAT(PLAYER_SPEED));
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else {
         const float PLAYER_STOP_THRESHOLD = 100.0f;
@@ -165,7 +165,7 @@ void Game::render(SDL_Renderer *renderer)
             camera,
             ground_grass_texture,
             ground_texture,
-            {0, 0, 0, (Uint8) config[ROOM_NEIGHBOR_DIM_ALPHA].int_value});
+            {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
     room_row[index.unwrap].render(
@@ -180,7 +180,7 @@ void Game::render(SDL_Renderer *renderer)
             camera,
             ground_grass_texture,
             ground_texture,
-            {0, 0, 0, (Uint8) config[ROOM_NEIGHBOR_DIM_ALPHA].int_value});
+            {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -206,7 +206,7 @@ void Game::entity_shoot(Entity_Index entity_index)
         entity->pos,
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
-    entity->cooldown_weapon = config[ENTITY_COOLDOWN_WEAPON].float_value;
+    entity->cooldown_weapon = CONFIG_FLOAT(ENTITY_COOLDOWN_WEAPON);
 
     mixer.play_sample(entity->shoot_sample);
 }

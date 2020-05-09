@@ -1,2 +1,5 @@
-something
+something.debug
+something.release
+config_baker
 TAGS
+baked_config.hpp

@@ -9,12 +9,20 @@
 #include <png.h>
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
-#include "something_print.cpp"
-#include "something_error.cpp"
+#include "common_print.cpp"
+#include "common_string.cpp"
 #include "something_math.cpp"
+
+#ifndef SOMETHING_RELEASE
+#include "common_config.cpp"
+#else
+#include "./baked_config.hpp"
+#define CONFIG_INT(x) x
+#define CONFIG_FLOAT(x) x
+#endif
+
+#include "something_error.cpp"
 #include "something_camera.cpp"
-#include "something_string.cpp"
-#include "something_config.cpp"
 #include "something_sprite.cpp"
 #include "something_room.cpp"
 #include "something_sound.cpp"
