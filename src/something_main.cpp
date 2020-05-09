@@ -83,6 +83,7 @@ int main(void)
     game.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
     game.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
 
+#ifndef SOMETHING_RELEASE
     {
         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
         if (result.is_error) {
@@ -90,6 +91,7 @@ int main(void)
             game.popup.notify(FAILURE_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
         }
     }
+#endif // SOMETHING_RELEASE
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
@@ -202,6 +204,7 @@ int main(void)
                         }
                     } break;
 
+#ifndef SOMETHING_RELEASE
                     case SDLK_F5: {
                         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
                         if (result.is_error) {
@@ -211,6 +214,7 @@ int main(void)
                             game.popup.notify(SUCCESS_FONT_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
                         }
                     } break;
+#endif  // SOMETHING_RELEASE
 
                     case SDLK_q: {
                         game.debug = !game.debug;
