@@ -1,5 +1,6 @@
 enum Config_Type
 {
+    CONFIG_TYPE_NONE = 0,
     CONFIG_TYPE_INT,
     CONFIG_TYPE_FLOAT
 };
@@ -7,19 +8,13 @@ enum Config_Type
 enum Config_Var
 {
     PLAYER_SPEED = 0,
-    ENTITY_GRAVITY,
     ENTITY_COOLDOWN_WEAPON,
+    ENTITY_GRAVITY,
     ENTITY_INITIAL_LIVES,
     ROOM_NEIGHBOR_DIM_ALPHA,
 
     CONFIG_VAR_CAPACITY,
     CONFIG_VAR_UNKNOWN,
-};
-
-struct Config_Def
-{
-    String_View name;
-    Config_Type type;
 };
 
 union Config_Value
@@ -28,23 +23,44 @@ union Config_Value
     int int_value;
 };
 
-Config_Def config_defs[CONFIG_VAR_CAPACITY] = {
-    {"PLAYER_SPEED"_sv            , CONFIG_TYPE_FLOAT},
-    {"ENTITY_GRAVITY"_sv          , CONFIG_TYPE_FLOAT},
-    {"ENTITY_COOLDOWN_WEAPON"_sv  , CONFIG_TYPE_FLOAT},
-    {"ENTITY_INITIAL_LIVES"_sv    , CONFIG_TYPE_INT},
-    {"ROOM_NEIGHBOR_DIM_ALPHA"_sv , CONFIG_TYPE_INT}
-};
-
-Config_Value config[CONFIG_VAR_CAPACITY] = {};
+bool config_types_inited = false;
+Config_Type config_types[CONFIG_VAR_CAPACITY] = {};
+Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
 
 const size_t CONFIG_FILE_CAPACITY = 1 * 1024 * 1024;
 char config_file_buffer[CONFIG_FILE_CAPACITY];
 
+void init_config_types()
+{
+    config_types[ENTITY_COOLDOWN_WEAPON]   = {CONFIG_TYPE_FLOAT};
+    config_types[ENTITY_GRAVITY]           = {CONFIG_TYPE_FLOAT};
+    config_types[ENTITY_INITIAL_LIVES]     = {CONFIG_TYPE_INT};
+    config_types[PLAYER_SPEED]             = {CONFIG_TYPE_FLOAT};
+    config_types[ROOM_NEIGHBOR_DIM_ALPHA]  = {CONFIG_TYPE_INT};
+    config_types_inited = true;
+}
+
+String_View config_var_as_string_view(Config_Var var)
+{
+    switch(var) {
+    case PLAYER_SPEED:             return "PLAYER_SPEED"_sv;
+    case ENTITY_COOLDOWN_WEAPON:   return "ENTITY_COOLDOWN_WEAPON"_sv;
+    case ENTITY_GRAVITY:           return "ENTITY_GRAVITY"_sv;
+    case ENTITY_INITIAL_LIVES:     return "ENTITY_INITIAL_LIVES"_sv;
+    case ROOM_NEIGHBOR_DIM_ALPHA:  return "ROOM_NEIGHBOR_DIM_ALPHA"_sv;
+
+    case CONFIG_VAR_CAPACITY:
+    case CONFIG_VAR_UNKNOWN:
+    {}
+    }
+
+    return {};
+}
+
 Config_Var string_view_as_config_var(String_View name)
 {
     for (int var = 0; var < CONFIG_VAR_CAPACITY; ++var) {
-        if (name == config_defs[var].name) {
+        if (name == config_var_as_string_view((Config_Var) var)) {
             return (Config_Var) var;
         }
     }
@@ -92,6 +108,8 @@ Config_Parse_Result parse_failure(const char *message, size_t line)
 
 Config_Parse_Result parse_config_text(String_View input)
 {
+    if (!config_types_inited) init_config_types();
+
     for (size_t line_number = 1; input.count > 0; ++line_number) {
         String_View line = input.chop_by_delim('\n').trim();
 
@@ -108,13 +126,13 @@ Config_Parse_Result parse_config_text(String_View input)
             return parse_failure("Unknown variable", line_number);
         }
 
-        switch (config_defs[var].type) {
+        switch (config_types[var]) {
         case CONFIG_TYPE_INT: {
             auto x = value.as_integer<int>();
             if (!x.has_value) {
                 return parse_failure("Value is not a valid integer", line_number);
             }
-            config[var].int_value = x.unwrap;
+            config_values[var].int_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_FLOAT: {
@@ -122,7 +140,14 @@ Config_Parse_Result parse_config_text(String_View input)
             if (!x.has_value) {
                 return parse_failure("Value is not a valid float", line_number);
             }
-            config[var].float_value = x.unwrap;
+            config_values[var].float_value = x.unwrap;
+        } break;
+
+        case CONFIG_TYPE_NONE: {
+            println(stderr,
+                    "[ERROR] Could not find the type definition of ", name, " variable. ",
+                    "Please add it to the init_config_types() function.");
+            abort();
         } break;
         }
     }
@@ -144,9 +169,9 @@ Config_Parse_Result reload_config_file(const char *file_path)
     input.data = config_file_buffer;
     fclose(f);
 
-    memset(config, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
+    memset(config_values, 0, sizeof(Config_Value) * CONFIG_VAR_CAPACITY);
     return parse_config_text(input);
 }
 
-#define CONFIG_INT(x) config[x].int_value
-#define CONFIG_FLOAT(x) config[x].float_value
+#define CONFIG_INT(x) config_values[x].int_value
+#define CONFIG_FLOAT(x) config_values[x].float_value

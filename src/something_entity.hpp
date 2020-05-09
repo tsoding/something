@@ -35,6 +35,7 @@ struct Entity
     Vec2f vel;
     float cooldown_weapon;
     Vec2f gun_dir;
+    int lives;
 
     Frame_Animat idle;
     Frame_Animat walking;
