@@ -29,14 +29,22 @@ int main()
     reload_config_file("./assets/config.vars");
 
     for (int var = 0; var < CONFIG_VAR_CAPACITY; ++var) {
-        print(stdout, "#define ", config_defs[var].name, " ");
-        switch (config_defs[var].type) {
+        auto name = config_var_as_string_view((Config_Var) var);
+        print(stdout, "#define ", name, " ");
+        switch (config_types[var]) {
         case CONFIG_TYPE_INT: {
-            println(stdout, config[var].int_value);
+            println(stdout, config_values[var].int_value);
         } break;
 
         case CONFIG_TYPE_FLOAT: {
-            println(stdout, config[var].float_value, "f");
+            println(stdout, config_values[var].float_value, "f");
+        } break;
+
+        case CONFIG_TYPE_NONE: {
+            println(stderr,
+                    "[ERROR] Could not find the type definition of ", name, " variable. ",
+                    "Please add it to the init_config_types() function.");
+            abort();
         } break;
         }
     }

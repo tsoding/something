@@ -108,7 +108,11 @@ void Game::update(float dt)
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                entity->kill();
+                entity->lives -= 100;
+
+                if (entity->lives <= 0) {
+                    entity->kill();
+                }
             }
         }
     }
@@ -235,6 +239,7 @@ void Game::inplace_spawn_entity(Entity_Index index,
     const float POOF_DURATION = 0.2f;
 
     memset(entities + index.unwrap, 0, sizeof(Entity));
+    entities[index.unwrap].lives = CONFIG_INT(ENTITY_INITIAL_LIVES);
     entities[index.unwrap].state = Entity_State::Alive;
     entities[index.unwrap].alive_state = Alive_State::Idle;
     entities[index.unwrap].texbox_local = texbox_local;
