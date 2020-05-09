@@ -125,7 +125,7 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
 {
     switch (state) {
     case Entity_State::Alive: {
-        vel.y += config[GRAVITY].float_value * dt;
+        vel.y += config[ENTITY_GRAVITY].float_value * dt;
         pos += vel * dt;
         resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= dt;
@@ -186,7 +186,7 @@ void Entity::jump(Sample_Mixer *mixer)
             float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
             jump_animat.reset();
             jump_state = Jump_State::Jump;
-            vel.y = config[GRAVITY].float_value * -min(a, 0.6f);
+            vel.y = config[ENTITY_GRAVITY].float_value * -min(a, 0.6f);
             mixer->play_sample(jump_samples[rand() % 2]);
         } break;
 

@@ -159,15 +159,13 @@ void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
-    const int NEIGHBOR_ROOM_DIM_ALPHA = 200;
-
     if (index.unwrap > 0) {
         room_row[index.unwrap - 1].render(
             renderer,
             camera,
             ground_grass_texture,
             ground_texture,
-            {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
+            {0, 0, 0, (Uint8) config[ROOM_NEIGHBOR_DIM_ALPHA].int_value});
     }
 
     room_row[index.unwrap].render(
@@ -182,7 +180,7 @@ void Game::render(SDL_Renderer *renderer)
             camera,
             ground_grass_texture,
             ground_texture,
-            {0, 0, 0, NEIGHBOR_ROOM_DIM_ALPHA});
+            {0, 0, 0, (Uint8) config[ROOM_NEIGHBOR_DIM_ALPHA].int_value});
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {

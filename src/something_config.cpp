@@ -7,8 +7,10 @@ enum Config_Type
 enum Config_Var
 {
     PLAYER_SPEED = 0,
-    GRAVITY,
+    ENTITY_GRAVITY,
     ENTITY_COOLDOWN_WEAPON,
+    ENTITY_INITIAL_LIVES,
+    ROOM_NEIGHBOR_DIM_ALPHA,
 
     CONFIG_VAR_CAPACITY,
     CONFIG_VAR_UNKNOWN,
@@ -27,9 +29,11 @@ union Config_Value
 };
 
 Config_Def config_defs[CONFIG_VAR_CAPACITY] = {
-    {"PLAYER_SPEED"_sv           , CONFIG_TYPE_FLOAT},
-    {"GRAVITY"_sv                , CONFIG_TYPE_FLOAT},
-    {"ENTITY_COOLDOWN_WEAPON"_sv , CONFIG_TYPE_FLOAT}
+    {"PLAYER_SPEED"_sv            , CONFIG_TYPE_FLOAT},
+    {"ENTITY_GRAVITY"_sv          , CONFIG_TYPE_FLOAT},
+    {"ENTITY_COOLDOWN_WEAPON"_sv  , CONFIG_TYPE_FLOAT},
+    {"ENTITY_INITIAL_LIVES"_sv    , CONFIG_TYPE_INT},
+    {"ROOM_NEIGHBOR_DIM_ALPHA"_sv , CONFIG_TYPE_INT}
 };
 
 Config_Value config[CONFIG_VAR_CAPACITY] = {};
