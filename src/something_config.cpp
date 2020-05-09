@@ -48,11 +48,18 @@ Config_Var string_view_as_config_var(String_View name)
     return CONFIG_VAR_UNKNOWN;
 }
 
-float string_view_as_float(String_View input)
+Maybe<float> string_view_as_float(String_View input)
 {
     char buffer[300] = {};
     memcpy(buffer, input.data, min(sizeof(buffer) - 1, input.count));
-    return strtof(buffer, NULL);
+    char *endptr = NULL;
+    float result = strtof(buffer, &endptr);
+
+    if (buffer > endptr || (size_t) (endptr - buffer) != input.count) {
+        return {};
+    }
+
+    return {true, result};
 }
 
 struct Config_Parse_Result
@@ -107,7 +114,11 @@ Config_Parse_Result parse_config_text(String_View input)
         } break;
 
         case CONFIG_TYPE_FLOAT: {
-            config[var].float_value = string_view_as_float(value);
+            Maybe<float> x = string_view_as_float(value);
+            if (!x.has_value) {
+                return parse_failure("Value is not a valid float", line_number);
+            }
+            config[var].float_value = x.unwrap;
         } break;
         }
     }
