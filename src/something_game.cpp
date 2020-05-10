@@ -295,11 +295,11 @@ void Game::inplace_spawn_entity_from_file(Entity_Index index, Vec2f pos,
             entities[index.unwrap].walking = frame_animat_by_name(value);
         } else if (subkey == "jump_sample"_sv) {
             subkey = key.chop_by_delim('.');
-            auto jump_index = subkey.as_integer<size_t>();
+            auto jump_index = subkey.as_integer<int>();
             if (!jump_index.has_value) {
                 fail_parsing(subkey, " is not a correct number");
             }
-            if (jump_index.unwrap >= JUMP_SAMPLES_CAPACITY) {
+            if (jump_index.unwrap < 0 || (size_t) jump_index.unwrap >= JUMP_SAMPLES_CAPACITY) {
                 fail_parsing(subkey, " is out-of-bound with jump_sample");
             }
             entities[index.unwrap].jump_samples[jump_index.unwrap] =
