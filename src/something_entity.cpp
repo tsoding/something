@@ -100,8 +100,6 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         } break;
         }
 
-        const float GUN_LENGTH = 50.0f;
-
         // TODO(#59): Proper gun rendering
 
         Vec2f gun_begin = pos;
@@ -109,7 +107,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         render_line(
             renderer,
             camera.to_screen(gun_begin),
-            camera.to_screen(gun_begin + normalize(gun_dir) * GUN_LENGTH));
+            camera.to_screen(gun_begin + normalize(gun_dir) * CONFIG_FLOAT(ENTITY_GUN_LENGTH)));
     } break;
 
     case Entity_State::Poof: {
