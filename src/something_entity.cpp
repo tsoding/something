@@ -106,12 +106,28 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
                 CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT)
             };
 
-            sec(SDL_SetRenderDrawColor(
-                    renderer,
-                    CONFIG_COLOR(ENTITY_LIVEBAR_COLOR).r,
-                    CONFIG_COLOR(ENTITY_LIVEBAR_COLOR).g,
-                    CONFIG_COLOR(ENTITY_LIVEBAR_COLOR).b,
-                    CONFIG_COLOR(ENTITY_LIVEBAR_COLOR).a));
+            if (percent > 0.75f) {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).a));
+            } else if (0.25f < percent && percent < 0.75f) {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).a));
+            } else {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).a));
+            }
             const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
             sec(SDL_RenderDrawRect(renderer, &rect_border));
             const auto rect_remain = rectf_for_sdl(camera.to_screen(livebar_remain));

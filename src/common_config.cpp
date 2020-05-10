@@ -17,7 +17,9 @@ enum Config_Var
     ENTITY_LIVEBAR_WIDTH,
     ENTITY_LIVEBAR_HEIGHT,
     ENTITY_LIVEBAR_PADDING_BOTTOM,
-    ENTITY_LIVEBAR_COLOR,
+    ENTITY_LIVEBAR_FULL_COLOR,
+    ENTITY_LIVEBAR_HALF_COLOR,
+    ENTITY_LIVEBAR_LOW_COLOR,
     ENTITY_MAX_LIVES,
     ROOM_NEIGHBOR_DIM_ALPHA,
 
@@ -55,7 +57,9 @@ void init_config_types()
     config_types[ROOM_NEIGHBOR_DIM_ALPHA]       = CONFIG_TYPE_INT;
     config_types[ENTITY_PROJECTILE_DAMAGE]      = CONFIG_TYPE_INT;
     config_types[ENTITY_MAX_LIVES]              = CONFIG_TYPE_INT;
-    config_types[ENTITY_LIVEBAR_COLOR]          = CONFIG_TYPE_COLOR;
+    config_types[ENTITY_LIVEBAR_FULL_COLOR]     = CONFIG_TYPE_COLOR;
+    config_types[ENTITY_LIVEBAR_HALF_COLOR]     = CONFIG_TYPE_COLOR;
+    config_types[ENTITY_LIVEBAR_LOW_COLOR]      = CONFIG_TYPE_COLOR;
     config_types_inited = true;
 }
 
@@ -73,7 +77,9 @@ String_View config_var_as_string_view(Config_Var var)
     case ENTITY_LIVEBAR_PADDING_BOTTOM: return "ENTITY_LIVEBAR_PADDING_BOTTOM"_sv;
     case ROOM_NEIGHBOR_DIM_ALPHA:       return "ROOM_NEIGHBOR_DIM_ALPHA"_sv;
     case ENTITY_MAX_LIVES:              return "ENTITY_MAX_LIVES"_sv;
-    case ENTITY_LIVEBAR_COLOR:          return "ENTITY_LIVEBAR_COLOR"_sv;
+    case ENTITY_LIVEBAR_FULL_COLOR:     return "ENTITY_LIVEBAR_FULL_COLOR"_sv;
+    case ENTITY_LIVEBAR_HALF_COLOR:     return "ENTITY_LIVEBAR_HALF_COLOR"_sv;
+    case ENTITY_LIVEBAR_LOW_COLOR:      return "ENTITY_LIVEBAR_LOW_COLOR"_sv;
 
     case CONFIG_VAR_CAPACITY:
     case CONFIG_VAR_UNKNOWN:
@@ -134,7 +140,6 @@ Config_Parse_Result parse_failure(const char *message, size_t line)
 
 Maybe<SDL_Color> string_view_as_color(String_View input)
 {
-    // input == "ff0000ff"
     if (input.count != 8) return {};
 
     SDL_Color result = {};
