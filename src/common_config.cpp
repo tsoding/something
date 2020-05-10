@@ -30,6 +30,9 @@ Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
 const size_t CONFIG_FILE_CAPACITY = 1 * 1024 * 1024;
 char config_file_buffer[CONFIG_FILE_CAPACITY];
 
+const size_t CONFIG_ERROR_CAPACITY = 1024;
+char config_error_buffer[CONFIG_ERROR_CAPACITY];
+
 void init_config_types()
 {
     config_types[ENTITY_COOLDOWN_WEAPON]   = {CONFIG_TYPE_FLOAT};
@@ -123,7 +126,9 @@ Config_Parse_Result parse_config_text(String_View input)
 
         auto var = string_view_as_config_var(name);
         if (var >= CONFIG_VAR_UNKNOWN) {
-            return parse_failure("Unknown variable", line_number);
+            snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY, "Unknown variable %.*s",
+                     (int) name.count, name.data);
+            return parse_failure(config_error_buffer, line_number);
         }
 
         switch (config_types[var]) {
