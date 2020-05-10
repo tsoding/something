@@ -100,20 +100,6 @@ Config_Var string_view_as_config_var(String_View name)
     return CONFIG_VAR_UNKNOWN;
 }
 
-Maybe<float> string_view_as_float(String_View input)
-{
-    char buffer[300] = {};
-    memcpy(buffer, input.data, min(sizeof(buffer) - 1, input.count));
-    char *endptr = NULL;
-    float result = strtof(buffer, &endptr);
-
-    if (buffer > endptr || (size_t) (endptr - buffer) != input.count) {
-        return {};
-    }
-
-    return {true, result};
-}
-
 struct Config_Parse_Result
 {
     bool is_error;
@@ -200,7 +186,7 @@ Config_Parse_Result parse_config_text(String_View input)
         } break;
 
         case CONFIG_TYPE_FLOAT: {
-            auto x = string_view_as_float(value);
+            auto x = value.as_float();
             if (!x.has_value) {
                 snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
                          "`%.*s` is not a float (variable `%.*s`)",

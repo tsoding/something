@@ -29,6 +29,30 @@ const size_t SOMETHING_SOUND_FORMAT = 32784;
 const size_t SOMETHING_SOUND_CHANNELS = 1;
 const size_t SOMETHING_SOUND_SAMPLES = 4096;
 
+struct Sample_S16_File
+{
+    const char *file_path;
+    Sample_S16 sample;
+};
+
+Sample_S16_File sample_s16_files[] = {
+    {"./assets/sounds/enemy_shoot-48000-decay.wav", {}},
+    {"./assets/sounds/jumppp11-48000-mono.wav", {}},
+    {"./assets/sounds/jumppp22-48000-mono.wav", {}},
+};
+const size_t sample_s16_files_count = sizeof(sample_s16_files) / sizeof(sample_s16_files[0]);
+
+Sample_S16 sample_s16_by_name(String_View file_path)
+{
+    for (size_t i = 0; i < sample_s16_files_count; ++i) {
+        if (file_path == cstr_as_string_view(sample_s16_files[i].file_path)) {
+            return sample_s16_files[i].sample;
+        }
+    }
+
+    return {};
+}
+
 Sample_S16 load_wav_as_sample_s16(const char *file_path)
 {
     Sample_S16 sample = {};
@@ -75,5 +99,12 @@ void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
 
     for (size_t i = 0; i < output_len; ++i) {
         output[i] = (int16_t) (output[i] * mixer->volume);
+    }
+}
+
+void load_samples()
+{
+    for (size_t i = 0; i < sample_s16_files_count; ++i) {
+        sample_s16_files[i].sample = load_wav_as_sample_s16(sample_s16_files[i].file_path);
     }
 }

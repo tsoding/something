@@ -10,8 +10,8 @@
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "common_print.cpp"
-#include "common_string.cpp"
 #include "something_math.cpp"
+#include "common_string.cpp"
 
 #ifndef SOMETHING_RELEASE
 #include "common_config.cpp"
