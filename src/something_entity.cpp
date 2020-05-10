@@ -74,6 +74,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
 
     switch (state) {
     case Entity_State::Alive: {
+        // Figuring out texbox
         Rectf texbox = {};
 
         switch (jump_state) {
@@ -90,6 +91,50 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
             break;
         }
 
+        // Rendering Live Bar
+        {
+            const Rectf livebar_border = {
+                texbox.x + texbox.w * 0.5f - CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH) * 0.5f,
+                texbox.y - CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT) - CONFIG_FLOAT(ENTITY_LIVEBAR_PADDING_BOTTOM),
+                CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH),
+                CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT)
+            };
+            const float percent = (float) lives / (float) CONFIG_INT(ENTITY_MAX_LIVES);
+            const Rectf livebar_remain = {
+                livebar_border.x, livebar_border.y,
+                CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH) * percent,
+                CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT)
+            };
+
+            if (percent > 0.75f) {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).a));
+            } else if (0.25f < percent && percent < 0.75f) {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).a));
+            } else {
+                sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).r,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).g,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).b,
+                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).a));
+            }
+            const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
+            sec(SDL_RenderDrawRect(renderer, &rect_border));
+            const auto rect_remain = rectf_for_sdl(camera.to_screen(livebar_remain));
+            sec(SDL_RenderFillRect(renderer, &rect_remain));
+        }
+
+        // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
             render_animat(renderer, idle, camera.to_screen(texbox), flip);
@@ -100,8 +145,8 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         } break;
         }
 
+        // Render the gun
         // TODO(#59): Proper gun rendering
-
         Vec2f gun_begin = pos;
         SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         render_line(

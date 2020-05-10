@@ -5,6 +5,14 @@ struct Maybe
     T unwrap;
 };
 
+int hexchar_as_number(int c)
+{
+    if ('0' <= c && c <= '9') return c - '0';
+    if ('a' <= c && c <= 'f') return c - 'a' + 10;
+    if ('A' <= c && c <= 'F') return c - 'A' + 10;
+    return 0;
+}
+
 struct String_View
 {
     size_t count;
@@ -84,6 +92,24 @@ struct String_View
         }
 
         return { true, number * sign };
+    }
+
+    String_View subview(size_t start, size_t size) const
+    {
+        assert(start + size <= count);
+        return String_View {size, data + start};
+    }
+
+    template <typename Number>
+    Number from_hex() const
+    {
+        Number result = Number();
+
+        for (size_t i = 0; i < count; ++i) {
+            result = (Number) (result * 16 + hexchar_as_number(data[i]));
+        }
+
+        return result;
     }
 };
 
