@@ -114,7 +114,7 @@ struct String_View
         return String_View {size, data + start};
     }
 
-    // TODO: String_View::from_hex should return Maybe<Number>
+    // TODO(#83): String_View::from_hex should return Maybe<Number>
     template <typename Number>
     Number from_hex() const
     {
