@@ -56,6 +56,8 @@ int main(void)
     // TODO(#9): baking assets into executable
 
     load_spritesheets(renderer);
+    load_samples();
+    load_frame_animat_files();
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
@@ -75,13 +77,13 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
-    game.player_shoot_sample      = load_wav_as_sample_s16("./assets/sounds/enemy_shoot-48000-decay.wav");
-    game.entity_walking_animat    = load_animat_file("./assets/animats/walking.txt");
-    game.entity_idle_animat       = load_animat_file("./assets/animats/idle.txt");
-    game.entity_jump_sample1      = load_wav_as_sample_s16("./assets/sounds/jumppp11-48000-mono.wav");
-    game.entity_jump_sample2      = load_wav_as_sample_s16("./assets/sounds/jumppp22-48000-mono.wav");
-    game.projectile_poof_animat   = load_animat_file("./assets/animats/plasma_pop.txt");
-    game.projectile_active_animat = load_animat_file("./assets/animats/plasma_bolt.txt");
+    game.player_shoot_sample      = sample_s16_by_name("./assets/sounds/enemy_shoot-48000-decay.wav"_sv);
+    game.entity_walking_animat    = frame_animat_by_name("./assets/animats/walking.txt"_sv);
+    game.entity_idle_animat       = frame_animat_by_name("./assets/animats/idle.txt"_sv);
+    game.entity_jump_sample1      = sample_s16_by_name("./assets/sounds/jumppp11-48000-mono.wav"_sv);
+    game.entity_jump_sample2      = sample_s16_by_name("./assets/sounds/jumppp22-48000-mono.wav"_sv);
+    game.projectile_poof_animat   = frame_animat_by_name("./assets/animats/plasma_pop.txt"_sv);
+    game.projectile_active_animat = frame_animat_by_name("./assets/animats/plasma_bolt.txt"_sv);
 
 #ifndef SOMETHING_RELEASE
     {

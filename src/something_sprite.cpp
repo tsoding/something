@@ -52,11 +52,13 @@ void render_animat(SDL_Renderer *renderer,
                    Rectf dstrect,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
-    render_sprite(
-        renderer,
-        animat.frames[animat.frame_current % animat.frame_count],
-        dstrect,
-        flip);
+    if (animat.frame_count > 0) {
+        render_sprite(
+            renderer,
+            animat.frames[animat.frame_current % animat.frame_count],
+            dstrect,
+            flip);
+    }
 }
 
 static inline
@@ -337,6 +339,30 @@ struct Squash_Animat
     }
 };
 
+struct Frame_Animat_File {
+    const char *file_path;
+    Frame_Animat animat;
+};
+
+Frame_Animat_File frame_animat_files[] = {
+    {"./assets/animats/idle.txt", {}},
+    {"./assets/animats/plasma_bolt.txt", {}},
+    {"./assets/animats/plasma_pop.txt", {}},
+    {"./assets/animats/walking.txt", {}},
+};
+const size_t frame_animat_files_count = sizeof(frame_animat_files) / sizeof(frame_animat_files[0]);
+
+Frame_Animat frame_animat_by_name(String_View file_path)
+{
+    for (size_t i = 0; i < frame_animat_files_count; ++i) {
+        if (file_path == cstr_as_string_view(frame_animat_files[i].file_path)) {
+            return frame_animat_files[i].animat;
+        }
+    }
+
+    return {};
+}
+
 Frame_Animat load_animat_file(const char *animat_filepath)
 {
     String_View source = file_as_string_view(animat_filepath);
@@ -432,4 +458,11 @@ Frame_Animat load_animat_file(const char *animat_filepath)
     delete[] source.data;
 
     return animat;
+}
+
+void load_frame_animat_files()
+{
+    for (size_t i = 0; i < frame_animat_files_count; ++i) {
+        frame_animat_files[i].animat = load_animat_file(frame_animat_files[i].file_path);
+    }
 }

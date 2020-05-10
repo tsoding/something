@@ -221,6 +221,102 @@ void Game::entity_jump(Entity_Index entity_index)
     entities[entity_index.unwrap].jump(&mixer);
 }
 
+const size_t ENTITY_FILE_CAPACITY = 1 * 1024 * 1024;
+static char entity_file_buffer[ENTITY_FILE_CAPACITY];
+
+const float POOF_DURATION = 0.2f;
+
+void Game::inplace_spawn_entity_from_file(Entity_Index index, Vec2f pos,
+                                          const char *file_path)
+{
+    entities[index.unwrap].lives = CONFIG_INT(ENTITY_INITIAL_LIVES);
+    entities[index.unwrap].state = Entity_State::Alive;
+    entities[index.unwrap].alive_state = Alive_State::Idle;
+    entities[index.unwrap].pos = pos;
+    entities[index.unwrap].gun_dir = vec2(1.0f, 0.0f);
+    entities[index.unwrap].poof.duration = POOF_DURATION;
+
+    entities[index.unwrap].prepare_for_jump_animat.begin = 0.0f;
+    entities[index.unwrap].prepare_for_jump_animat.end = 0.2f;
+    entities[index.unwrap].prepare_for_jump_animat.duration = 0.2f;
+
+    entities[index.unwrap].jump_animat.rubber_animats[0].begin = 0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[0].end = -0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[0].duration = 0.1f;
+
+    entities[index.unwrap].jump_animat.rubber_animats[1].begin = -0.2f;
+    entities[index.unwrap].jump_animat.rubber_animats[1].end = 0.0f;
+    entities[index.unwrap].jump_animat.rubber_animats[1].duration = 0.2f;
+
+    auto input = file_as_string_view(file_path,
+                                     entity_file_buffer,
+                                     ENTITY_FILE_CAPACITY);
+
+    for (size_t line_number = 0; input.count > 0; ++line_number) {
+        auto fail_parsing =
+            [&file_path, &line_number](auto ...args) {
+                println(stderr, file_path, ":", line_number, ": ", args...);
+            };
+
+        auto line = input.chop_by_delim('\n').trim();
+        if (line.count == 0) continue; // Empty line
+        if (*line.data == '#') continue; // Comment
+        auto key = line.chop_by_delim('=').trim();
+        auto value = line.chop_by_delim('#').trim(); // Potential comment on the same line
+
+        auto subkey = key.chop_by_delim('.');
+        if (subkey == "texbox"_sv) {
+            subkey = key.chop_by_delim('.');
+            auto x = value.as_float();
+            if (!x.has_value) fail_parsing(value, " is not a number");
+
+            if (subkey == "w"_sv) {
+                entities[index.unwrap].texbox_local.w = x.unwrap;
+            } else if (subkey == "h"_sv) {
+                entities[index.unwrap].texbox_local.h = x.unwrap;
+            } else {
+                fail_parsing("`texbox` does not have `", subkey, "`subkey");
+            }
+        } else if (subkey == "hitbox"_sv) {
+            subkey = key.chop_by_delim('.');
+            auto x = value.as_float();
+            if (!x.has_value) fail_parsing(value, " is not a number");
+
+            if (subkey == "w"_sv) {
+                entities[index.unwrap].hitbox_local.w = x.unwrap;
+            } else if (subkey == "h"_sv) {
+                entities[index.unwrap].hitbox_local.h = x.unwrap;
+            } else {
+                fail_parsing("`hitbox` does not have `", subkey, "`subkey");
+            }
+        } else if (subkey == "idle"_sv) {
+            entities[index.unwrap].idle = frame_animat_by_name(value);
+        } else if (subkey == "walking"_sv) {
+            entities[index.unwrap].walking = frame_animat_by_name(value);
+        } else if (subkey == "jump_sample"_sv) {
+            subkey = key.chop_by_delim('.');
+            auto jump_index = subkey.as_integer<int>();
+            if (!jump_index.has_value) {
+                fail_parsing(subkey, " is not a correct number");
+            }
+            if (jump_index.unwrap < 0 || (size_t) jump_index.unwrap >= JUMP_SAMPLES_CAPACITY) {
+                fail_parsing(subkey, " is out-of-bound with jump_sample");
+            }
+            entities[index.unwrap].jump_samples[jump_index.unwrap] =
+                sample_s16_by_name(value);
+        } else if (subkey == "shoot_sample"_sv) {
+            entities[index.unwrap].shoot_sample = sample_s16_by_name(value);
+        } else {
+            fail_parsing("Unknown entity description subkey `", subkey, "`");
+        }
+    }
+
+    entities[index.unwrap].texbox_local.x = entities[index.unwrap].texbox_local.w * -0.5f;
+    entities[index.unwrap].texbox_local.y = entities[index.unwrap].texbox_local.h * -0.5f;
+    entities[index.unwrap].hitbox_local.x = entities[index.unwrap].hitbox_local.w * -0.5f;
+    entities[index.unwrap].hitbox_local.y = entities[index.unwrap].hitbox_local.h * -0.5f;
+}
+
 void Game::inplace_spawn_entity(Entity_Index index,
                                 Vec2f pos)
 {
@@ -235,8 +331,6 @@ void Game::inplace_spawn_entity(Entity_Index index,
         - (ENTITY_HITBOX_SIZE / 2), - (ENTITY_HITBOX_SIZE / 2),
         ENTITY_HITBOX_SIZE, ENTITY_HITBOX_SIZE
     };
-
-    const float POOF_DURATION = 0.2f;
 
     memset(entities + index.unwrap, 0, sizeof(Entity));
     entities[index.unwrap].lives = CONFIG_INT(ENTITY_INITIAL_LIVES);
@@ -270,10 +364,12 @@ void Game::inplace_spawn_entity(Entity_Index index,
 void Game::reset_entities()
 {
     static_assert(ROOM_ROW_COUNT > 0);
-    inplace_spawn_entity({PLAYER_ENTITY_INDEX},
-                         room_row[0].center());
+    inplace_spawn_entity_from_file({PLAYER_ENTITY_INDEX},
+                                   room_row[0].center(),
+                                   "./assets/entities/player.txt");
     entities[PLAYER_ENTITY_INDEX].shoot_sample = player_shoot_sample;
 
+    // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              room_row[i + 1].center());

@@ -1,0 +1,12 @@
+texbox.w      = 128
+texbox.h      = 128
+hitbox.w      = 100
+hitbox.h      = 100
+
+# Comment
+
+idle          = ./assets/animats/idle.txt     # comment
+walking       = ./assets/animats/walking.txt
+jump_sample.0 = ./assets/sounds/jumppp11-48000-mono.wav
+jump_sample.1 = ./assets/sounds/jumppp22-48000-mono.wav
+shoot_sample  = ./assets/sounds/enemy_shoot-48000-decay.wav

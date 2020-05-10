@@ -103,6 +103,8 @@ struct Game
     void entity_shoot(Entity_Index entity_index);
     void entity_jump(Entity_Index entity_index);
     void inplace_spawn_entity(Entity_Index index, Vec2f pos);
+    void inplace_spawn_entity_from_file(Entity_Index index, Vec2f pos,
+                                        const char *file_path);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);

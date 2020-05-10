@@ -94,12 +94,27 @@ struct String_View
         return { true, number * sign };
     }
 
+    Maybe<float> as_float() const
+    {
+        char buffer[300] = {};
+        memcpy(buffer, data, min(sizeof(buffer) - 1, count));
+        char *endptr = NULL;
+        float result = strtof(buffer, &endptr);
+
+        if (buffer > endptr || (size_t) (endptr - buffer) != count) {
+            return {};
+        }
+
+        return {true, result};
+    }
+
     String_View subview(size_t start, size_t size) const
     {
         assert(start + size <= count);
         return String_View {size, data + start};
     }
 
+    // TODO(#83): String_View::from_hex should return Maybe<Number>
     template <typename Number>
     Number from_hex() const
     {
@@ -135,6 +150,24 @@ bool operator==(String_View view1, String_View view2)
 {
     if (view1.count != view2.count) return false;
     return memcmp(view1.data, view2.data, view1.count) == 0;
+}
+
+String_View file_as_string_view(const char *filepath, char *buffer, size_t buffer_size)
+{
+    String_View result = {};
+    FILE *f = fopen(filepath, "rb");
+    if (!f) goto fail;
+
+    result.data = buffer;
+    result.count = fread(buffer, 1, buffer_size, f);
+    if (ferror(f)) goto fail;
+
+    fclose(f);
+    return result;
+fail:
+    println(stderr, "Could not read file `", filepath, "`: ", strerror(errno));
+    abort();
+    return {};
 }
 
 String_View file_as_string_view(const char *filepath)
