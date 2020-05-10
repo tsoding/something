@@ -59,7 +59,7 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-    const int POPUP_FONT_SIZE = 32 + 16;
+    const int POPUP_FONT_SIZE = 32 + 8;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);

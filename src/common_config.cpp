@@ -126,7 +126,8 @@ Config_Parse_Result parse_config_text(String_View input)
 
         auto var = string_view_as_config_var(name);
         if (var >= CONFIG_VAR_UNKNOWN) {
-            snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY, "Unknown variable %.*s",
+            snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                     "Unknown variable `%.*s`",
                      (int) name.count, name.data);
             return parse_failure(config_error_buffer, line_number);
         }
@@ -135,15 +136,23 @@ Config_Parse_Result parse_config_text(String_View input)
         case CONFIG_TYPE_INT: {
             auto x = value.as_integer<int>();
             if (!x.has_value) {
-                return parse_failure("Value is not a valid integer", line_number);
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not an int (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
             }
             config_values[var].int_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_FLOAT: {
-            Maybe<float> x = string_view_as_float(value);
+            auto x = string_view_as_float(value);
             if (!x.has_value) {
-                return parse_failure("Value is not a valid float", line_number);
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not a float (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
             }
             config_values[var].float_value = x.unwrap;
         } break;
