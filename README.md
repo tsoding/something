@@ -16,6 +16,6 @@ $ ## Manjaro
 $ sudo pacman -S sdl2 sdl2_ttf libpng
 $ ## (add your distro here)
 $ # Build
-$ make
-$ ./something
+$ make -B
+$ ./something.debug
 ```
