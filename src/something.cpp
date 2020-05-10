@@ -19,6 +19,7 @@
 #include "./baked_config.hpp"
 #define CONFIG_INT(x) x
 #define CONFIG_FLOAT(x) x
+#define CONFIG_COLOR(x) x
 #endif
 
 #include "something_error.cpp"

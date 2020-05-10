@@ -2,7 +2,8 @@ enum Config_Type
 {
     CONFIG_TYPE_NONE = 0,
     CONFIG_TYPE_INT,
-    CONFIG_TYPE_FLOAT
+    CONFIG_TYPE_FLOAT,
+    CONFIG_TYPE_COLOR
 };
 
 enum Config_Var
@@ -16,6 +17,7 @@ enum Config_Var
     ENTITY_LIVEBAR_WIDTH,
     ENTITY_LIVEBAR_HEIGHT,
     ENTITY_LIVEBAR_PADDING_BOTTOM,
+    ENTITY_LIVEBAR_COLOR,
     ENTITY_MAX_LIVES,
     ROOM_NEIGHBOR_DIM_ALPHA,
 
@@ -27,6 +29,7 @@ union Config_Value
 {
     float float_value;
     int int_value;
+    SDL_Color color_value;
 };
 
 bool config_types_inited = false;
@@ -52,6 +55,7 @@ void init_config_types()
     config_types[ROOM_NEIGHBOR_DIM_ALPHA]       = CONFIG_TYPE_INT;
     config_types[ENTITY_PROJECTILE_DAMAGE]      = CONFIG_TYPE_INT;
     config_types[ENTITY_MAX_LIVES]              = CONFIG_TYPE_INT;
+    config_types[ENTITY_LIVEBAR_COLOR]          = CONFIG_TYPE_COLOR;
     config_types_inited = true;
 }
 
@@ -69,6 +73,7 @@ String_View config_var_as_string_view(Config_Var var)
     case ENTITY_LIVEBAR_PADDING_BOTTOM: return "ENTITY_LIVEBAR_PADDING_BOTTOM"_sv;
     case ROOM_NEIGHBOR_DIM_ALPHA:       return "ROOM_NEIGHBOR_DIM_ALPHA"_sv;
     case ENTITY_MAX_LIVES:              return "ENTITY_MAX_LIVES"_sv;
+    case ENTITY_LIVEBAR_COLOR:          return "ENTITY_LIVEBAR_COLOR"_sv;
 
     case CONFIG_VAR_CAPACITY:
     case CONFIG_VAR_UNKNOWN:
@@ -127,6 +132,20 @@ Config_Parse_Result parse_failure(const char *message, size_t line)
     return result;
 }
 
+Maybe<SDL_Color> string_view_as_color(String_View input)
+{
+    // input == "ff0000ff"
+    if (input.count != 8) return {};
+
+    SDL_Color result = {};
+    result.r = input.subview(0, 2).from_hex<Uint8>();
+    result.g = input.subview(2, 2).from_hex<Uint8>();
+    result.b = input.subview(4, 2).from_hex<Uint8>();
+    result.a = input.subview(6, 2).from_hex<Uint8>();
+
+    return {true, result};
+}
+
 Config_Parse_Result parse_config_text(String_View input)
 {
     if (!config_types_inited) init_config_types();
@@ -151,6 +170,18 @@ Config_Parse_Result parse_config_text(String_View input)
         }
 
         switch (config_types[var]) {
+        case CONFIG_TYPE_COLOR: {
+            auto x = string_view_as_color(value);
+            if (!x.has_value) {
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not a color (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
+            }
+            config_values[var].color_value = x.unwrap;
+        } break;
+
         case CONFIG_TYPE_INT: {
             auto x = value.as_integer<int>();
             if (!x.has_value) {
@@ -207,3 +238,4 @@ Config_Parse_Result reload_config_file(const char *file_path)
 
 #define CONFIG_INT(x) (config_values[x].int_value)
 #define CONFIG_FLOAT(x) (config_values[x].float_value)
+#define CONFIG_COLOR(x) (config_values[x].color_value)
