@@ -108,7 +108,7 @@ void Game::update(float dt)
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->state = Projectile_State::Poof;
                 projectile->poof_animat.frame_current = 0;
-                entity->lives -= 100;
+                entity->lives -= CONFIG_INT(ENTITY_PROJECTILE_DAMAGE);
 
                 if (entity->lives <= 0) {
                     entity->kill();

@@ -12,6 +12,7 @@ enum Config_Var
     ENTITY_GRAVITY,
     ENTITY_INITIAL_LIVES,
     ENTITY_GUN_LENGTH,
+    ENTITY_PROJECTILE_DAMAGE,
     ROOM_NEIGHBOR_DIM_ALPHA,
 
     CONFIG_VAR_CAPACITY,
@@ -36,12 +37,13 @@ char config_error_buffer[CONFIG_ERROR_CAPACITY];
 
 void init_config_types()
 {
-    config_types[PLAYER_SPEED]            = CONFIG_TYPE_FLOAT;
-    config_types[ENTITY_COOLDOWN_WEAPON]  = CONFIG_TYPE_FLOAT;
-    config_types[ENTITY_GRAVITY]          = CONFIG_TYPE_FLOAT;
-    config_types[ENTITY_GUN_LENGTH]       = CONFIG_TYPE_FLOAT;
-    config_types[ENTITY_INITIAL_LIVES]    = CONFIG_TYPE_INT;
-    config_types[ROOM_NEIGHBOR_DIM_ALPHA] = CONFIG_TYPE_INT;
+    config_types[PLAYER_SPEED]             = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_COOLDOWN_WEAPON]   = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_GRAVITY]           = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_GUN_LENGTH]        = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_INITIAL_LIVES]     = CONFIG_TYPE_INT;
+    config_types[ROOM_NEIGHBOR_DIM_ALPHA]  = CONFIG_TYPE_INT;
+    config_types[ENTITY_PROJECTILE_DAMAGE] = CONFIG_TYPE_INT;
     config_types_inited = true;
 }
 
@@ -53,6 +55,7 @@ String_View config_var_as_string_view(Config_Var var)
     case ENTITY_GRAVITY:           return "ENTITY_GRAVITY"_sv;
     case ENTITY_INITIAL_LIVES:     return "ENTITY_INITIAL_LIVES"_sv;
     case ENTITY_GUN_LENGTH:        return "ENTITY_GUN_LENGTH"_sv;
+    case ENTITY_PROJECTILE_DAMAGE: return "ENTITY_PROJECTILE_DAMAGE"_sv;
     case ROOM_NEIGHBOR_DIM_ALPHA:  return "ROOM_NEIGHBOR_DIM_ALPHA"_sv;
 
     case CONFIG_VAR_CAPACITY:
