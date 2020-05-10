@@ -369,7 +369,7 @@ void Game::reset_entities()
                                    "./assets/entities/player.txt");
     entities[PLAYER_ENTITY_INDEX].shoot_sample = player_shoot_sample;
 
-    // TODO: load enemies from description files
+    // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         inplace_spawn_entity({ENEMY_ENTITY_INDEX_OFFSET + i},
                              room_row[i + 1].center());
