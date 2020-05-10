@@ -100,7 +100,6 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         } break;
         }
 
-        // TODO(#61): file with variables
         const float GUN_LENGTH = 50.0f;
 
         // TODO(#59): Proper gun rendering
