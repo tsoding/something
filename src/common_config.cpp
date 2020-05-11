@@ -129,10 +129,10 @@ Maybe<SDL_Color> string_view_as_color(String_View input)
     if (input.count != 8) return {};
 
     SDL_Color result = {};
-    result.r = input.subview(0, 2).from_hex<Uint8>();
-    result.g = input.subview(2, 2).from_hex<Uint8>();
-    result.b = input.subview(4, 2).from_hex<Uint8>();
-    result.a = input.subview(6, 2).from_hex<Uint8>();
+    unwrap_into(result.r, input.subview(0, 2).from_hex<Uint8>());
+    unwrap_into(result.g, input.subview(2, 2).from_hex<Uint8>());
+    unwrap_into(result.b, input.subview(4, 2).from_hex<Uint8>());
+    unwrap_into(result.a, input.subview(6, 2).from_hex<Uint8>());
 
     return {true, result};
 }
