@@ -5,12 +5,19 @@ struct Maybe
     T unwrap;
 };
 
+#define unwrap_into(lvalue, maybe)\
+    do {\
+        auto maybe_var = (maybe);\
+        if (!maybe_var.has_value) return {};\
+        (lvalue) = maybe_var.unwrap;\
+    } while (0)
+
 int hexchar_as_number(int c)
 {
     if ('0' <= c && c <= '9') return c - '0';
     if ('a' <= c && c <= 'f') return c - 'a' + 10;
     if ('A' <= c && c <= 'F') return c - 'A' + 10;
-    return 0;
+    return -1;
 }
 
 struct String_View
@@ -114,17 +121,18 @@ struct String_View
         return String_View {size, data + start};
     }
 
-    // TODO(#83): String_View::from_hex should return Maybe<Number>
-    template <typename Number>
-    Number from_hex() const
+    template <typename Integer>
+    Maybe<Integer> from_hex() const
     {
-        Number result = Number();
+        Integer result = Integer();
 
         for (size_t i = 0; i < count; ++i) {
-            result = (Number) (result * 16 + hexchar_as_number(data[i]));
+            int x = hexchar_as_number(data[i]);
+            if (x < 0) return {};
+            result = (Integer) (result * 16 + x);
         }
 
-        return result;
+        return {true, result};
     }
 };
 
