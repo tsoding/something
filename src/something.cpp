@@ -6,7 +6,9 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
+#ifdef SOMETHING_RELEASE
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include "./stb_image.h"
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
