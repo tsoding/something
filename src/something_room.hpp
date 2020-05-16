@@ -8,6 +8,7 @@ enum Tile
 {
     TILE_EMPTY = 0,
     TILE_WALL,
+    TILE_DESTROYABLE,
 
     TILE_COUNT
 };
@@ -22,6 +23,7 @@ struct Tile_Def
 Tile_Def tile_defs[TILE_COUNT] = {
     {false, {}, {}},                          // TILE_EMPTY
     {true, {}, {}},                           // TILE_WALL
+    {true, {}, {}},                           // TILE_DESTROYABLE
 };
 
 const float TILE_SIZE = 128.0f;

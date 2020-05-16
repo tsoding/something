@@ -77,6 +77,12 @@ int main(void)
         {120, 128 + 16, 16, 16},
         tileset_texture
     };
+    tile_defs[TILE_DESTROYABLE].top_texture = {
+        {208, 176, 16, 16},
+        tileset_texture,
+    };
+    tile_defs[TILE_DESTROYABLE].bottom_texture = tile_defs[TILE_DESTROYABLE].top_texture;
+
     game.player_shoot_sample      = sample_s16_by_name("./assets/sounds/enemy_shoot-48000-decay.wav"_sv);
     game.entity_walking_animat    = frame_animat_by_name("./assets/animats/walking.txt"_sv);
     game.entity_idle_animat       = frame_animat_by_name("./assets/animats/idle.txt"_sv);
@@ -288,7 +294,7 @@ int main(void)
                 switch (game.state) {
                 case Debug_Draw_State::Create: {
                     if (game.room_row[index.unwrap].is_tile_inbounds(tile))
-                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_DESTROYABLE;
                 } break;
 
                 case Debug_Draw_State::Delete: {
@@ -319,7 +325,7 @@ int main(void)
                             if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {
                                 if (game.room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
                                     game.state = Debug_Draw_State::Create;
-                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_DESTROYABLE;
                                 } else {
                                     game.state = Debug_Draw_State::Delete;
                                     game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
