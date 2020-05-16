@@ -168,6 +168,15 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
     switch (state) {
     case Entity_State::Alive: {
         vel.y += CONFIG_FLOAT(ENTITY_GRAVITY) * dt;
+
+        const float PLAYER_STOP_THRESHOLD = 100.0f;
+        const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 6.0f;
+        if (fabs(vel.x) > PLAYER_STOP_THRESHOLD) {
+            vel.x -= sgn(vel.x) * PLAYER_ACCEL * dt;
+        } else {
+            vel.x = 0.0f;
+        }
+
         pos += vel * dt;
         resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= dt;

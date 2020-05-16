@@ -126,8 +126,7 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    // TODO(#56): inertia implementation is not reusable for other entities
-    const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 6.0f;
+    const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 12.0f;
     if (keyboard[SDL_SCANCODE_D]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fminf(
@@ -141,13 +140,6 @@ void Game::update(float dt)
                 -CONFIG_FLOAT(PLAYER_SPEED));
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else {
-        const float PLAYER_STOP_THRESHOLD = 100.0f;
-        if (fabs(entities[PLAYER_ENTITY_INDEX].vel.x) > PLAYER_STOP_THRESHOLD) {
-            entities[PLAYER_ENTITY_INDEX].vel.x -=
-                sgn(entities[PLAYER_ENTITY_INDEX].vel.x) * PLAYER_ACCEL * dt;
-        } else {
-            entities[PLAYER_ENTITY_INDEX].vel.x = 0.0f;
-        }
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
     }
 
