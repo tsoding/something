@@ -24,6 +24,7 @@ enum Config_Var
     ROOM_NEIGHBOR_DIM_ALPHA,
     ENTITY_PROJECTILE_KNOCKBACK,
     ENTITY_DECEL_FACTOR,
+    ENTITY_ACCEL_FACTOR,
 
     CONFIG_VAR_CAPACITY,
     CONFIG_VAR_UNKNOWN,
@@ -64,6 +65,7 @@ void init_config_types()
     config_types[ENTITY_LIVEBAR_LOW_COLOR]      = CONFIG_TYPE_COLOR;
     config_types[ENTITY_PROJECTILE_KNOCKBACK]   = CONFIG_TYPE_FLOAT;
     config_types[ENTITY_DECEL_FACTOR]           = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_ACCEL_FACTOR]           = CONFIG_TYPE_FLOAT;
     config_types_inited = true;
 }
 
@@ -86,6 +88,7 @@ String_View config_var_as_string_view(Config_Var var)
     case ENTITY_LIVEBAR_LOW_COLOR:      return "ENTITY_LIVEBAR_LOW_COLOR"_sv;
     case ENTITY_PROJECTILE_KNOCKBACK:   return "ENTITY_PROJECTILE_KNOCKBACK"_sv;
     case ENTITY_DECEL_FACTOR:           return "ENTITY_DECEL_FACTOR"_sv;
+    case ENTITY_ACCEL_FACTOR:           return "ENTITY_ACCEL_FACTOR"_sv;
 
     case CONFIG_VAR_CAPACITY:
     case CONFIG_VAR_UNKNOWN:
