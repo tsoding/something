@@ -1,6 +1,6 @@
 WERROR?=-Werror
-PKGS=sdl2 libpng SDL2_ttf
-CXXFLAGS=-Wall -Wextra -Wconversion $(WERROR) -pedantic -std=c++17 -fno-exceptions -I. $(shell pkg-config --cflags $(PKGS))
+PKGS=sdl2 SDL2_ttf
+CXXFLAGS=-Wall -Wextra $(WERROR) -pedantic -std=c++17 -fno-exceptions -I. $(shell pkg-config --cflags $(PKGS))
 CXXFLAGS_DEBUG=$(CXXFLAGS) -O0 -fno-builtin -ggdb
 CXXFLAGS_RELEASE=$(CXXFLAGS) -DSOMETHING_RELEASE -O3 -ggdb
 LIBS=$(shell pkg-config --libs $(PKGS)) -lm

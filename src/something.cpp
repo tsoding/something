@@ -6,7 +6,8 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
 
-#include <png.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include "./stb_image.h"
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "common_print.cpp"
