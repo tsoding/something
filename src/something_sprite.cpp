@@ -44,6 +44,11 @@ struct Frame_Animat
     size_t   frame_current;
     float frame_duration;
     float frame_cooldown;
+
+    void reset()
+    {
+        frame_current = 0;
+    }
 };
 
 static inline

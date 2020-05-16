@@ -62,6 +62,14 @@ void displayf(SDL_Renderer *renderer,
     va_end(args);
 }
 
+void Projectile::kill()
+{
+    if (state == Projectile_State::Active) {
+        state = Projectile_State::Poof;
+        poof_animat.reset();
+    }
+}
+
 void Game::update(float dt)
 {
     // Update Player's gun direction //////////////////////////////
@@ -106,9 +114,9 @@ void Game::update(float dt)
             if (entity_index == projectile->shooter.unwrap) continue;
 
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
-                projectile->state = Projectile_State::Poof;
-                projectile->poof_animat.frame_current = 0;
+                projectile->kill();
                 entity->lives -= CONFIG_INT(ENTITY_PROJECTILE_DAMAGE);
+                entity->vel += normalize(projectile->vel) * CONFIG_FLOAT(ENTITY_PROJECTILE_KNOCKBACK);
 
                 if (entity->lives <= 0) {
                     entity->kill();
