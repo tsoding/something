@@ -38,6 +38,8 @@ struct Projectile
     Frame_Animat active_animat;
     Frame_Animat poof_animat;
     float lifetime;
+
+    void kill();
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;
