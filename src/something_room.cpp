@@ -12,7 +12,7 @@ bool Room::is_tile_inbounds(Vec2i p) const
 
 bool Room::is_tile_empty(Vec2i p) const
 {
-    return !is_tile_inbounds(p) || tiles[p.y][p.x] == Tile::Empty;
+    return !is_tile_inbounds(p) || tiles[p.y][p.x] == TILE_EMPTY;
 }
 
 bool Room::is_tile_at_abs_p_empty(Vec2f p) const
@@ -45,10 +45,10 @@ void Room::render(SDL_Renderer *renderer,
     for (int y = 0; y < ROOM_HEIGHT; ++y) {
         for (int x = 0; x < ROOM_WIDTH; ++x) {
             switch (tiles[y][x]) {
-            case Tile::Empty: {
+            case TILE_EMPTY: {
             } break;
 
-            case Tile::Wall: {
+            case TILE_WALL: {
                 const auto dstrect = rect(
                     camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position),
                     TILE_SIZE, TILE_SIZE);
@@ -60,6 +60,10 @@ void Room::render(SDL_Renderer *renderer,
 
                 SDL_Rect rect = rectf_for_sdl(dstrect);
                 SDL_RenderFillRect(renderer, &rect);
+            } break;
+
+            case TILE_COUNT: {
+                assert(0 && "Unexpected tile index");
             } break;
             }
         }

@@ -646,7 +646,7 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (int row = 0; row < ROOM_HEIGHT; ++row) {
         for (int col = 0; col < ROOM_WIDTH; ++col) {
-            if (room_row[index.unwrap].tiles[row][col] == Tile::Wall) {
+            if (room_row[index.unwrap].tiles[row][col] == TILE_WALL) {
                 SDL_Rect rect = {
                     (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
                     (int) (position.y + (float) row * MINIMAP_TILE_SIZE),

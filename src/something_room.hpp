@@ -4,10 +4,12 @@
 const int ROOM_WIDTH = 10;
 const int ROOM_HEIGHT = 10;
 
-enum class Tile
+enum Tile
 {
-    Empty = 0,
-    Wall
+    TILE_EMPTY = 0,
+    TILE_WALL,
+
+    TILE_COUNT
 };
 
 const float TILE_SIZE = 128.0f;
