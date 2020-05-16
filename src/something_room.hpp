@@ -12,6 +12,18 @@ enum Tile
     TILE_COUNT
 };
 
+struct Tile_Def
+{
+    bool is_collidable;
+    Sprite top_texture;
+    Sprite bottom_texture;
+};
+
+Tile_Def tile_defs[TILE_COUNT] = {
+    {false, {}, {}},                          // TILE_EMPTY
+    {true, {}, {}},                           // TILE_WALL
+};
+
 const float TILE_SIZE = 128.0f;
 const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
@@ -31,8 +43,6 @@ struct Room
 
     void render(SDL_Renderer *renderer,
                 Camera camera,
-                Sprite top_ground_texture,
-                Sprite bottom_ground_texture,
                 SDL_Color blend_color = {0, 0, 0, 0});
     void fill_with(Tile tile);
     void floor_at(Tile tile, size_t row);

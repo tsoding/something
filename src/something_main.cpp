@@ -69,11 +69,11 @@ int main(void)
         stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
     game.popup.font =
         stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
-    game.ground_grass_texture = {
+    tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
         tileset_texture
     };
-    game.ground_texture = {
+    tile_defs[TILE_WALL].bottom_texture = {
         {120, 128 + 16, 16, 16},
         tileset_texture
     };

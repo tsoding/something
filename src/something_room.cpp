@@ -12,7 +12,7 @@ bool Room::is_tile_inbounds(Vec2i p) const
 
 bool Room::is_tile_empty(Vec2i p) const
 {
-    return !is_tile_inbounds(p) || tiles[p.y][p.x] == TILE_EMPTY;
+    return !is_tile_inbounds(p) || !tile_defs[tiles[p.y][p.x]].is_collidable;
 }
 
 bool Room::is_tile_at_abs_p_empty(Vec2f p) const
@@ -22,8 +22,6 @@ bool Room::is_tile_at_abs_p_empty(Vec2f p) const
 
 void Room::render(SDL_Renderer *renderer,
                   Camera camera,
-                  Sprite top_ground_texture,
-                  Sprite bottom_ground_texture,
                   SDL_Color blend_color)
 {
     SDL_Color saved_blend_color = {};
@@ -44,28 +42,18 @@ void Room::render(SDL_Renderer *renderer,
 
     for (int y = 0; y < ROOM_HEIGHT; ++y) {
         for (int x = 0; x < ROOM_WIDTH; ++x) {
-            switch (tiles[y][x]) {
-            case TILE_EMPTY: {
-            } break;
-
-            case TILE_WALL: {
-                const auto dstrect = rect(
-                    camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position),
-                    TILE_SIZE, TILE_SIZE);
-                if (is_tile_empty(vec2(x, y - 1))) {
-                    render_sprite(renderer, top_ground_texture, dstrect);
-                } else {
-                    render_sprite(renderer, bottom_ground_texture, dstrect);
-                }
-
-                SDL_Rect rect = rectf_for_sdl(dstrect);
-                SDL_RenderFillRect(renderer, &rect);
-            } break;
-
-            case TILE_COUNT: {
-                assert(0 && "Unexpected tile index");
-            } break;
+            assert(tiles[y][x] < TILE_COUNT);
+            const auto dstrect = rect(
+                camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position),
+                TILE_SIZE, TILE_SIZE);
+            if (is_tile_empty(vec2(x, y - 1))) {
+                render_sprite(renderer, tile_defs[tiles[y][x]].top_texture, dstrect);
+            } else {
+                render_sprite(renderer, tile_defs[tiles[y][x]].bottom_texture, dstrect);
             }
+
+            SDL_Rect rect = rectf_for_sdl(dstrect);
+            SDL_RenderFillRect(renderer, &rect);
         }
     }
 

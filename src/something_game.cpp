@@ -167,23 +167,15 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap - 1].render(
             renderer,
             camera,
-            ground_grass_texture,
-            ground_texture,
             {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
-    room_row[index.unwrap].render(
-        renderer,
-        camera,
-        ground_grass_texture,
-        ground_texture);
+    room_row[index.unwrap].render(renderer, camera);
 
     if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
         room_row[index.unwrap + 1].render(
             renderer,
             camera,
-            ground_grass_texture,
-            ground_texture,
             {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
