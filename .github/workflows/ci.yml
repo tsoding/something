@@ -15,6 +15,7 @@ jobs:
           make
         env:
           CC: gcc
+          CXX: g++
   build-linux-clang:
     runs-on: ubuntu-18.04
     steps:
@@ -28,6 +29,7 @@ jobs:
           make
         env:
           CC: clang
+          CXX: clang++
   build-macos:
     runs-on: macOS-latest
     steps:
@@ -39,5 +41,6 @@ jobs:
           make
         env:
           CC: clang
+          CXX: clang++
 
   # TODO(#5): there is no build for Windows

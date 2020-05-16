@@ -88,30 +88,15 @@ void update_animat(Frame_Animat *animat, float dt)
 
 SDL_Surface *load_png_file_as_surface(const char *image_filename)
 {
-    png_image image;
-    memset(&image, 0, sizeof(image));
-    image.version = PNG_IMAGE_VERSION;
-    // TODO(#6): implement libpng error checker similar to the SDL one
-    // TODO(#7): try stb_image.h instead of libpng
-    //   https://github.com/nothings/stb/blob/master/stb_image.h
-    if (!png_image_begin_read_from_file(&image, image_filename)) {
-        println(stderr, "Could not read file `", image_filename, "`: ", image.message);
-        abort();
-    }
-    image.format = PNG_FORMAT_RGBA;
-    uint32_t *image_pixels = new uint32_t[image.width * image.height];
-
-    if (!png_image_finish_read(&image, nullptr, image_pixels, 0, nullptr)) {
-        println(stderr, "libpng pooped itself: ", image.message);
-        abort();
-    }
+    int width, height;
+    uint32_t *image_pixels = (uint32_t *) stbi_load(image_filename, &width, &height, NULL, 4);
 
     SDL_Surface* image_surface =
         sec(SDL_CreateRGBSurfaceFrom(image_pixels,
-                                     (int) image.width,
-                                     (int) image.height,
+                                     (int) width,
+                                     (int) height,
                                      32,
-                                     (int) image.width * 4,
+                                     (int) width * 4,
                                      0x000000FF,
                                      0x0000FF00,
                                      0x00FF0000,
