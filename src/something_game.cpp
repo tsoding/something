@@ -126,18 +126,18 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 12.0f;
+    const float PLAYER_ACCEL = CONFIG_FLOAT(ENTITY_SPEED) * 12.0f;
     if (keyboard[SDL_SCANCODE_D]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fminf(
                 entities[PLAYER_ENTITY_INDEX].vel.x + PLAYER_ACCEL * dt,
-                CONFIG_FLOAT(PLAYER_SPEED));
+                CONFIG_FLOAT(ENTITY_SPEED));
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else if (keyboard[SDL_SCANCODE_A]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fmax(
                 entities[PLAYER_ENTITY_INDEX].vel.x - PLAYER_ACCEL * dt,
-                -CONFIG_FLOAT(PLAYER_SPEED));
+                -CONFIG_FLOAT(ENTITY_SPEED));
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else {
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;

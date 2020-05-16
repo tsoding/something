@@ -8,7 +8,7 @@ enum Config_Type
 
 enum Config_Var
 {
-    PLAYER_SPEED = 0,
+    ENTITY_SPEED = 0,
     ENTITY_COOLDOWN_WEAPON,
     ENTITY_GRAVITY,
     ENTITY_INITIAL_LIVES,
@@ -47,7 +47,7 @@ char config_error_buffer[CONFIG_ERROR_CAPACITY];
 
 void init_config_types()
 {
-    config_types[PLAYER_SPEED]                  = CONFIG_TYPE_FLOAT;
+    config_types[ENTITY_SPEED]                  = CONFIG_TYPE_FLOAT;
     config_types[ENTITY_COOLDOWN_WEAPON]        = CONFIG_TYPE_FLOAT;
     config_types[ENTITY_GRAVITY]                = CONFIG_TYPE_FLOAT;
     config_types[ENTITY_GUN_LENGTH]             = CONFIG_TYPE_FLOAT;
@@ -68,7 +68,7 @@ void init_config_types()
 String_View config_var_as_string_view(Config_Var var)
 {
     switch(var) {
-    case PLAYER_SPEED:                  return "PLAYER_SPEED"_sv;
+    case ENTITY_SPEED:                  return "ENTITY_SPEED"_sv;
     case ENTITY_COOLDOWN_WEAPON:        return "ENTITY_COOLDOWN_WEAPON"_sv;
     case ENTITY_GRAVITY:                return "ENTITY_GRAVITY"_sv;
     case ENTITY_INITIAL_LIVES:          return "ENTITY_INITIAL_LIVES"_sv;

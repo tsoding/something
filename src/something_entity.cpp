@@ -170,7 +170,7 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
         vel.y += CONFIG_FLOAT(ENTITY_GRAVITY) * dt;
 
         const float PLAYER_STOP_THRESHOLD = 100.0f;
-        const float PLAYER_ACCEL = CONFIG_FLOAT(PLAYER_SPEED) * 6.0f;
+        const float PLAYER_ACCEL = CONFIG_FLOAT(ENTITY_SPEED) * 6.0f;
         if (fabs(vel.x) > PLAYER_STOP_THRESHOLD) {
             vel.x -= sgn(vel.x) * PLAYER_ACCEL * dt;
         } else {
