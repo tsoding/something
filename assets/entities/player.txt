@@ -1,7 +1,7 @@
-texbox.w      = 128
-texbox.h      = 128
-hitbox.w      = 100
-hitbox.h      = 100
+texbox.w      = 64
+texbox.h      = 64
+hitbox.w      = 44
+hitbox.h      = 44
 
 # Comment
 
