@@ -167,7 +167,7 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap - 1].render(
             renderer,
             camera,
-            {0, 0, 0, (Uint8) ROOM_NEIGHBOR_DIM_ALPHA});
+            ROOM_NEIGHBOR_DIM_COLOR);
     }
 
     room_row[index.unwrap].render(renderer, camera);
@@ -176,7 +176,7 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap + 1].render(
             renderer,
             camera,
-            {0, 0, 0, (Uint8) ROOM_NEIGHBOR_DIM_ALPHA});
+            ROOM_NEIGHBOR_DIM_COLOR);
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
