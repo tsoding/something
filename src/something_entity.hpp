@@ -75,5 +75,7 @@ struct Entity
     void jump(Sample_Mixer *mixer);
 };
 
+Entity player_entity(Vec2f pos);
+Entity enemy_entity(Vec2f pos);
 
 #endif  // SOMETHING_ENTITY_H_

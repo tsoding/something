@@ -62,6 +62,11 @@ struct String_View
         }
     }
 
+    void chop_back(size_t n)
+    {
+        count -= min(n, count);
+    }
+
     String_View chop_by_delim(char delim)
     {
         assert(data);

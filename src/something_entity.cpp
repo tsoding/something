@@ -246,3 +246,86 @@ void Entity::jump(Sample_Mixer *mixer)
         }
     }
 }
+
+Entity player_entity(Vec2f pos)
+{
+    Entity entity = {};
+
+    entity.texbox_local.w = PLAYER_TEXBOX_W;
+    entity.texbox_local.h = PLAYER_TEXBOX_H;
+    entity.hitbox_local.w = PLAYER_HITBOX_W;
+    entity.hitbox_local.h = PLAYER_HITBOX_H;
+    entity.texbox_local.x = entity.texbox_local.w * -0.5f;
+    entity.texbox_local.y = entity.texbox_local.h * -0.5f;
+    entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
+    entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+
+
+    entity.idle = frame_animat_by_name(PLAYER_IDLE);
+    entity.walking = frame_animat_by_name(PLAYER_WALKING);
+    entity.jump_samples[0] = sample_s16_by_name(PLAYER_JUMP_SAMPLE_0);
+    entity.jump_samples[1] = sample_s16_by_name(PLAYER_JUMP_SAMPLE_1);
+    entity.shoot_sample = sample_s16_by_name(PLAYER_SHOOT_SAMPLE);
+
+    entity.lives = ENTITY_INITIAL_LIVES;
+    entity.state = Entity_State::Alive;
+    entity.alive_state = Alive_State::Idle;
+    entity.pos = pos;
+    entity.gun_dir = vec2(1.0f, 0.0f);
+    entity.poof.duration = POOF_DURATION;
+
+    entity.prepare_for_jump_animat.begin = 0.0f;
+    entity.prepare_for_jump_animat.end = 0.2f;
+    entity.prepare_for_jump_animat.duration = 0.2f;
+
+    entity.jump_animat.rubber_animats[0].begin = 0.2f;
+    entity.jump_animat.rubber_animats[0].end = -0.2f;
+    entity.jump_animat.rubber_animats[0].duration = 0.1f;
+
+    entity.jump_animat.rubber_animats[1].begin = -0.2f;
+    entity.jump_animat.rubber_animats[1].end = 0.0f;
+    entity.jump_animat.rubber_animats[1].duration = 0.2f;
+
+    return entity;
+}
+
+Entity enemy_entity(Vec2f pos)
+{
+    Entity entity = {};
+
+    entity.texbox_local.w = ENEMY_TEXBOX_W;
+    entity.texbox_local.h = ENEMY_TEXBOX_H;
+    entity.hitbox_local.w = ENEMY_HITBOX_W;
+    entity.hitbox_local.h = ENEMY_HITBOX_H;
+    entity.texbox_local.x = entity.texbox_local.w * -0.5f;
+    entity.texbox_local.y = entity.texbox_local.h * -0.5f;
+    entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
+    entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+
+
+    entity.idle = frame_animat_by_name(ENEMY_IDLE);
+    entity.walking = frame_animat_by_name(ENEMY_WALKING);
+    entity.jump_samples[0] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_0);
+    entity.jump_samples[1] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_1);
+
+    entity.lives = ENTITY_INITIAL_LIVES;
+    entity.state = Entity_State::Alive;
+    entity.alive_state = Alive_State::Idle;
+    entity.pos = pos;
+    entity.gun_dir = vec2(1.0f, 0.0f);
+    entity.poof.duration = POOF_DURATION;
+
+    entity.prepare_for_jump_animat.begin = 0.0f;
+    entity.prepare_for_jump_animat.end = 0.2f;
+    entity.prepare_for_jump_animat.duration = 0.2f;
+
+    entity.jump_animat.rubber_animats[0].begin = 0.2f;
+    entity.jump_animat.rubber_animats[0].end = -0.2f;
+    entity.jump_animat.rubber_animats[0].duration = 0.1f;
+
+    entity.jump_animat.rubber_animats[1].begin = -0.2f;
+    entity.jump_animat.rubber_animats[1].end = 0.0f;
+    entity.jump_animat.rubber_animats[1].duration = 0.2f;
+
+    return entity;
+}

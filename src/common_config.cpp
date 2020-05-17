@@ -3,7 +3,8 @@ enum Config_Type
     CONFIG_TYPE_UNKNOWN = 0,
     CONFIG_TYPE_INT,
     CONFIG_TYPE_FLOAT,
-    CONFIG_TYPE_COLOR
+    CONFIG_TYPE_COLOR,
+    CONFIG_TYPE_STRING
 };
 
 #include "./config_types.hpp"
@@ -13,6 +14,7 @@ Config_Type config_type_by_name(String_View type_name)
     if (type_name == "float"_sv) return CONFIG_TYPE_FLOAT;
     if (type_name == "int"_sv) return CONFIG_TYPE_INT;
     if (type_name == "color"_sv) return CONFIG_TYPE_COLOR;
+    if (type_name == "string"_sv) return CONFIG_TYPE_STRING;
     return CONFIG_TYPE_UNKNOWN;
 }
 
@@ -21,6 +23,7 @@ union Config_Value
     float float_value;
     int int_value;
     SDL_Color color_value;
+    String_View string_value;
 };
 
 Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
@@ -66,6 +69,19 @@ Maybe<SDL_Color> string_view_as_color(String_View input)
     unwrap_into(result.a, input.subview(6, 2).from_hex<Uint8>());
 
     return {true, result};
+}
+
+Maybe<String_View> string_view_of_string_literal(String_View input)
+{
+    if (input.count < 2) return {};
+
+    if (*input.data != '"') return {};
+    input.chop(1);
+
+    if (input.data[input.count - 1] != '"') return {};
+    input.chop_back(1);
+
+    return {true, input};
 }
 
 Config_Parse_Result parse_config_text(String_View input)
@@ -125,6 +141,18 @@ Config_Parse_Result parse_config_text(String_View input)
                 return parse_failure(config_error_buffer, line_number);
             }
             config_values[index].float_value = x.unwrap;
+        } break;
+
+        case CONFIG_TYPE_STRING: {
+            auto x = string_view_of_string_literal(value);
+            if (!x.has_value) {
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not a string (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
+            }
+            config_values[index].string_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_UNKNOWN: {

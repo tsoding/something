@@ -54,6 +54,10 @@ int main()
                     config_values[index].color_value.a, "};");
         } break;
 
+        case CONFIG_TYPE_STRING: {
+            println(stdout, "#define ", name, " \"", config_values[index].string_value, "\"_sv");
+        } break;
+
         case CONFIG_TYPE_UNKNOWN: {
             println(stderr, "[ERROR] Variable ", config_names[index], " has an unknown type.");
             abort();
