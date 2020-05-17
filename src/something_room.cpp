@@ -58,8 +58,10 @@ void Room::render(SDL_Renderer *renderer,
                 render_sprite(renderer, tile_defs[tiles[y][x]].bottom_texture, dstrect);
             }
 
-            SDL_Rect rect = rectf_for_sdl(dstrect);
-            SDL_RenderFillRect(renderer, &rect);
+            if (tile_defs[tiles[y][x]].is_collidable) {
+                SDL_Rect rect = rectf_for_sdl(dstrect);
+                SDL_RenderFillRect(renderer, &rect);
+            }
         }
     }
 
