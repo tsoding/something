@@ -248,6 +248,7 @@ void Game::inplace_spawn_entity_from_file(Entity_Index index, Vec2f pos,
         auto fail_parsing =
             [&file_path, &line_number](auto ...args) {
                 println(stderr, file_path, ":", line_number, ": ", args...);
+                abort();
             };
 
         auto line = input.chop_by_delim('\n').trim();
