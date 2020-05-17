@@ -381,7 +381,12 @@ int main(void)
         //// UPDATE STATE END //////////////////////////////
 
         //// RENDER //////////////////////////////
-        sec(SDL_SetRenderDrawColor(renderer, 18, 8, 8, 255));
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                BACKGROUND_COLOR.r,
+                BACKGROUND_COLOR.g,
+                BACKGROUND_COLOR.b,
+                BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
         if (game.debug) {
