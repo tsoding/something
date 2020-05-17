@@ -1,6 +1,8 @@
 something.debug
 something.release
 config_baker
+config_typer
 TAGS
 baked_config.hpp
+config_types.hpp
 *.o

@@ -115,8 +115,8 @@ void Game::update(float dt)
 
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->kill();
-                entity->lives -= CONFIG_INT(ENTITY_PROJECTILE_DAMAGE);
-                entity->vel += normalize(projectile->vel) * CONFIG_FLOAT(ENTITY_PROJECTILE_KNOCKBACK);
+                entity->lives -= ENTITY_PROJECTILE_DAMAGE;
+                entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
 
                 if (entity->lives <= 0) {
                     entity->kill();
@@ -126,18 +126,18 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    const float ENTITY_ACCEL = CONFIG_FLOAT(ENTITY_SPEED) * CONFIG_FLOAT(ENTITY_ACCEL_FACTOR);
+    const float ENTITY_ACCEL = ENTITY_SPEED * ENTITY_ACCEL_FACTOR;
     if (keyboard[SDL_SCANCODE_D]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fminf(
                 entities[PLAYER_ENTITY_INDEX].vel.x + ENTITY_ACCEL * dt,
-                CONFIG_FLOAT(ENTITY_SPEED));
+                ENTITY_SPEED);
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else if (keyboard[SDL_SCANCODE_A]) {
         entities[PLAYER_ENTITY_INDEX].vel.x =
             fmax(
                 entities[PLAYER_ENTITY_INDEX].vel.x - ENTITY_ACCEL * dt,
-                -CONFIG_FLOAT(ENTITY_SPEED));
+                -ENTITY_SPEED);
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
     } else {
         entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
@@ -167,7 +167,7 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap - 1].render(
             renderer,
             camera,
-            {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
+            {0, 0, 0, (Uint8) ROOM_NEIGHBOR_DIM_ALPHA});
     }
 
     room_row[index.unwrap].render(renderer, camera);
@@ -176,7 +176,7 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap + 1].render(
             renderer,
             camera,
-            {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
+            {0, 0, 0, (Uint8) ROOM_NEIGHBOR_DIM_ALPHA});
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
@@ -202,7 +202,7 @@ void Game::entity_shoot(Entity_Index entity_index)
         entity->pos,
         entity->gun_dir * PROJECTILE_SPEED,
         entity_index);
-    entity->cooldown_weapon = CONFIG_FLOAT(ENTITY_COOLDOWN_WEAPON);
+    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
     mixer.play_sample(entity->shoot_sample);
 }
@@ -221,7 +221,7 @@ const float POOF_DURATION = 0.2f;
 void Game::inplace_spawn_entity_from_file(Entity_Index index, Vec2f pos,
                                           const char *file_path)
 {
-    entities[index.unwrap].lives = CONFIG_INT(ENTITY_INITIAL_LIVES);
+    entities[index.unwrap].lives = ENTITY_INITIAL_LIVES;
     entities[index.unwrap].state = Entity_State::Alive;
     entities[index.unwrap].alive_state = Alive_State::Idle;
     entities[index.unwrap].pos = pos;
@@ -325,7 +325,7 @@ void Game::inplace_spawn_entity(Entity_Index index,
     };
 
     memset(entities + index.unwrap, 0, sizeof(Entity));
-    entities[index.unwrap].lives = CONFIG_INT(ENTITY_INITIAL_LIVES);
+    entities[index.unwrap].lives = ENTITY_INITIAL_LIVES;
     entities[index.unwrap].state = Entity_State::Alive;
     entities[index.unwrap].alive_state = Alive_State::Idle;
     entities[index.unwrap].texbox_local = texbox_local;
@@ -370,7 +370,6 @@ void Game::reset_entities()
 
 void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
-    const float PROJECTILE_LIFETIME = 5.0f;
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
             projectiles[i].state = Projectile_State::Active;
