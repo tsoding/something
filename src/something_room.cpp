@@ -20,6 +20,11 @@ bool Room::is_tile_at_abs_p_empty(Vec2f p) const
     return is_tile_empty(vec_cast<int>((p - position) / TILE_SIZE));
 }
 
+Vec2i Room::f(Vec2f p)
+{
+    return vec_cast<int>((p - position) / TILE_SIZE);
+}
+
 void Room::render(SDL_Renderer *renderer,
                   Camera camera,
                   SDL_Color blend_color)

@@ -567,16 +567,20 @@ void Game::update_projectiles(float dt)
             int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
             if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
                 if (!room_row[room_current].is_tile_at_abs_p_empty(projectiles[i].pos)) {
-                    projectiles[i].state = Projectile_State::Poof;
-                    projectiles[i].poof_animat.frame_current = 0;
+                    projectiles[i].kill();
+                    Vec2i p = room_row[room_current].f(projectiles[i].pos);
+                    if (TILE_DESTROYABLE_0 <= room_row[room_current].tiles[p.y][p.x] && room_row[room_current].tiles[p.y][p.x] < TILE_DESTROYABLE_3) {
+                        room_row[room_current].tiles[p.y][p.x] = (Tile) ((int)room_row[room_current].tiles[p.y][p.x] + 1);
+                    } else if (room_row[room_current].tiles[p.y][p.x] == TILE_DESTROYABLE_3) {
+                        room_row[room_current].tiles[p.y][p.x] = TILE_EMPTY;
+                    }
                 }
             }
 
             projectiles[i].lifetime -= dt;
 
             if (projectiles[i].lifetime <= 0.0f) {
-                projectiles[i].state = Projectile_State::Poof;
-                projectiles[i].poof_animat.frame_current = 0;
+                projectiles[i].kill();
             }
         } break;
 

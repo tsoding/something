@@ -8,7 +8,10 @@ enum Tile
 {
     TILE_EMPTY = 0,
     TILE_WALL,
-    TILE_DESTROYABLE,
+    TILE_DESTROYABLE_0,
+    TILE_DESTROYABLE_1,
+    TILE_DESTROYABLE_2,
+    TILE_DESTROYABLE_3,
 
     TILE_COUNT
 };
@@ -23,7 +26,10 @@ struct Tile_Def
 Tile_Def tile_defs[TILE_COUNT] = {
     {false, {}, {}},                          // TILE_EMPTY
     {true, {}, {}},                           // TILE_WALL
-    {true, {}, {}},                           // TILE_DESTROYABLE
+    {true, {}, {}},                           // TILE_DESTROYABLE_0
+    {true, {}, {}},                           // TILE_DESTROYABLE_1
+    {true, {}, {}},                           // TILE_DESTROYABLE_2
+    {true, {}, {}},                           // TILE_DESTROYABLE_3
 };
 
 const float TILE_SIZE = 128.0f;
@@ -54,6 +60,7 @@ struct Room
     void load_stream(FILE *stream);
     void copy_from(Room *room);
     void resolve_point_collision(Vec2f *origin);
+    Vec2i f(Vec2f p);
 };
 
 #endif  // SOMETHING_ROOM_HPP_
