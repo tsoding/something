@@ -7,19 +7,21 @@ struct Sprite
 #define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
 
 void render_sprite(SDL_Renderer *renderer,
-                   Sprite texture,
+                   Sprite sprite,
                    Rectf destrect,
                    SDL_RendererFlip flip = SDL_FLIP_NONE)
 {
-    SDL_Rect rect = rectf_for_sdl(destrect);
-    sec(SDL_RenderCopyEx(
-            renderer,
-            texture.texture,
-            &texture.srcrect,
-            &rect,
-            0.0,
-            nullptr,
-            flip));
+    if (sprite.texture) {
+        SDL_Rect rect = rectf_for_sdl(destrect);
+        sec(SDL_RenderCopyEx(
+                renderer,
+                sprite.texture,
+                &sprite.srcrect,
+                &rect,
+                0.0,
+                nullptr,
+                flip));
+    }
 }
 
 void render_sprite(SDL_Renderer *renderer,

@@ -167,23 +167,15 @@ void Game::render(SDL_Renderer *renderer)
         room_row[index.unwrap - 1].render(
             renderer,
             camera,
-            ground_grass_texture,
-            ground_texture,
             {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
-    room_row[index.unwrap].render(
-        renderer,
-        camera,
-        ground_grass_texture,
-        ground_texture);
+    room_row[index.unwrap].render(renderer, camera);
 
     if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
         room_row[index.unwrap + 1].render(
             renderer,
             camera,
-            ground_grass_texture,
-            ground_texture,
             {0, 0, 0, (Uint8) CONFIG_INT(ROOM_NEIGHBOR_DIM_ALPHA)});
     }
 
@@ -574,17 +566,21 @@ void Game::update_projectiles(float dt)
 
             int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
             if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
-                if (!room_row[room_current].is_tile_at_abs_p_empty(projectiles[i].pos)) {
-                    projectiles[i].state = Projectile_State::Poof;
-                    projectiles[i].poof_animat.frame_current = 0;
+                auto tile = room_row[room_current].tile_at(projectiles[i].pos);
+                if (tile && tile_defs[*tile].is_collidable) {
+                    projectiles[i].kill();
+                    if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
+                        *tile += 1;
+                    } else if (*tile == TILE_DESTROYABLE_3) {
+                        *tile = TILE_EMPTY;
+                    }
                 }
             }
 
             projectiles[i].lifetime -= dt;
 
             if (projectiles[i].lifetime <= 0.0f) {
-                projectiles[i].state = Projectile_State::Poof;
-                projectiles[i].poof_animat.frame_current = 0;
+                projectiles[i].kill();
             }
         } break;
 
@@ -646,7 +642,7 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (int row = 0; row < ROOM_HEIGHT; ++row) {
         for (int col = 0; col < ROOM_WIDTH; ++col) {
-            if (room_row[index.unwrap].tiles[row][col] == Tile::Wall) {
+            if (room_row[index.unwrap].tiles[row][col] == TILE_WALL) {
                 SDL_Rect rect = {
                     (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
                     (int) (position.y + (float) row * MINIMAP_TILE_SIZE),

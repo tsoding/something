@@ -77,9 +77,6 @@ struct Game
     const Uint8 *keyboard;
     Popup popup;
 
-    Sprite ground_grass_texture;
-    Sprite ground_texture;
-
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
     Sample_S16 entity_jump_sample1;

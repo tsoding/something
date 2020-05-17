@@ -4,10 +4,30 @@
 const int ROOM_WIDTH = 10;
 const int ROOM_HEIGHT = 10;
 
-enum class Tile
+typedef uint32_t Tile;
+
+#define TILE_EMPTY         0
+#define TILE_WALL          1
+#define TILE_DESTROYABLE_0 2
+#define TILE_DESTROYABLE_1 3
+#define TILE_DESTROYABLE_2 4
+#define TILE_DESTROYABLE_3 5
+#define TILE_COUNT         6
+
+struct Tile_Def
 {
-    Empty = 0,
-    Wall
+    bool is_collidable;
+    Sprite top_texture;
+    Sprite bottom_texture;
+};
+
+Tile_Def tile_defs[TILE_COUNT] = {
+    {false, {}, {}},                          // TILE_EMPTY
+    {true, {}, {}},                           // TILE_WALL
+    {true, {}, {}},                           // TILE_DESTROYABLE_0
+    {true, {}, {}},                           // TILE_DESTROYABLE_1
+    {true, {}, {}},                           // TILE_DESTROYABLE_2
+    {true, {}, {}},                           // TILE_DESTROYABLE_3
 };
 
 const float TILE_SIZE = 128.0f;
@@ -29,8 +49,6 @@ struct Room
 
     void render(SDL_Renderer *renderer,
                 Camera camera,
-                Sprite top_ground_texture,
-                Sprite bottom_ground_texture,
                 SDL_Color blend_color = {0, 0, 0, 0});
     void fill_with(Tile tile);
     void floor_at(Tile tile, size_t row);
@@ -40,6 +58,7 @@ struct Room
     void load_stream(FILE *stream);
     void copy_from(Room *room);
     void resolve_point_collision(Vec2f *origin);
+    Tile *tile_at(Vec2f p);
 };
 
 #endif  // SOMETHING_ROOM_HPP_
