@@ -20,9 +20,10 @@ bool Room::is_tile_at_abs_p_empty(Vec2f p) const
     return is_tile_empty(vec_cast<int>((p - position) / TILE_SIZE));
 }
 
-Vec2i Room::f(Vec2f p)
+Tile *Room::tile_at(Vec2f world_position)
 {
-    return vec_cast<int>((p - position) / TILE_SIZE);
+    Vec2i p = vec_cast<int>((world_position - position) / TILE_SIZE);
+    return is_tile_inbounds(p) ? &tiles[p.y][p.x] : NULL;
 }
 
 void Room::render(SDL_Renderer *renderer,

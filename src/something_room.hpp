@@ -4,17 +4,15 @@
 const int ROOM_WIDTH = 10;
 const int ROOM_HEIGHT = 10;
 
-enum Tile
-{
-    TILE_EMPTY = 0,
-    TILE_WALL,
-    TILE_DESTROYABLE_0,
-    TILE_DESTROYABLE_1,
-    TILE_DESTROYABLE_2,
-    TILE_DESTROYABLE_3,
+typedef uint32_t Tile;
 
-    TILE_COUNT
-};
+#define TILE_EMPTY         0
+#define TILE_WALL          1
+#define TILE_DESTROYABLE_0 2
+#define TILE_DESTROYABLE_1 3
+#define TILE_DESTROYABLE_2 4
+#define TILE_DESTROYABLE_3 5
+#define TILE_COUNT         6
 
 struct Tile_Def
 {
@@ -60,7 +58,7 @@ struct Room
     void load_stream(FILE *stream);
     void copy_from(Room *room);
     void resolve_point_collision(Vec2f *origin);
-    Vec2i f(Vec2f p);
+    Tile *tile_at(Vec2f p);
 };
 
 #endif  // SOMETHING_ROOM_HPP_
