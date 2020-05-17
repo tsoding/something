@@ -108,18 +108,6 @@ Rect<T> operator+(Rect<T> a, Vec2<T> b)
 //////////////////////////////
 
 template <typename T>
-constexpr T min(T a, T b)
-{
-    return a < b ? a : b;
-}
-
-template <typename T>
-constexpr T max(T x, T y)
-{
-    return x > y ? x : y;
-}
-
-template <typename T>
 T abs(T x)
 {
     return x < 0 ? -x : x;
@@ -165,10 +153,4 @@ template <typename T> T sgn(T val) {
     }
 
     return 0;
-}
-
-template <typename T>
-constexpr T clamp(T x, T low, T high)
-{
-    return min(max(low, x), high);
 }

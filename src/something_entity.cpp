@@ -94,39 +94,39 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         // Rendering Live Bar
         {
             const Rectf livebar_border = {
-                texbox.x + texbox.w * 0.5f - CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH) * 0.5f,
-                texbox.y - CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT) - CONFIG_FLOAT(ENTITY_LIVEBAR_PADDING_BOTTOM),
-                CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH),
-                CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT)
+                texbox.x + texbox.w * 0.5f - ENTITY_LIVEBAR_WIDTH * 0.5f,
+                texbox.y - ENTITY_LIVEBAR_HEIGHT - ENTITY_LIVEBAR_PADDING_BOTTOM,
+                ENTITY_LIVEBAR_WIDTH,
+                ENTITY_LIVEBAR_HEIGHT
             };
-            const float percent = (float) lives / (float) CONFIG_INT(ENTITY_MAX_LIVES);
+            const float percent = (float) lives / (float) ENTITY_MAX_LIVES;
             const Rectf livebar_remain = {
                 livebar_border.x, livebar_border.y,
-                CONFIG_FLOAT(ENTITY_LIVEBAR_WIDTH) * percent,
-                CONFIG_FLOAT(ENTITY_LIVEBAR_HEIGHT)
+                ENTITY_LIVEBAR_WIDTH * percent,
+                ENTITY_LIVEBAR_HEIGHT
             };
 
             if (percent > 0.75f) {
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).r,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).g,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).b,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_FULL_COLOR).a));
+                        ENTITY_LIVEBAR_FULL_COLOR.r,
+                        ENTITY_LIVEBAR_FULL_COLOR.g,
+                        ENTITY_LIVEBAR_FULL_COLOR.b,
+                        ENTITY_LIVEBAR_FULL_COLOR.a));
             } else if (0.25f < percent && percent < 0.75f) {
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).r,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).g,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).b,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_HALF_COLOR).a));
+                        ENTITY_LIVEBAR_HALF_COLOR.r,
+                        ENTITY_LIVEBAR_HALF_COLOR.g,
+                        ENTITY_LIVEBAR_HALF_COLOR.b,
+                        ENTITY_LIVEBAR_HALF_COLOR.a));
             } else {
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).r,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).g,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).b,
-                        CONFIG_COLOR(ENTITY_LIVEBAR_LOW_COLOR).a));
+                        ENTITY_LIVEBAR_LOW_COLOR.r,
+                        ENTITY_LIVEBAR_LOW_COLOR.g,
+                        ENTITY_LIVEBAR_LOW_COLOR.b,
+                        ENTITY_LIVEBAR_LOW_COLOR.a));
             }
             const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
             sec(SDL_RenderDrawRect(renderer, &rect_border));
@@ -152,7 +152,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         render_line(
             renderer,
             camera.to_screen(gun_begin),
-            camera.to_screen(gun_begin + normalize(gun_dir) * CONFIG_FLOAT(ENTITY_GUN_LENGTH)));
+            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH));
     } break;
 
     case Entity_State::Poof: {
@@ -167,9 +167,9 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
 {
     switch (state) {
     case Entity_State::Alive: {
-        vel.y += CONFIG_FLOAT(ENTITY_GRAVITY) * dt;
+        vel.y += ENTITY_GRAVITY * dt;
 
-        const float ENTITY_DECEL = CONFIG_FLOAT(ENTITY_SPEED) * CONFIG_FLOAT(ENTITY_DECEL_FACTOR);
+        const float ENTITY_DECEL = ENTITY_SPEED * ENTITY_DECEL_FACTOR;
         const float ENTITY_STOP_THRESHOLD = 100.0f;
         if (fabs(vel.x) > ENTITY_STOP_THRESHOLD) {
             vel.x -= sgn(vel.x) * ENTITY_DECEL * dt;
@@ -237,7 +237,7 @@ void Entity::jump(Sample_Mixer *mixer)
             float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
             jump_animat.reset();
             jump_state = Jump_State::Jump;
-            vel.y = CONFIG_FLOAT(ENTITY_GRAVITY) * -min(a, 0.6f);
+            vel.y = ENTITY_GRAVITY * -min(a, 0.6f);
             mixer->play_sample(jump_samples[rand() % 2]);
         } break;
 
