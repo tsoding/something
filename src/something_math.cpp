@@ -157,7 +157,6 @@ Vec2<float> normalize(Vec2<float> a)
 }
 
 template <typename T> T sgn(T val) {
-    return fabsf(val) / val;
     if (val < 0) {
         return -1;
     } else if (val > 0) {
