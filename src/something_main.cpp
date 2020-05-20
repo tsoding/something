@@ -115,7 +115,7 @@ int main(void)
         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
         if (result.is_error) {
             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-            game.popup.notify(FAILURE_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
         }
     }
 #endif // SOMETHING_RELEASE
@@ -236,7 +236,7 @@ int main(void)
                         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
                         if (result.is_error) {
                             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-                            game.popup.notify(FAILURE_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
                         } else {
                             game.popup.notify(SUCCESS_FONT_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
                         }
