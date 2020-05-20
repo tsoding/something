@@ -272,7 +272,7 @@ Entity player_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-    entity.poof.duration = POOF_DURATION;
+    entity.poof.duration = PROJECTILE_POOF_DURATION;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -313,7 +313,7 @@ Entity enemy_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-    entity.poof.duration = POOF_DURATION;
+    entity.poof.duration = PROJECTILE_POOF_DURATION;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
