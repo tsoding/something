@@ -260,39 +260,39 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
     // TODO(#38): FPS display is broken
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, PADDING),
              "FPS: %d", 60);
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, 50 + PADDING),
              "Mouse Position: (%.4f, %.4f)",
              debug_mouse_position.x,
              debug_mouse_position.y);
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, 2 * 50 + PADDING),
              "Collision Probe: (%.4f, %.4f)",
              collision_probe.x,
              collision_probe.y);
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, 3 * 50 + PADDING),
              "Projectiles: %d",
              count_alive_projectiles());
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, 4 * 50 + PADDING),
              "Player position: (%.4f, %.4f)",
              entities[PLAYER_ENTITY_INDEX].pos.x,
              entities[PLAYER_ENTITY_INDEX].pos.y);
     displayf(renderer, debug_font,
              FONT_DEBUG_COLOR,
-             FONT_DEBUG_SHADOW_COLOR,
+             FONT_SHADOW_COLOR,
              vec2(PADDING, 5 * 50 + PADDING),
              "Player velocity: (%.4f, %.4f)",
              entities[PLAYER_ENTITY_INDEX].vel.x,
@@ -312,24 +312,24 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         const SDL_Color TRACKING_DEBUG_COLOR = {255, 255, 150, 255};
         displayf(renderer, debug_font,
                  TRACKING_DEBUG_COLOR,
-                 FONT_DEBUG_SHADOW_COLOR,
+                 FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
                  "State: %s", projectile_state_as_cstr(projectile.state));
         displayf(renderer, debug_font,
                  TRACKING_DEBUG_COLOR,
-                 FONT_DEBUG_SHADOW_COLOR,
+                 FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 50 + PADDING),
                  "Position: (%.4f, %.4f)",
                  projectile.pos.x, projectile.pos.y);
         displayf(renderer, debug_font,
                  TRACKING_DEBUG_COLOR,
-                 FONT_DEBUG_SHADOW_COLOR,
+                 FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
                  "Velocity: (%.4f, %.4f)",
                  projectile.vel.x, projectile.vel.y);
         displayf(renderer, debug_font,
                  TRACKING_DEBUG_COLOR,
-                 FONT_DEBUG_SHADOW_COLOR,
+                 FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
                  "Shooter Index: %d",
                  projectile.shooter.unwrap);
@@ -574,7 +574,7 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
         };
 
         // SHADOW //////////////////////////////
-        SDL_Color shadow_color = FONT_DEBUG_SHADOW_COLOR;
+        SDL_Color shadow_color = FONT_SHADOW_COLOR;
         shadow_color.a         = alpha;
 
         SDL_Texture *shadow_texture =
