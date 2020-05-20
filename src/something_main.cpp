@@ -115,7 +115,7 @@ int main(void)
         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
         if (result.is_error) {
             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-            game.popup.notify(FAILURE_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
         }
     }
 #endif // SOMETHING_RELEASE
@@ -236,9 +236,9 @@ int main(void)
                         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
                         if (result.is_error) {
                             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-                            game.popup.notify(FAILURE_FONT_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
                         } else {
-                            game.popup.notify(SUCCESS_FONT_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
+                            game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
                         }
                     } break;
 #endif  // SOMETHING_RELEASE
@@ -265,7 +265,7 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        game.popup.notify(SUCCESS_FONT_COLOR,
+                        game.popup.notify(FONT_SUCCESS_COLOR,
                                           "Saved room %lu to `%s`",
                                           room_index.unwrap,
                                           room_file_path);
@@ -278,7 +278,7 @@ int main(void)
                                 room_file_path,
                                 sizeof(room_file_path),
                                 room_index));
-                        game.popup.notify(SUCCESS_FONT_COLOR,
+                        game.popup.notify(FONT_SUCCESS_COLOR,
                                           "Load room %lu from `%s`\n",
                                           room_index.unwrap,
                                           room_file_path);
