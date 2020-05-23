@@ -4,7 +4,7 @@ enum Config_Type
     CONFIG_TYPE_INT,
     CONFIG_TYPE_FLOAT,
     CONFIG_TYPE_COLOR,
-    CONFIG_TYPE_STRING
+    CONFIG_TYPE_STRING,
 };
 
 #include "./config_types.hpp"
@@ -16,6 +16,19 @@ Config_Type config_type_by_name(String_View type_name)
     if (type_name == "color"_sv) return CONFIG_TYPE_COLOR;
     if (type_name == "string"_sv) return CONFIG_TYPE_STRING;
     return CONFIG_TYPE_UNKNOWN;
+}
+
+String_View config_name_by_type(Config_Type type)
+{
+    switch (type) {
+    case CONFIG_TYPE_UNKNOWN: return "<unknown>"_sv;
+    case CONFIG_TYPE_INT: return "int"_sv;
+    case CONFIG_TYPE_FLOAT: return "float"_sv;
+    case CONFIG_TYPE_COLOR: return "color"_sv;
+    case CONFIG_TYPE_STRING: return "string"_sv;
+    }
+
+    return "<unknown>"_sv;
 }
 
 union Config_Value
@@ -30,6 +43,7 @@ Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
 
 const size_t CONFIG_FILE_CAPACITY = 1 * 1024 * 1024;
 char config_file_buffer[CONFIG_FILE_CAPACITY];
+
 
 const size_t CONFIG_ERROR_CAPACITY = 1024;
 char config_error_buffer[CONFIG_ERROR_CAPACITY];
@@ -94,8 +108,8 @@ Config_Parse_Result parse_config_text(String_View input)
 
         // NOTE: Format of Line:
         // VAR_NAME : TYPE = VALUE # COMMENT
-        String_View name = line.chop_by_delim(':').trim();
-        String_View type = line.chop_by_delim('=').trim();
+        String_View name  = line.chop_by_delim(':').trim();
+        String_View type  = line.chop_by_delim('=').trim();
         String_View value = line.chop_by_delim('#').trim();
 
         auto index = config_index_by_name(name);
@@ -106,7 +120,20 @@ Config_Parse_Result parse_config_text(String_View input)
             return parse_failure(config_error_buffer, line_number);
         }
 
-        switch (config_type_by_name(type)) {
+        auto actual_config_type = config_type_by_name(type);
+        auto expected_config_type = config_types[index];
+
+        if (actual_config_type != expected_config_type) {
+            auto expected_type = config_name_by_type(expected_config_type);
+            snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                     "Expected type of `%.*s` was `%.*s`, but found `%.*s`.",
+                     (int) name.count, name.data,
+                     (int) expected_type.count, expected_type.data,
+                     (int) type.count, type.data);
+            return parse_failure(config_error_buffer, line_number);
+        }
+
+        switch (actual_config_type) {
         case CONFIG_TYPE_COLOR: {
             auto x = string_view_as_color(value);
             if (!x.has_value) {
