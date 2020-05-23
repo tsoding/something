@@ -284,7 +284,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
 
     auto index = room_index_at(debug_mouse_position);
     auto room_boundary_screen =
-        camera.to_screen(ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f));
+        camera.to_screen(ROOM_BOUNDARY + room_row[index.unwrap].position());
     {
         auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
