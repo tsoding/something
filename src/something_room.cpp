@@ -188,11 +188,3 @@ void Room::resolve_point_collision(Vec2f *origin)
 }
 
 ////////////////////////////////////////////////////////////
-
-const float MINIMAP_TILE_SIZE = 10.0f;
-const Rectf MINIMAP_ROOM_BOUNDARY = {
-    0, 0,
-    ROOM_WIDTH * MINIMAP_TILE_SIZE,
-    ROOM_HEIGHT * MINIMAP_TILE_SIZE
-};
-const float MINIMAP_ENTITY_SIZE = MINIMAP_TILE_SIZE;

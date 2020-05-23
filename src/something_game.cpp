@@ -1,5 +1,13 @@
 #include "something_game.hpp"
 
+const float MINIMAP_TILE_SIZE = 10.0f;
+const Rectf MINIMAP_ROOM_BOUNDARY = {
+    0, 0,
+    ROOM_WIDTH * MINIMAP_TILE_SIZE,
+    ROOM_HEIGHT * MINIMAP_TILE_SIZE
+};
+const float MINIMAP_ENTITY_SIZE = MINIMAP_TILE_SIZE;
+
 const char *projectile_state_as_cstr(Projectile_State state)
 {
     switch (state) {
@@ -542,11 +550,13 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
                                    Vec2f position)
 {
+    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
+
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
             renderer,
             {i},
-            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (float) i, 0.0f));
+            position + vec2((MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING) * (float) i, 0.0f));
     }
 }
 
@@ -554,10 +564,12 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
                                     Vec2f position,
                                     Vec2f entity_position)
 {
+    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
+
     const Vec2f minimap_position =
         entity_position /
-        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
-        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
+        vec2(ROOM_BOUNDARY.w + ROOM_PADDING, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING, (float) MINIMAP_ROOM_BOUNDARY.h);
 
     const Vec2f screen_position =
         minimap_position + position;
