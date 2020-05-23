@@ -151,7 +151,7 @@ int main(void)
 
     char room_file_path[256];
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        game.room_row[room_index].position = {(float) room_index * ROOM_BOUNDARY.w, 0};
+        game.room_row[room_index].index = {room_index};
         game.room_row[room_index].load_file(
             file_path_of_room(
                 room_file_path,
@@ -204,10 +204,8 @@ int main(void)
                     if (game.debug) {
                         int room_index = sym - '0' - 1;
                         if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
-                            auto room_center =
-                                vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) +
-                                game.room_row[room_index].position;
-                            game.entities[PLAYER_ENTITY_INDEX].pos = room_center;
+                            game.entities[PLAYER_ENTITY_INDEX].pos =
+                                game.room_row[room_index].center();
                         }
                     }
                 } else {
@@ -309,7 +307,7 @@ int main(void)
                 auto index = game.room_index_at(game.collision_probe);
                 game.room_row[index.unwrap].resolve_point_collision(&game.collision_probe);
 
-                Vec2i tile = vec_cast<int>((game.debug_mouse_position - game.room_row[index.unwrap].position) / TILE_SIZE);
+                Vec2i tile = vec_cast<int>((game.debug_mouse_position - game.room_row[index.unwrap].position()) / TILE_SIZE);
                 switch (game.state) {
                 case Debug_Draw_State::Create: {
                     if (game.room_row[index.unwrap].is_tile_inbounds(tile))
@@ -338,7 +336,7 @@ int main(void)
 
                             Vec2i tile =
                                 vec_cast<int>(
-                                    (game.debug_mouse_position - game.room_row[index.unwrap].position) /
+                                    (game.debug_mouse_position - game.room_row[index.unwrap].position()) /
                                     TILE_SIZE);
 
                             if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {

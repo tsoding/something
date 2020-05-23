@@ -88,7 +88,8 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, room_row, ROOM_ROW_COUNT);
+        entities[i].update(dt);
+        entity_resolve_collision({i});
     }
 
     // Update All Projectiles //////////////////////////////
@@ -139,9 +140,6 @@ void Game::update(float dt)
     }
 
     // Camera "Physics" //////////////////////////////
-    const float PLAYER_CAMERA_FORCE = 2.0f;
-    const float CENTER_CAMERA_FORCE = PLAYER_CAMERA_FORCE * 2.0f;
-
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
     const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
 
@@ -216,6 +214,42 @@ void Game::reset_entities()
     // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entities[ENEMY_ENTITY_INDEX_OFFSET + i] = enemy_entity(room_row[i + 1].center());
+    }
+}
+
+void Game::entity_resolve_collision(Entity_Index entity_index)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+
+    if (entity->state == Entity_State::Alive) {
+        Vec2f p0 = vec2(entity->hitbox_local.x, entity->hitbox_local.y) + entity->pos;
+        Vec2f p1 = p0 + vec2(entity->hitbox_local.w, entity->hitbox_local.h);
+
+        Vec2f mesh[] = {
+            p0,
+            {p1.x, p0.y},
+            {p0.x, p1.y},
+            p1,
+        };
+        const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+
+        for (int i = 0; i < MESH_COUNT; ++i) {
+            Vec2f t = mesh[i];
+            room_row[room_index_at(t).unwrap].resolve_point_collision(&t);
+
+            Vec2f d = t - mesh[i];
+
+            const int IMPACT_THRESHOLD = 5;
+            if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+            if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
+
+            for (int j = 0; j < MESH_COUNT; ++j) {
+                mesh[j] += d;
+            }
+
+            entity->pos += d;
+        }
     }
 }
 
@@ -476,7 +510,7 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
 
 Room_Index Game::room_index_at(Vec2f p)
 {
-    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
+    int index = (int) floor(p.x / (ROOM_BOUNDARY.w + ROOM_PADDING));
 
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
@@ -538,6 +572,7 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
     };
     sec(SDL_RenderFillRect(renderer, &rect));
 }
+
 
 void Popup::notify(SDL_Color color, const char *format, ...)
 {

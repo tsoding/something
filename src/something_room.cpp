@@ -2,7 +2,12 @@
 
 Vec2f Room::center() const
 {
-    return vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + position;
+    return vec2(ROOM_BOUNDARY.w * 0.5f, ROOM_BOUNDARY.h * 0.5f) + position();
+}
+
+Vec2f Room::position() const
+{
+    return {(float) index.unwrap * (ROOM_BOUNDARY.w + ROOM_PADDING), 0.0};
 }
 
 bool Room::is_tile_inbounds(Vec2i p) const
@@ -17,12 +22,12 @@ bool Room::is_tile_empty(Vec2i p) const
 
 bool Room::is_tile_at_abs_p_empty(Vec2f p) const
 {
-    return is_tile_empty(vec_cast<int>((p - position) / TILE_SIZE));
+    return is_tile_empty(vec_cast<int>((p - position()) / TILE_SIZE));
 }
 
 Tile *Room::tile_at(Vec2f world_position)
 {
-    Vec2i p = vec_cast<int>((world_position - position) / TILE_SIZE);
+    Vec2i p = vec_cast<int>((world_position - position()) / TILE_SIZE);
     return is_tile_inbounds(p) ? &tiles[p.y][p.x] : NULL;
 }
 
@@ -50,7 +55,7 @@ void Room::render(SDL_Renderer *renderer,
         for (int x = 0; x < ROOM_WIDTH; ++x) {
             assert(tiles[y][x] < TILE_COUNT);
             const auto dstrect = rect(
-                camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position),
+                camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position()),
                 TILE_SIZE, TILE_SIZE);
             if (is_tile_empty(vec2(x, y - 1))) {
                 render_sprite(renderer, tile_defs[tiles[y][x]].top_texture, dstrect);
@@ -135,7 +140,7 @@ void Room::resolve_point_collision(Vec2f *origin)
 {
     assert(origin);
 
-    Vec2f p = *origin  - position;
+    Vec2f p = *origin  - position();
 
     const auto tile = vec_cast<int>(p / TILE_SIZE);
 
@@ -179,7 +184,7 @@ void Room::resolve_point_collision(Vec2f *origin)
         }
     }
 
-    *origin = sides[closest].np + position;
+    *origin = sides[closest].np + position();
 }
 
 ////////////////////////////////////////////////////////////

@@ -70,7 +70,7 @@ struct Entity
     }
 
     void render(SDL_Renderer *renderer, Camera camera) const;
-    void update(float dt, Room *room_row, size_t room_row_count);
+    void update(float dt);
     void point_gun_at(Vec2f target);
     void jump(Sample_Mixer *mixer);
 };
