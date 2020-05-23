@@ -8,41 +8,6 @@ void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
             (int) floorf(end.x),   (int) floorf(end.y)));
 }
 
-void Entity::resolve_entity_collision(Room *room_row, size_t room_row_count)
-{
-    Vec2f p0 = vec2(hitbox_local.x, hitbox_local.y) + pos;
-    Vec2f p1 = p0 + vec2(hitbox_local.w, hitbox_local.h);
-
-    Vec2f mesh[] = {
-        p0,
-        {p1.x, p0.y},
-        {p0.x, p1.y},
-        p1,
-    };
-    const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
-
-    for (int i = 0; i < MESH_COUNT; ++i) {
-        Vec2f t = mesh[i];
-        int room_index = (int) floorf(t.x / ROOM_BOUNDARY.w);
-
-        if (0 <= room_index && room_index < (int) room_row_count) {
-            room_row[room_index].resolve_point_collision(&t);
-        }
-
-        Vec2f d = t - mesh[i];
-
-        const int IMPACT_THRESHOLD = 5;
-        if (abs(d.y) >= IMPACT_THRESHOLD) vel.y = 0;
-        if (abs(d.x) >= IMPACT_THRESHOLD) vel.x = 0;
-
-        for (int j = 0; j < MESH_COUNT; ++j) {
-            mesh[j] += d;
-        }
-
-        pos += d;
-    }
-}
-
 void Entity::kill()
 {
     if (state == Entity_State::Alive) {
@@ -163,7 +128,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(float dt, Room *room_row, size_t room_row_count)
+void Entity::update(float dt)
 {
     switch (state) {
     case Entity_State::Alive: {
@@ -178,7 +143,6 @@ void Entity::update(float dt, Room *room_row, size_t room_row_count)
         }
 
         pos += vel * dt;
-        resolve_entity_collision(room_row, room_row_count);
         cooldown_weapon -= dt;
 
         switch (jump_state) {

@@ -37,11 +37,17 @@ const Rectf ROOM_BOUNDARY = {
     0.0f, 0.0f, ROOM_WIDTH * TILE_SIZE, ROOM_HEIGHT * TILE_SIZE
 };
 
+struct Room_Index
+{
+    size_t unwrap;
+};
+
 struct Room
 {
-    Vec2f position;
+    Room_Index index;
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
 
+    Vec2f position() const;
     Vec2f center() const;
     bool is_tile_inbounds(Vec2i p) const;
     bool is_tile_empty(Vec2i p) const;

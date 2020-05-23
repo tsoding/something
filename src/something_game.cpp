@@ -1,5 +1,13 @@
 #include "something_game.hpp"
 
+const float MINIMAP_TILE_SIZE = 10.0f;
+const Rectf MINIMAP_ROOM_BOUNDARY = {
+    0, 0,
+    ROOM_WIDTH * MINIMAP_TILE_SIZE,
+    ROOM_HEIGHT * MINIMAP_TILE_SIZE
+};
+const float MINIMAP_ENTITY_SIZE = MINIMAP_TILE_SIZE;
+
 const char *projectile_state_as_cstr(Projectile_State state)
 {
     switch (state) {
@@ -88,7 +96,8 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, room_row, ROOM_ROW_COUNT);
+        entities[i].update(dt);
+        entity_resolve_collision({i});
     }
 
     // Update All Projectiles //////////////////////////////
@@ -139,9 +148,6 @@ void Game::update(float dt)
     }
 
     // Camera "Physics" //////////////////////////////
-    const float PLAYER_CAMERA_FORCE = 2.0f;
-    const float CENTER_CAMERA_FORCE = PLAYER_CAMERA_FORCE * 2.0f;
-
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
     const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
 
@@ -219,6 +225,42 @@ void Game::reset_entities()
     }
 }
 
+void Game::entity_resolve_collision(Entity_Index entity_index)
+{
+    assert(entity_index.unwrap < ENTITIES_COUNT);
+    Entity *entity = &entities[entity_index.unwrap];
+
+    if (entity->state == Entity_State::Alive) {
+        Vec2f p0 = vec2(entity->hitbox_local.x, entity->hitbox_local.y) + entity->pos;
+        Vec2f p1 = p0 + vec2(entity->hitbox_local.w, entity->hitbox_local.h);
+
+        Vec2f mesh[] = {
+            p0,
+            {p1.x, p0.y},
+            {p0.x, p1.y},
+            p1,
+        };
+        const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+
+        for (int i = 0; i < MESH_COUNT; ++i) {
+            Vec2f t = mesh[i];
+            room_row[room_index_at(t).unwrap].resolve_point_collision(&t);
+
+            Vec2f d = t - mesh[i];
+
+            const int IMPACT_THRESHOLD = 5;
+            if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+            if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
+
+            for (int j = 0; j < MESH_COUNT; ++j) {
+                mesh[j] += d;
+            }
+
+            entity->pos += d;
+        }
+    }
+}
+
 void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
@@ -250,7 +292,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
 
     auto index = room_index_at(debug_mouse_position);
     auto room_boundary_screen =
-        camera.to_screen(ROOM_BOUNDARY + vec2((float) index.unwrap * ROOM_BOUNDARY.w, 1.0f));
+        camera.to_screen(ROOM_BOUNDARY + room_row[index.unwrap].position());
     {
         auto rect = rectf_for_sdl(room_boundary_screen);
         sec(SDL_RenderDrawRect(renderer, &rect));
@@ -414,16 +456,13 @@ void Game::update_projectiles(float dt)
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel * dt;
 
-            int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
-            if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
-                auto tile = room_row[room_current].tile_at(projectiles[i].pos);
-                if (tile && tile_defs[*tile].is_collidable) {
-                    projectiles[i].kill();
-                    if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
-                        *tile += 1;
-                    } else if (*tile == TILE_DESTROYABLE_3) {
-                        *tile = TILE_EMPTY;
-                    }
+            auto tile = room_row[room_index_at(projectiles[i].pos).unwrap].tile_at(projectiles[i].pos);
+            if (tile && tile_defs[*tile].is_collidable) {
+                projectiles[i].kill();
+                if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
+                    *tile += 1;
+                } else if (*tile == TILE_DESTROYABLE_3) {
+                    *tile = TILE_EMPTY;
                 }
             }
 
@@ -476,7 +515,7 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
 
 Room_Index Game::room_index_at(Vec2f p)
 {
-    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
+    int index = (int) floor(p.x / (ROOM_BOUNDARY.w + ROOM_PADDING));
 
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
@@ -508,11 +547,13 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
                                    Vec2f position)
 {
+    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
+
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
             renderer,
             {i},
-            position + vec2(MINIMAP_ROOM_BOUNDARY.w * (float) i, 0.0f));
+            position + vec2((MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING) * (float) i, 0.0f));
     }
 }
 
@@ -520,10 +561,12 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
                                     Vec2f position,
                                     Vec2f entity_position)
 {
+    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
+
     const Vec2f minimap_position =
         entity_position /
-        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
-        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
+        vec2(ROOM_BOUNDARY.w + ROOM_PADDING, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING, (float) MINIMAP_ROOM_BOUNDARY.h);
 
     const Vec2f screen_position =
         minimap_position + position;
@@ -538,6 +581,7 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
     };
     sec(SDL_RenderFillRect(renderer, &rect));
 }
+
 
 void Popup::notify(SDL_Color color, const char *format, ...)
 {

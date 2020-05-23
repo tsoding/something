@@ -17,10 +17,6 @@ struct Projectile_Index
     size_t unwrap;
 };
 
-struct Room_Index
-{
-    size_t unwrap;
-};
 
 enum class Projectile_State
 {
@@ -101,6 +97,7 @@ struct Game
     void reset_entities();
     void entity_shoot(Entity_Index entity_index);
     void entity_jump(Entity_Index entity_index);
+    void entity_resolve_collision(Entity_Index entity_index);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
