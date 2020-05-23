@@ -1,8 +1,8 @@
 #ifndef SOMETHING_ROOM_HPP_
 #define SOMETHING_ROOM_HPP_
 
-const int ROOM_WIDTH = 10;
-const int ROOM_HEIGHT = 10;
+const int ROOM_WIDTH  = 10 * 2;
+const int ROOM_HEIGHT = 10 * 2;
 
 typedef uint32_t Tile;
 
@@ -30,7 +30,7 @@ Tile_Def tile_defs[TILE_COUNT] = {
     {true, {}, {}},                           // TILE_DESTROYABLE_3
 };
 
-const float TILE_SIZE = 128.0f;
+const float TILE_SIZE = 128.0f * 0.5f;
 const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 const Rectf ROOM_BOUNDARY = {
