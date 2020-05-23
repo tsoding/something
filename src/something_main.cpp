@@ -308,7 +308,7 @@ int main(void)
                 switch (game.state) {
                 case Debug_Draw_State::Create: {
                     if (game.room_row[index.unwrap].is_tile_inbounds(tile))
-                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_DESTROYABLE_0;
+                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
                 } break;
 
                 case Debug_Draw_State::Delete: {
@@ -339,7 +339,7 @@ int main(void)
                             if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {
                                 if (game.room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
                                     game.state = Debug_Draw_State::Create;
-                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_DESTROYABLE_0;
+                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
                                 } else {
                                     game.state = Debug_Draw_State::Delete;
                                     game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
