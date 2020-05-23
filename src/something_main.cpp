@@ -161,8 +161,6 @@ int main(void)
 
     game.reset_entities();
 
-    SDL_SetWindowGrab(window, game.debug ? SDL_FALSE : SDL_TRUE);
-
     bool step_debug = false;
 
     sec(SDL_SetRenderDrawBlendMode(
@@ -243,7 +241,6 @@ int main(void)
 
                     case SDLK_q: {
                         game.debug = !game.debug;
-                        SDL_SetWindowGrab(window, game.debug ? SDL_FALSE : SDL_TRUE);
                     } break;
 
                     case SDLK_z: {
