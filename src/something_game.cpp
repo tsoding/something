@@ -456,16 +456,13 @@ void Game::update_projectiles(float dt)
             update_animat(&projectiles[i].active_animat, dt);
             projectiles[i].pos += projectiles[i].vel * dt;
 
-            int room_current = (int) floorf(projectiles[i].pos.x / ROOM_BOUNDARY.w);
-            if (0 <= room_current && room_current < (int) ROOM_ROW_COUNT) {
-                auto tile = room_row[room_current].tile_at(projectiles[i].pos);
-                if (tile && tile_defs[*tile].is_collidable) {
-                    projectiles[i].kill();
-                    if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
-                        *tile += 1;
-                    } else if (*tile == TILE_DESTROYABLE_3) {
-                        *tile = TILE_EMPTY;
-                    }
+            auto tile = room_row[room_index_at(projectiles[i].pos).unwrap].tile_at(projectiles[i].pos);
+            if (tile && tile_defs[*tile].is_collidable) {
+                projectiles[i].kill();
+                if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
+                    *tile += 1;
+                } else if (*tile == TILE_DESTROYABLE_3) {
+                    *tile = TILE_EMPTY;
                 }
             }
 
