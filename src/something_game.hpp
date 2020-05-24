@@ -51,7 +51,7 @@ struct Popup
 {
     char buffer[POPUP_BUFFER_CAPACITY];
     int buffer_size;
-    TTF_Font *font;
+    Cached_Font font;
     SDL_Color color;
     float a;
 
@@ -82,7 +82,7 @@ struct Game
     Frame_Animat projectile_active_animat;
     Frame_Animat projectile_poof_animat;
 
-    TTF_Font *debug_font;
+    Cached_Font debug_font;
 
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];

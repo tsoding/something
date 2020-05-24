@@ -65,10 +65,14 @@ int main(void)
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
-    game.debug_font =
-        stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
-    game.popup.font =
-        stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
+
+    game.debug_font.font = stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
+    game.debug_font.populate_cache(renderer);
+
+    game.popup.font.font = stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
+    game.popup.font.populate_cache(renderer);
+
+
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
         tileset_texture
@@ -368,6 +372,7 @@ int main(void)
 
         //// UPDATE STATE //////////////////////////////
         if (!step_debug) {
+            SDL_Delay(1);
             while (lag_sec >= SIMULATION_DELTA_TIME) {
                 game.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
@@ -384,6 +389,7 @@ int main(void)
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
+
         if (game.debug) {
             game.render_debug_overlay(renderer);
         }
