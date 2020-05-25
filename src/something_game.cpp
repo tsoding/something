@@ -22,7 +22,7 @@ const char *projectile_state_as_cstr(Projectile_State state)
 
 // TODO(#25): Turn displayf into println style
 void displayf(SDL_Renderer *renderer,
-              Cached_Font *font,
+              Bitmap_Font *font,
               SDL_Color color,
               SDL_Color shadow_color,
               Vec2f p,

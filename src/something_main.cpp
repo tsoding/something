@@ -60,17 +60,17 @@ int main(void)
     load_frame_animat_files();
 
     stec(TTF_Init());
-    const int DEBUG_FONT_SIZE = 32;
+    const float DEBUG_FONT_SIZE = 2.0f;
     const float POPUP_FONT_SIZE = 3.0f;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
 
-    game.debug_font.font = stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
-    game.debug_font.populate_cache(renderer);
-
     game.popup.font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
     game.popup.font.size = vec2(POPUP_FONT_SIZE, POPUP_FONT_SIZE);
+
+    game.debug_font.bitmap = game.popup.font.bitmap;
+    game.debug_font.size = vec2(DEBUG_FONT_SIZE, DEBUG_FONT_SIZE);
 
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
