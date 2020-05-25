@@ -32,7 +32,7 @@ void Cached_Font::render(SDL_Renderer *renderer,
                 };
                 const SDL_Rect dstrect = {
                     (int) floorf(position.x) + pen_x + minx,
-                    (int) floorf(position.y) + miny + TTF_FontAscent(font) - maxy,
+                    (int) floorf(position.y) + TTF_FontAscent(font) - maxy,
                     w, h
                 };
 
