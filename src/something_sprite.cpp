@@ -111,6 +111,26 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
     return image_surface;
 }
 
+SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
+                                        const char *image_filepath,
+                                        SDL_Color color_key)
+{
+    SDL_Surface *image_surface = sec(SDL_LoadBMP(image_filepath));
+
+    sec(SDL_SetColorKey(
+            image_surface,
+            SDL_TRUE,
+            SDL_MapRGB(
+                image_surface->format,
+                color_key.r,
+                color_key.g,
+                color_key.b)));
+
+    SDL_Texture *image_texture = sec(SDL_CreateTextureFromSurface(renderer, image_surface));
+    SDL_FreeSurface(image_surface);
+    return image_texture;
+}
+
 SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
                                         const char *image_filename)
 {

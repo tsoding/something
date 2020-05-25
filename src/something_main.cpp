@@ -31,7 +31,6 @@ char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
 Game game = {};
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
-const char *const FONT_FILE_PATH = "./assets/fonts/UbuntuMono-R.ttf";
 
 int main(void)
 {
@@ -59,16 +58,18 @@ int main(void)
     load_samples();
     load_frame_animat_files();
 
-    stec(TTF_Init());
-    const int DEBUG_FONT_SIZE = 32;
-    const int POPUP_FONT_SIZE = 32 + 8;
+    const float DEBUG_FONT_SIZE = 2.0f;
+    const float POPUP_FONT_SIZE = 3.0f;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
-    game.debug_font =
-        stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
-    game.popup.font =
-        stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
+
+    game.popup.font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
+    game.popup.font.size = vec2(POPUP_FONT_SIZE, POPUP_FONT_SIZE);
+
+    game.debug_font.bitmap = game.popup.font.bitmap;
+    game.debug_font.size = vec2(DEBUG_FONT_SIZE, DEBUG_FONT_SIZE);
+
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
         tileset_texture
@@ -368,6 +369,7 @@ int main(void)
 
         //// UPDATE STATE //////////////////////////////
         if (!step_debug) {
+            SDL_Delay(1);
             while (lag_sec >= SIMULATION_DELTA_TIME) {
                 game.update(SIMULATION_DELTA_TIME);
                 lag_sec -= SIMULATION_DELTA_TIME;
@@ -384,6 +386,7 @@ int main(void)
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
+
         if (game.debug) {
             game.render_debug_overlay(renderer);
         }

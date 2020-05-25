@@ -11,9 +11,9 @@ can be changed at any moment or stop working at all.**
 ```console
 $ # Dependencies
 $ ## Debian
-$ sudo apt-get install libsdl2-dev libsdl2-ttf-dev libpng-dev
+$ sudo apt-get install libsdl2-dev
 $ ## Manjaro
-$ sudo pacman -S sdl2 sdl2_ttf libpng
+$ sudo pacman -S sdl2
 $ ## (add your distro here)
 $ # Build
 $ make -B

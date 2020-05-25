@@ -4,11 +4,11 @@
 #include <cerrno>
 #include <cmath>
 #include <SDL.h>
-#include <SDL_ttf.h>
 
 #ifdef SOMETHING_RELEASE
 #define STB_IMAGE_IMPLEMENTATION
 #endif
+#define STBI_ONLY_PNG
 #include "./stb_image.h"
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
@@ -25,10 +25,12 @@
 #endif
 
 #include "something_error.cpp"
+#include "something_font.cpp"
 #include "something_camera.cpp"
 #include "something_sprite.cpp"
 #include "something_room.cpp"
 #include "something_sound.cpp"
 #include "something_entity.cpp"
+#include "something_popup.cpp"
 #include "something_game.cpp"
 #include "something_main.cpp"
