@@ -13,4 +13,18 @@ struct Cached_Font
     void render(SDL_Renderer *render, Vec2f position, SDL_Color color, const char *cstr);
 };
 
+const int BITMAP_FONT_ROW_SIZE    = 18;
+const int BITMAP_FONT_CHAR_WIDTH  = 7;
+const int BITMAP_FONT_CHAR_HEIGHT = 9;
+
+struct Bitmap_Font
+{
+    SDL_Texture *bitmap;
+    Vec2f size;
+
+    void render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, String_View sv);
+    void render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, const char *cstr);
+    SDL_Rect char_rect(char x);
+};
+
 #endif  // SOMETHING_FONT_HPP_
