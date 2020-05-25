@@ -25,6 +25,9 @@ struct Bitmap_Font
     void render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, String_View sv);
     void render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, const char *cstr);
     SDL_Rect char_rect(char x);
+
+    Vec2f text_size(String_View sv);
+    Vec2f text_size(const char *cstr);
 };
 
 #endif  // SOMETHING_FONT_HPP_

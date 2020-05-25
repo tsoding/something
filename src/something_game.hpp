@@ -51,7 +51,7 @@ struct Popup
 {
     char buffer[POPUP_BUFFER_CAPACITY];
     int buffer_size;
-    Cached_Font font;
+    Bitmap_Font font;
     SDL_Color color;
     float a;
 

@@ -93,3 +93,22 @@ void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, SDL_Color color
 {
     render(renderer, position, color, cstr_as_string_view(cstr));
 }
+
+Vec2f Bitmap_Font::text_size(String_View sv)
+{
+    size_t lines_count = 0;
+    size_t longest_line = 0;
+    while (sv.count > 0) {
+        String_View line = sv.chop_by_delim('\n');
+        lines_count += 1;
+        longest_line = max(longest_line, line.count);
+    }
+
+    return vec2((float) longest_line * BITMAP_FONT_CHAR_WIDTH * size.x,
+                (float) lines_count * BITMAP_FONT_CHAR_HEIGHT * size.y);
+}
+
+Vec2f Bitmap_Font::text_size(const char *cstr)
+{
+    return text_size(cstr_as_string_view(cstr));
+}

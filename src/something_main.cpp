@@ -61,7 +61,7 @@ int main(void)
 
     stec(TTF_Init());
     const int DEBUG_FONT_SIZE = 32;
-    const int POPUP_FONT_SIZE = 32 + 8;
+    const float POPUP_FONT_SIZE = 3.0f;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
@@ -69,12 +69,8 @@ int main(void)
     game.debug_font.font = stec(TTF_OpenFont(FONT_FILE_PATH, DEBUG_FONT_SIZE));
     game.debug_font.populate_cache(renderer);
 
-    game.popup.font.font = stec(TTF_OpenFont(FONT_FILE_PATH, POPUP_FONT_SIZE));
-    game.popup.font.populate_cache(renderer);
-
-    Bitmap_Font font = {};
-    font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
-    font.size = vec2(5.0f, 5.0f);
+    game.popup.font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
+    game.popup.font.size = vec2(POPUP_FONT_SIZE, POPUP_FONT_SIZE);
 
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
@@ -392,7 +388,6 @@ int main(void)
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
-        font.render(renderer, vec2(100.0f, 100.0f), {255, 0, 0, 255}, "Khello Vorld");
 
         if (game.debug) {
             game.render_debug_overlay(renderer);
