@@ -16,7 +16,7 @@ something.release: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp)
 	$(CXX) $(CXXFLAGS_RELEASE) -o something.release src/something.cpp $(LIBS)
 
 stb_image.o: src/stb_image.h
-	$(CC) $(CFLAGS) -x c -ggdb -DSTB_IMAGE_IMPLEMENTATION -c -o stb_image.o src/stb_image.h
+	$(CC) $(CFLAGS) -x c -ggdb -DSTBI_ONLY_PNG -DSTB_IMAGE_IMPLEMENTATION -c -o stb_image.o src/stb_image.h
 
 baked_config.hpp: config_baker ./assets/config.vars
 	./config_baker > baked_config.hpp
