@@ -13,7 +13,9 @@ void Cached_Font::populate_cache(SDL_Renderer *renderer)
     }
 }
 
-void Cached_Font::render_sv(SDL_Renderer *renderer, Vec2f position, SDL_Color color, String_View sv)
+void Cached_Font::render(SDL_Renderer *renderer,
+                         Vec2f position, SDL_Color color,
+                         String_View sv)
 {
     if (font) {
         int pen_x = 0;
@@ -43,8 +45,9 @@ void Cached_Font::render_sv(SDL_Renderer *renderer, Vec2f position, SDL_Color co
     }
 }
 
-void Cached_Font::render_cstr(SDL_Renderer *renderer, Vec2f position, SDL_Color color,
-                              const char *cstr)
+void Cached_Font::render(SDL_Renderer *renderer,
+                         Vec2f position, SDL_Color color,
+                         const char *cstr)
 {
-    render_sv(renderer, position, color, cstr_as_string_view(cstr));
+    render(renderer, position, color, cstr_as_string_view(cstr));
 }

@@ -9,8 +9,8 @@ struct Cached_Font
     SDL_Texture *glyph_cache[CACHED_FONT_CAPACITY];
 
     void populate_cache(SDL_Renderer *renderer);
-    void render_sv(SDL_Renderer *render, Vec2f position, SDL_Color color, String_View sv);
-    void render_cstr(SDL_Renderer *render, Vec2f position, SDL_Color color, const char *cstr);
+    void render(SDL_Renderer *render, Vec2f position, SDL_Color color, String_View sv);
+    void render(SDL_Renderer *render, Vec2f position, SDL_Color color, const char *cstr);
 };
 
 #endif  // SOMETHING_FONT_HPP_

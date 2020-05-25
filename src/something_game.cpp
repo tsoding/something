@@ -34,8 +34,8 @@ void displayf(SDL_Renderer *renderer,
     char text[256];
     vsnprintf(text, sizeof(text), format, args);
 
-    font->render_cstr(renderer, p - vec2(2.0f, 2.0f), shadow_color, text);
-    font->render_cstr(renderer, p, color, text);
+    font->render(renderer, p - vec2(2.0f, 2.0f), shadow_color, text);
+    font->render(renderer, p, color, text);
 
     va_end(args);
 }
@@ -589,16 +589,15 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
         const Vec2f position = vec2(camera->width  * 0.5f - (float) w * 0.5f,
                                     camera->height * 0.5f - (float) h * 0.5f);
 
-        // font->render_cstr(renderer, Vec2f position, SDL_Color color, const char *cstr);
         // SHADOW //////////////////////////////
         SDL_Color shadow_color = FONT_SHADOW_COLOR;
         shadow_color.a         = alpha;
-        font.render_cstr(renderer, position - shadow_offset_dir(font.font, 0.05f), shadow_color, buffer);
+        font.render(renderer, position - shadow_offset_dir(font.font, 0.05f), shadow_color, buffer);
 
         // TEXT   //////////////////////////////
         SDL_Color front_color = color;
         color.a               = alpha;
-        font.render_cstr(renderer, position, front_color, buffer);
+        font.render(renderer, position, front_color, buffer);
     }
 }
 
