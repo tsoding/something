@@ -1,5 +1,5 @@
 WERROR?=-Werror
-PKGS=sdl2 SDL2_ttf
+PKGS=sdl2
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
 CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions $(shell pkg-config --cflags $(PKGS))
 CXXFLAGS_DEBUG=$(CXXFLAGS) -O0 -fno-builtin -ggdb

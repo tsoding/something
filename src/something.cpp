@@ -4,7 +4,6 @@
 #include <cerrno>
 #include <cmath>
 #include <SDL.h>
-#include <SDL_ttf.h>
 
 #ifdef SOMETHING_RELEASE
 #define STB_IMAGE_IMPLEMENTATION

@@ -31,7 +31,6 @@ char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
 Game game = {};
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
-const char *const FONT_FILE_PATH = "./assets/fonts/UbuntuMono-R.ttf";
 
 int main(void)
 {
@@ -59,7 +58,6 @@ int main(void)
     load_samples();
     load_frame_animat_files();
 
-    stec(TTF_Init());
     const float DEBUG_FONT_SIZE = 2.0f;
     const float POPUP_FONT_SIZE = 3.0f;
 
