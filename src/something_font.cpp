@@ -26,10 +26,10 @@ void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL
         for (int col = 0; (size_t) col < line.count; ++col) {
             const SDL_Rect src_rect = char_rect(line.data[col]);
             const SDL_Rect dest_rect = {
-                (int) floorf(position.x) + BITMAP_FONT_CHAR_WIDTH  * col * (int) floorf(size.x),
-                (int) floorf(position.y) + BITMAP_FONT_CHAR_HEIGHT * row * (int) floorf(size.y),
-                src_rect.w * (int) floorf(size.x),
-                src_rect.h * (int) floorf(size.y)
+                (int) floorf(position.x + BITMAP_FONT_CHAR_WIDTH  * col * size.x),
+                (int) floorf(position.y + BITMAP_FONT_CHAR_HEIGHT * row * size.y),
+                (int) floorf(src_rect.w * size.x),
+                (int) floorf(src_rect.h * size.y)
             };
             sec(SDL_RenderCopy(renderer, bitmap, &src_rect, &dest_rect));
         }
