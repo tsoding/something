@@ -34,8 +34,9 @@ void displayf(SDL_Renderer *renderer,
     char text[256];
     vsnprintf(text, sizeof(text), format, args);
 
-    font->render(renderer, p - vec2(2.0f, 2.0f), shadow_color, text);
-    font->render(renderer, p, color, text);
+    auto font_size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
+    font->render(renderer, p - vec2(2.0f, 2.0f), font_size, shadow_color, text);
+    font->render(renderer, p, font_size, color, text);
 
     va_end(args);
 }

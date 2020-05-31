@@ -15,7 +15,7 @@ SDL_Rect Bitmap_Font::char_rect(char x)
     }
 }
 
-void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, String_View sv)
+void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, String_View sv)
 {
     sec(SDL_SetTextureColorMod(bitmap, color.r, color.g, color.b));
     sec(SDL_SetTextureAlphaMod(bitmap, color.a));
@@ -36,12 +36,12 @@ void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, SDL_Color color
     }
 }
 
-void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, SDL_Color color, const char *cstr)
+void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, const char *cstr)
 {
-    render(renderer, position, color, cstr_as_string_view(cstr));
+    render(renderer, position, size, color, cstr_as_string_view(cstr));
 }
 
-Vec2f Bitmap_Font::text_size(String_View sv)
+Vec2f Bitmap_Font::text_size(Vec2f size, String_View sv)
 {
     size_t lines_count = 0;
     size_t longest_line = 0;
@@ -55,7 +55,7 @@ Vec2f Bitmap_Font::text_size(String_View sv)
                 (float) lines_count * BITMAP_FONT_CHAR_HEIGHT * size.y);
 }
 
-Vec2f Bitmap_Font::text_size(const char *cstr)
+Vec2f Bitmap_Font::text_size(Vec2f size, const char *cstr)
 {
-    return text_size(cstr_as_string_view(cstr));
+    return text_size(size, cstr_as_string_view(cstr));
 }
