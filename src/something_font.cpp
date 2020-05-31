@@ -20,20 +20,19 @@ void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, SDL_Color color
     sec(SDL_SetTextureColorMod(bitmap, color.r, color.g, color.b));
     sec(SDL_SetTextureAlphaMod(bitmap, color.a));
 
-    for (int i = 0, col = 0, row = 0; i < (int) sv.count; ++i, col++) {
-        if (sv.data[i] == '\n'){
-            col = 0;
-            row++;
-            continue;
+    for (int row = 0; sv.count > 0; ++row) {
+        auto line = sv.chop_by_delim('\n');
+
+        for (int col = 0; (size_t) col < line.count; ++col) {
+            const SDL_Rect src_rect = char_rect(line.data[col]);
+            const SDL_Rect dest_rect = {
+                (int) floorf(position.x) + BITMAP_FONT_CHAR_WIDTH  * col * (int) floorf(size.x),
+                (int) floorf(position.y) + BITMAP_FONT_CHAR_HEIGHT * row * (int) floorf(size.y),
+                src_rect.w * (int) floorf(size.x),
+                src_rect.h * (int) floorf(size.y)
+            };
+            sec(SDL_RenderCopy(renderer, bitmap, &src_rect, &dest_rect));
         }
-        const SDL_Rect src_rect = char_rect(sv.data[i]);
-        const SDL_Rect dest_rect = {
-            (int) floorf(position.x) + BITMAP_FONT_CHAR_WIDTH  * col * (int) floorf(size.x),
-            (int) floorf(position.y) + BITMAP_FONT_CHAR_HEIGHT * row * (int) floorf(size.y),
-            src_rect.w * (int) floorf(size.x),
-            src_rect.h * (int) floorf(size.y)
-        };
-        sec(SDL_RenderCopy(renderer, bitmap, &src_rect, &dest_rect));
     }
 }
 

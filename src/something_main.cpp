@@ -235,7 +235,7 @@ int main(void)
                             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
                             game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
                         } else {
-                            game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
+                            game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
                         }
                     } break;
 #endif  // SOMETHING_RELEASE
