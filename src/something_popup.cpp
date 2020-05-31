@@ -15,15 +15,16 @@ void Popup::notify(SDL_Color color, const char *format, ...)
     va_end(args);
 }
 
-Vec2f shadow_offset_dir(Bitmap_Font *font, float ratio)
+Vec2f shadow_offset_dir(float ratio)
 {
-    return vec2((float) font->size.x * ratio, (float) font->size.y * ratio);
+    return vec2((float) FONT_POPUP_SIZE * ratio, (float) FONT_POPUP_SIZE * ratio);
 }
 
 void Popup::render(SDL_Renderer *renderer, const Camera *camera)
 {
     if (buffer_size > 0 && a > 1e-6) {
-        const auto text_size = font.text_size(buffer);
+        const auto font_size = vec2(FONT_POPUP_SIZE, FONT_POPUP_SIZE);
+        const auto text_size = font.text_size(font_size, buffer);
 
         const Uint8 alpha = (Uint8) floorf(255.0f * fminf(a, 1.0f));
         const Vec2f position = vec2(camera->width  * 0.5f - (float) text_size.x * 0.5f,
@@ -32,12 +33,12 @@ void Popup::render(SDL_Renderer *renderer, const Camera *camera)
         // SHADOW //////////////////////////////
         SDL_Color shadow_color = FONT_SHADOW_COLOR;
         shadow_color.a         = alpha;
-        font.render(renderer, position - shadow_offset_dir(&font, 0.5f), shadow_color, buffer);
+        font.render(renderer, position - shadow_offset_dir(0.5f), font_size, shadow_color, buffer);
 
         // TEXT   //////////////////////////////
         SDL_Color front_color = color;
         color.a               = alpha;
-        font.render(renderer, position, front_color, buffer);
+        font.render(renderer, position, font_size, front_color, buffer);
     }
 }
 

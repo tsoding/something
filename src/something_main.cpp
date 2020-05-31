@@ -58,17 +58,11 @@ int main(void)
     load_samples();
     load_frame_animat_files();
 
-    const float DEBUG_FONT_SIZE = 2.0f;
-    const float POPUP_FONT_SIZE = 3.0f;
-
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
 
     game.popup.font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
-    game.popup.font.size = vec2(POPUP_FONT_SIZE, POPUP_FONT_SIZE);
-
     game.debug_font.bitmap = game.popup.font.bitmap;
-    game.debug_font.size = vec2(DEBUG_FONT_SIZE, DEBUG_FONT_SIZE);
 
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
@@ -235,7 +229,7 @@ int main(void)
                             println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
                             game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
                         } else {
-                            game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file `%s`", CONFIG_VARS_FILE_PATH);
+                            game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
                         }
                     } break;
 #endif  // SOMETHING_RELEASE
