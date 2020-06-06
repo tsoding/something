@@ -58,6 +58,16 @@ int main()
             println(stdout, "#define ", name, " \"", config_values[index].string_value, "\"_sv");
         } break;
 
+        case CONFIG_TYPE_SDL_BLENDFACTOR: {
+            println(stdout, "#define ", name, " ",
+                    string_view_of_sdl_blend_factor(config_values[index].SDL_BlendFactor_value));
+        } break;
+
+        case CONFIG_TYPE_SDL_BLENDOPERATION: {
+            println(stdout, "#define ", name, " ",
+                    string_view_of_sdl_blend_operation(config_values[index].SDL_BlendOperation_value));
+        } break;
+
         case CONFIG_TYPE_UNKNOWN: {
             println(stderr, "[ERROR] Variable ", config_names[index], " has an unknown type.");
             abort();
