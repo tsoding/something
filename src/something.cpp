@@ -27,6 +27,7 @@
 #include "something_error.cpp"
 #include "something_font.cpp"
 #include "something_camera.cpp"
+#include "something_texture.cpp"
 #include "something_sprite.cpp"
 #include "something_room.cpp"
 #include "something_sound.cpp"
