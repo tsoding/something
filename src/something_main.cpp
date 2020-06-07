@@ -32,6 +32,95 @@ Game game = {};
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
 
+int main0()
+{
+    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+
+    SDL_Window *window =
+        sec(SDL_CreateWindow(
+                "Something",
+                0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                SDL_WINDOW_RESIZABLE));
+
+    SDL_Renderer *renderer =
+        sec(SDL_CreateRenderer(
+                window, -1,
+                SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
+
+    load_spritesheets(renderer);
+
+#ifndef SOMETHING_RELEASE
+    {
+        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+        if (result.is_error) {
+            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+        } else {
+            println(stdout, "Reloaded config file ", CONFIG_VARS_FILE_PATH);
+        }
+    }
+#endif // SOMETHING_RELEASE
+
+    SDL_Texture * const mask =
+        spritesheet_mask_by_name("./assets/sprites/walking-12px-zoom.png"_sv);
+
+    SDL_Texture * const texture =
+        spritesheet_by_name("./assets/sprites/walking-12px-zoom.png"_sv);
+
+
+    bool quit = false;
+    while (!quit) {
+        SDL_Event event = {};
+        while (SDL_PollEvent(&event)) {
+            switch (event.type) {
+            case SDL_QUIT:
+                quit = true;
+                break;
+
+#ifndef SOMETHING_RELEASE
+            case SDL_KEYDOWN: {
+                switch (event.key.keysym.sym) {
+                case SDLK_F5: {
+                    auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+                    if (result.is_error) {
+                        println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                    } else {
+                        println(stdout, "Reloaded config file ", CONFIG_VARS_FILE_PATH);
+                    }
+                } break;
+                }
+            } break;
+#endif // SOMETHING_RELEASE
+            }
+        }
+
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                BACKGROUND_COLOR.r,
+                BACKGROUND_COLOR.g,
+                BACKGROUND_COLOR.b,
+                BACKGROUND_COLOR.a));
+        sec(SDL_RenderClear(renderer));
+
+        SDL_Rect srcrect = {};
+        sec(SDL_QueryTexture(texture, NULL, NULL, &srcrect.w, &srcrect.h));
+        const int DEBUG_SPRITE_FACTOR = 5;
+        SDL_Rect dstrect = { 0, 0, srcrect.w * DEBUG_SPRITE_FACTOR, srcrect.h * DEBUG_SPRITE_FACTOR };
+
+        sec(SDL_RenderCopy(renderer, texture, &srcrect, &dstrect));
+        sec(SDL_SetTextureColorMod(mask,
+                                   ROOM_NEIGHBOR_DIM_COLOR.r,
+                                   ROOM_NEIGHBOR_DIM_COLOR.g,
+                                   ROOM_NEIGHBOR_DIM_COLOR.b));
+        sec(SDL_SetTextureAlphaMod(mask, ROOM_NEIGHBOR_DIM_COLOR.a));
+        sec(SDL_RenderCopy(renderer, mask, &srcrect, &dstrect));
+
+        SDL_RenderPresent(renderer);
+        SDL_Delay(1);
+    }
+
+    return 0;
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));

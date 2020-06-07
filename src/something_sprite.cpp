@@ -31,9 +31,6 @@ void Sprite::render(SDL_Renderer *renderer,
     render(renderer, destrect, flip);
 }
 
-#define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
-
-
 void Frame_Animat::reset()
 {
     frame_current = 0;
@@ -155,7 +152,7 @@ void load_spritesheets(SDL_Renderer *renderer)
 
 SDL_Texture *spritesheet_mask_by_name(String_View filename)
 {
-    for (size_t i = 0; i < ARRAY_SIZE(spritesheets); ++i) {
+    for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
         if (filename == cstr_as_string_view(spritesheet_files[i])) {
             return spritesheet_masks[i];
         }
@@ -171,7 +168,7 @@ SDL_Texture *spritesheet_mask_by_name(String_View filename)
 
 SDL_Texture *spritesheet_by_name(String_View filename)
 {
-    for (size_t i = 0; i < ARRAY_SIZE(spritesheets); ++i) {
+    for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
         if (filename == cstr_as_string_view(spritesheet_files[i])) {
             return spritesheets[i];
         }
