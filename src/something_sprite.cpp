@@ -150,36 +150,30 @@ void load_spritesheets(SDL_Renderer *renderer)
     }
 }
 
-SDL_Texture *spritesheet_mask_by_name(String_View filename)
+size_t texture_index_by_name(String_View filename)
 {
     for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
         if (filename == cstr_as_string_view(spritesheet_files[i])) {
-            return spritesheet_masks[i];
+            return i;
         }
     }
 
     println(stderr,
             "[ERROR] Unknown texture file `", filename, "`. ",
+
             "You may want to add it to the `spritesheets` array.");
     abort();
+    return 0;
+}
 
-    return nullptr;
+SDL_Texture *spritesheet_mask_by_name(String_View filename)
+{
+    return spritesheet_masks[texture_index_by_name(filename)];
 }
 
 SDL_Texture *spritesheet_by_name(String_View filename)
 {
-    for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
-        if (filename == cstr_as_string_view(spritesheet_files[i])) {
-            return spritesheets[i];
-        }
-    }
-
-    println(stderr,
-            "[ERROR] Unknown texture file `", filename, "`. ",
-            "You may want to add it to the `spritesheets` array.");
-    abort();
-
-    return nullptr;
+    return spritesheets[texture_index_by_name(filename)];
 }
 
 Frame_Animat load_spritesheet_animat(SDL_Renderer *renderer,
