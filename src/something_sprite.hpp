@@ -44,5 +44,15 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
 Sprite load_png_file_as_sprite(SDL_Renderer *renderer,
                                const char *image_filename);
 
+const char *spritesheet_files[] = {
+    "./assets/sprites/Destroy1-sheet.png",
+    "./assets/sprites/fantasy_tiles.png",
+    "./assets/sprites/spark1-sheet.png",
+    "./assets/sprites/walking-12px-zoom.png"
+};
+const size_t SPRITESHEET_COUNT = sizeof(spritesheet_files) / sizeof(spritesheet_files[0]);
+
+SDL_Texture *spritesheets[SPRITESHEET_COUNT] = {};
+SDL_Texture *spritesheet_masks[SPRITESHEET_COUNT] = {};
 
 #endif  // SOMETHING_SPRITE_HPP_

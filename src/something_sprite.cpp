@@ -127,17 +127,6 @@ Sprite load_png_file_as_sprite(SDL_Renderer *renderer, const char *image_filenam
     return sprite;
 }
 
-const char *spritesheet_files[] = {
-    "./assets/sprites/Destroy1-sheet.png",
-    "./assets/sprites/fantasy_tiles.png",
-    "./assets/sprites/spark1-sheet.png",
-    "./assets/sprites/walking-12px-zoom.png"
-};
-const size_t SPRITESHEET_COUNT = sizeof(spritesheet_files) / sizeof(spritesheet_files[0]);
-
-SDL_Texture *spritesheets[SPRITESHEET_COUNT] = {};
-SDL_Texture *spritesheet_masks[SPRITESHEET_COUNT] = {};
-
 void load_spritesheets(SDL_Renderer *renderer)
 {
     for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
