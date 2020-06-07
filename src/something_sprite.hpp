@@ -43,8 +43,6 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename);
 SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
                                         const char *image_filepath,
                                         SDL_Color color_key);
-SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
-                                        const char *image_filename);
 
 const char *spritesheet_files[] = {
     "./assets/sprites/Destroy1-sheet.png",

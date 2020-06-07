@@ -121,20 +121,6 @@ SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
-SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
-                                        const char *image_filename)
-{
-    SDL_Surface *image_surface =
-        load_png_file_as_surface(image_filename);
-
-    SDL_Texture *image_texture =
-        sec(SDL_CreateTextureFromSurface(renderer,
-                                         image_surface));
-    SDL_FreeSurface(image_surface);
-
-    return image_texture;
-}
-
 void load_spritesheets(SDL_Renderer *renderer)
 {
     for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
@@ -175,16 +161,6 @@ size_t texture_index_by_name(String_View filename)
             "You may want to add it to the `spritesheets` array.");
     abort();
     return 0;
-}
-
-SDL_Texture *spritesheet_mask_by_name(String_View filename)
-{
-    return spritesheet_masks[texture_index_by_name(filename)];
-}
-
-SDL_Texture *spritesheet_by_name(String_View filename)
-{
-    return spritesheets[texture_index_by_name(filename)];
 }
 
 void dump_animat(Frame_Animat animat, const char *sprite_filename, FILE *output)
