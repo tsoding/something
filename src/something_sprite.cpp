@@ -1,42 +1,37 @@
-struct Sprite
+#include "./something_sprite.hpp"
+
+void Sprite::render(SDL_Renderer *renderer,
+                    Rectf destrect,
+                    SDL_RendererFlip flip) const
 {
-    SDL_Rect srcrect;
-    SDL_Texture *texture;
-
-    void render(SDL_Renderer *renderer,
-                Rectf destrect,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
-    {
-        if (texture) {
-            SDL_Rect rect = rectf_for_sdl(destrect);
-            sec(SDL_RenderCopyEx(
-                    renderer,
-                    texture,
-                    &srcrect,
-                    &rect,
-                    0.0,
-                    nullptr,
-                    flip));
-        }
+    if (texture) {
+        SDL_Rect rect = rectf_for_sdl(destrect);
+        sec(SDL_RenderCopyEx(
+                renderer,
+                texture,
+                &srcrect,
+                &rect,
+                0.0,
+                nullptr,
+                flip));
     }
+}
 
-    void render(SDL_Renderer *renderer,
-                Vec2f pos,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
-    {
-        const Rectf destrect = {
-            pos.x - (float) srcrect.w * 0.5f,
-            pos.y - (float) srcrect.h * 0.5f,
-            (float) srcrect.w,
-            (float) srcrect.h
-        };
+void Sprite::render(SDL_Renderer *renderer,
+                    Vec2f pos,
+                    SDL_RendererFlip flip) const
+{
+    const Rectf destrect = {
+        pos.x - (float) srcrect.w * 0.5f,
+        pos.y - (float) srcrect.h * 0.5f,
+        (float) srcrect.w,
+        (float) srcrect.h
+    };
 
-        render(renderer, destrect, flip);
-    }
-};
+    render(renderer, destrect, flip);
+}
 
 #define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
-
 
 struct Frame_Animat
 {
