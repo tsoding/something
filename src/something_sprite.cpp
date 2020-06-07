@@ -33,48 +33,39 @@ void Sprite::render(SDL_Renderer *renderer,
 
 #define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
 
-struct Frame_Animat
+
+void Frame_Animat::reset()
 {
-    Sprite *frames;
-    size_t  frame_count;
-    size_t  frame_current;
-    float frame_duration;
-    float frame_cooldown;
+    frame_current = 0;
+}
 
-    void reset()
-    {
-        frame_current = 0;
+void Frame_Animat::render(SDL_Renderer *renderer,
+                          Rectf dstrect,
+                          SDL_RendererFlip flip) const
+{
+    if (frame_count > 0) {
+        frames[frame_current % frame_count].render(renderer, dstrect, flip);
     }
+}
 
-    void render(SDL_Renderer *renderer,
-                Rectf dstrect,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
-    {
-        if (frame_count > 0) {
-            frames[frame_current % frame_count].render(renderer, dstrect, flip);
-        }
+void Frame_Animat::render(SDL_Renderer *renderer,
+                          Vec2f pos,
+                          SDL_RendererFlip flip) const
+{
+    if (frame_count > 0) {
+        frames[frame_current % frame_count].render(renderer, pos, flip);
     }
+}
 
-    void render(SDL_Renderer *renderer,
-                Vec2f pos,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
-    {
-        if (frame_count > 0) {
-            frames[frame_current % frame_count].render(renderer, pos, flip);
-        }
+void Frame_Animat::update(float dt)
+{
+    if (dt < frame_cooldown) {
+        frame_cooldown -= dt;
+    } else if (frame_count > 0) {
+        frame_current = (frame_current + 1) % frame_count;
+        frame_cooldown = frame_duration;
     }
-
-    void update(float dt)
-    {
-        if (dt < frame_cooldown) {
-            frame_cooldown -= dt;
-        } else if (frame_count > 0) {
-            frame_current = (frame_current + 1) % frame_count;
-            frame_cooldown = frame_duration;
-        }
-    }
-};
-
+}
 
 SDL_Surface *load_png_file_as_surface(const char *image_filename)
 {
