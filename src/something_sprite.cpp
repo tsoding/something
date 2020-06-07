@@ -127,12 +127,6 @@ Sprite load_png_file_as_sprite(SDL_Renderer *renderer, const char *image_filenam
     return sprite;
 }
 
-struct Spritesheet
-{
-    const char *filename;
-    SDL_Texture *texture;
-};
-
 const char *spritesheet_files[] = {
     "./assets/sprites/Destroy1-sheet.png",
     "./assets/sprites/fantasy_tiles.png",
