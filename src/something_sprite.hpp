@@ -4,14 +4,16 @@
 struct Sprite
 {
     SDL_Rect srcrect;
-    SDL_Texture *texture;
+    size_t texture_index;
 
     void render(SDL_Renderer *renderer,
                 Rectf destrect,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+                SDL_RendererFlip flip = SDL_FLIP_NONE,
+                SDL_Color shade = {0, 0, 0, 0}) const;
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+                SDL_RendererFlip flip = SDL_FLIP_NONE,
+                SDL_Color shade = {0, 0, 0, 0}) const;
 };
 
 struct Frame_Animat
@@ -26,11 +28,13 @@ struct Frame_Animat
 
     void render(SDL_Renderer *renderer,
                 Rectf dstrect,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+                SDL_RendererFlip flip = SDL_FLIP_NONE,
+                SDL_Color shade = {0, 0, 0, 0}) const;
 
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const;
+                SDL_RendererFlip flip = SDL_FLIP_NONE,
+                SDL_Color shade = {0, 0, 0, 0}) const;
 
     void update(float dt);
 };
@@ -41,8 +45,6 @@ SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
                                         SDL_Color color_key);
 SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
                                         const char *image_filename);
-Sprite load_png_file_as_sprite(SDL_Renderer *renderer,
-                               const char *image_filename);
 
 const char *spritesheet_files[] = {
     "./assets/sprites/Destroy1-sheet.png",

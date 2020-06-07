@@ -30,7 +30,7 @@ void Entity::kill()
     }
 }
 
-void Entity::render(SDL_Renderer *renderer, Camera camera) const
+void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) const
 {
     const SDL_RendererFlip flip =
         gun_dir.x > 0.0f ?
@@ -102,11 +102,11 @@ void Entity::render(SDL_Renderer *renderer, Camera camera) const
         // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
-            idle.render(renderer, camera.to_screen(texbox), flip);
+            idle.render(renderer, camera.to_screen(texbox), flip, shade);
         } break;
 
         case Alive_State::Walking: {
-            walking.render(renderer, camera.to_screen(texbox), flip);
+            walking.render(renderer, camera.to_screen(texbox), flip, shade);
         } break;
         }
 

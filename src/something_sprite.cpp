@@ -2,13 +2,29 @@
 
 void Sprite::render(SDL_Renderer *renderer,
                     Rectf destrect,
-                    SDL_RendererFlip flip) const
+                    SDL_RendererFlip flip,
+                    SDL_Color shade) const
 {
-    if (texture) {
+    if (texture_index < SPRITESHEET_COUNT) {
         SDL_Rect rect = rectf_for_sdl(destrect);
+
         sec(SDL_RenderCopyEx(
                 renderer,
-                texture,
+                spritesheets[texture_index],
+                &srcrect,
+                &rect,
+                0.0,
+                nullptr,
+                flip));
+
+        sec(SDL_SetTextureColorMod(
+                spritesheet_masks[texture_index],
+                shade.r, shade.g, shade.b));
+        sec(SDL_SetTextureAlphaMod(spritesheet_masks[texture_index], shade.a));
+
+        sec(SDL_RenderCopyEx(
+                renderer,
+                spritesheet_masks[texture_index],
                 &srcrect,
                 &rect,
                 0.0,
@@ -19,7 +35,8 @@ void Sprite::render(SDL_Renderer *renderer,
 
 void Sprite::render(SDL_Renderer *renderer,
                     Vec2f pos,
-                    SDL_RendererFlip flip) const
+                    SDL_RendererFlip flip,
+                    SDL_Color shade) const
 {
     const Rectf destrect = {
         pos.x - (float) srcrect.w * 0.5f,
@@ -28,7 +45,7 @@ void Sprite::render(SDL_Renderer *renderer,
         (float) srcrect.h
     };
 
-    render(renderer, destrect, flip);
+    render(renderer, destrect, flip, shade);
 }
 
 void Frame_Animat::reset()
@@ -38,19 +55,21 @@ void Frame_Animat::reset()
 
 void Frame_Animat::render(SDL_Renderer *renderer,
                           Rectf dstrect,
-                          SDL_RendererFlip flip) const
+                          SDL_RendererFlip flip,
+                          SDL_Color shade) const
 {
     if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, dstrect, flip);
+        frames[frame_current % frame_count].render(renderer, dstrect, flip, shade);
     }
 }
 
 void Frame_Animat::render(SDL_Renderer *renderer,
                           Vec2f pos,
-                          SDL_RendererFlip flip) const
+                          SDL_RendererFlip flip,
+                          SDL_Color shade) const
 {
     if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, pos, flip);
+        frames[frame_current % frame_count].render(renderer, pos, flip, shade);
     }
 }
 
@@ -116,14 +135,6 @@ SDL_Texture *load_texture_from_png_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
-Sprite load_png_file_as_sprite(SDL_Renderer *renderer, const char *image_filename)
-{
-    Sprite sprite = {};
-    sprite.texture = load_texture_from_png_file(renderer, image_filename);
-    sec(SDL_QueryTexture(sprite.texture, NULL, NULL, &sprite.srcrect.w, &sprite.srcrect.h));
-    return sprite;
-}
-
 void load_spritesheets(SDL_Renderer *renderer)
 {
     for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
@@ -174,31 +185,6 @@ SDL_Texture *spritesheet_mask_by_name(String_View filename)
 SDL_Texture *spritesheet_by_name(String_View filename)
 {
     return spritesheets[texture_index_by_name(filename)];
-}
-
-Frame_Animat load_spritesheet_animat(SDL_Renderer *renderer,
-                                     size_t frame_count,
-                                     float frame_duration,
-                                     const char *spritesheet_filepath)
-{
-    Frame_Animat result = {};
-    result.frames = new Sprite[frame_count];
-    result.frame_count = frame_count;
-    result.frame_duration = frame_duration;
-
-    SDL_Texture *spritesheet = load_texture_from_png_file(renderer, spritesheet_filepath);
-    int spritesheet_w = 0;
-    int spritesheet_h = 0;
-    sec(SDL_QueryTexture(spritesheet, NULL, NULL, &spritesheet_w, &spritesheet_h));
-    int sprite_w = spritesheet_w / (int) frame_count;
-    int sprite_h = spritesheet_h; // NOTE: we only handle horizontal sprites
-
-    for (int i = 0; i < (int) frame_count; ++i) {
-        result.frames[i].texture = spritesheet;
-        result.frames[i].srcrect = {i * sprite_w, 0, sprite_w, sprite_h};
-    }
-
-    return result;
 }
 
 void dump_animat(Frame_Animat animat, const char *sprite_filename, FILE *output)
@@ -363,7 +349,7 @@ Frame_Animat load_animat_file(const char *animat_filepath)
     String_View source = file_as_string_view(animat_filepath);
     String_View input = source;
     Frame_Animat animat = {};
-    SDL_Texture *spritesheet_texture = nullptr;
+    Maybe<size_t> spritesheet_texture = {};
 
     while (input.count != 0) {
         auto value = input.chop_by_delim('\n');
@@ -388,12 +374,7 @@ Frame_Animat load_animat_file(const char *animat_filepath)
             animat.frame_count = (size_t) count_result.unwrap;
             animat.frames = new Sprite[animat.frame_count];
         } else if (subkey == "sprite"_sv) {
-            spritesheet_texture = spritesheet_by_name(value);
-            if (spritesheet_texture == nullptr) {
-                println(stderr, "Spritesheet `", value, "` is not loaded. ",
-                        "Did you forget to run `load_spritesheets()`?");
-                abort();
-            }
+            spritesheet_texture = {true, texture_index_by_name(value)};
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<int>();
             if (!result.has_value) {
@@ -415,7 +396,12 @@ Frame_Animat load_animat_file(const char *animat_filepath)
                                   "frame index is bigger than the `count`");
             }
 
-            animat.frames[frame_index].texture = spritesheet_texture;
+            if (!spritesheet_texture.has_value) {
+                abort_parse_error(stderr, source, input, animat_filepath,
+                                  "spritesheet was not loaded");
+            }
+
+            animat.frames[frame_index].texture_index = spritesheet_texture.unwrap;
 
             while (key.count) {
                 subkey = key.chop_by_delim('.').trim();

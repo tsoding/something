@@ -157,7 +157,12 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].render(renderer, camera);
+        // TODO: display health bar differently for enemies in a different room
+        if (index.unwrap != room_index_at(entities[i].pos).unwrap) {
+            entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
+        } else {
+            entities[i].render(renderer, camera);
+        }
     }
 
     render_projectiles(renderer, camera);
