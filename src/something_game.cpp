@@ -408,15 +408,15 @@ void Game::render_projectiles(SDL_Renderer *renderer, Camera camera)
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
-            render_animat(renderer,
-                          projectiles[i].active_animat,
-                          camera.to_screen(projectiles[i].pos));
+            projectiles[i].active_animat.render(
+                renderer,
+                camera.to_screen(projectiles[i].pos));
         } break;
 
         case Projectile_State::Poof: {
-            render_animat(renderer,
-                          projectiles[i].poof_animat,
-                          camera.to_screen(projectiles[i].pos));
+            projectiles[i].poof_animat.render(
+                renderer,
+                camera.to_screen(projectiles[i].pos));
         } break;
 
         case Projectile_State::Ded: {} break;
@@ -429,7 +429,7 @@ void Game::update_projectiles(float dt)
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
-            update_animat(&projectiles[i].active_animat, dt);
+            projectiles[i].active_animat.update(dt);
             projectiles[i].pos += projectiles[i].vel * dt;
 
             auto tile = room_row[room_index_at(projectiles[i].pos).unwrap].tile_at(projectiles[i].pos);
@@ -450,7 +450,7 @@ void Game::update_projectiles(float dt)
         } break;
 
         case Projectile_State::Poof: {
-            update_animat(&projectiles[i].poof_animat, dt);
+            projectiles[i].poof_animat.update(dt);
             if (projectiles[i].poof_animat.frame_current ==
                 (projectiles[i].poof_animat.frame_count - 1)) {
                 projectiles[i].state = Projectile_State::Ded;
