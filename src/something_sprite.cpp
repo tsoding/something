@@ -2,42 +2,41 @@ struct Sprite
 {
     SDL_Rect srcrect;
     SDL_Texture *texture;
+
+    void render(SDL_Renderer *renderer,
+                Rectf destrect,
+                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    {
+        if (texture) {
+            SDL_Rect rect = rectf_for_sdl(destrect);
+            sec(SDL_RenderCopyEx(
+                    renderer,
+                    texture,
+                    &srcrect,
+                    &rect,
+                    0.0,
+                    nullptr,
+                    flip));
+        }
+    }
+
+    void render(SDL_Renderer *renderer,
+                Vec2f pos,
+                SDL_RendererFlip flip = SDL_FLIP_NONE) const
+    {
+        const Rectf destrect = {
+            pos.x - (float) srcrect.w * 0.5f,
+            pos.y - (float) srcrect.h * 0.5f,
+            (float) srcrect.w,
+            (float) srcrect.h
+        };
+
+        render(renderer, destrect, flip);
+    }
 };
 
 #define ARRAY_SIZE(xs) (sizeof(xs) / sizeof(xs[0]))
 
-void render_sprite(SDL_Renderer *renderer,
-                   Sprite sprite,
-                   Rectf destrect,
-                   SDL_RendererFlip flip = SDL_FLIP_NONE)
-{
-    if (sprite.texture) {
-        SDL_Rect rect = rectf_for_sdl(destrect);
-        sec(SDL_RenderCopyEx(
-                renderer,
-                sprite.texture,
-                &sprite.srcrect,
-                &rect,
-                0.0,
-                nullptr,
-                flip));
-    }
-}
-
-void render_sprite(SDL_Renderer *renderer,
-                   Sprite texture,
-                   Vec2f pos,
-                   SDL_RendererFlip flip = SDL_FLIP_NONE)
-{
-    const Rectf destrect = {
-        pos.x - (float) texture.srcrect.w * 0.5f,
-        pos.y - (float) texture.srcrect.h * 0.5f,
-        (float) texture.srcrect.w,
-        (float) texture.srcrect.h
-    };
-
-    render_sprite(renderer, texture, destrect, flip);
-}
 
 struct Frame_Animat
 {
@@ -57,11 +56,7 @@ struct Frame_Animat
                 SDL_RendererFlip flip = SDL_FLIP_NONE) const
     {
         if (frame_count > 0) {
-            render_sprite(
-                renderer,
-                frames[frame_current % frame_count],
-                dstrect,
-                flip);
+            frames[frame_current % frame_count].render(renderer, dstrect, flip);
         }
     }
 
@@ -70,11 +65,7 @@ struct Frame_Animat
                 SDL_RendererFlip flip = SDL_FLIP_NONE) const
     {
         if (frame_count > 0) {
-            render_sprite(
-                renderer,
-                frames[frame_current % frame_count],
-                pos,
-                flip);
+            frames[frame_current % frame_count].render(renderer, pos, flip);
         }
     }
 
@@ -374,7 +365,7 @@ struct Squash_Animat
         const float w = texbox.w + texbox.w * a;
         const float h = texbox.h * (1.0f - a);
         Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
-        render_sprite(renderer, sprite, dstrect, flip);
+        sprite.render(renderer, dstrect, flip);
     }
 
     void update(float dt)
