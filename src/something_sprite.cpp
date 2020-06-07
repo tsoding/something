@@ -5,12 +5,12 @@ void Sprite::render(SDL_Renderer *renderer,
                     SDL_RendererFlip flip,
                     SDL_Color shade) const
 {
-    if (texture_index < SPRITESHEET_COUNT) {
+    if (texture_index < TEXTURE_COUNT) {
         SDL_Rect rect = rectf_for_sdl(destrect);
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                spritesheets[texture_index],
+                textures[texture_index],
                 &srcrect,
                 &rect,
                 0.0,
@@ -18,13 +18,13 @@ void Sprite::render(SDL_Renderer *renderer,
                 flip));
 
         sec(SDL_SetTextureColorMod(
-                spritesheet_masks[texture_index],
+                texture_masks[texture_index],
                 shade.r, shade.g, shade.b));
-        sec(SDL_SetTextureAlphaMod(spritesheet_masks[texture_index], shade.a));
+        sec(SDL_SetTextureAlphaMod(texture_masks[texture_index], shade.a));
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                spritesheet_masks[texture_index],
+                texture_masks[texture_index],
                 &srcrect,
                 &rect,
                 0.0,
@@ -121,13 +121,13 @@ SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
     return image_texture;
 }
 
-void load_spritesheets(SDL_Renderer *renderer)
+void load_textures(SDL_Renderer *renderer)
 {
-    for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
-        if (spritesheets[i] == nullptr) {
-            SDL_Surface *image_surface = load_png_file_as_surface(spritesheet_files[i]);
+    for (size_t i = 0; i < TEXTURE_COUNT; ++i) {
+        if (textures[i] == nullptr) {
+            SDL_Surface *image_surface = load_png_file_as_surface(texture_files[i]);
 
-            spritesheets[i] = sec(SDL_CreateTextureFromSurface(renderer,
+            textures[i] = sec(SDL_CreateTextureFromSurface(renderer,
                                                                image_surface));
             sec(SDL_LockSurface(image_surface));
             assert(image_surface->format->format == SDL_PIXELFORMAT_RGBA32);
@@ -139,7 +139,7 @@ void load_spritesheets(SDL_Renderer *renderer)
             }
             SDL_UnlockSurface(image_surface);
 
-            spritesheet_masks[i] =
+            texture_masks[i] =
                 sec(SDL_CreateTextureFromSurface(renderer, image_surface));
 
             SDL_FreeSurface(image_surface);
@@ -149,16 +149,15 @@ void load_spritesheets(SDL_Renderer *renderer)
 
 size_t texture_index_by_name(String_View filename)
 {
-    for (size_t i = 0; i < SPRITESHEET_COUNT; ++i) {
-        if (filename == cstr_as_string_view(spritesheet_files[i])) {
+    for (size_t i = 0; i < TEXTURE_COUNT; ++i) {
+        if (filename == cstr_as_string_view(texture_files[i])) {
             return i;
         }
     }
 
     println(stderr,
             "[ERROR] Unknown texture file `", filename, "`. ",
-
-            "You may want to add it to the `spritesheets` array.");
+            "You may want to add it to the `textures` array.");
     abort();
     return 0;
 }

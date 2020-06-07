@@ -52,7 +52,7 @@ int main(void)
 
     // TODO(#9): baking assets into executable
 
-    load_spritesheets(renderer);
+    load_textures(renderer);
     load_samples();
     load_frame_animat_files();
 
