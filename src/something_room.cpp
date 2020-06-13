@@ -58,9 +58,9 @@ void Room::render(SDL_Renderer *renderer,
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE + position()),
                 TILE_SIZE, TILE_SIZE);
             if (is_tile_empty(vec2(x, y - 1))) {
-                render_sprite(renderer, tile_defs[tiles[y][x]].top_texture, dstrect);
+                tile_defs[tiles[y][x]].top_texture.render(renderer, dstrect);
             } else {
-                render_sprite(renderer, tile_defs[tiles[y][x]].bottom_texture, dstrect);
+                tile_defs[tiles[y][x]].bottom_texture.render(renderer, dstrect);
             }
 
             if (tile_defs[tiles[y][x]].is_collidable) {

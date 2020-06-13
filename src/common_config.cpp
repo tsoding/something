@@ -5,6 +5,8 @@ enum Config_Type
     CONFIG_TYPE_FLOAT,
     CONFIG_TYPE_COLOR,
     CONFIG_TYPE_STRING,
+    CONFIG_TYPE_SDL_BLENDFACTOR,
+    CONFIG_TYPE_SDL_BLENDOPERATION,
 };
 
 #include "./config_types.hpp"
@@ -15,6 +17,8 @@ Config_Type config_type_by_name(String_View type_name)
     if (type_name == "int"_sv) return CONFIG_TYPE_INT;
     if (type_name == "color"_sv) return CONFIG_TYPE_COLOR;
     if (type_name == "string"_sv) return CONFIG_TYPE_STRING;
+    if (type_name == "SDL_BlendFactor"_sv) return CONFIG_TYPE_SDL_BLENDFACTOR;
+    if (type_name == "SDL_BlendOperation"_sv) return CONFIG_TYPE_SDL_BLENDOPERATION;
     return CONFIG_TYPE_UNKNOWN;
 }
 
@@ -26,6 +30,8 @@ String_View config_name_by_type(Config_Type type)
     case CONFIG_TYPE_FLOAT: return "float"_sv;
     case CONFIG_TYPE_COLOR: return "color"_sv;
     case CONFIG_TYPE_STRING: return "string"_sv;
+    case CONFIG_TYPE_SDL_BLENDFACTOR: return "SDL_BlendFactor"_sv;
+    case CONFIG_TYPE_SDL_BLENDOPERATION: return "SDL_BlendOperation"_sv;
     }
 
     return "<unknown>"_sv;
@@ -37,6 +43,8 @@ union Config_Value
     int int_value;
     SDL_Color color_value;
     String_View string_value;
+    SDL_BlendFactor SDL_BlendFactor_value;
+    SDL_BlendOperation SDL_BlendOperation_value;
 };
 
 Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
@@ -96,6 +104,122 @@ Maybe<String_View> string_view_of_string_literal(String_View input)
     input.chop_back(1);
 
     return {true, input};
+}
+
+String_View string_view_of_sdl_blend_factor(SDL_BlendFactor factor)
+{
+    switch (factor) {
+    case SDL_BLENDFACTOR_ZERO:
+        return "SDL_BLENDFACTOR_ZERO"_sv;
+    case SDL_BLENDFACTOR_ONE:
+        return "SDL_BLENDFACTOR_ONE"_sv;
+    case SDL_BLENDFACTOR_SRC_COLOR:
+        return "SDL_BLENDFACTOR_SRC_COLOR"_sv;
+    case SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR:
+        return "SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR"_sv;
+    case SDL_BLENDFACTOR_SRC_ALPHA:
+        return "SDL_BLENDFACTOR_SRC_ALPHA"_sv;
+    case SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA:
+        return "SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA"_sv;
+    case SDL_BLENDFACTOR_DST_COLOR:
+        return "SDL_BLENDFACTOR_DST_COLOR"_sv;
+    case SDL_BLENDFACTOR_ONE_MINUS_DST_COLOR:
+        return "SDL_BLENDFACTOR_ONE_MINUS_DST_COLOR"_sv;
+    case SDL_BLENDFACTOR_DST_ALPHA:
+        return "SDL_BLENDFACTOR_DST_ALPHA"_sv;
+    case SDL_BLENDFACTOR_ONE_MINUS_DST_ALPHA:
+        return "SDL_BLENDFACTOR_ONE_MINUS_DST_ALPHA"_sv;
+    default:
+        return ""_sv;
+    }
+}
+
+Maybe<SDL_BlendFactor> sdl_blend_factor_of_string_view(String_View input)
+{
+    if (input == "SDL_BLENDFACTOR_ZERO"_sv) {
+        return {true, SDL_BLENDFACTOR_ZERO};
+    }
+
+    if (input == "SDL_BLENDFACTOR_ONE"_sv) {
+        return {true, SDL_BLENDFACTOR_ONE};
+    }
+
+    if (input == "SDL_BLENDFACTOR_SRC_COLOR"_sv) {
+        return {true, SDL_BLENDFACTOR_SRC_COLOR};
+    }
+
+    if (input == "SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR"_sv) {
+        return {true, SDL_BLENDFACTOR_ONE_MINUS_SRC_COLOR};
+    }
+
+    if (input == "SDL_BLENDFACTOR_SRC_ALPHA"_sv) {
+        return {true, SDL_BLENDFACTOR_SRC_ALPHA};
+    }
+
+    if (input == "SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA"_sv) {
+        return {true, SDL_BLENDFACTOR_ONE_MINUS_SRC_ALPHA};
+    }
+
+    if (input == "SDL_BLENDFACTOR_DST_COLOR"_sv) {
+        return {true, SDL_BLENDFACTOR_DST_COLOR};
+    }
+
+    if (input == "SDL_BLENDFACTOR_ONE_MINUS_DST_COLOR"_sv) {
+        return {true, SDL_BLENDFACTOR_ONE_MINUS_DST_COLOR};
+    }
+
+    if (input == "SDL_BLENDFACTOR_DST_ALPHA"_sv) {
+        return {true, SDL_BLENDFACTOR_DST_ALPHA};
+    }
+
+    if (input == "SDL_BLENDFACTOR_ONE_MINUS_DST_ALPHA"_sv) {
+        return {true, SDL_BLENDFACTOR_ONE_MINUS_DST_ALPHA};
+    }
+
+    return {};
+}
+
+Maybe<SDL_BlendOperation> sdl_blend_operation_of_string_view(String_View input)
+{
+    if (input == "SDL_BLENDOPERATION_ADD"_sv) {
+        return {true, SDL_BLENDOPERATION_ADD};
+    }
+
+    if (input == "SDL_BLENDOPERATION_SUBTRACT"_sv) {
+        return {true, SDL_BLENDOPERATION_SUBTRACT};
+    }
+
+    if (input == "SDL_BLENDOPERATION_REV_SUBTRACT"_sv) {
+        return {true, SDL_BLENDOPERATION_REV_SUBTRACT};
+    }
+
+    if (input == "SDL_BLENDOPERATION_MINIMUM"_sv) {
+        return {true, SDL_BLENDOPERATION_MINIMUM};
+    }
+
+    if (input == "SDL_BLENDOPERATION_MAXIMUM"_sv) {
+        return {true, SDL_BLENDOPERATION_MAXIMUM};
+    }
+
+    return {};
+}
+
+String_View string_view_of_sdl_blend_operation(SDL_BlendOperation blend_operation)
+{
+    switch (blend_operation) {
+    case SDL_BLENDOPERATION_ADD:
+        return "SDL_BLENDOPERATION_ADD"_sv;
+    case SDL_BLENDOPERATION_SUBTRACT:
+        return "SDL_BLENDOPERATION_SUBTRACT"_sv;
+    case SDL_BLENDOPERATION_REV_SUBTRACT:
+        return "SDL_BLENDOPERATION_REV_SUBTRACT"_sv;
+    case SDL_BLENDOPERATION_MINIMUM:
+        return "SDL_BLENDOPERATION_MINIMUM"_sv;
+    case SDL_BLENDOPERATION_MAXIMUM:
+        return "SDL_BLENDOPERATION_MAXIMUM"_sv;
+    default:
+        return ""_sv;
+    }
 }
 
 Config_Parse_Result parse_config_text(String_View input)
@@ -180,6 +304,30 @@ Config_Parse_Result parse_config_text(String_View input)
                 return parse_failure(config_error_buffer, line_number);
             }
             config_values[index].string_value = x.unwrap;
+        } break;
+
+        case CONFIG_TYPE_SDL_BLENDFACTOR: {
+            auto x = sdl_blend_factor_of_string_view(value);
+            if (!x.has_value) {
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not an SDL_BlendFactor (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
+            }
+            config_values[index].SDL_BlendFactor_value = x.unwrap;
+        } break;
+
+        case CONFIG_TYPE_SDL_BLENDOPERATION: {
+            auto x = sdl_blend_operation_of_string_view(value);
+            if (!x.has_value) {
+                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                         "`%.*s` is not an SDL_BlendOperation (variable `%.*s`)",
+                         (int) value.count, value.data,
+                         (int) name.count, name.data);
+                return parse_failure(config_error_buffer, line_number);
+            }
+            config_values[index].SDL_BlendOperation_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_UNKNOWN: {

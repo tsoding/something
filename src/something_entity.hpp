@@ -69,7 +69,8 @@ struct Entity
         return hitbox;
     }
 
-    void render(SDL_Renderer *renderer, Camera camera) const;
+    void render(SDL_Renderer *renderer, Camera camera,
+                SDL_Color shade = {0, 0, 0, 0}) const;
     void update(float dt);
     void point_gun_at(Vec2f target);
     void jump(Sample_Mixer *mixer);
