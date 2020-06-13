@@ -323,7 +323,7 @@ int main(void)
                         if (!game.tracking_projectile.has_value) {
                             game.spawn_health_at_mouse();
 
-                            // TODO: switch between editing modes
+                            // TODO(#109): switch between editing modes
                             //   - Modify tiles
                             //   - Adding items
                             //   - ...
