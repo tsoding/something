@@ -79,6 +79,11 @@ void Game::update(float dt)
     // Update All Projectiles //////////////////////////////
     update_projectiles(dt);
 
+    // Update Items //////////////////////////////
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        items[i].update(dt);
+    }
+
     // Entities/Projectiles interaction //////////////////////////////
     for (size_t index = 0; index < PROJECTILES_COUNT; ++index) {
         auto projectile = projectiles + index;
@@ -167,6 +172,10 @@ void Game::render(SDL_Renderer *renderer)
 
     render_projectiles(renderer, camera);
 
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        items[i].render(renderer, camera);
+    }
+
     popup.render(renderer, &camera);
 }
 
@@ -204,6 +213,14 @@ void Game::reset_entities()
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entities[ENEMY_ENTITY_INDEX_OFFSET + i] = enemy_entity(room_row[i + 1].center());
     }
+
+    memset(items, 0, sizeof(items));
+    static_assert(ITEMS_COUNT > 1);
+    static_assert(ROOM_ROW_COUNT > 1);
+    items[0].pos = room_row[0].center();
+    items[0].type = ITEM_HEALTH;
+    items[0].sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
+    items[0].sprite.srcrect = {0, 0, 64, 64};
 }
 
 void Game::entity_resolve_collision(Entity_Index entity_index)

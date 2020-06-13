@@ -43,6 +43,7 @@ const size_t PLAYER_ENTITY_INDEX = 0;
 
 const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
+const size_t ITEMS_COUNT = 69;
 const size_t ROOM_ROW_COUNT = 8;
 
 struct Game
@@ -72,6 +73,7 @@ struct Game
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
     Room room_row[ROOM_ROW_COUNT];
+    Item items[ITEMS_COUNT];
 
     // Whole Game State
     void update(float dt);
