@@ -123,7 +123,7 @@ void Game::update(float dt)
                 if (entity->state == Entity_State::Alive) {
                     // TODO: item should have a hitbox
                     if (rect_contains_vec2(entity->hitbox_world(), item->pos)) {
-                        entity->lives += ITEM_HEALTH_POINTS;
+                        entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
                         item->type = ITEM_NONE;
                         break;
                     }
