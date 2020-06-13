@@ -122,8 +122,9 @@ void Game::update(float dt)
 
                 if (entity->state == Entity_State::Alive) {
                     // TODO(#108): item should have a hitbox
-                    if (rect_contains_vec2(entity->hitbox_world(), item->pos)) {
+                    if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
                         entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
+                        mixer.play_sample(item->sound);
                         item->type = ITEM_NONE;
                         break;
                     }
@@ -428,6 +429,10 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         auto rect = rectf_for_sdl(camera.to_screen(tile_rect));
         sec(SDL_RenderDrawRect(renderer, &rect));
     }
+
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        items[i].render_debug(renderer, camera);
+    }
 }
 
 int Game::count_alive_projectiles(void)
@@ -598,10 +603,7 @@ void Game::spawn_health_at_mouse()
 {
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type == ITEM_NONE) {
-            items[i].pos = debug_mouse_position;
-            items[i].type = ITEM_HEALTH;
-            items[i].sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
-            items[i].sprite.srcrect = {0, 0, 64, 64};
+            items[i] = make_health_item(debug_mouse_position);
             break;
         }
     }
