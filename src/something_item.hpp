@@ -13,9 +13,15 @@ struct Item
     Sprite sprite;
     Vec2f pos;
     float a;
+    Rectf hitbox_local;
+    Sample_S16 sound;
 
     void update(float delta_time);
-    void render(SDL_Renderer *renderer, Camera camera);
+    void render(SDL_Renderer *renderer, Camera camera) const;
+    void render_debug(SDL_Renderer *renderer, Camera camera) const;
+    Rectf hitbox_world() const;
 };
+
+Item make_health_item(Vec2f pos);
 
 #endif  // SOMETHING_ITEM_HPP_

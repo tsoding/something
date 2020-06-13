@@ -153,3 +153,19 @@ template <typename T> T sgn(T val) {
 
     return 0;
 }
+
+template <typename T>
+bool rects_overlap(Rect<T> a, Rect<T> b)
+{
+    const T a_x1 = a.x;
+    const T a_y1 = a.y;
+    const T a_x2 = a.x + a.w;
+    const T a_y2 = a.y + a.h;
+
+    const T b_x1 = b.x;
+    const T b_y1 = b.y;
+    const T b_x2 = b.x + b.w;
+    const T b_y2 = b.y + b.h;
+
+    return !((a_x2 < b_x1) || (a_y2 < b_y1) || (b_x2 < a_x1) || (b_y2 < a_y1));
+}
