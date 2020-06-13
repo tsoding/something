@@ -235,14 +235,6 @@ void Game::reset_entities()
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entities[ENEMY_ENTITY_INDEX_OFFSET + i] = enemy_entity(room_row[i + 1].center());
     }
-
-    memset(items, 0, sizeof(items));
-    static_assert(ITEMS_COUNT > 1);
-    static_assert(ROOM_ROW_COUNT > 1);
-    items[0].pos = room_row[0].center();
-    items[0].type = ITEM_HEALTH;
-    items[0].sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
-    items[0].sprite.srcrect = {0, 0, 64, 64};
 }
 
 void Game::entity_resolve_collision(Entity_Index entity_index)
@@ -600,4 +592,17 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
         (int) MINIMAP_ENTITY_SIZE
     };
     sec(SDL_RenderFillRect(renderer, &rect));
+}
+
+void Game::spawn_health_at_mouse()
+{
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        if (items[i].type == ITEM_NONE) {
+            items[i].pos = debug_mouse_position;
+            items[i].type = ITEM_HEALTH;
+            items[i].sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
+            items[i].sprite.srcrect = {0, 0, 64, 64};
+            break;
+        }
+    }
 }

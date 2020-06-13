@@ -94,6 +94,9 @@ struct Game
     Rectf hitbox_of_projectile(Projectile_Index index);
     Maybe<Projectile_Index> projectile_at_position(Vec2f position);
 
+    // Items of the Game
+    void spawn_health_at_mouse();
+
     // Rooms of the Game
     Room_Index room_index_at(Vec2f p);
     void render_room_minimap(SDL_Renderer *renderer,

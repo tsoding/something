@@ -321,7 +321,13 @@ int main(void)
                             game.projectile_at_position(game.debug_mouse_position);
 
                         if (!game.tracking_projectile.has_value) {
+                            game.spawn_health_at_mouse();
 
+                            // TODO: switch between editing modes
+                            //   - Modify tiles
+                            //   - Adding items
+                            //   - ...
+#if 0
                             auto index = game.room_index_at(game.debug_mouse_position);
 
                             Vec2i tile =
@@ -338,6 +344,7 @@ int main(void)
                                     game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
                                 }
                             }
+#endif
                         }
                     }
                 } break;
