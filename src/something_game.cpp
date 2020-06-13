@@ -110,6 +110,28 @@ void Game::update(float dt)
         }
     }
 
+    // Entities/Items interaction
+    for (size_t index = 0; index < ITEMS_COUNT; ++index) {
+        auto item = items + index;
+        if (item->type == ITEM_HEALTH) {
+            for (size_t entity_index = 0;
+                 entity_index < ENTITIES_COUNT;
+                 ++entity_index)
+            {
+                auto entity = entities + entity_index;
+
+                if (entity->state == Entity_State::Alive) {
+                    // TODO: item should have a hitbox
+                    if (rect_contains_vec2(entity->hitbox_world(), item->pos)) {
+                        entity->lives += ITEM_HEALTH_POINTS;
+                        item->type = ITEM_NONE;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     // Player Movement //////////////////////////////
     const float ENTITY_ACCEL = ENTITY_SPEED * ENTITY_ACCEL_FACTOR;
     if (keyboard[SDL_SCANCODE_D]) {
