@@ -79,6 +79,11 @@ void Game::update(float dt)
     // Update All Projectiles //////////////////////////////
     update_projectiles(dt);
 
+    // Update Items //////////////////////////////
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        items[i].update(dt);
+    }
+
     // Entities/Projectiles interaction //////////////////////////////
     for (size_t index = 0; index < PROJECTILES_COUNT; ++index) {
         auto projectile = projectiles + index;
@@ -100,6 +105,28 @@ void Game::update(float dt)
 
                 if (entity->lives <= 0) {
                     entity->kill();
+                }
+            }
+        }
+    }
+
+    // Entities/Items interaction
+    for (size_t index = 0; index < ITEMS_COUNT; ++index) {
+        auto item = items + index;
+        if (item->type == ITEM_HEALTH) {
+            for (size_t entity_index = 0;
+                 entity_index < ENTITIES_COUNT;
+                 ++entity_index)
+            {
+                auto entity = entities + entity_index;
+
+                if (entity->state == Entity_State::Alive) {
+                    // TODO(#108): item should have a hitbox
+                    if (rect_contains_vec2(entity->hitbox_world(), item->pos)) {
+                        entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
+                        item->type = ITEM_NONE;
+                        break;
+                    }
                 }
             }
         }
@@ -166,6 +193,10 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     render_projectiles(renderer, camera);
+
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        items[i].render(renderer, camera);
+    }
 
     popup.render(renderer, &camera);
 }
@@ -561,4 +592,17 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
         (int) MINIMAP_ENTITY_SIZE
     };
     sec(SDL_RenderFillRect(renderer, &rect));
+}
+
+void Game::spawn_health_at_mouse()
+{
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        if (items[i].type == ITEM_NONE) {
+            items[i].pos = debug_mouse_position;
+            items[i].type = ITEM_HEALTH;
+            items[i].sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
+            items[i].sprite.srcrect = {0, 0, 64, 64};
+            break;
+        }
+    }
 }
