@@ -237,6 +237,13 @@ Frame_Animat frame_animat_by_name(String_View file_path)
         }
     }
 
+#ifndef SOMETHING_RELEASE
+    println(stderr,
+            "Could not find animat `", file_path, "`. ",
+            "Did you forget to add it to `frame_animat_files` list?");
+    abort();
+#endif // SOMETHING_RELEASE
+
     return {};
 }
 
