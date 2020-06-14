@@ -30,6 +30,22 @@ void Entity::kill()
     }
 }
 
+SDL_Color mix_colors(SDL_Color b32, SDL_Color a32)
+{
+    const float a32_alpha = a32.a / 255.0;
+    const float b32_alpha = b32.a / 255.0;
+    const float r_alpha = a32_alpha + b32_alpha * (1.0f - a32_alpha);
+
+    SDL_Color r = {};
+
+    r.r = (Uint8) ((a32.r * a32_alpha + b32.r * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
+    r.g = (Uint8) ((a32.g * a32_alpha + b32.g * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
+    r.b = (Uint8) ((a32.b * a32_alpha + b32.b * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
+    r.a = (Uint8) (r_alpha * 255.0f);
+
+    return r;
+}
+
 void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) const
 {
     const SDL_RendererFlip flip =
@@ -99,14 +115,19 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
             sec(SDL_RenderFillRect(renderer, &rect_remain));
         }
 
+        SDL_Color effective_flash_color = flash_color;
+        effective_flash_color.a = flash_alpha * 255.0f;
+
         // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
-            idle.render(renderer, camera.to_screen(texbox), flip, shade);
+            idle.render(renderer, camera.to_screen(texbox), flip,
+                        mix_colors(shade, effective_flash_color));
         } break;
 
         case Alive_State::Walking: {
-            walking.render(renderer, camera.to_screen(texbox), flip, shade);
+            walking.render(renderer, camera.to_screen(texbox), flip,
+                           mix_colors(shade, effective_flash_color));
         } break;
         }
 
@@ -132,6 +153,8 @@ void Entity::update(float dt)
 {
     switch (state) {
     case Entity_State::Alive: {
+        flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
+
         vel.y += ENTITY_GRAVITY * dt;
 
         const float ENTITY_DECEL = ENTITY_SPEED * ENTITY_DECEL_FACTOR;
@@ -292,4 +315,10 @@ Entity enemy_entity(Vec2f pos)
     entity.jump_animat.rubber_animats[1].duration = 0.2f;
 
     return entity;
+}
+
+void Entity::flash(SDL_Color color)
+{
+    flash_alpha = 1.0f;
+    flash_color = color;
 }

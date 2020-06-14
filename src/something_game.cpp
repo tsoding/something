@@ -102,6 +102,7 @@ void Game::update(float dt)
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
                 entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
+                entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
 
                 if (entity->lives <= 0) {
                     entity->kill();
@@ -124,6 +125,7 @@ void Game::update(float dt)
                     // TODO(#108): item should have a hitbox
                     if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
                         entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
+                        entity->flash(ENTITY_HEAL_FLASH_COLOR);
                         mixer.play_sample(item->sound);
                         item->type = ITEM_NONE;
                         break;

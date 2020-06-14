@@ -36,6 +36,8 @@ struct Entity
     float cooldown_weapon;
     Vec2f gun_dir;
     int lives;
+    SDL_Color flash_color;
+    float flash_alpha;
 
     Frame_Animat idle;
     Frame_Animat walking;
@@ -74,6 +76,7 @@ struct Entity
     void update(float dt);
     void point_gun_at(Vec2f target);
     void jump(Sample_Mixer *mixer);
+    void flash(SDL_Color color);
 };
 
 Entity player_entity(Vec2f pos);
