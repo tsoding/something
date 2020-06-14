@@ -11,6 +11,8 @@ const char *texture_files[] = {
 };
 const size_t TEXTURE_COUNT = sizeof(texture_files) / sizeof(texture_files[0]);
 
+// TODO(#113): add support for mipmaps for the texture cache
+
 SDL_Texture *textures[TEXTURE_COUNT] = {};
 SDL_Texture *texture_masks[TEXTURE_COUNT] = {};
 
