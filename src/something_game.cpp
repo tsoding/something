@@ -252,32 +252,26 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state == Entity_State::Alive) {
-        Vec2f p0 = vec2(entity->hitbox_local.x, entity->hitbox_local.y) + entity->pos;
-        Vec2f p1 = p0 + vec2(entity->hitbox_local.w, entity->hitbox_local.h);
+        const float step_x = entity->hitbox_local.w / (float) ENTITY_MESH_COLS;
+        const float step_y = entity->hitbox_local.h / (float) ENTITY_MESH_ROWS;
 
-        Vec2f mesh[] = {
-            p0,
-            {p1.x, p0.y},
-            {p0.x, p1.y},
-            p1,
-        };
-        const int MESH_COUNT = sizeof(mesh) / sizeof(mesh[0]);
+        for (int rows = 0; rows <= ENTITY_MESH_ROWS; ++rows) {
+            for (int cols = 0; cols <= ENTITY_MESH_COLS; ++cols) {
+                Vec2f t0 = entity->pos +
+                    vec2(entity->hitbox_local.x, entity->hitbox_local.y) +
+                    vec2(cols * step_x, rows * step_y);
+                Vec2f t1 = t0;
+                const auto index = room_index_at(t1);
+                room_row[index.unwrap].resolve_point_collision(&t1);
 
-        for (int i = 0; i < MESH_COUNT; ++i) {
-            Vec2f t = mesh[i];
-            room_row[room_index_at(t).unwrap].resolve_point_collision(&t);
+                Vec2f d = t1 - t0;
 
-            Vec2f d = t - mesh[i];
+                const int IMPACT_THRESHOLD = 5;
+                if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+                if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
-            const int IMPACT_THRESHOLD = 5;
-            if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
-            if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
-
-            for (int j = 0; j < MESH_COUNT; ++j) {
-                mesh[j] += d;
+                entity->pos += d;
             }
-
-            entity->pos += d;
         }
     }
 }
@@ -408,6 +402,8 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(camera.to_screen(entities[i].hitbox_world()));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
+
+        entities[i].render_debug(renderer, camera);
     }
 
     if (tracking_projectile.has_value) {

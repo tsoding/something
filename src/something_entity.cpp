@@ -149,6 +149,32 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
     }
 }
 
+void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
+{
+    if (state == Entity_State::Alive) {
+        const float step_x = hitbox_local.w / (float) ENTITY_MESH_COLS;
+        const float step_y = hitbox_local.h / (float) ENTITY_MESH_ROWS;
+
+        for (int rows = 0; rows <= ENTITY_MESH_ROWS; ++rows) {
+            for (int cols = 0; cols <= ENTITY_MESH_COLS; ++cols) {
+                Vec2f t = camera.to_screen(
+                    pos +
+                    vec2(hitbox_local.x, hitbox_local.y) +
+                    vec2(cols * step_x, rows * step_y));
+                SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+                const int PROBE_SIZE = 10;
+                SDL_Rect rect = {
+                    (int)t.x - PROBE_SIZE / 2,
+                    (int)t.y - PROBE_SIZE / 2,
+                    PROBE_SIZE,
+                    PROBE_SIZE
+                };
+                sec(SDL_RenderFillRect(renderer, &rect));
+            }
+        }
+    }
+}
+
 void Entity::update(float dt)
 {
     switch (state) {
