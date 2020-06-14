@@ -196,7 +196,13 @@ void Game::render(SDL_Renderer *renderer)
     render_projectiles(renderer, camera);
 
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
-        items[i].render(renderer, camera);
+        if (items[i].type != ITEM_NONE) {
+            if (index.unwrap != room_index_at(items[i].pos).unwrap) {
+                items[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
+            } else {
+                items[i].render(renderer, camera);
+            }
+        }
     }
 
     popup.render(renderer, &camera);
