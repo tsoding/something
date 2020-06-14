@@ -226,6 +226,7 @@ Frame_Animat_File frame_animat_files[] = {
     {"./assets/animats/plasma_bolt.txt", {}},
     {"./assets/animats/plasma_pop.txt", {}},
     {"./assets/animats/walking.txt", {}},
+    {"./assets/animats/tsodinw.txt", {}}
 };
 const size_t frame_animat_files_count = sizeof(frame_animat_files) / sizeof(frame_animat_files[0]);
 

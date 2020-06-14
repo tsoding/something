@@ -6,7 +6,8 @@ const char *texture_files[] = {
     "./assets/sprites/fantasy_tiles.png",
     "./assets/sprites/spark1-sheet.png",
     "./assets/sprites/walking-12px-zoom.png",
-    "./assets/sprites/64.png"
+    "./assets/sprites/64.png",
+    "./assets/sprites/tsodinw.png"
 };
 const size_t TEXTURE_COUNT = sizeof(texture_files) / sizeof(texture_files[0]);
 
