@@ -6,8 +6,7 @@ void load_textures(SDL_Renderer *renderer)
         if (textures[i] == nullptr) {
             SDL_Surface *image_surface = load_png_file_as_surface(texture_files[i]);
 
-            textures[i] = sec(SDL_CreateTextureFromSurface(renderer,
-                                                               image_surface));
+            textures[i] = sec(SDL_CreateTextureFromSurface(renderer, image_surface));
             sec(SDL_LockSurface(image_surface));
             assert(image_surface->format->format == SDL_PIXELFORMAT_RGBA32);
             for (int row = 0; row < image_surface->h; ++row) {
@@ -34,10 +33,13 @@ size_t texture_index_by_name(String_View filename)
         }
     }
 
+#ifndef SOMETHING_RELEASE
     println(stderr,
             "[ERROR] Unknown texture file `", filename, "`. ",
             "You may want to add it to the `textures` array.");
     abort();
+#endif
+
     return 0;
 }
 
@@ -65,6 +67,10 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
 {
     int width, height;
     uint32_t *image_pixels = (uint32_t *) stbi_load(image_filename, &width, &height, NULL, 4);
+    if (image_pixels == NULL) {
+        println(stderr, "[ERROR] Could not load `", image_filename, "` as PNG");
+        abort();
+    }
 
     SDL_Surface* image_surface =
         sec(SDL_CreateRGBSurfaceFrom(image_pixels,

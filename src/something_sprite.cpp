@@ -226,6 +226,7 @@ Frame_Animat_File frame_animat_files[] = {
     {"./assets/animats/plasma_bolt.txt", {}},
     {"./assets/animats/plasma_pop.txt", {}},
     {"./assets/animats/walking.txt", {}},
+    {"./assets/animats/tsodinw.txt", {}}
 };
 const size_t frame_animat_files_count = sizeof(frame_animat_files) / sizeof(frame_animat_files[0]);
 
@@ -236,6 +237,13 @@ Frame_Animat frame_animat_by_name(String_View file_path)
             return frame_animat_files[i].animat;
         }
     }
+
+#ifndef SOMETHING_RELEASE
+    println(stderr,
+            "Could not find animat `", file_path, "`. ",
+            "Did you forget to add it to `frame_animat_files` list?");
+    abort();
+#endif // SOMETHING_RELEASE
 
     return {};
 }
