@@ -17,7 +17,8 @@ struct Item
     Sample_S16 sound;
 
     void update(float delta_time);
-    void render(SDL_Renderer *renderer, Camera camera) const;
+    void render(SDL_Renderer *renderer, Camera camera,
+                SDL_Color shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera) const;
     Rectf hitbox_world() const;
 };
