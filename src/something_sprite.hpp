@@ -16,6 +16,8 @@ struct Sprite
                 SDL_Color shade = {0, 0, 0, 0}) const;
 };
 
+Sprite sprite_from_texture_index(size_t texture_index);
+
 struct Frame_Animat
 {
     Sprite *frames;
