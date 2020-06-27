@@ -24,6 +24,8 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
             texture_index_by_name(
                 TOOLBAR_BUTTON_TEXTURE));
 
+    // TODO: Toolbar buttons should have tooltips explaining buttons' purpose
+
     for (int i = 0; i < Button_Count; ++i) {
         SDL_Color shade = {};
 
@@ -33,6 +35,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
 
         switch ((Button) i) {
         case Tiles: {
+            // TODO: Toolbar::Tiles button should rendered differently
             button_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
         } break;
 
