@@ -40,18 +40,37 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
             shade = TOOLBAR_INACTIVE_SHADE;
         }
 
+        auto hitbox = button_hitbox((Button) i, camera);
+        const auto shade_rect = rectf_for_sdl(hitbox);
+
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                TOOLBAR_BUTTON_COLOR.r,
+                TOOLBAR_BUTTON_COLOR.g,
+                TOOLBAR_BUTTON_COLOR.b,
+                TOOLBAR_BUTTON_COLOR.a));
+        sec(SDL_RenderFillRect(renderer, &shade_rect));
+
         switch ((Button) i) {
         case Tiles: {
-            tiles_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
+            tiles_sprite.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));
         } break;
 
         case Heals: {
-            heals_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
+            heals_sprite.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));
         } break;
 
         case Button_Count:
         default: {}
         }
+
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                shade.r,
+                shade.g,
+                shade.b,
+                shade.a));
+        sec(SDL_RenderFillRect(renderer, &shade_rect));
     }
 }
 
