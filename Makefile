@@ -1,10 +1,10 @@
 WERROR?=-Werror
 PKGS=sdl2
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
-CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions $(shell pkg-config --cflags $(PKGS))
+CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions `pkg-config --cflags $(PKGS)`
 CXXFLAGS_DEBUG=$(CXXFLAGS) -O0 -fno-builtin -ggdb
 CXXFLAGS_RELEASE=$(CXXFLAGS) -DSOMETHING_RELEASE -O3 -ggdb
-LIBS=$(shell pkg-config --libs $(PKGS)) -lm
+LIBS=`pkg-config --libs $(PKGS) ` -lm
 
 .PHONY: all
 all: something.debug something.release
