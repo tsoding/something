@@ -19,10 +19,17 @@ Rectf Toolbar::button_hitbox(Button button, Camera camera)
 
 void Toolbar::render(SDL_Renderer *renderer, Camera camera)
 {
-    Sprite button_sprite =
+    Sprite heals_sprite =
         sprite_from_texture_index(
             texture_index_by_name(
                 TOOLBAR_BUTTON_TEXTURE));
+
+    Sprite tiles_sprite = {};
+    tiles_sprite.texture_index = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
+    // TODO: move tiles srcrect dimention to config.vars
+    //   That may require add a new type to the config file.
+    //   Might be a good opportunity to simplify adding new types to the system.
+    tiles_sprite.srcrect = {120, 128, 16, 16};
 
     // TODO: Toolbar buttons should have tooltips explaining buttons' purpose
 
@@ -35,12 +42,11 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
 
         switch ((Button) i) {
         case Tiles: {
-            // TODO: Toolbar::Tiles button should rendered differently
-            button_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
+            tiles_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
         } break;
 
         case Heals: {
-            button_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
+            heals_sprite.render(renderer, button_hitbox((Button) i, camera), SDL_FLIP_NONE, shade);
         } break;
 
         case Button_Count:
