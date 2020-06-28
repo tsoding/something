@@ -19,6 +19,11 @@ const char *projectile_state_as_cstr(Projectile_State state)
     assert(0 && "Incorrect Projectile_State");
 }
 
+static char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
+{
+    snprintf(buffer, buffer_size, "assets/rooms/room-%lu.bin", index.unwrap);
+    return buffer;
+}
 
 // TODO(#25): Turn displayf into println style
 void displayf(SDL_Renderer *renderer,
@@ -46,6 +51,200 @@ void Projectile::kill()
     if (state == Projectile_State::Active) {
         state = Projectile_State::Poof;
         poof_animat.reset();
+    }
+}
+
+void Game::handle_event(SDL_Event *event)
+{
+    switch (event->type) {
+    case SDL_QUIT: {
+        quit = true;
+    } break;
+
+    case SDL_KEYDOWN: {
+        // The reason we are not using isdigit here is because
+        // isdigit(event->key.keysym.sym) maybe crash on
+        // clang++ with -O0. Probably because SDL_Keycode is
+        // not a char and can be bigger than char and that
+        // kills isdigit if it's not optimized away?
+        const auto sym = event->key.keysym.sym;
+        if ('0' <= sym && sym <= '9') {
+            if (debug) {
+                int room_index = sym - '0' - 1;
+                if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
+                    entities[PLAYER_ENTITY_INDEX].pos =
+                        room_row[room_index].center();
+                }
+            }
+        } else {
+            switch (event->key.keysym.sym) {
+            case SDLK_SPACE: {
+                if (!event->key.repeat) {
+                    entity_jump({PLAYER_ENTITY_INDEX});
+                }
+            } break;
+
+            case SDLK_c: {
+                if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
+                    room_index_clipboard = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                }
+            } break;
+
+            case SDLK_v: {
+                if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
+                    room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap]
+                        .copy_from(&room_row[room_index_clipboard.unwrap]);
+                }
+            } break;
+
+#ifndef SOMETHING_RELEASE
+            case SDLK_F5: {
+                auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+                if (result.is_error) {
+                    println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                    popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                } else {
+                    popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
+                }
+            } break;
+#endif  // SOMETHING_RELEASE
+
+            case SDLK_q: {
+                debug = !debug;
+            } break;
+
+            case SDLK_z: {
+                step_debug = !step_debug;
+            } break;
+
+            case SDLK_e: {
+                auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                room_row[room_index.unwrap].dump_file(
+                    file_path_of_room(
+                        room_file_path,
+                        sizeof(room_file_path),
+                        room_index));
+                popup.notify(FONT_SUCCESS_COLOR,
+                             "Saved room %lu to `%s`",
+                             room_index.unwrap,
+                             room_file_path);
+            } break;
+
+            case SDLK_i: {
+                auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                room_row[room_index.unwrap].load_file(
+                    file_path_of_room(
+                        room_file_path,
+                        sizeof(room_file_path),
+                        room_index));
+                popup.notify(FONT_SUCCESS_COLOR,
+                             "Load room %lu from `%s`\n",
+                             room_index.unwrap,
+                             room_file_path);
+            } break;
+
+            case SDLK_r: {
+                reset_entities();
+            } break;
+            }
+        }
+    } break;
+
+    case SDL_KEYUP: {
+        switch (event->key.keysym.sym) {
+        case SDLK_SPACE: {
+            if (!event->key.repeat) {
+                entity_jump({PLAYER_ENTITY_INDEX});
+            }
+        } break;
+        }
+    } break;
+
+    case SDL_MOUSEMOTION: {
+        debug_mouse_position =
+            camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
+        collision_probe = debug_mouse_position;
+
+        if (debug) {
+            debug_toolbar.handle_mouse_hover(
+                vec_cast<float>(vec2(event->motion.x, event->motion.y)),
+                camera);
+        }
+
+        auto index = room_index_at(collision_probe);
+        room_row[index.unwrap].resolve_point_collision(&collision_probe);
+
+        Vec2i tile = vec_cast<int>((debug_mouse_position - room_row[index.unwrap].position()) / TILE_SIZE);
+        switch (state) {
+        case Debug_Draw_State::Create: {
+            if (room_row[index.unwrap].is_tile_inbounds(tile))
+                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+        } break;
+
+        case Debug_Draw_State::Delete: {
+            if (room_row[index.unwrap].is_tile_inbounds(tile))
+                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
+        } break;
+
+        case Debug_Draw_State::Idle:
+        default: {}
+        }
+    } break;
+
+    case SDL_MOUSEBUTTONDOWN: {
+        switch (event->button.button) {
+        case SDL_BUTTON_RIGHT: {
+            if (debug) {
+                tracking_projectile =
+                    projectile_at_position(debug_mouse_position);
+
+                if (!tracking_projectile.has_value) {
+                    switch (debug_toolbar.active_button) {
+                    case DEBUG_TOOLBAR_TILES: {
+                        auto index = room_index_at(debug_mouse_position);
+
+                        Vec2i tile =
+                            vec_cast<int>(
+                                (debug_mouse_position - room_row[index.unwrap].position()) /
+                                TILE_SIZE);
+
+                        if (room_row[index.unwrap].is_tile_inbounds(tile)) {
+                            if (room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
+                                state = Debug_Draw_State::Create;
+                                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+                            } else {
+                                state = Debug_Draw_State::Delete;
+                                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
+                            }
+                        }
+                    } break;
+
+                    case DEBUG_TOOLBAR_HEALS: {
+                        spawn_health_at_mouse();
+                    } break;
+
+                    default: {}
+                    }
+                }
+            }
+        } break;
+
+        case SDL_BUTTON_LEFT: {
+            if (!debug_toolbar.handle_click_at({(float)event->button.x, (float)event->button.y},
+                                                    camera)) {
+                entity_shoot({PLAYER_ENTITY_INDEX});
+            }
+        } break;
+        }
+    } break;
+
+    case SDL_MOUSEBUTTONUP: {
+        switch (event->button.button) {
+        case SDL_BUTTON_RIGHT: {
+            state = Debug_Draw_State::Idle;
+        } break;
+        }
+    } break;
     }
 }
 
@@ -437,6 +636,8 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         items[i].render_debug(renderer, camera);
     }
+
+    debug_toolbar.render(renderer, camera, debug_font);
 }
 
 int Game::count_alive_projectiles(void)
@@ -541,6 +742,18 @@ Room_Index Game::room_index_at(Vec2f p)
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
     return {(size_t) index};
+}
+
+void Game::load_rooms()
+{
+    for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
+        room_row[room_index].index = {room_index};
+        room_row[room_index].load_file(
+            file_path_of_room(
+                room_file_path,
+                sizeof(room_file_path),
+                {room_index}));
+    }
 }
 
 void Game::render_room_minimap(SDL_Renderer *renderer,
