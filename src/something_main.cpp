@@ -32,6 +32,38 @@ Game game = {};
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
 
+enum Debug_Toolbar_Button
+{
+    DEBUG_TOOLBAR_TILES = 0,
+    DEBUG_TOOLBAR_HEALS,
+    DEBUG_TOOLBAR_COUNT
+};
+
+void render_tooltip(SDL_Renderer *renderer, Camera camera,
+                    Bitmap_Font font, String_View tooltip,
+                    Vec2f position)
+{
+    (void) camera;
+    const Vec2f padding = vec2(TOOLTIP_PADDING, TOOLTIP_PADDING);
+    const Vec2f size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
+    const Vec2f tooltip_box = font.text_size(size, tooltip) + padding * 2.0f;
+
+    const SDL_Rect tooltip_rect = {
+        (int) floorf(position.x),
+        (int) floorf(position.y),
+        (int) floorf(tooltip_box.x),
+        (int) floorf(tooltip_box.y)
+    };
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            TOOLTIP_BACKGROUND_COLOR.r,
+            TOOLTIP_BACKGROUND_COLOR.g,
+            TOOLTIP_BACKGROUND_COLOR.b,
+            TOOLTIP_BACKGROUND_COLOR.a));
+    sec(SDL_RenderFillRect(renderer, &tooltip_rect));
+    font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
@@ -62,6 +94,9 @@ int main(void)
     game.popup.font.bitmap = load_texture_from_bmp_file(renderer, "./assets/fonts/charmap-oldschool.bmp", {0, 0, 0, 255});
     game.debug_font.bitmap = game.popup.font.bitmap;
 
+    // TODO(#119): move tiles srcrect dimention to config.vars
+    //   That may require add a new type to the config file.
+    //   Might be a good opportunity to simplify adding new types to the system.
     tile_defs[TILE_WALL].top_texture = {
         {120, 128, 16, 16},
         tileset_texture
@@ -93,8 +128,6 @@ int main(void)
     };
     tile_defs[TILE_DESTROYABLE_3].bottom_texture = tile_defs[TILE_DESTROYABLE_3].top_texture;
 
-
-
     game.player_shoot_sample      = sample_s16_by_name("./assets/sounds/enemy_shoot-48000-decay.wav"_sv);
     game.entity_walking_animat    = frame_animat_by_name("./assets/animats/walking.txt"_sv);
     game.entity_idle_animat       = frame_animat_by_name("./assets/animats/idle.txt"_sv);
@@ -102,6 +135,8 @@ int main(void)
     game.entity_jump_sample2      = sample_s16_by_name("./assets/sounds/jumppp22-48000-mono.wav"_sv);
     game.projectile_poof_animat   = frame_animat_by_name("./assets/animats/plasma_pop.txt"_sv);
     game.projectile_active_animat = frame_animat_by_name("./assets/animats/plasma_bolt.txt"_sv);
+
+
 
 #ifndef SOMETHING_RELEASE
     {
@@ -112,6 +147,15 @@ int main(void)
         }
     }
 #endif // SOMETHING_RELEASE
+
+    static_assert(DEBUG_TOOLBAR_COUNT <= TOOLBAR_BUTTONS_CAPACITY);
+    game.debug_toolbar.buttons_count = DEBUG_TOOLBAR_COUNT;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].icon = tile_defs[TILE_WALL].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tooltip = "Edit walls"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
+        texture_index_by_name(
+            TOOLBAR_BUTTON_TEXTURE));
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
@@ -294,6 +338,12 @@ int main(void)
                     game.camera.to_world(vec_cast<float>(vec2(event.motion.x, event.motion.y)));
                 game.collision_probe = game.debug_mouse_position;
 
+                if (game.debug) {
+                    game.debug_toolbar.handle_mouse_hover(
+                        vec_cast<float>(vec2(event.motion.x, event.motion.y)),
+                        game.camera);
+                }
+
                 auto index = game.room_index_at(game.collision_probe);
                 game.room_row[index.unwrap].resolve_point_collision(&game.collision_probe);
 
@@ -323,7 +373,7 @@ int main(void)
 
                         if (!game.tracking_projectile.has_value) {
                             switch (game.debug_toolbar.active_button) {
-                            case Toolbar::Tiles: {
+                            case DEBUG_TOOLBAR_TILES: {
                                 auto index = game.room_index_at(game.debug_mouse_position);
 
                                 Vec2i tile =
@@ -342,11 +392,10 @@ int main(void)
                                 }
                             } break;
 
-                            case Toolbar::Heals: {
+                            case DEBUG_TOOLBAR_HEALS: {
                                 game.spawn_health_at_mouse();
                             } break;
 
-                            case Toolbar::Button_Count:
                             default: {}
                             }
                         }
@@ -395,6 +444,12 @@ int main(void)
         if (game.debug) {
             game.render_debug_overlay(renderer);
             game.debug_toolbar.render(renderer, game.camera);
+            if (game.debug_toolbar.hovered_button.has_value) {
+                const auto button = game.debug_toolbar.hovered_button.unwrap;
+                const auto tooltip = game.debug_toolbar.buttons[button].tooltip;
+                render_tooltip(renderer, game.camera, game.debug_font, tooltip,
+                               game.camera.to_screen(game.debug_mouse_position));
+            }
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
