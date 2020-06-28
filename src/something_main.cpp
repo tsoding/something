@@ -130,7 +130,7 @@ int main(void)
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tooltip = "Edit walls"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
         texture_index_by_name(
-            TOOLBAR_BUTTON_TEXTURE));
+            ITEM_HEALTH_TEXTURE));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
 
     // SOUND //////////////////////////////
