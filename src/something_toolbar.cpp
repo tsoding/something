@@ -26,7 +26,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
 
     Sprite tiles_sprite = {};
     tiles_sprite.texture_index = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
-    // TODO: move tiles srcrect dimention to config.vars
+    // TODO(#119): move tiles srcrect dimention to config.vars
     //   That may require add a new type to the config file.
     //   Might be a good opportunity to simplify adding new types to the system.
     tiles_sprite.srcrect = {120, 128, 16, 16};
