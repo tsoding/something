@@ -163,7 +163,6 @@ int main(void)
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
     Room_Index room_index_clipboard = {0};
-    Toolbar debug_toolbar = {};
     while (!game.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
@@ -323,7 +322,7 @@ int main(void)
                             game.projectile_at_position(game.debug_mouse_position);
 
                         if (!game.tracking_projectile.has_value) {
-                            switch (debug_toolbar.active_button) {
+                            switch (game.debug_toolbar.active_button) {
                             case Toolbar::Tiles: {
                                 auto index = game.room_index_at(game.debug_mouse_position);
 
@@ -355,8 +354,8 @@ int main(void)
                 } break;
 
                 case SDL_BUTTON_LEFT: {
-                    if (!debug_toolbar.handle_click_at({(float)event.button.x, (float)event.button.y},
-                                                       game.camera)) {
+                    if (!game.debug_toolbar.handle_click_at({(float)event.button.x, (float)event.button.y},
+                                                            game.camera)) {
                         game.entity_shoot({PLAYER_ENTITY_INDEX});
                     }
                 } break;
@@ -393,9 +392,9 @@ int main(void)
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
-        debug_toolbar.render(renderer, game.camera);
         if (game.debug) {
             game.render_debug_overlay(renderer);
+            game.debug_toolbar.render(renderer, game.camera);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
