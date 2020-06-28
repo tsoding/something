@@ -1,5 +1,31 @@
 #include "something_toolbar.hpp"
 
+static void render_tooltip(SDL_Renderer *renderer,
+                           Bitmap_Font font,
+                           String_View tooltip,
+                           Vec2f position)
+{
+    const Vec2f padding = vec2(TOOLTIP_PADDING, TOOLTIP_PADDING);
+    const Vec2f size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
+    const Vec2f tooltip_box = font.text_size(size, tooltip) + padding * 2.0f;
+
+    const SDL_Rect tooltip_rect = {
+        (int) floorf(position.x),
+        (int) floorf(position.y),
+        (int) floorf(tooltip_box.x),
+        (int) floorf(tooltip_box.y)
+    };
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            TOOLTIP_BACKGROUND_COLOR.r,
+            TOOLTIP_BACKGROUND_COLOR.g,
+            TOOLTIP_BACKGROUND_COLOR.b,
+            TOOLTIP_BACKGROUND_COLOR.a));
+    sec(SDL_RenderFillRect(renderer, &tooltip_rect));
+    font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
+}
+
+
 Rectf Toolbar::button_hitbox(size_t button, Camera camera)
 {
     const Vec2f position = {
@@ -17,7 +43,7 @@ Rectf Toolbar::button_hitbox(size_t button, Camera camera)
     return hitbox;
 }
 
-void Toolbar::render(SDL_Renderer *renderer, Camera camera)
+void Toolbar::render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font)
 {
     for (size_t i = 0; i < buttons_count; ++i) {
         SDL_Color shade = {};
@@ -47,6 +73,12 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
                 shade.a));
         sec(SDL_RenderFillRect(renderer, &shade_rect));
     }
+
+    if (hovered_button.has_value) {
+        render_tooltip(renderer, font,
+                       buttons[hovered_button.unwrap].tooltip,
+                       tooltip_position);
+    }
 }
 
 bool Toolbar::handle_click_at(Vec2f position, Camera camera)
@@ -65,6 +97,7 @@ bool Toolbar::handle_mouse_hover(Vec2f position, Camera camera)
     for (size_t i = 0; i < buttons_count; ++i) {
         if (rect_contains_vec2(button_hitbox(i, camera), position)) {
             hovered_button = {true, i};
+            tooltip_position = position;
             return true;
         }
     }

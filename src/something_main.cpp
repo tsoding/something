@@ -39,30 +39,6 @@ enum Debug_Toolbar_Button
     DEBUG_TOOLBAR_COUNT
 };
 
-void render_tooltip(SDL_Renderer *renderer, Camera camera,
-                    Bitmap_Font font, String_View tooltip,
-                    Vec2f position)
-{
-    (void) camera;
-    const Vec2f padding = vec2(TOOLTIP_PADDING, TOOLTIP_PADDING);
-    const Vec2f size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
-    const Vec2f tooltip_box = font.text_size(size, tooltip) + padding * 2.0f;
-
-    const SDL_Rect tooltip_rect = {
-        (int) floorf(position.x),
-        (int) floorf(position.y),
-        (int) floorf(tooltip_box.x),
-        (int) floorf(tooltip_box.y)
-    };
-    sec(SDL_SetRenderDrawColor(
-            renderer,
-            TOOLTIP_BACKGROUND_COLOR.r,
-            TOOLTIP_BACKGROUND_COLOR.g,
-            TOOLTIP_BACKGROUND_COLOR.b,
-            TOOLTIP_BACKGROUND_COLOR.a));
-    sec(SDL_RenderFillRect(renderer, &tooltip_rect));
-    font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
-}
 
 int main(void)
 {
@@ -443,13 +419,7 @@ int main(void)
         game.render(renderer);
         if (game.debug) {
             game.render_debug_overlay(renderer);
-            game.debug_toolbar.render(renderer, game.camera);
-            if (game.debug_toolbar.hovered_button.has_value) {
-                const auto button = game.debug_toolbar.hovered_button.unwrap;
-                const auto tooltip = game.debug_toolbar.buttons[button].tooltip;
-                render_tooltip(renderer, game.camera, game.debug_font, tooltip,
-                               game.camera.to_screen(game.debug_mouse_position));
-            }
+            game.debug_toolbar.render(renderer, game.camera, game.debug_font);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
