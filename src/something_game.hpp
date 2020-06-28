@@ -1,6 +1,13 @@
 #ifndef SOMETHING_GAME_HPP_
 #define SOMETHING_GAME_HPP_
 
+enum Debug_Toolbar_Button
+{
+    DEBUG_TOOLBAR_TILES = 0,
+    DEBUG_TOOLBAR_HEALS,
+    DEBUG_TOOLBAR_COUNT
+};
+
 enum class Debug_Draw_State {
     Idle = 0,
     Create,
@@ -50,6 +57,7 @@ struct Game
 {
     bool quit;
     bool debug;
+    bool step_debug;
     Vec2f collision_probe;
     Vec2f debug_mouse_position;
     Maybe<Projectile_Index> tracking_projectile;
@@ -73,12 +81,17 @@ struct Game
 
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
+
     Room room_row[ROOM_ROW_COUNT];
+    char room_file_path[256];
+    Room_Index room_index_clipboard;
+
     Item items[ITEMS_COUNT];
 
     // Whole Game State
     void update(float dt);
     void render(SDL_Renderer *renderer);
+    void handle_event(SDL_Event *event);
     void render_debug_overlay(SDL_Renderer *renderer);
 
     // Entities of the Game
@@ -100,6 +113,7 @@ struct Game
 
     // Rooms of the Game
     Room_Index room_index_at(Vec2f p);
+    void load_rooms();
     void render_room_minimap(SDL_Renderer *renderer,
                              Room_Index index,
                              Vec2f position);

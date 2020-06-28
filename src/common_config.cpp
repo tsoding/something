@@ -11,6 +11,8 @@ enum Config_Type
 
 #include "./config_types.hpp"
 
+const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
+
 Config_Type config_type_by_name(String_View type_name)
 {
     if (type_name == "float"_sv) return CONFIG_TYPE_FLOAT;
