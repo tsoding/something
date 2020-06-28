@@ -40,7 +40,7 @@ Item make_health_item(Vec2f pos)
     Item item = {};
     item.pos = pos;
     item.type = ITEM_HEALTH;
-    item.sprite.texture_index = texture_index_by_name("./assets/sprites/64.png"_sv);
+    item.sprite.texture_index = texture_index_by_name(ITEM_HEALTH_TEXTURE);
     item.sprite.srcrect = {0, 0, 64, 64};
     item.hitbox_local = {
         ITEM_HITBOX_WIDTH * -0.5f,

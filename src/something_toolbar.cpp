@@ -1,6 +1,32 @@
 #include "something_toolbar.hpp"
 
-Rectf Toolbar::button_hitbox(Button button, Camera camera)
+static void render_tooltip(SDL_Renderer *renderer,
+                           Bitmap_Font font,
+                           String_View tooltip,
+                           Vec2f position)
+{
+    const Vec2f padding = vec2(TOOLTIP_PADDING, TOOLTIP_PADDING);
+    const Vec2f size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
+    const Vec2f tooltip_box = font.text_size(size, tooltip) + padding * 2.0f;
+
+    const SDL_Rect tooltip_rect = {
+        (int) floorf(position.x),
+        (int) floorf(position.y),
+        (int) floorf(tooltip_box.x),
+        (int) floorf(tooltip_box.y)
+    };
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            TOOLTIP_BACKGROUND_COLOR.r,
+            TOOLTIP_BACKGROUND_COLOR.g,
+            TOOLTIP_BACKGROUND_COLOR.b,
+            TOOLTIP_BACKGROUND_COLOR.a));
+    sec(SDL_RenderFillRect(renderer, &tooltip_rect));
+    font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
+}
+
+
+Rectf Toolbar::button_hitbox(size_t button, Camera camera)
 {
     const Vec2f position = {
         TOOLBAR_BUTTON_PADDING,
@@ -8,7 +34,7 @@ Rectf Toolbar::button_hitbox(Button button, Camera camera)
     };
 
     const Rectf hitbox = {
-        position.x + (int) button * (TOOLBAR_BUTTON_WIDTH + TOOLBAR_BUTTON_PADDING),
+        position.x + button * (TOOLBAR_BUTTON_WIDTH + TOOLBAR_BUTTON_PADDING),
         position.y,
         TOOLBAR_BUTTON_WIDTH,
         TOOLBAR_BUTTON_HEIGHT
@@ -17,30 +43,16 @@ Rectf Toolbar::button_hitbox(Button button, Camera camera)
     return hitbox;
 }
 
-void Toolbar::render(SDL_Renderer *renderer, Camera camera)
+void Toolbar::render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font)
 {
-    Sprite heals_sprite =
-        sprite_from_texture_index(
-            texture_index_by_name(
-                TOOLBAR_BUTTON_TEXTURE));
-
-    Sprite tiles_sprite = {};
-    tiles_sprite.texture_index = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
-    // TODO(#119): move tiles srcrect dimention to config.vars
-    //   That may require add a new type to the config file.
-    //   Might be a good opportunity to simplify adding new types to the system.
-    tiles_sprite.srcrect = {120, 128, 16, 16};
-
-    // TODO(#120): Toolbar buttons should have tooltips explaining buttons' purpose
-
-    for (int i = 0; i < Button_Count; ++i) {
+    for (size_t i = 0; i < buttons_count; ++i) {
         SDL_Color shade = {};
 
-        if (i != (int) active_button) {
+        if (i != active_button) {
             shade = TOOLBAR_INACTIVE_SHADE;
         }
 
-        auto hitbox = button_hitbox((Button) i, camera);
+        auto hitbox = button_hitbox(i, camera);
         const auto shade_rect = rectf_for_sdl(hitbox);
 
         sec(SDL_SetRenderDrawColor(
@@ -51,18 +63,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
                 TOOLBAR_BUTTON_COLOR.a));
         sec(SDL_RenderFillRect(renderer, &shade_rect));
 
-        switch ((Button) i) {
-        case Tiles: {
-            tiles_sprite.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));
-        } break;
-
-        case Heals: {
-            heals_sprite.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));
-        } break;
-
-        case Button_Count:
-        default: {}
-        }
+        buttons[i].icon.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));
 
         sec(SDL_SetRenderDrawColor(
                 renderer,
@@ -72,13 +73,19 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
                 shade.a));
         sec(SDL_RenderFillRect(renderer, &shade_rect));
     }
+
+    if (hovered_button.has_value) {
+        render_tooltip(renderer, font,
+                       buttons[hovered_button.unwrap].tooltip,
+                       tooltip_position);
+    }
 }
 
 bool Toolbar::handle_click_at(Vec2f position, Camera camera)
 {
-    for (int i = 0; i < Button_Count; ++i) {
-        if (rect_contains_vec2(button_hitbox((Button) i, camera), position)) {
-            active_button = (Button) i;
+    for (size_t i = 0; i < buttons_count; ++i) {
+        if (rect_contains_vec2(button_hitbox(i, camera), position)) {
+            active_button = i;
             return true;
         }
     }
@@ -87,9 +94,10 @@ bool Toolbar::handle_click_at(Vec2f position, Camera camera)
 
 bool Toolbar::handle_mouse_hover(Vec2f position, Camera camera)
 {
-    for (int i = 0; i < Button_Count; ++i) {
-        if (rect_contains_vec2(button_hitbox((Button) i, camera), position)) {
-            hovered_button = {true, (Button) i};
+    for (size_t i = 0; i < buttons_count; ++i) {
+        if (rect_contains_vec2(button_hitbox(i, camera), position)) {
+            hovered_button = {true, i};
+            tooltip_position = position;
             return true;
         }
     }
