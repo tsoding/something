@@ -19,9 +19,4 @@ struct Toolbar
     Rectf button_hitbox(Button button, Camera camera);
 };
 
-String_View toolbar_tooltips[Toolbar::Button_Count] = {
-    ""_sv,
-    ""_sv
-};
-
 #endif  // SOMETHING_TOOLBAR_HPP_
