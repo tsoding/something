@@ -69,6 +69,7 @@ struct Game
     Frame_Animat projectile_poof_animat;
 
     Bitmap_Font debug_font;
+    Toolbar debug_toolbar;
 
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];

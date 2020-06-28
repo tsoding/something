@@ -309,6 +309,7 @@ int main(void)
                         game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
                 } break;
 
+                case Debug_Draw_State::Idle:
                 default: {}
                 }
             } break;
@@ -321,36 +322,42 @@ int main(void)
                             game.projectile_at_position(game.debug_mouse_position);
 
                         if (!game.tracking_projectile.has_value) {
-                            game.spawn_health_at_mouse();
+                            switch (game.debug_toolbar.active_button) {
+                            case Toolbar::Tiles: {
+                                auto index = game.room_index_at(game.debug_mouse_position);
 
-                            // TODO(#109): switch between editing modes
-                            //   - Modify tiles
-                            //   - Adding items
-                            //   - ...
-#if 0
-                            auto index = game.room_index_at(game.debug_mouse_position);
+                                Vec2i tile =
+                                    vec_cast<int>(
+                                        (game.debug_mouse_position - game.room_row[index.unwrap].position()) /
+                                        TILE_SIZE);
 
-                            Vec2i tile =
-                                vec_cast<int>(
-                                    (game.debug_mouse_position - game.room_row[index.unwrap].position()) /
-                                    TILE_SIZE);
-
-                            if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {
-                                if (game.room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
-                                    game.state = Debug_Draw_State::Create;
-                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
-                                } else {
-                                    game.state = Debug_Draw_State::Delete;
-                                    game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
+                                if (game.room_row[index.unwrap].is_tile_inbounds(tile)) {
+                                    if (game.room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
+                                        game.state = Debug_Draw_State::Create;
+                                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+                                    } else {
+                                        game.state = Debug_Draw_State::Delete;
+                                        game.room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
+                                    }
                                 }
+                            } break;
+
+                            case Toolbar::Heals: {
+                                game.spawn_health_at_mouse();
+                            } break;
+
+                            case Toolbar::Button_Count:
+                            default: {}
                             }
-#endif
                         }
                     }
                 } break;
 
                 case SDL_BUTTON_LEFT: {
-                    game.entity_shoot({PLAYER_ENTITY_INDEX});
+                    if (!game.debug_toolbar.handle_click_at({(float)event.button.x, (float)event.button.y},
+                                                            game.camera)) {
+                        game.entity_shoot({PLAYER_ENTITY_INDEX});
+                    }
                 } break;
                 }
             } break;
@@ -385,9 +392,9 @@ int main(void)
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
-
         if (game.debug) {
             game.render_debug_overlay(renderer);
+            game.debug_toolbar.render(renderer, game.camera);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////

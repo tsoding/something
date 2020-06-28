@@ -1,7 +1,8 @@
 WERROR?=-Werror
 PKGS=sdl2
+# TODO(#118): try to enable -Weverything and disable things that don't make sense
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
-CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions `pkg-config --cflags $(PKGS)`
+CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions -Wswitch-enum `pkg-config --cflags $(PKGS)`
 CXXFLAGS_DEBUG=$(CXXFLAGS) -O0 -fno-builtin -ggdb
 CXXFLAGS_RELEASE=$(CXXFLAGS) -DSOMETHING_RELEASE -O3 -ggdb
 LIBS=`pkg-config --libs $(PKGS) ` -lm

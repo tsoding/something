@@ -59,6 +59,17 @@ Vec2<T> rect_top_left(Rect<T> rect)
     return vec2(rect.x, rect.y);
 }
 
+template <typename T>
+Rect<T> rect_shrink(Rect<T> rect, T padding)
+{
+    return {
+        rect.x + padding,
+        rect.y + padding,
+        rect.w - padding * 2,
+        rect.h - padding * 2
+    };
+}
+
 //////////////////////////////
 // Vector x Scalar
 //////////////////////////////

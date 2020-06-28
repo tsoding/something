@@ -1,5 +1,17 @@
 #include "./something_sprite.hpp"
 
+Sprite sprite_from_texture_index(size_t texture_index)
+{
+    Sprite result = {};
+    result.texture_index = texture_index;
+    sec(SDL_QueryTexture(textures[texture_index],
+                         NULL,
+                         NULL,
+                         &result.srcrect.w,
+                         &result.srcrect.h));
+    return result;
+}
+
 void Sprite::render(SDL_Renderer *renderer,
                     Rectf destrect,
                     SDL_RendererFlip flip,
