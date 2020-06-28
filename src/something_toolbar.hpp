@@ -10,12 +10,18 @@ struct Toolbar
         Button_Count
     };
 
-    Button current_button;
+    Button active_button;
+    Maybe<Button> hovered_button;
 
     void render(SDL_Renderer *renderer, Camera camera);
     bool handle_click_at(Vec2f position, Camera camera);
+    bool handle_mouse_hover(Vec2f position, Camera camera);
     Rectf button_hitbox(Button button, Camera camera);
 };
 
+String_View toolbar_tooltips[Toolbar::Button_Count] = {
+    ""_sv,
+    ""_sv
+};
 
 #endif  // SOMETHING_TOOLBAR_HPP_

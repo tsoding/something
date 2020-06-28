@@ -323,7 +323,7 @@ int main(void)
                             game.projectile_at_position(game.debug_mouse_position);
 
                         if (!game.tracking_projectile.has_value) {
-                            switch (debug_toolbar.current_button) {
+                            switch (debug_toolbar.active_button) {
                             case Toolbar::Tiles: {
                                 auto index = game.room_index_at(game.debug_mouse_position);
 
@@ -394,7 +394,6 @@ int main(void)
         sec(SDL_RenderClear(renderer));
         game.render(renderer);
         debug_toolbar.render(renderer, game.camera);
-
         if (game.debug) {
             game.render_debug_overlay(renderer);
         }

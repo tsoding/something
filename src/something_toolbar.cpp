@@ -36,7 +36,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
     for (int i = 0; i < Button_Count; ++i) {
         SDL_Color shade = {};
 
-        if (i != (int) current_button) {
+        if (i != (int) active_button) {
             shade = TOOLBAR_INACTIVE_SHADE;
         }
 
@@ -78,9 +78,22 @@ bool Toolbar::handle_click_at(Vec2f position, Camera camera)
 {
     for (int i = 0; i < Button_Count; ++i) {
         if (rect_contains_vec2(button_hitbox((Button) i, camera), position)) {
-            current_button = (Button) i;
+            active_button = (Button) i;
             return true;
         }
     }
+    return false;
+}
+
+bool Toolbar::handle_mouse_hover(Vec2f position, Camera camera)
+{
+    for (int i = 0; i < Button_Count; ++i) {
+        if (rect_contains_vec2(button_hitbox((Button) i, camera), position)) {
+            hovered_button = {true, (Button) i};
+            return true;
+        }
+    }
+
+    hovered_button = {};
     return false;
 }
