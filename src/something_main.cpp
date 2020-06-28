@@ -208,7 +208,6 @@ int main(void)
         game.render(renderer);
         if (game.debug) {
             game.render_debug_overlay(renderer);
-            game.debug_toolbar.render(renderer, game.camera, game.debug_font);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////

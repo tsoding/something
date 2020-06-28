@@ -636,6 +636,8 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         items[i].render_debug(renderer, camera);
     }
+
+    debug_toolbar.render(renderer, camera, debug_font);
 }
 
 int Game::count_alive_projectiles(void)
