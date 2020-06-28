@@ -31,7 +31,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera)
     //   Might be a good opportunity to simplify adding new types to the system.
     tiles_sprite.srcrect = {120, 128, 16, 16};
 
-    // TODO: Toolbar buttons should have tooltips explaining buttons' purpose
+    // TODO(#120): Toolbar buttons should have tooltips explaining buttons' purpose
 
     for (int i = 0; i < Button_Count; ++i) {
         SDL_Color shade = {};
