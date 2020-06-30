@@ -216,6 +216,19 @@ void Entity::update(float dt)
             break;
 
         case Alive_State::Walking:
+            const float ENTITY_ACCEL = ENTITY_SPEED * ENTITY_ACCEL_FACTOR;
+            switch (walking_direction) {
+            case Left: {
+                vel.x = fmax(vel.x - ENTITY_ACCEL * dt,
+                             -ENTITY_SPEED);
+            } break;
+
+            case Right: {
+                vel.x = fminf(vel.x + ENTITY_ACCEL * dt,
+                              ENTITY_SPEED);
+            } break;
+            }
+
             walking.update(dt);
             break;
         }
@@ -347,4 +360,15 @@ void Entity::flash(SDL_Color color)
 {
     flash_alpha = 1.0f;
     flash_color = color;
+}
+
+void Entity::move(Direction direction)
+{
+    alive_state = Alive_State::Walking;
+    walking_direction = direction;
+}
+
+void Entity::stop()
+{
+    alive_state = Alive_State::Idle;
 }

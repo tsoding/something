@@ -335,21 +335,12 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    const float ENTITY_ACCEL = ENTITY_SPEED * ENTITY_ACCEL_FACTOR;
     if (keyboard[SDL_SCANCODE_D]) {
-        entities[PLAYER_ENTITY_INDEX].vel.x =
-            fminf(
-                entities[PLAYER_ENTITY_INDEX].vel.x + ENTITY_ACCEL * dt,
-                ENTITY_SPEED);
-        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
+        entities[PLAYER_ENTITY_INDEX].move(Entity::Right);
     } else if (keyboard[SDL_SCANCODE_A]) {
-        entities[PLAYER_ENTITY_INDEX].vel.x =
-            fmax(
-                entities[PLAYER_ENTITY_INDEX].vel.x - ENTITY_ACCEL * dt,
-                -ENTITY_SPEED);
-        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Walking;
+        entities[PLAYER_ENTITY_INDEX].move(Entity::Left);
     } else {
-        entities[PLAYER_ENTITY_INDEX].alive_state = Alive_State::Idle;
+        entities[PLAYER_ENTITY_INDEX].stop();
     }
 
     // Camera "Physics" //////////////////////////////

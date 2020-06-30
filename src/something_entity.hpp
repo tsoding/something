@@ -23,8 +23,15 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
+
 struct Entity
 {
+    enum Direction
+    {
+        Right,
+        Left
+    };
+
     Entity_State state;
     Alive_State alive_state;
     Jump_State jump_state;
@@ -38,6 +45,7 @@ struct Entity
     int lives;
     SDL_Color flash_color;
     float flash_alpha;
+    Direction walking_direction;
 
     Frame_Animat idle;
     Frame_Animat walking;
@@ -77,6 +85,8 @@ struct Entity
     void point_gun_at(Vec2f target);
     void jump(Sample_Mixer *mixer);
     void flash(SDL_Color color);
+    void move(Direction direction);
+    void stop();
 };
 
 Entity player_entity(Vec2f pos);
