@@ -298,11 +298,14 @@ void Game::update(float dt)
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
-                entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
-                entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
-
+                
+                mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
                     entity->kill();
+                    mixer.play_sample(kill_enemy_sample);
+                } else {
+                    entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
+                    entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
                 }
             }
         }

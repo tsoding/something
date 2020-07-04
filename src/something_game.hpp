@@ -73,6 +73,8 @@ struct Game
     Sample_S16 entity_jump_sample1;
     Sample_S16 entity_jump_sample2;
     Sample_S16 player_shoot_sample;
+    Sample_S16 kill_enemy_sample;
+    Sample_S16 damage_enemy_sample;
 
     Frame_Animat projectile_active_animat;
     Frame_Animat projectile_poof_animat;
