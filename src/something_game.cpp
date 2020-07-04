@@ -161,9 +161,9 @@ void Game::handle_event(SDL_Event *event)
     } break;
 
     case SDL_MOUSEMOTION: {
-        debug_mouse_position =
+        mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
-        collision_probe = debug_mouse_position;
+        collision_probe = mouse_position;
 
         if (debug) {
             debug_toolbar.handle_mouse_hover(
@@ -174,7 +174,7 @@ void Game::handle_event(SDL_Event *event)
         auto index = room_index_at(collision_probe);
         room_row[index.unwrap].resolve_point_collision(&collision_probe);
 
-        Vec2i tile = vec_cast<int>((debug_mouse_position - room_row[index.unwrap].position()) / TILE_SIZE);
+        Vec2i tile = vec_cast<int>((mouse_position - room_row[index.unwrap].position()) / TILE_SIZE);
         switch (state) {
         case Debug_Draw_State::Create: {
             if (room_row[index.unwrap].is_tile_inbounds(tile))
@@ -196,16 +196,16 @@ void Game::handle_event(SDL_Event *event)
         case SDL_BUTTON_RIGHT: {
             if (debug) {
                 tracking_projectile =
-                    projectile_at_position(debug_mouse_position);
+                    projectile_at_position(mouse_position);
 
                 if (!tracking_projectile.has_value) {
                     switch (debug_toolbar.active_button) {
                     case DEBUG_TOOLBAR_TILES: {
-                        auto index = room_index_at(debug_mouse_position);
+                        auto index = room_index_at(mouse_position);
 
                         Vec2i tile =
                             vec_cast<int>(
-                                (debug_mouse_position - room_row[index.unwrap].position()) /
+                                (mouse_position - room_row[index.unwrap].position()) /
                                 TILE_SIZE);
 
                         if (room_row[index.unwrap].is_tile_inbounds(tile)) {
@@ -253,7 +253,7 @@ void Game::update(float dt)
     // Update Player's gun direction //////////////////////////////
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
-    entities[PLAYER_ENTITY_INDEX].point_gun_at(debug_mouse_position);
+    entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
     if (!debug) {
@@ -494,7 +494,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         sec(SDL_RenderFillRect(renderer, &rect));
     }
 
-    auto index = room_index_at(debug_mouse_position);
+    auto index = room_index_at(mouse_position);
     auto room_boundary_screen =
         camera.to_screen(ROOM_BOUNDARY + room_row[index.unwrap].position());
     {
@@ -514,8 +514,8 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
              FONT_SHADOW_COLOR,
              vec2(PADDING, 50 + PADDING),
              "Mouse Position: (%.4f, %.4f)",
-             debug_mouse_position.x,
-             debug_mouse_position.y);
+             mouse_position.x,
+             mouse_position.y);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
@@ -602,7 +602,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         sec(SDL_RenderDrawRect(renderer, &hitbox));
     }
 
-    auto projectile_index = projectile_at_position(debug_mouse_position);
+    auto projectile_index = projectile_at_position(mouse_position);
     if (projectile_index.has_value) {
         sec(SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255));
         auto hitbox = rectf_for_sdl(
@@ -613,8 +613,8 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
 
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
     const Rectf tile_rect = {
-        floorf(debug_mouse_position.x / TILE_SIZE) * TILE_SIZE,
-        floorf(debug_mouse_position.y / TILE_SIZE) * TILE_SIZE,
+        floorf(mouse_position.x / TILE_SIZE) * TILE_SIZE,
+        floorf(mouse_position.y / TILE_SIZE) * TILE_SIZE,
         TILE_SIZE,
         TILE_SIZE
     };
@@ -810,7 +810,7 @@ void Game::spawn_health_at_mouse()
 {
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type == ITEM_NONE) {
-            items[i] = make_health_item(debug_mouse_position);
+            items[i] = make_health_item(mouse_position);
             break;
         }
     }

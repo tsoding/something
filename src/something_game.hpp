@@ -59,7 +59,7 @@ struct Game
     bool debug;
     bool step_debug;
     Vec2f collision_probe;
-    Vec2f debug_mouse_position;
+    Vec2f mouse_position;
     Maybe<Projectile_Index> tracking_projectile;
     Debug_Draw_State state;
     Camera camera;
