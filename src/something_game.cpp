@@ -253,8 +253,7 @@ void Game::update(float dt)
     // Update Player's gun direction //////////////////////////////
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
-    entities[PLAYER_ENTITY_INDEX].point_gun_at(
-        camera.to_world(vec2((float) mouse_x, (float) mouse_y)));
+    entities[PLAYER_ENTITY_INDEX].point_gun_at(debug_mouse_position);
 
     // Enemy AI //////////////////////////////
     if (!debug) {
