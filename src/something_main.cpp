@@ -96,8 +96,10 @@ int main(void)
     game.entity_jump_sample2      = sample_s16_by_name("./assets/sounds/jumppp22-48000-mono.wav"_sv);
     game.projectile_poof_animat   = frame_animat_by_name("./assets/animats/plasma_pop.txt"_sv);
     game.projectile_active_animat = frame_animat_by_name("./assets/animats/plasma_bolt.txt"_sv);
-
-
+    /// {"./assets/sounds/Fallbig1.wav", {}},
+    /// {"./assets/sounds/Hurt_Old.wav", {}},
+    game.damage_enemy_sample      = sample_s16_by_name("./assets/sounds/Hurt_Old.wav"_sv);
+    game.kill_enemy_sample        = sample_s16_by_name("./assets/sounds/Fallbig1.wav"_sv);
 
 #ifndef SOMETHING_RELEASE
     {
