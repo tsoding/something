@@ -10,8 +10,8 @@ struct Defer
 #define CONCAT(a, b) CONCAT0(a, b)
 #define defer(body) Defer CONCAT(defer, __LINE__)([&]() { body; })
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
@@ -23,7 +23,6 @@ void print1(FILE *stream, Vec2<T> v)
 }
 
 Game game = {};
-
 
 int main(void)
 {
@@ -39,6 +38,10 @@ int main(void)
         sec(SDL_CreateRenderer(
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
+
+    sec(SDL_RenderSetLogicalSize(renderer,
+                                 SCREEN_WIDTH,
+                                 SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
     size_t tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
@@ -205,6 +208,16 @@ int main(void)
                 BACKGROUND_COLOR.b,
                 BACKGROUND_COLOR.a));
         sec(SDL_RenderClear(renderer));
+        sec(SDL_SetRenderDrawColor(
+                renderer,
+                CANVAS_BACKGROUND_COLOR.r,
+                CANVAS_BACKGROUND_COLOR.g,
+                CANVAS_BACKGROUND_COLOR.b,
+                CANVAS_BACKGROUND_COLOR.a));
+        {
+            SDL_Rect canvas = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+            SDL_RenderFillRect(renderer, &canvas);
+        }
         game.render(renderer);
         if (game.debug) {
             game.render_debug_overlay(renderer);
