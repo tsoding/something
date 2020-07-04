@@ -10,9 +10,6 @@ struct Defer
 #define CONCAT(a, b) CONCAT0(a, b)
 #define defer(body) Defer CONCAT(defer, __LINE__)([&]() { body; })
 
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
-
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
 
@@ -164,13 +161,6 @@ int main(void)
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
 
-        {
-            int w, h;
-            SDL_GetWindowSize(window, &w, &h);
-            game.camera.width = (float) w;
-            game.camera.height = (float) h;
-        }
-
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -215,7 +205,7 @@ int main(void)
                 CANVAS_BACKGROUND_COLOR.b,
                 CANVAS_BACKGROUND_COLOR.a));
         {
-            SDL_Rect canvas = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+            SDL_Rect canvas = {0, 0, (int) floorf(SCREEN_WIDTH), (int) floorf(SCREEN_HEIGHT)};
             SDL_RenderFillRect(renderer, &canvas);
         }
         game.render(renderer);

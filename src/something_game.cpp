@@ -163,12 +163,12 @@ void Game::handle_event(SDL_Event *event)
     case SDL_MOUSEMOTION: {
         mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
+        original_mouse_position = vec2(event->motion.x, event->motion.y);
         collision_probe = mouse_position;
 
         if (debug) {
             debug_toolbar.handle_mouse_hover(
-                vec_cast<float>(vec2(event->motion.x, event->motion.y)),
-                camera);
+                vec_cast<float>(vec2(event->motion.x, event->motion.y)));
         }
 
         auto index = room_index_at(collision_probe);
@@ -230,8 +230,7 @@ void Game::handle_event(SDL_Event *event)
         } break;
 
         case SDL_BUTTON_LEFT: {
-            if (!debug_toolbar.handle_click_at({(float)event->button.x, (float)event->button.y},
-                                                    camera)) {
+            if (!debug_toolbar.handle_click_at({(float)event->button.x, (float)event->button.y})) {
                 entity_shoot({PLAYER_ENTITY_INDEX});
             }
         } break;
@@ -396,7 +395,7 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
-    popup.render(renderer, &camera);
+    popup.render(renderer);
 }
 
 void Game::entity_shoot(Entity_Index entity_index)
@@ -627,7 +626,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         items[i].render_debug(renderer, camera);
     }
 
-    debug_toolbar.render(renderer, camera, debug_font);
+    debug_toolbar.render(renderer, debug_font);
 }
 
 int Game::count_alive_projectiles(void)

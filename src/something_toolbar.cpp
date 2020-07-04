@@ -26,11 +26,11 @@ static void render_tooltip(SDL_Renderer *renderer,
 }
 
 
-Rectf Toolbar::button_hitbox(size_t button, Camera camera)
+Rectf Toolbar::button_hitbox(size_t button)
 {
     const Vec2f position = {
         TOOLBAR_BUTTON_PADDING,
-        camera.height - TOOLBAR_BUTTON_PADDING - TOOLBAR_BUTTON_HEIGHT
+        SCREEN_HEIGHT - TOOLBAR_BUTTON_PADDING - TOOLBAR_BUTTON_HEIGHT
     };
 
     const Rectf hitbox = {
@@ -43,7 +43,7 @@ Rectf Toolbar::button_hitbox(size_t button, Camera camera)
     return hitbox;
 }
 
-void Toolbar::render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font)
+void Toolbar::render(SDL_Renderer *renderer, Bitmap_Font font)
 {
     for (size_t i = 0; i < buttons_count; ++i) {
         SDL_Color shade = {};
@@ -52,7 +52,7 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font)
             shade = TOOLBAR_INACTIVE_SHADE;
         }
 
-        auto hitbox = button_hitbox(i, camera);
+        auto hitbox = button_hitbox(i);
         const auto shade_rect = rectf_for_sdl(hitbox);
 
         sec(SDL_SetRenderDrawColor(
@@ -81,10 +81,10 @@ void Toolbar::render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font)
     }
 }
 
-bool Toolbar::handle_click_at(Vec2f position, Camera camera)
+bool Toolbar::handle_click_at(Vec2f position)
 {
     for (size_t i = 0; i < buttons_count; ++i) {
-        if (rect_contains_vec2(button_hitbox(i, camera), position)) {
+        if (rect_contains_vec2(button_hitbox(i), position)) {
             active_button = i;
             return true;
         }
@@ -92,10 +92,10 @@ bool Toolbar::handle_click_at(Vec2f position, Camera camera)
     return false;
 }
 
-bool Toolbar::handle_mouse_hover(Vec2f position, Camera camera)
+bool Toolbar::handle_mouse_hover(Vec2f position)
 {
     for (size_t i = 0; i < buttons_count; ++i) {
-        if (rect_contains_vec2(button_hitbox(i, camera), position)) {
+        if (rect_contains_vec2(button_hitbox(i), position)) {
             hovered_button = {true, i};
             tooltip_position = position;
             return true;

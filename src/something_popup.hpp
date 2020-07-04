@@ -12,7 +12,7 @@ struct Popup
     float a;
 
     void notify(SDL_Color color, const char *format, ...);
-    void render(SDL_Renderer *renderer, const Camera *camera);
+    void render(SDL_Renderer *renderer);
     void update(float delta_time);
 };
 

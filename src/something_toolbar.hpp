@@ -17,10 +17,10 @@ struct Toolbar
     Maybe<size_t> hovered_button;
     Vec2f tooltip_position;
 
-    void render(SDL_Renderer *renderer, Camera camera, Bitmap_Font font);
-    bool handle_click_at(Vec2f position, Camera camera);
-    bool handle_mouse_hover(Vec2f position, Camera camera);
-    Rectf button_hitbox(size_t button, Camera camera);
+    void render(SDL_Renderer *renderer, Bitmap_Font font);
+    bool handle_click_at(Vec2f position);
+    bool handle_mouse_hover(Vec2f position);
+    Rectf button_hitbox(size_t button);
 };
 
 #endif  // SOMETHING_TOOLBAR_HPP_
