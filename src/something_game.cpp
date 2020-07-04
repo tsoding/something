@@ -607,17 +607,15 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
         auto hitbox = rectf_for_sdl(
             camera.to_screen(hitbox_of_projectile(projectile_index.unwrap)));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
-        return;
-    }
+    } else {
+        sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
+        const Rectf tile_rect = {
+            floorf(mouse_position.x / TILE_SIZE) * TILE_SIZE,
+            floorf(mouse_position.y / TILE_SIZE) * TILE_SIZE,
+            TILE_SIZE,
+            TILE_SIZE
+        };
 
-    sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
-    const Rectf tile_rect = {
-        floorf(mouse_position.x / TILE_SIZE) * TILE_SIZE,
-        floorf(mouse_position.y / TILE_SIZE) * TILE_SIZE,
-        TILE_SIZE,
-        TILE_SIZE
-    };
-    {
         auto rect = rectf_for_sdl(camera.to_screen(tile_rect));
         sec(SDL_RenderDrawRect(renderer, &rect));
     }
