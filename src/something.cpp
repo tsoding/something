@@ -25,6 +25,7 @@
 #endif
 
 #include "something_error.cpp"
+#include "something_render.cpp"
 #include "something_font.cpp"
 #include "something_camera.cpp"
 #include "something_texture.cpp"

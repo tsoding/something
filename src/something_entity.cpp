@@ -1,13 +1,5 @@
 #include "./something_entity.hpp"
 
-void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
-{
-    sec(SDL_RenderDrawLine(
-            renderer,
-            (int) floorf(begin.x), (int) floorf(begin.y),
-            (int) floorf(end.x),   (int) floorf(end.y)));
-}
-
 void Entity::kill()
 {
     if (state == Entity_State::Alive) {
@@ -134,11 +126,11 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
         // Render the gun
         // TODO(#59): Proper gun rendering
         Vec2f gun_begin = pos;
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         render_line(
             renderer,
             camera.to_screen(gun_begin),
-            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH));
+            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH),
+            {255, 0, 0, 255});
     } break;
 
     case Entity_State::Poof: {

@@ -65,6 +65,7 @@ struct Room
     void copy_from(Room *room);
     void resolve_point_collision(Vec2f *origin);
     Tile *tile_at(Vec2f p);
+    bool a_sees_b(Vec2f a, Vec2f b);
 };
 
 #endif  // SOMETHING_ROOM_HPP_

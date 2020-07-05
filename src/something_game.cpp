@@ -298,7 +298,7 @@ void Game::update(float dt)
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
-                
+
                 mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
                     entity->kill();
