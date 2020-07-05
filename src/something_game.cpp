@@ -247,12 +247,44 @@ void Game::update(float dt)
     // Enemy AI //////////////////////////////
     if (!debug) {
         for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-            size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
-            size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
+            auto &player = entities[PLAYER_ENTITY_INDEX];
+            auto &enemy =  entities[ENEMY_ENTITY_INDEX_OFFSET + i];
+            size_t player_index = room_index_at(player.pos).unwrap;
+            size_t enemy_index = room_index_at(enemy.pos).unwrap;
             if (player_index == enemy_index) {
-                entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
-                    entities[PLAYER_ENTITY_INDEX].pos);
-                entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+                if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
+                    enemy.stop();
+                    enemy.point_gun_at(player.pos);
+                    entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+                } else {
+                    static Room_Queue path = {};
+                    auto player_tile = room_row[player_index].tile_coord_at(player.pos);
+                    auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
+                    room_row[player_index].bfs(
+                        player_tile,
+                        enemy_tile,
+                        &path);
+                    if (path.count > 0) {
+                        auto d = path[0] - enemy_tile;
+                        println(stdout, d);
+                        if (d.y < 0) {
+                            enemy.jump();
+                        }
+                        if (d.x > 0) {
+                            enemy.move(Entity::Right);
+                        }
+                        if (d.x < 0) {
+                            enemy.move(Entity::Left);
+                        }
+                        if (d.x == 0) {
+                            enemy.stop();
+                        }
+                    } else {
+                        enemy.stop();
+                    }
+                }
+            } else {
+                enemy.stop();
             }
         }
     }

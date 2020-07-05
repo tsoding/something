@@ -204,3 +204,64 @@ bool Room::a_sees_b(Vec2f a, Vec2f b)
 
     return true;
 }
+
+void Room::bfs(Vec2i src, Vec2i dst, Room_Queue *path)
+{
+    Room_Queue bfs_q = {};
+    int visited[ROOM_WIDTH][ROOM_HEIGHT] = {};
+
+    bfs_q.clear();
+    memset(visited, 0, sizeof(visited));
+    path->clear();
+
+    bfs_q.nq(src);
+    visited[src.y][src.x] = 1;
+    while (bfs_q.count > 0) {
+        Vec2i p0 = bfs_q.dq();
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if ((dy == 0) != (dx == 0)) {
+                    Vec2i p1 = {p0.x + dx, p0.y + dy};
+                    if (is_tile_inbounds(p1) &&
+                        tiles[p1.y][p1.x] == TILE_EMPTY &&
+                        visited[p1.y][p1.x] == 0)
+                    {
+                        visited[p1.y][p1.x] = visited[p0.y][p0.x] + 1;
+                        bfs_q.nq(p1);
+                    }
+                }
+            }
+        }
+    }
+
+    if (visited[dst.y][dst.x] > 0) {
+        while (dst.y != src.y || dst.x != src.x) {
+            bool next = false;
+            for (int dy = -1; !next && dy <= 1; ++dy) {
+                for (int dx = -1; !next && dx <= 1; ++dx) {
+                    if ((dy == 0) != (dx == 0)) {
+                        Vec2i dst1 = {
+                            dst.x + dx,
+                            dst.y + dy
+                        };
+
+                        if (is_tile_inbounds(dst1) &&
+                            tiles[dst1.y][dst1.x] == TILE_EMPTY &&
+                            visited[dst1.y][dst1.x] < visited[dst.y][dst.x])
+                        {
+                            path->nq(dst1);
+                            next = true;
+                            dst = dst1;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+Vec2i Room::tile_coord_at(Vec2f p)
+{
+    auto coord = (p - position()) / TILE_SIZE;
+    return vec_cast<int>(coord);
+}

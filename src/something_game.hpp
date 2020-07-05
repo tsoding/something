@@ -24,7 +24,6 @@ struct Projectile_Index
     size_t unwrap;
 };
 
-
 enum class Projectile_State
 {
     Ded = 0,
