@@ -269,7 +269,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt);
+        entities[i].update(dt, &mixer);
         entity_resolve_collision({i});
     }
 
@@ -423,7 +423,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 void Game::entity_jump(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
-    entities[entity_index.unwrap].jump(&mixer);
+    entities[entity_index.unwrap].jump();
 }
 
 void Game::reset_entities()
