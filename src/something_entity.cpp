@@ -287,7 +287,7 @@ Entity player_entity(Vec2f pos)
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
-    entity.prepare_for_jump_animat.duration = 0.1f;
+    entity.prepare_for_jump_animat.duration = 0.05f;
 
     entity.jump_animat.rubber_animats[0].begin = 0.2f;
     entity.jump_animat.rubber_animats[0].end = -0.2f;
