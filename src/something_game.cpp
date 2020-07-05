@@ -150,16 +150,6 @@ void Game::handle_event(SDL_Event *event)
         }
     } break;
 
-    case SDL_KEYUP: {
-        switch (event->key.keysym.sym) {
-        case SDLK_SPACE: {
-            if (!event->key.repeat) {
-                entity_jump({PLAYER_ENTITY_INDEX});
-            }
-        } break;
-        }
-    } break;
-
     case SDL_MOUSEMOTION: {
         mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
