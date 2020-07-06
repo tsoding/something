@@ -251,38 +251,40 @@ void Game::update(float dt)
         auto player_tile = room_row[player_index].tile_coord_at(player.pos);
         room_row[player_index].bfs_to_tile(player_tile);
 
-        for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-            auto &enemy =  entities[ENEMY_ENTITY_INDEX_OFFSET + i];
-            size_t enemy_index = room_index_at(enemy.pos).unwrap;
-            if (player_index == enemy_index) {
-                if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
-                    enemy.stop();
-                    enemy.point_gun_at(player.pos);
-                    entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
-                } else {
-                    auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
-                    auto next = room_row[player_index].next_in_bfs(enemy_tile);
-                    if (next.has_value) {
-                        auto d = next.unwrap - enemy_tile;
+        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+            auto &enemy =  entities[i];
+            if (enemy.state == Entity_State::Alive) {
+                size_t enemy_index = room_index_at(enemy.pos).unwrap;
+                if (player_index == enemy_index) {
+                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
+                        enemy.stop();
+                        enemy.point_gun_at(player.pos);
+                        entity_shoot({i});
+                    } else {
+                        auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
+                        auto next = room_row[player_index].next_in_bfs(enemy_tile);
+                        if (next.has_value) {
+                            auto d = next.unwrap - enemy_tile;
 
-                        if (d.y < 0) {
-                            enemy.jump();
-                        }
-                        if (d.x > 0) {
-                            enemy.move(Entity::Right);
-                        }
-                        if (d.x < 0) {
-                            enemy.move(Entity::Left);
-                        }
-                        if (d.x == 0) {
+                            if (d.y < 0) {
+                                enemy.jump();
+                            }
+                            if (d.x > 0) {
+                                enemy.move(Entity::Right);
+                            }
+                            if (d.x < 0) {
+                                enemy.move(Entity::Left);
+                            }
+                            if (d.x == 0) {
+                                enemy.stop();
+                            }
+                        } else {
                             enemy.stop();
                         }
-                    } else {
-                        enemy.stop();
                     }
+                } else {
+                    enemy.stop();
                 }
-            } else {
-                enemy.stop();
             }
         }
     }
@@ -453,7 +455,10 @@ void Game::reset_entities()
 
     // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i] = enemy_entity(room_row[i + 1].center());
+        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i] = enemy_entity(
+            room_row[i + 1].center() - vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
+        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i + 1] = enemy_entity(
+            room_row[i + 1].center() + vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
     }
 }
 
