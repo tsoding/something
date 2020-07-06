@@ -266,7 +266,6 @@ void Game::update(float dt)
                         &path);
                     if (path.count > 0) {
                         auto d = path[0] - enemy_tile;
-                        println(stdout, d);
                         if (d.y < 0) {
                             enemy.jump();
                         }
