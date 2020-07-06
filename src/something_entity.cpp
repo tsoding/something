@@ -1,13 +1,5 @@
 #include "./something_entity.hpp"
 
-void render_line(SDL_Renderer *renderer, Vec2f begin, Vec2f end)
-{
-    sec(SDL_RenderDrawLine(
-            renderer,
-            (int) floorf(begin.x), (int) floorf(begin.y),
-            (int) floorf(end.x),   (int) floorf(end.y)));
-}
-
 void Entity::kill()
 {
     if (state == Entity_State::Alive) {
@@ -134,11 +126,11 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
         // Render the gun
         // TODO(#59): Proper gun rendering
         Vec2f gun_begin = pos;
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
         render_line(
             renderer,
             camera.to_screen(gun_begin),
-            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH));
+            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH),
+            {255, 0, 0, 255});
     } break;
 
     case Entity_State::Poof: {
@@ -175,7 +167,7 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(float dt)
+void Entity::update(float dt, Sample_Mixer *mixer)
 {
     switch (state) {
     case Entity_State::Alive: {
@@ -200,6 +192,12 @@ void Entity::update(float dt)
 
         case Jump_State::Prepare:
             prepare_for_jump_animat.update(dt);
+            if (prepare_for_jump_animat.finished()) {
+                jump_animat.reset();
+                jump_state = Jump_State::Jump;
+                vel.y = ENTITY_GRAVITY * -0.6f;
+                mixer->play_sample(jump_samples[rand() % 2]);
+            }
             break;
 
         case Jump_State::Jump:
@@ -250,25 +248,12 @@ void Entity::point_gun_at(Vec2f target)
     gun_dir = normalize(target - pos);
 }
 
-void Entity::jump(Sample_Mixer *mixer)
+void Entity::jump()
 {
     if (state == Entity_State::Alive) {
-        switch (jump_state) {
-        case Jump_State::No_Jump: {
+        if (jump_state == Jump_State::No_Jump) {
             prepare_for_jump_animat.reset();
             jump_state = Jump_State::Prepare;
-        } break;
-
-        case Jump_State::Prepare: {
-            float a = prepare_for_jump_animat.t / prepare_for_jump_animat.duration;
-            jump_animat.reset();
-            jump_state = Jump_State::Jump;
-            vel.y = ENTITY_GRAVITY * -min(a, 0.6f);
-            mixer->play_sample(jump_samples[rand() % 2]);
-        } break;
-
-        case Jump_State::Jump:
-            break;
         }
     }
 }
@@ -302,7 +287,7 @@ Entity player_entity(Vec2f pos)
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
-    entity.prepare_for_jump_animat.duration = 0.2f;
+    entity.prepare_for_jump_animat.duration = 0.05f;
 
     entity.jump_animat.rubber_animats[0].begin = 0.2f;
     entity.jump_animat.rubber_animats[0].end = -0.2f;

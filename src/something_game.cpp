@@ -150,16 +150,6 @@ void Game::handle_event(SDL_Event *event)
         }
     } break;
 
-    case SDL_KEYUP: {
-        switch (event->key.keysym.sym) {
-        case SDLK_SPACE: {
-            if (!event->key.repeat) {
-                entity_jump({PLAYER_ENTITY_INDEX});
-            }
-        } break;
-        }
-    } break;
-
     case SDL_MOUSEMOTION: {
         mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
@@ -256,20 +246,52 @@ void Game::update(float dt)
 
     // Enemy AI //////////////////////////////
     if (!debug) {
-        for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-            size_t player_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap;
-            size_t enemy_index = room_index_at(entities[ENEMY_ENTITY_INDEX_OFFSET + i].pos).unwrap;
-            if (player_index == enemy_index) {
-                entities[ENEMY_ENTITY_INDEX_OFFSET + i].point_gun_at(
-                    entities[PLAYER_ENTITY_INDEX].pos);
-                entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
+        auto &player = entities[PLAYER_ENTITY_INDEX];
+        size_t player_index = room_index_at(player.pos).unwrap;
+        auto player_tile = room_row[player_index].tile_coord_at(player.pos);
+        room_row[player_index].bfs_to_tile(player_tile);
+
+        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+            auto &enemy =  entities[i];
+            if (enemy.state == Entity_State::Alive) {
+                size_t enemy_index = room_index_at(enemy.pos).unwrap;
+                if (player_index == enemy_index) {
+                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
+                        enemy.stop();
+                        enemy.point_gun_at(player.pos);
+                        entity_shoot({i});
+                    } else {
+                        auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
+                        auto next = room_row[player_index].next_in_bfs(enemy_tile);
+                        if (next.has_value) {
+                            auto d = next.unwrap - enemy_tile;
+
+                            if (d.y < 0) {
+                                enemy.jump();
+                            }
+                            if (d.x > 0) {
+                                enemy.move(Entity::Right);
+                            }
+                            if (d.x < 0) {
+                                enemy.move(Entity::Left);
+                            }
+                            if (d.x == 0) {
+                                enemy.stop();
+                            }
+                        } else {
+                            enemy.stop();
+                        }
+                    }
+                } else {
+                    enemy.stop();
+                }
             }
         }
     }
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt);
+        entities[i].update(dt, &mixer);
         entity_resolve_collision({i});
     }
 
@@ -298,7 +320,7 @@ void Game::update(float dt)
             if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
-                
+
                 mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
                     entity->kill();
@@ -423,7 +445,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 void Game::entity_jump(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
-    entities[entity_index.unwrap].jump(&mixer);
+    entities[entity_index.unwrap].jump();
 }
 
 void Game::reset_entities()
@@ -433,7 +455,10 @@ void Game::reset_entities()
 
     // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        entities[ENEMY_ENTITY_INDEX_OFFSET + i] = enemy_entity(room_row[i + 1].center());
+        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i] = enemy_entity(
+            room_row[i + 1].center() - vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
+        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i + 1] = enemy_entity(
+            room_row[i + 1].center() + vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
     }
 }
 

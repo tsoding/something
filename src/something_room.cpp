@@ -187,4 +187,77 @@ void Room::resolve_point_collision(Vec2f *origin)
     *origin = sides[closest].np + position();
 }
 
-////////////////////////////////////////////////////////////
+bool Room::a_sees_b(Vec2f a, Vec2f b)
+{
+    // TODO: Room::a_sees_b is not particularly smart
+    //   It is implemented using a very simple ray marching which sometimes skips
+    //   the corners. We need to evaluate whether this is important or not
+    Vec2f d = normalize(b - a);
+    float s = TILE_SIZE * 0.5f;
+    float n = sqrtf(sqr_dist(a, b)) / s;
+    for (float i = 0; i < n; i += 1.0f) {
+        Vec2f p = a + d * s * i;
+        if (!is_tile_at_abs_p_empty(p)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void Room::bfs_to_tile(Vec2i src)
+{
+    Room_Queue bfs_q = {};
+    memset(bfs_trace, 0, sizeof(bfs_trace));
+
+    bfs_q.nq(src);
+    bfs_trace[src.y][src.x] = 1;
+    while (bfs_q.count > 0) {
+        Vec2i p0 = bfs_q.dq();
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if ((dy == 0) != (dx == 0)) {
+                    Vec2i p1 = {p0.x + dx, p0.y + dy};
+                    if (is_tile_inbounds(p1) &&
+                        tiles[p1.y][p1.x] == TILE_EMPTY &&
+                        bfs_trace[p1.y][p1.x] == 0)
+                    {
+                        bfs_trace[p1.y][p1.x] = bfs_trace[p0.y][p0.x] + 1;
+                        bfs_q.nq(p1);
+                    }
+                }
+            }
+        }
+    }
+}
+
+Maybe<Vec2i> Room::next_in_bfs(Vec2i dst)
+{
+    if (bfs_trace[dst.y][dst.x] > 0) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if ((dy == 0) != (dx == 0)) {
+                    Vec2i dst1 = {
+                        dst.x + dx,
+                        dst.y + dy
+                    };
+
+                    if (is_tile_inbounds(dst1) &&
+                        tiles[dst1.y][dst1.x] == TILE_EMPTY &&
+                        bfs_trace[dst1.y][dst1.x] < bfs_trace[dst.y][dst.x])
+                    {
+                        return {true, dst1};
+                    }
+                }
+            }
+        }
+    }
+
+    return {};
+}
+
+Vec2i Room::tile_coord_at(Vec2f p)
+{
+    auto coord = (p - position()) / TILE_SIZE;
+    return vec_cast<int>(coord);
+}
