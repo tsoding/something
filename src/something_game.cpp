@@ -246,10 +246,13 @@ void Game::update(float dt)
 
     // Enemy AI //////////////////////////////
     if (!debug) {
+        auto &player = entities[PLAYER_ENTITY_INDEX];
+        size_t player_index = room_index_at(player.pos).unwrap;
+        auto player_tile = room_row[player_index].tile_coord_at(player.pos);
+        room_row[player_index].bfs_to_tile(player_tile);
+
         for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-            auto &player = entities[PLAYER_ENTITY_INDEX];
             auto &enemy =  entities[ENEMY_ENTITY_INDEX_OFFSET + i];
-            size_t player_index = room_index_at(player.pos).unwrap;
             size_t enemy_index = room_index_at(enemy.pos).unwrap;
             if (player_index == enemy_index) {
                 if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
@@ -257,15 +260,11 @@ void Game::update(float dt)
                     enemy.point_gun_at(player.pos);
                     entity_shoot({ENEMY_ENTITY_INDEX_OFFSET + i});
                 } else {
-                    static Room_Queue path = {};
-                    auto player_tile = room_row[player_index].tile_coord_at(player.pos);
                     auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
-                    room_row[player_index].bfs(
-                        player_tile,
-                        enemy_tile,
-                        &path);
-                    if (path.count > 0) {
-                        auto d = path[0] - enemy_tile;
+                    auto next = room_row[player_index].next_in_bfs(enemy_tile);
+                    if (next.has_value) {
+                        auto d = next.unwrap - enemy_tile;
+
                         if (d.y < 0) {
                             enemy.jump();
                         }

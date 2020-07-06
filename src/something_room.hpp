@@ -87,6 +87,7 @@ struct Room
 {
     Room_Index index;
     Tile tiles[ROOM_HEIGHT][ROOM_WIDTH];
+    int bfs_trace[ROOM_WIDTH][ROOM_HEIGHT];
 
     Vec2f position() const;
     Vec2f center() const;
@@ -108,7 +109,9 @@ struct Room
     void resolve_point_collision(Vec2f *origin);
     Tile *tile_at(Vec2f p);
     bool a_sees_b(Vec2f a, Vec2f b);
-    void bfs(Vec2i src, Vec2i dst, Room_Queue *path);
+
+    void bfs_to_tile(Vec2i src);
+    Maybe<Vec2i> next_in_bfs(Vec2i dst);
 };
 
 #endif  // SOMETHING_ROOM_HPP_
