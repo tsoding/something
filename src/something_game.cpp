@@ -453,7 +453,6 @@ void Game::reset_entities()
     static_assert(ROOM_ROW_COUNT > 0);
     entities[PLAYER_ENTITY_INDEX] = player_entity(room_row[0].center());
 
-    // TODO(#84): load enemies from description files
     for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
         entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i] = enemy_entity(
             room_row[i + 1].center() - vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
