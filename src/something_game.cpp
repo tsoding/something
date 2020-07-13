@@ -344,7 +344,6 @@ void Game::update(float dt)
                 auto entity = entities + entity_index;
 
                 if (entity->state == Entity_State::Alive) {
-                    // TODO(#108): item should have a hitbox
                     if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
                         entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
                         entity->flash(ENTITY_HEAL_FLASH_COLOR);
