@@ -7,9 +7,9 @@
 #include <cctype>
 #include <cstring>
 
-#include "./common_algo.cpp"
-#include "./common_print.cpp"
-#include "./common_string.cpp"
+#include "./aids.hpp"
+
+using namespace aids;
 
 const size_t CONFIG_VAR_CAPACITY = 1024;
 String_View names[CONFIG_VAR_CAPACITY];
@@ -35,11 +35,15 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    auto input = file_as_string_view(argv[1]);
+    auto input = read_file_as_string_view(argv[1]);
+    if (!input.has_value) {
+        println(stderr, "Could not read file `", argv[1], "`");
+        abort();
+    }
 
-    while (input.count > 0) {
+    while (input.unwrap.count > 0) {
         // VAR_NAME : type = value
-        auto line = input.chop_by_delim('\n').trim();
+        auto line = input.unwrap.chop_by_delim('\n').trim();
         if (line.count == 0)   continue; // skip empty lines
         if (*line.data == '#') continue; // skip commentsa
 

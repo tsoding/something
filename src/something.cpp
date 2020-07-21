@@ -11,10 +11,9 @@
 #define STBI_ONLY_PNG
 #include "./stb_image.h"
 
-// READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
-#include "common_algo.cpp"
-#include "common_print.cpp"
-#include "common_string.cpp"
+#include "aids.hpp"
+
+using namespace aids;
 
 #include "something_math.cpp"
 
@@ -24,6 +23,7 @@
 #include "./baked_config.hpp"
 #endif
 
+// READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #include "something_error.cpp"
 #include "something_render.cpp"
 #include "something_font.cpp"
