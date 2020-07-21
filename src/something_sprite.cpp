@@ -262,8 +262,13 @@ Frame_Animat frame_animat_by_name(String_View file_path)
 
 Frame_Animat load_animat_file(const char *animat_filepath)
 {
-    String_View source = file_as_string_view(animat_filepath);
-    String_View input = source;
+    auto source = read_file_as_string_view(animat_filepath);
+    if (!source.has_value) {
+        println(stderr, "Could not load animation file: `", animat_filepath, "`");
+        abort();
+    }
+
+    String_View input = source.unwrap;
     Frame_Animat animat = {};
     Maybe<size_t> spritesheet_texture = {};
 
@@ -277,13 +282,13 @@ Frame_Animat load_animat_file(const char *animat_filepath)
 
         if (subkey == "count"_sv) {
             if (animat.frames != nullptr) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "`count` provided twice");
             }
 
             auto count_result = value.as_integer<int>();
             if (!count_result.has_value) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "`count` is not a number");
             }
 
@@ -294,7 +299,7 @@ Frame_Animat load_animat_file(const char *animat_filepath)
         } else if (subkey == "duration"_sv) {
             auto result = value.as_integer<int>();
             if (!result.has_value) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "`duration` is not a number");
             }
 
@@ -302,18 +307,18 @@ Frame_Animat load_animat_file(const char *animat_filepath)
         } else if (subkey == "frames"_sv) {
             auto result = key.chop_by_delim('.').trim().as_integer<int>();
             if (!result.has_value) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "frame index is not a number");
             }
 
             size_t frame_index = (size_t) result.unwrap;
             if (frame_index >= animat.frame_count) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "frame index is bigger than the `count`");
             }
 
             if (!spritesheet_texture.has_value) {
-                abort_parse_error(stderr, source, input, animat_filepath,
+                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                   "spritesheet was not loaded");
             }
 
@@ -323,13 +328,13 @@ Frame_Animat load_animat_file(const char *animat_filepath)
                 subkey = key.chop_by_delim('.').trim();
 
                 if (key.count != 0) {
-                    abort_parse_error(stderr, source, input, animat_filepath,
+                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                       "unknown subkey");
                 }
 
                 auto result_value = value.as_integer<int>();
                 if (!result_value.has_value) {
-                    abort_parse_error(stderr, source, input, animat_filepath,
+                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                       "value is not a number");
                 }
 
@@ -342,17 +347,17 @@ Frame_Animat load_animat_file(const char *animat_filepath)
                 } else if (subkey == "h"_sv) {
                     animat.frames[frame_index].srcrect.h = result_value.unwrap;
                 } else {
-                    abort_parse_error(stderr, source, input, animat_filepath,
+                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                                       "unknown subkey");
                 }
             }
         } else {
-            abort_parse_error(stderr, source, input, animat_filepath,
+            abort_parse_error(stderr, source.unwrap, input, animat_filepath,
                               "unknown subkey");
         }
     }
 
-    delete[] source.data;
+    free((void*) source.unwrap.data);
 
     return animat;
 }

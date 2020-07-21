@@ -9,22 +9,10 @@
 
 #include <SDL2/SDL.h>
 
-template <typename T>
-constexpr T min(T a, T b)
-{
-    return a < b ? a : b;
-}
+#include "aids.hpp"
+using namespace aids;
 
-template <typename T>
-constexpr T max(T x, T y)
-{
-    return x > y ? x : y;
-}
-
-// READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
-#include "./common_print.cpp"
-#include "./common_string.cpp"
-#include "./common_config.cpp"
+#include "common_config.cpp"
 
 const char * const CONFIG_FILE_PATH = "./assets/config.vars";
 
