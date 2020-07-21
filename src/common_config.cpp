@@ -82,13 +82,6 @@ Config_Parse_Result parse_failure(const char *message, size_t line)
     return result;
 }
 
-#define unwrap_into(lvalue, maybe)\
-    do {\
-        auto maybe_var = (maybe);\
-        if (!maybe_var.has_value) return {};\
-        (lvalue) = maybe_var.unwrap;\
-    } while (0)
-
 Maybe<SDL_Color> string_view_as_color(String_View input)
 {
     if (input.count != 8) return {};
