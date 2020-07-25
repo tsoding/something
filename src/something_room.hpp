@@ -4,34 +4,6 @@
 const int ROOM_WIDTH  = 10 * 2;
 const int ROOM_HEIGHT = 10 * 2;
 
-typedef uint32_t Tile;
-
-#define TILE_EMPTY         0
-#define TILE_WALL          1
-#define TILE_DESTROYABLE_0 2
-#define TILE_DESTROYABLE_1 3
-#define TILE_DESTROYABLE_2 4
-#define TILE_DESTROYABLE_3 5
-#define TILE_COUNT         6
-
-struct Tile_Def
-{
-    bool is_collidable;
-    Sprite top_texture;
-    Sprite bottom_texture;
-};
-
-Tile_Def tile_defs[TILE_COUNT] = {
-    {false, {}, {}},                          // TILE_EMPTY
-    {true, {}, {}},                           // TILE_WALL
-    {true, {}, {}},                           // TILE_DESTROYABLE_0
-    {true, {}, {}},                           // TILE_DESTROYABLE_1
-    {true, {}, {}},                           // TILE_DESTROYABLE_2
-    {true, {}, {}},                           // TILE_DESTROYABLE_3
-};
-
-const float TILE_SIZE = 128.0f * 0.5f;
-const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 const Rectf ROOM_BOUNDARY = {
     0.0f, 0.0f, ROOM_WIDTH * TILE_SIZE, ROOM_HEIGHT * TILE_SIZE

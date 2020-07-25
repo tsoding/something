@@ -382,21 +382,7 @@ void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
-    if (index.unwrap > 0) {
-        room_row[index.unwrap - 1].render(
-            renderer,
-            camera,
-            ROOM_NEIGHBOR_DIM_COLOR);
-    }
-
-    room_row[index.unwrap].render(renderer, camera);
-
-    if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
-        room_row[index.unwrap + 1].render(
-            renderer,
-            camera,
-            ROOM_NEIGHBOR_DIM_COLOR);
-    }
+    grid.render(renderer, camera);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         // TODO(#106): display health bar differently for enemies in a different room
@@ -475,8 +461,8 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                     vec2(entity->hitbox_local.x, entity->hitbox_local.y) +
                     vec2(cols * step_x, rows * step_y);
                 Vec2f t1 = t0;
-                const auto index = room_index_at(t1);
-                room_row[index.unwrap].resolve_point_collision(&t1);
+
+                grid.resolve_point_collision(&t1);
 
                 Vec2f d = t1 - t0;
 

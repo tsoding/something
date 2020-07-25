@@ -90,6 +90,8 @@ struct Game
 
     Item items[ITEMS_COUNT];
 
+    Tile_Grid grid;
+
     // Whole Game State
     void update(float dt);
     void render(SDL_Renderer *renderer);
