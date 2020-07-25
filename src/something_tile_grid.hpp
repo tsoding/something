@@ -41,7 +41,11 @@ struct Tile_Grid
     void resolve_point_collision(Vec2f *origin);
     Vec2i abs_to_tile_coord(Vec2f pos);
     Tile get_tile(Vec2i coord);
-    bool is_tile_empty(Vec2i coord);
+    void set_tile(Vec2i coord, Tile tile);
+    bool is_tile_coord_inbounds(Vec2i coord);
+    bool is_tile_empty_tile(Vec2i coord);
+    bool is_tile_empty_abs(Vec2f pos);
+    Tile *tile_at_abs(Vec2f pos);
 };
 
 #endif  // TILE_GRID_HPP_

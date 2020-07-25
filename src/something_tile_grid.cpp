@@ -7,19 +7,43 @@ Vec2i Tile_Grid::abs_to_tile_coord(Vec2f pos)
         (int) floorf(pos.y / TILE_SIZE));
 }
 
+bool Tile_Grid::is_tile_coord_inbounds(Vec2i coord)
+{
+    return 0 <= coord.x && coord.x < (int) TILE_GRID_WIDTH &&
+           0 <= coord.y && coord.y < (int) TILE_GRID_HEIGHT;
+}
+
 Tile Tile_Grid::get_tile(Vec2i coord)
 {
-    if (0 <= coord.x && coord.x < (int) TILE_GRID_WIDTH &&
-        0 <= coord.y && coord.y < (int) TILE_GRID_HEIGHT)  {
+    if (is_tile_coord_inbounds(coord))  {
         return tiles[coord.y][coord.x];
     }
 
     return TILE_EMPTY;
 }
 
-bool Tile_Grid::is_tile_empty(Vec2i coord)
+void Tile_Grid::set_tile(Vec2i coord, Tile tile)
+{
+    if (is_tile_coord_inbounds(coord)) {
+        tiles[coord.y][coord.x] = tile;
+    }
+}
+
+bool Tile_Grid::is_tile_empty_tile(Vec2i coord)
 {
     return !tile_defs[get_tile(coord)].is_collidable;
+}
+
+bool Tile_Grid::is_tile_empty_abs(Vec2f pos)
+{
+    assert(0 && "TODO: Tile_Grid::is_tile_empty_abs()");
+    return false;
+}
+
+Tile *Tile_Grid::tile_at_abs(Vec2f pos)
+{
+    assert(0 && "TODO: Tile_Grid::tile_at_abs()");
+    return NULL;
 }
 
 void Tile_Grid::render(SDL_Renderer *renderer, Camera camera)
@@ -37,7 +61,7 @@ void Tile_Grid::render(SDL_Renderer *renderer, Camera camera)
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE),
                 TILE_SIZE, TILE_SIZE);
 
-            if (is_tile_empty(vec2(coord.x, coord.y - 1))) {
+            if (is_tile_empty_tile(vec2(coord.x, coord.y - 1))) {
                 tile_defs[tile].top_texture.render(renderer, dstrect);
             } else {
                 tile_defs[tile].bottom_texture.render(renderer, dstrect);
@@ -52,7 +76,7 @@ void Tile_Grid::resolve_point_collision(Vec2f *origin)
 
     const auto tile = vec_cast<int>(p / TILE_SIZE);
 
-    if (is_tile_empty(tile)) {
+    if (is_tile_empty_tile(tile)) {
         return;
     }
 
@@ -81,7 +105,7 @@ void Tile_Grid::resolve_point_collision(Vec2f *origin)
     int closest = -1;
     for (int current = 0; current < SIDES_COUNT; ++current) {
         for (int i = 1;
-             !is_tile_empty(tile + (sides[current].nd * i)) ;
+             !is_tile_empty_tile(tile + (sides[current].nd * i)) ;
              ++i)
         {
             sides[current].d += sides[current].dd;
