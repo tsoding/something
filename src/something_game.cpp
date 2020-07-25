@@ -254,7 +254,7 @@ void Game::update(float dt)
                         entity_shoot({i});
                     } else {
                         auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
-                        auto next = room_row[player_index].next_in_bfs(enemy_tile);
+                        auto next = room_row[player_index].next_in_bfs(enemy_tile, &grid);
                         if (next.has_value) {
                             auto d = next.unwrap - enemy_tile;
 

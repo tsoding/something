@@ -74,7 +74,7 @@ struct Room
 
     bool a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid);
     void bfs_to_tile(Vec2i src, Tile_Grid *tile_grid);
-    Maybe<Vec2i> next_in_bfs(Vec2i dst);
+    Maybe<Vec2i> next_in_bfs(Vec2i dst, Tile_Grid *tile_grid);
 };
 
 #endif  // SOMETHING_ROOM_HPP_

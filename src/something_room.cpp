@@ -114,10 +114,8 @@ void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
     }
 }
 
-Maybe<Vec2i> Room::next_in_bfs(Vec2i dst)
+Maybe<Vec2i> Room::next_in_bfs(Vec2i dst, Tile_Grid *grid)
 {
-    assert(0 && "Room::next_in_bfs() is not implemented");
-#if 0
     if (bfs_trace[dst.y][dst.x] > 0) {
         for (int dy = -1; dy <= 1; ++dy) {
             for (int dx = -1; dx <= 1; ++dx) {
@@ -128,7 +126,7 @@ Maybe<Vec2i> Room::next_in_bfs(Vec2i dst)
                     };
 
                     if (is_tile_inbounds(dst1) &&
-                        tiles[dst1.y][dst1.x] == TILE_EMPTY &&
+                        grid->is_tile_empty_tile(dst1 + coord) &&
                         bfs_trace[dst1.y][dst1.x] < bfs_trace[dst.y][dst.x])
                     {
                         return {true, dst1};
@@ -137,7 +135,6 @@ Maybe<Vec2i> Room::next_in_bfs(Vec2i dst)
             }
         }
     }
-#endif
 
     return {};
 }
