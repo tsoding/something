@@ -2,8 +2,11 @@
 
 Vec2f Room::center() const
 {
-    assert(0 && "TODO: Room::center() needs to be reimplemented");
-    return {};
+    const auto coordf = vec2((float) coord.x, (float) coord.y);
+    const auto top_left = coordf * TILE_SIZE;
+    const auto bottom_right = (coordf + vec2((float) ROOM_WIDTH, (float) ROOM_HEIGHT)) * TILE_SIZE;
+    return vec2((top_left.x + bottom_right.x) * 0.5f,
+                (top_left.y + bottom_right.y) * 0.5f);
 }
 
 bool Room::is_tile_inbounds(Vec2i p) const
