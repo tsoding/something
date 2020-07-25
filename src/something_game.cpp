@@ -744,6 +744,8 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
                                Room_Index index,
                                Vec2f position)
 {
+    (void) renderer;
+    (void) position;
     assert(index.unwrap < ROOM_ROW_COUNT);
 
     assert(0 && "TODO: Game::render_room_minimap() is not implemented");

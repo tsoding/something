@@ -16,11 +16,16 @@ bool Room::is_tile_inbounds(Vec2i p) const
 
 void Room::fill_with(Tile tile, Tile_Grid *tile_grid)
 {
+    (void) tile;
+    (void) tile_grid;
     assert(0 && "TODO: Room::fill_with() is not implemented");
 }
 
 void Room::floor_at(Tile tile, size_t row, Tile_Grid *tile_grid)
 {
+    (void) tile;
+    (void) row;
+    (void) tile_grid;
     assert(0 && "TODO: Room::floor_at() is not implemented");
 }
 
@@ -50,6 +55,8 @@ void Room::load_file(const char *file_path, Tile_Grid *tile_grid)
 
 void Room::dump_stream(FILE *stream, Tile_Grid *tile_grid)
 {
+    (void) stream;
+    (void) tile_grid;
     assert(0 && "TODO: Room::dump_stream() is not implemented");
 }
 
@@ -67,6 +74,8 @@ void Room::load_stream(FILE *stream, Tile_Grid *tile_grid)
 
 void Room::copy_from(Room *room, Tile_Grid *tile_grid)
 {
+    (void) room;
+    (void) tile_grid;
     assert(0 && "TODO: Room::copy_from() is not implemented");
 }
 
