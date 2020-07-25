@@ -90,8 +90,6 @@ bool Room::a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid)
 
 void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
 {
-    assert(0 && "Room::bfs_to_tile() is not implemented");
-#if 0
     Room_Queue bfs_q = {};
     memset(bfs_trace, 0, sizeof(bfs_trace));
 
@@ -104,7 +102,7 @@ void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
                 if ((dy == 0) != (dx == 0)) {
                     Vec2i p1 = {p0.x + dx, p0.y + dy};
                     if (is_tile_inbounds(p1) &&
-                        tiles[p1.y][p1.x] == TILE_EMPTY &&
+                        grid->is_tile_empty_tile(p1 + coord) &&
                         bfs_trace[p1.y][p1.x] == 0)
                     {
                         bfs_trace[p1.y][p1.x] = bfs_trace[p0.y][p0.x] + 1;
@@ -114,7 +112,6 @@ void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
             }
         }
     }
-#endif
 }
 
 Maybe<Vec2i> Room::next_in_bfs(Vec2i dst)

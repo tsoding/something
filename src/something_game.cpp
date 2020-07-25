@@ -720,7 +720,7 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
 
 Room_Index Game::room_index_at(Vec2f p)
 {
-    int index = (int) floor(p.x / (ROOM_BOUNDARY.w + ROOM_PADDING));
+    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
 
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
@@ -769,13 +769,11 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
                                    Vec2f position)
 {
-    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
-
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
             renderer,
             {i},
-            position + vec2((MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING) * (float) i, 0.0f));
+            position + vec2((MINIMAP_ROOM_BOUNDARY.w) * (float) i, 0.0f));
     }
 }
 
@@ -783,12 +781,10 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
                                     Vec2f position,
                                     Vec2f entity_position)
 {
-    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
-
     const Vec2f minimap_position =
         entity_position /
-        vec2(ROOM_BOUNDARY.w + ROOM_PADDING, ROOM_BOUNDARY.h) *
-        vec2((float) MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING, (float) MINIMAP_ROOM_BOUNDARY.h);
+        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
 
     const Vec2f screen_position =
         minimap_position + position;
