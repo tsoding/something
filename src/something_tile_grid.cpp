@@ -36,13 +36,16 @@ bool Tile_Grid::is_tile_empty_tile(Vec2i coord)
 
 bool Tile_Grid::is_tile_empty_abs(Vec2f pos)
 {
-    assert(0 && "TODO: Tile_Grid::is_tile_empty_abs()");
-    return false;
+    return is_tile_empty_tile(abs_to_tile_coord(pos));
 }
 
 Tile *Tile_Grid::tile_at_abs(Vec2f pos)
 {
-    assert(0 && "TODO: Tile_Grid::tile_at_abs()");
+    const Vec2i coord = abs_to_tile_coord(pos);
+    if (is_tile_coord_inbounds(coord)) {
+        return &tiles[coord.y][coord.x];
+    }
+
     return NULL;
 }
 
