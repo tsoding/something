@@ -86,14 +86,20 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_c: {
                 if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
-                    room_index_clipboard = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    if (room_index.has_value) {
+                        room_index_clipboard = room_index.unwrap;
+                    }
                 }
             } break;
 
             case SDLK_v: {
                 if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
-                    room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap]
-                        .copy_from(&room_row[room_index_clipboard.unwrap], &grid);
+                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+                    if (room_index.has_value) {
+                        room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap.unwrap]
+                            .copy_from(&room_row[room_index_clipboard.unwrap], &grid);
+                    }
                 }
             } break;
 
@@ -119,30 +125,46 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_e: {
                 auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                room_row[room_index.unwrap].dump_file(
-                    file_path_of_room(
-                        room_file_path,
-                        sizeof(room_file_path),
-                        room_index),
+                if (room_index.has_value) {
+                    room_row[room_index.unwrap.unwrap].dump_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index.unwrap),
                         &grid);
-                popup.notify(FONT_SUCCESS_COLOR,
-                             "Saved room %lu to `%s`",
-                             room_index.unwrap,
-                             room_file_path);
+                    popup.notify(FONT_SUCCESS_COLOR,
+                                 "Saved room %lu to `%s`",
+                                 room_index.unwrap,
+                                 room_file_path);
+                } else {
+                    popup.notify(FONT_SUCCESS_COLOR,
+                                 "Player is outside of any rooms.\n"
+                                 "Cannot save anything.",
+                                 room_index.unwrap,
+                                 room_file_path);
+                }
             } break;
 
             case SDLK_i: {
                 auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                room_row[room_index.unwrap].load_file(
-                    file_path_of_room(
-                        room_file_path,
-                        sizeof(room_file_path),
-                        room_index),
-                    &grid);
-                popup.notify(FONT_SUCCESS_COLOR,
-                             "Load room %lu from `%s`\n",
-                             room_index.unwrap,
-                             room_file_path);
+                if (room_index.has_value) {
+                    room_row[room_index.unwrap.unwrap].load_file(
+                        file_path_of_room(
+                            room_file_path,
+                            sizeof(room_file_path),
+                            room_index.unwrap),
+                        &grid);
+                    popup.notify(FONT_SUCCESS_COLOR,
+                                 "Load room %lu from `%s`\n",
+                                 room_index.unwrap,
+                                 room_file_path);
+                } else {
+                    popup.notify(FONT_SUCCESS_COLOR,
+                                 "Player is outside of any rooms.\n"
+                                 "Cannot load anything.",
+                                 room_index.unwrap,
+                                 room_file_path);
+                }
             } break;
 
             case SDLK_r: {
@@ -239,43 +261,45 @@ void Game::update(float dt)
     // Enemy AI //////////////////////////////
     if (!debug) {
         auto &player = entities[PLAYER_ENTITY_INDEX];
-        size_t player_index = room_index_at(player.pos).unwrap;
-        auto player_tile = grid.abs_to_tile_coord(player.pos);
-        room_row[player_index].bfs_to_tile(player_tile, &grid);
+        auto player_index = room_index_at(player.pos);
+        if (player_index.has_value) {
+            auto player_tile = grid.abs_to_tile_coord(player.pos);
+            room_row[player_index.unwrap.unwrap].bfs_to_tile(player_tile, &grid);
 
-        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
-            auto &enemy =  entities[i];
-            if (enemy.state == Entity_State::Alive) {
-                size_t enemy_index = room_index_at(enemy.pos).unwrap;
-                if (player_index == enemy_index) {
-                    if (grid.a_sees_b(enemy.pos, player.pos)) {
-                        enemy.stop();
-                        enemy.point_gun_at(player.pos);
-                        entity_shoot({i});
-                    } else {
-                        auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
-                        auto next = room_row[player_index].next_in_bfs(enemy_tile, &grid);
-                        if (next.has_value) {
-                            auto d = next.unwrap - enemy_tile;
+            for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+                auto &enemy =  entities[i];
+                if (enemy.state == Entity_State::Alive) {
+                    auto enemy_index = room_index_at(enemy.pos);
+                    if (enemy_index.has_value && player_index.unwrap.unwrap == enemy_index.unwrap.unwrap) {
+                        if (grid.a_sees_b(enemy.pos, player.pos)) {
+                            enemy.stop();
+                            enemy.point_gun_at(player.pos);
+                            entity_shoot({i});
+                        } else {
+                            auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
+                            auto next = room_row[player_index.unwrap.unwrap].next_in_bfs(enemy_tile, &grid);
+                            if (next.has_value) {
+                                auto d = next.unwrap - enemy_tile;
 
-                            if (d.y < 0) {
-                                enemy.jump();
-                            }
-                            if (d.x > 0) {
-                                enemy.move(Entity::Right);
-                            }
-                            if (d.x < 0) {
-                                enemy.move(Entity::Left);
-                            }
-                            if (d.x == 0) {
+                                if (d.y < 0) {
+                                    enemy.jump();
+                                }
+                                if (d.x > 0) {
+                                    enemy.move(Entity::Right);
+                                }
+                                if (d.x < 0) {
+                                    enemy.move(Entity::Left);
+                                }
+                                if (d.x == 0) {
+                                    enemy.stop();
+                                }
+                            } else {
                                 enemy.stop();
                             }
-                        } else {
-                            enemy.stop();
                         }
+                    } else {
+                        enemy.stop();
                     }
-                } else {
-                    enemy.stop();
                 }
             }
         }
@@ -359,11 +383,13 @@ void Game::update(float dt)
 
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
-    const auto room_center = room_row[room_index_at(player_pos).unwrap].center();
+    camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
+    const auto room_index = room_index_at(player_pos);
+    if (room_index.has_value) {
+        const auto room_center = room_row[room_index_at(player_pos).unwrap.unwrap].center();
+        camera.vel += (room_center - camera.pos) * CENTER_CAMERA_FORCE;
+    }
 
-    camera.vel =
-        (player_pos - camera.pos) * PLAYER_CAMERA_FORCE +
-        (room_center - camera.pos) * CENTER_CAMERA_FORCE;
     camera.update(dt);
 
     // Popup //////////////////////////////
@@ -372,17 +398,20 @@ void Game::update(float dt)
 
 void Game::render(SDL_Renderer *renderer)
 {
-    auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+    const auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
-    room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap].render_debug_bfs_overlay(
-        renderer,
-        &camera);
+    // if (index.has_value) {
+    //     room_row[index.unwrap.unwrap].render_debug_bfs_overlay(
+    //         renderer,
+    //         &camera);
+    // }
 
     grid.render(renderer, camera);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         // TODO(#106): display health bar differently for enemies in a different room
-        if (index.unwrap != room_index_at(entities[i].pos).unwrap) {
+        const auto entity_index = room_index_at(entities[i].pos);
+        if (index != entity_index) {
             entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
         } else {
             entities[i].render(renderer, camera);
@@ -393,7 +422,7 @@ void Game::render(SDL_Renderer *renderer)
 
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type != ITEM_NONE) {
-            if (index.unwrap != room_index_at(items[i].pos).unwrap) {
+            if (index != room_index_at(items[i].pos)) {
                 items[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
             } else {
                 items[i].render(renderer, camera);
@@ -722,19 +751,22 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
     return {};
 }
 
-Room_Index Game::room_index_at(Vec2f p)
+Maybe<Room_Index> Game::room_index_at(Vec2f p)
 {
-    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
+    for (size_t index = 0; index < ROOM_ROW_COUNT; ++index) {
+        if (room_row[index].contains_point(p)) {
+            return {true, {index}};
+        }
+    }
 
-    if (index < 0) return {0};
-    if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
-    return {(size_t) index};
+    return {};
 }
 
 void Game::load_rooms()
 {
+    const int ROOM_PADDING = 1;
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        room_row[room_index].coord = vec2((int) (room_index * ROOM_WIDTH), 0);
+        room_row[room_index].coord = vec2((int) (room_index * (ROOM_WIDTH + ROOM_PADDING)), 0);
         room_row[room_index].load_file(
             file_path_of_room(
                 room_file_path,

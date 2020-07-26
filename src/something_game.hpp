@@ -14,15 +14,8 @@ enum class Debug_Draw_State {
     Delete
 };
 
-struct Entity_Index
-{
-    size_t unwrap;
-};
-
-struct Projectile_Index
-{
-    size_t unwrap;
-};
+struct Entity_Index: public Index<Entity_Index> {};
+struct Projectile_Index: public Index<Projectile_Index> {};
 
 enum class Projectile_State
 {
@@ -116,7 +109,7 @@ struct Game
     void spawn_health_at_mouse();
 
     // Rooms of the Game
-    Room_Index room_index_at(Vec2f p);
+    Maybe<Room_Index> room_index_at(Vec2f p);
     void load_rooms();
     void render_room_minimap(SDL_Renderer *renderer,
                              Room_Index index,

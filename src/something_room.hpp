@@ -4,15 +4,27 @@
 const int ROOM_WIDTH  = 10 * 2;
 const int ROOM_HEIGHT = 10 * 2;
 
-
 const Rectf ROOM_BOUNDARY = {
     0.0f, 0.0f, ROOM_WIDTH * TILE_SIZE, ROOM_HEIGHT * TILE_SIZE
 };
 
-struct Room_Index
+template <typename That>
+struct Index
 {
     size_t unwrap;
+
+    bool operator==(const That that) const
+    {
+        return this->unwrap == that.unwrap;
+    }
+
+    bool operator!=(const That that) const
+    {
+        return !(*this == that);
+    }
 };
+
+struct Room_Index: public Index<Room_Index> {};
 
 template <typename T, size_t Capacity>
 struct Queue
@@ -73,6 +85,8 @@ struct Room
     Maybe<Vec2i> next_in_bfs(Vec2i dst, Tile_Grid *tile_grid);
 
     void render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera);
+
+    bool contains_point(Vec2f p);
 };
 
 #endif  // SOMETHING_ROOM_HPP_

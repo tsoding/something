@@ -161,3 +161,13 @@ void Room::render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera)
         }
     }
 }
+
+bool Room::contains_point(Vec2f p)
+{
+    return rect_contains_vec2(
+        rect(vec2(coord.x * TILE_SIZE,
+                  coord.y * TILE_SIZE),
+             ROOM_BOUNDARY.w,
+             ROOM_BOUNDARY.h),
+        p);
+}
