@@ -764,7 +764,7 @@ Maybe<Room_Index> Game::room_index_at(Vec2f p)
 
 void Game::load_rooms()
 {
-    const int ROOM_PADDING = 1;
+    const int ROOM_PADDING = 2;
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
         room_row[room_index].coord = vec2((int) (room_index * (ROOM_WIDTH + ROOM_PADDING)), 0);
         room_row[room_index].load_file(
@@ -787,8 +787,8 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
         for (int x = 0; x < ROOM_WIDTH; ++x) {
             if (!grid.is_tile_empty_tile(vec2(x, y) + room_row[index.unwrap].coord)) {
                 SDL_Rect rect = {
-                    (int) (position.x + (float) x * MINIMAP_TILE_SIZE),
-                    (int) (position.y + (float) y * MINIMAP_TILE_SIZE),
+                    (int) (position.x + (float) (room_row[index.unwrap].coord.x + x) * MINIMAP_TILE_SIZE),
+                    (int) (position.y + (float) (room_row[index.unwrap].coord.y + y) * MINIMAP_TILE_SIZE),
                     (int) MINIMAP_TILE_SIZE,
                     (int) MINIMAP_TILE_SIZE
                 };
@@ -802,10 +802,7 @@ void Game::render_room_row_minimap(SDL_Renderer *renderer,
                                    Vec2f position)
 {
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
-        render_room_minimap(
-            renderer,
-            {i},
-            position + vec2((MINIMAP_ROOM_BOUNDARY.w) * (float) i, 0.0f));
+        render_room_minimap(renderer, {i}, position);
     }
 }
 
