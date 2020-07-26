@@ -62,19 +62,17 @@ struct Room
 
     Vec2f center() const;
 
-    void fill_with(Tile tile, Tile_Grid *tile_grid);
-    void floor_at(Tile tile, size_t row, Tile_Grid *tile_grid);
-
     void dump_file(const char *file_path, Tile_Grid *tile_grid);
     void load_file(const char *file_path, Tile_Grid *tile_grid);
     void dump_stream(FILE *stream, Tile_Grid *tile_grid);
     void load_stream(FILE *stream, Tile_Grid *tile_grid);
-    void copy_from(Room *room, Tile_Grid *tile_grid);
+    void copy_from(const Room *room, Tile_Grid *tile_grid) const;
     bool is_tile_inbounds(Vec2i p) const;
 
-    bool a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid);
     void bfs_to_tile(Vec2i src, Tile_Grid *tile_grid);
     Maybe<Vec2i> next_in_bfs(Vec2i dst, Tile_Grid *tile_grid);
+
+    void render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera);
 };
 
 #endif  // SOMETHING_ROOM_HPP_

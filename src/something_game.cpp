@@ -248,7 +248,7 @@ void Game::update(float dt)
             if (enemy.state == Entity_State::Alive) {
                 size_t enemy_index = room_index_at(enemy.pos).unwrap;
                 if (player_index == enemy_index) {
-                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos, &grid)) {
+                    if (grid.a_sees_b(enemy.pos, player.pos)) {
                         enemy.stop();
                         enemy.point_gun_at(player.pos);
                         entity_shoot({i});
@@ -373,6 +373,10 @@ void Game::update(float dt)
 void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
+
+    room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap].render_debug_bfs_overlay(
+        renderer,
+        &camera);
 
     grid.render(renderer, camera);
 
@@ -744,20 +748,15 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
                                Room_Index index,
                                Vec2f position)
 {
-    (void) renderer;
-    (void) position;
     assert(index.unwrap < ROOM_ROW_COUNT);
 
-    assert(0 && "TODO: Game::render_room_minimap() is not implemented");
-
-#if 0
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (int row = 0; row < ROOM_HEIGHT; ++row) {
-        for (int col = 0; col < ROOM_WIDTH; ++col) {
-            if (room_row[index.unwrap].tiles[row][col] != TILE_EMPTY) {
+    for (int y = 0; y < ROOM_HEIGHT; ++y) {
+        for (int x = 0; x < ROOM_WIDTH; ++x) {
+            if (!grid.is_tile_empty_tile(vec2(x, y) + room_row[index.unwrap].coord)) {
                 SDL_Rect rect = {
-                    (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
-                    (int) (position.y + (float) row * MINIMAP_TILE_SIZE),
+                    (int) (position.x + (float) x * MINIMAP_TILE_SIZE),
+                    (int) (position.y + (float) y * MINIMAP_TILE_SIZE),
                     (int) MINIMAP_TILE_SIZE,
                     (int) MINIMAP_TILE_SIZE
                 };
@@ -765,7 +764,6 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
             }
         }
     }
-#endif
 }
 
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
