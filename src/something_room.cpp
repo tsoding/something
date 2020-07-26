@@ -63,7 +63,8 @@ void Room::dump_stream(FILE *stream, Tile_Grid *tile_grid)
 void Room::load_stream(FILE *stream, Tile_Grid *tile_grid)
 {
     Tile tmp[ROOM_WIDTH * ROOM_HEIGHT];
-    fread(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+    size_t n = fread(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+    assert(n == ROOM_WIDTH * ROOM_HEIGHT);
 
     for (int y = 0; y < ROOM_HEIGHT; ++y) {
         for (int x = 0; x < ROOM_WIDTH; ++x) {
