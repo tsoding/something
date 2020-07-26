@@ -744,20 +744,15 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
                                Room_Index index,
                                Vec2f position)
 {
-    (void) renderer;
-    (void) position;
     assert(index.unwrap < ROOM_ROW_COUNT);
 
-    assert(0 && "TODO: Game::render_room_minimap() is not implemented");
-
-#if 0
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (int row = 0; row < ROOM_HEIGHT; ++row) {
-        for (int col = 0; col < ROOM_WIDTH; ++col) {
-            if (room_row[index.unwrap].tiles[row][col] != TILE_EMPTY) {
+    for (int y = 0; y < ROOM_HEIGHT; ++y) {
+        for (int x = 0; x < ROOM_WIDTH; ++x) {
+            if (!grid.is_tile_empty_tile(vec2(x, y) + room_row[index.unwrap].coord)) {
                 SDL_Rect rect = {
-                    (int) (position.x + (float) col * MINIMAP_TILE_SIZE),
-                    (int) (position.y + (float) row * MINIMAP_TILE_SIZE),
+                    (int) (position.x + (float) x * MINIMAP_TILE_SIZE),
+                    (int) (position.y + (float) y * MINIMAP_TILE_SIZE),
                     (int) MINIMAP_TILE_SIZE,
                     (int) MINIMAP_TILE_SIZE
                 };
@@ -765,7 +760,6 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
             }
         }
     }
-#endif
 }
 
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
