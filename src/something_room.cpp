@@ -93,25 +93,29 @@ bool Room::a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid)
     return true;
 }
 
-void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
+void Room::bfs_to_tile(Vec2i src0, Tile_Grid *grid)
 {
-    Room_Queue bfs_q = {};
-    memset(bfs_trace, 0, sizeof(bfs_trace));
+    const Vec2i src = src0 - coord;
 
-    bfs_q.nq(src);
-    bfs_trace[src.y][src.x] = 1;
-    while (bfs_q.count > 0) {
-        Vec2i p0 = bfs_q.dq();
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if ((dy == 0) != (dx == 0)) {
-                    Vec2i p1 = {p0.x + dx, p0.y + dy};
-                    if (is_tile_inbounds(p1) &&
-                        grid->is_tile_empty_tile(p1 + coord) &&
-                        bfs_trace[p1.y][p1.x] == 0)
-                    {
-                        bfs_trace[p1.y][p1.x] = bfs_trace[p0.y][p0.x] + 1;
-                        bfs_q.nq(p1);
+    if (is_tile_inbounds(src)) {
+        Room_Queue bfs_q = {};
+        memset(bfs_trace, 0, sizeof(bfs_trace));
+
+        bfs_q.nq(src);
+        bfs_trace[src.y][src.x] = 1;
+        while (bfs_q.count > 0) {
+            Vec2i p0 = bfs_q.dq();
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    if ((dy == 0) != (dx == 0)) {
+                        Vec2i p1 = {p0.x + dx, p0.y + dy};
+                        if (is_tile_inbounds(p1) &&
+                            grid->is_tile_empty_tile(p1 + coord) &&
+                            bfs_trace[p1.y][p1.x] == 0)
+                        {
+                            bfs_trace[p1.y][p1.x] = bfs_trace[p0.y][p0.x] + 1;
+                            bfs_q.nq(p1);
+                        }
                     }
                 }
             }
@@ -119,9 +123,11 @@ void Room::bfs_to_tile(Vec2i src, Tile_Grid *grid)
     }
 }
 
-Maybe<Vec2i> Room::next_in_bfs(Vec2i dst, Tile_Grid *grid)
+Maybe<Vec2i> Room::next_in_bfs(Vec2i dst0, Tile_Grid *grid)
 {
-    if (bfs_trace[dst.y][dst.x] > 0) {
+    Vec2i dst = dst0 - coord;
+
+    if (is_tile_inbounds(dst) && bfs_trace[dst.y][dst.x] > 0) {
         for (int dy = -1; dy <= 1; ++dy) {
             for (int dx = -1; dx <= 1; ++dx) {
                 if ((dy == 0) != (dx == 0)) {
