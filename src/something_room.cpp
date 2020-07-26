@@ -14,21 +14,6 @@ bool Room::is_tile_inbounds(Vec2i p) const
     return 0 <= p.x && p.x < ROOM_WIDTH && 0 <= p.y && p.y < ROOM_HEIGHT;
 }
 
-void Room::fill_with(Tile tile, Tile_Grid *tile_grid)
-{
-    (void) tile;
-    (void) tile_grid;
-    assert(0 && "TODO: Room::fill_with() is not implemented");
-}
-
-void Room::floor_at(Tile tile, size_t row, Tile_Grid *tile_grid)
-{
-    (void) tile;
-    (void) row;
-    (void) tile_grid;
-    assert(0 && "TODO: Room::floor_at() is not implemented");
-}
-
 void Room::dump_file(const char *file_path, Tile_Grid *tile_grid)
 {
     FILE *room_file = fopen(file_path, "wb");

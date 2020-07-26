@@ -62,9 +62,6 @@ struct Room
 
     Vec2f center() const;
 
-    void fill_with(Tile tile, Tile_Grid *tile_grid);
-    void floor_at(Tile tile, size_t row, Tile_Grid *tile_grid);
-
     void dump_file(const char *file_path, Tile_Grid *tile_grid);
     void load_file(const char *file_path, Tile_Grid *tile_grid);
     void dump_stream(FILE *stream, Tile_Grid *tile_grid);
