@@ -131,7 +131,7 @@ void Tile_Grid::resolve_point_collision(Vec2f *origin)
 
 bool Tile_Grid::a_sees_b(Vec2f a, Vec2f b)
 {
-    // TODO: Tile_Grid::a_sees_b is not particularly smart
+    // TODO(#133): Tile_Grid::a_sees_b is not particularly smart
     //   It is implemented using a very simple ray marching which sometimes skips
     //   the corners. We need to evaluate whether this is important or not
     Vec2f d = normalize(b - a);
