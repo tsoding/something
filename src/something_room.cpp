@@ -64,11 +64,15 @@ void Room::load_stream(FILE *stream, Tile_Grid *tile_grid)
     }
 }
 
-void Room::copy_from(Room *room, Tile_Grid *tile_grid)
+void Room::copy_from(const Room *room, Tile_Grid *tile_grid) const
 {
-    (void) room;
-    (void) tile_grid;
-    assert(0 && "TODO: Room::copy_from() is not implemented");
+    for (int y = 0; y < ROOM_HEIGHT; ++y) {
+        for (int x = 0; x < ROOM_WIDTH; ++x) {
+            tile_grid->copy_tile(
+                vec2(x, y) + coord,
+                vec2(x, y) + room->coord);
+        }
+    }
 }
 
 bool Room::a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid)

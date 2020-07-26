@@ -29,6 +29,13 @@ void Tile_Grid::set_tile(Vec2i coord, Tile tile)
     }
 }
 
+void Tile_Grid::copy_tile(Vec2i coord_dst, Vec2i coord_src)
+{
+    if (is_tile_coord_inbounds(coord_dst) && is_tile_coord_inbounds(coord_src)) {
+        tiles[coord_dst.y][coord_dst.x] = tiles[coord_src.y][coord_src.x];
+    }
+}
+
 bool Tile_Grid::is_tile_empty_tile(Vec2i coord)
 {
     return !tile_defs[get_tile(coord)].is_collidable;

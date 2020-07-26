@@ -40,8 +40,11 @@ struct Tile_Grid
     void render(SDL_Renderer *renderer, Camera camera);
     void resolve_point_collision(Vec2f *origin);
     Vec2i abs_to_tile_coord(Vec2f pos);
+
     Tile get_tile(Vec2i coord);
     void set_tile(Vec2i coord, Tile tile);
+    void copy_tile(Vec2i coord_dst, Vec2i coord_src);
+
     bool is_tile_coord_inbounds(Vec2i coord);
     bool is_tile_empty_tile(Vec2i coord);
     bool is_tile_empty_abs(Vec2f pos);

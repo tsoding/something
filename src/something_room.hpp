@@ -66,7 +66,7 @@ struct Room
     void load_file(const char *file_path, Tile_Grid *tile_grid);
     void dump_stream(FILE *stream, Tile_Grid *tile_grid);
     void load_stream(FILE *stream, Tile_Grid *tile_grid);
-    void copy_from(Room *room, Tile_Grid *tile_grid);
+    void copy_from(const Room *room, Tile_Grid *tile_grid) const;
     bool is_tile_inbounds(Vec2i p) const;
 
     bool a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid);
