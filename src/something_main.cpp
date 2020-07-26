@@ -107,6 +107,12 @@ int main(void)
             ITEM_HEALTH_TEXTURE));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
 
+    for (size_t y = 0; y < TILE_GRID_HEIGHT; ++y) {
+        for (size_t x = 0; x < TILE_GRID_HEIGHT; ++x) {
+            game.grid.tiles[y][x] = (x + y) % 2 == 0 ? TILE_EMPTY : TILE_WALL;
+        }
+    }
+
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
     want.freq = SOMETHING_SOUND_FREQ;

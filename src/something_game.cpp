@@ -93,7 +93,7 @@ void Game::handle_event(SDL_Event *event)
             case SDLK_v: {
                 if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
                     room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap]
-                        .copy_from(&room_row[room_index_clipboard.unwrap]);
+                        .copy_from(&room_row[room_index_clipboard.unwrap], &grid);
                 }
             } break;
 
@@ -123,7 +123,8 @@ void Game::handle_event(SDL_Event *event)
                     file_path_of_room(
                         room_file_path,
                         sizeof(room_file_path),
-                        room_index));
+                        room_index),
+                        &grid);
                 popup.notify(FONT_SUCCESS_COLOR,
                              "Saved room %lu to `%s`",
                              room_index.unwrap,
@@ -136,7 +137,8 @@ void Game::handle_event(SDL_Event *event)
                     file_path_of_room(
                         room_file_path,
                         sizeof(room_file_path),
-                        room_index));
+                        room_index),
+                    &grid);
                 popup.notify(FONT_SUCCESS_COLOR,
                              "Load room %lu from `%s`\n",
                              room_index.unwrap,
@@ -161,19 +163,16 @@ void Game::handle_event(SDL_Event *event)
                 vec_cast<float>(vec2(event->motion.x, event->motion.y)));
         }
 
-        auto index = room_index_at(collision_probe);
-        room_row[index.unwrap].resolve_point_collision(&collision_probe);
+        grid.resolve_point_collision(&collision_probe);
 
-        Vec2i tile = vec_cast<int>((mouse_position - room_row[index.unwrap].position()) / TILE_SIZE);
+        Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
         switch (state) {
         case Debug_Draw_State::Create: {
-            if (room_row[index.unwrap].is_tile_inbounds(tile))
-                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
+            grid.set_tile(tile, TILE_WALL);
         } break;
 
         case Debug_Draw_State::Delete: {
-            if (room_row[index.unwrap].is_tile_inbounds(tile))
-                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
+            grid.set_tile(tile, TILE_EMPTY);
         } break;
 
         case Debug_Draw_State::Idle:
@@ -191,21 +190,14 @@ void Game::handle_event(SDL_Event *event)
                 if (!tracking_projectile.has_value) {
                     switch (debug_toolbar.active_button) {
                     case DEBUG_TOOLBAR_TILES: {
-                        auto index = room_index_at(mouse_position);
+                        Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
 
-                        Vec2i tile =
-                            vec_cast<int>(
-                                (mouse_position - room_row[index.unwrap].position()) /
-                                TILE_SIZE);
-
-                        if (room_row[index.unwrap].is_tile_inbounds(tile)) {
-                            if (room_row[index.unwrap].tiles[tile.y][tile.x] == TILE_EMPTY) {
-                                state = Debug_Draw_State::Create;
-                                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_WALL;
-                            } else {
-                                state = Debug_Draw_State::Delete;
-                                room_row[index.unwrap].tiles[tile.y][tile.x] = TILE_EMPTY;
-                            }
+                        if (grid.get_tile(tile) == TILE_EMPTY) {
+                            state = Debug_Draw_State::Create;
+                            grid.set_tile(tile, TILE_WALL);
+                        } else {
+                            state = Debug_Draw_State::Delete;
+                            grid.set_tile(tile, TILE_EMPTY);
                         }
                     } break;
 
@@ -248,21 +240,21 @@ void Game::update(float dt)
     if (!debug) {
         auto &player = entities[PLAYER_ENTITY_INDEX];
         size_t player_index = room_index_at(player.pos).unwrap;
-        auto player_tile = room_row[player_index].tile_coord_at(player.pos);
-        room_row[player_index].bfs_to_tile(player_tile);
+        auto player_tile = grid.abs_to_tile_coord(player.pos);
+        room_row[player_index].bfs_to_tile(player_tile, &grid);
 
         for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
             auto &enemy =  entities[i];
             if (enemy.state == Entity_State::Alive) {
                 size_t enemy_index = room_index_at(enemy.pos).unwrap;
                 if (player_index == enemy_index) {
-                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos)) {
+                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos, &grid)) {
                         enemy.stop();
                         enemy.point_gun_at(player.pos);
                         entity_shoot({i});
                     } else {
-                        auto enemy_tile = room_row[player_index].tile_coord_at(enemy.pos);
-                        auto next = room_row[player_index].next_in_bfs(enemy_tile);
+                        auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
+                        auto next = room_row[player_index].next_in_bfs(enemy_tile, &grid);
                         if (next.has_value) {
                             auto d = next.unwrap - enemy_tile;
 
@@ -382,21 +374,7 @@ void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
-    if (index.unwrap > 0) {
-        room_row[index.unwrap - 1].render(
-            renderer,
-            camera,
-            ROOM_NEIGHBOR_DIM_COLOR);
-    }
-
-    room_row[index.unwrap].render(renderer, camera);
-
-    if (index.unwrap + 1 < (int) ROOM_ROW_COUNT) {
-        room_row[index.unwrap + 1].render(
-            renderer,
-            camera,
-            ROOM_NEIGHBOR_DIM_COLOR);
-    }
+    grid.render(renderer, camera);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         // TODO(#106): display health bar differently for enemies in a different room
@@ -475,8 +453,8 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                     vec2(entity->hitbox_local.x, entity->hitbox_local.y) +
                     vec2(cols * step_x, rows * step_y);
                 Vec2f t1 = t0;
-                const auto index = room_index_at(t1);
-                room_row[index.unwrap].resolve_point_collision(&t1);
+
+                grid.resolve_point_collision(&t1);
 
                 Vec2f d = t1 - t0;
 
@@ -517,14 +495,6 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
     {
         auto rect = rectf_for_sdl(collision_probe_rect);
         sec(SDL_RenderFillRect(renderer, &rect));
-    }
-
-    auto index = room_index_at(mouse_position);
-    auto room_boundary_screen =
-        camera.to_screen(ROOM_BOUNDARY + room_row[index.unwrap].position());
-    {
-        auto rect = rectf_for_sdl(room_boundary_screen);
-        sec(SDL_RenderDrawRect(renderer, &rect));
     }
 
     const float PADDING = 10.0f;
@@ -691,7 +661,7 @@ void Game::update_projectiles(float dt)
             projectiles[i].active_animat.update(dt);
             projectiles[i].pos += projectiles[i].vel * dt;
 
-            auto tile = room_row[room_index_at(projectiles[i].pos).unwrap].tile_at(projectiles[i].pos);
+            auto tile = grid.tile_at_abs(projectiles[i].pos);
             if (tile && tile_defs[*tile].is_collidable) {
                 projectiles[i].kill();
                 if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
@@ -750,7 +720,7 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
 
 Room_Index Game::room_index_at(Vec2f p)
 {
-    int index = (int) floor(p.x / (ROOM_BOUNDARY.w + ROOM_PADDING));
+    int index = (int) floor(p.x / ROOM_BOUNDARY.w);
 
     if (index < 0) return {0};
     if (index >= (int) ROOM_ROW_COUNT) return {ROOM_ROW_COUNT - 1};
@@ -760,12 +730,13 @@ Room_Index Game::room_index_at(Vec2f p)
 void Game::load_rooms()
 {
     for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        room_row[room_index].index = {room_index};
+        room_row[room_index].coord = vec2((int) (room_index * ROOM_WIDTH), 0);
         room_row[room_index].load_file(
             file_path_of_room(
                 room_file_path,
                 sizeof(room_file_path),
-                {room_index}));
+                {room_index}),
+            &grid);
     }
 }
 
@@ -773,8 +744,13 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
                                Room_Index index,
                                Vec2f position)
 {
+    (void) renderer;
+    (void) position;
     assert(index.unwrap < ROOM_ROW_COUNT);
 
+    assert(0 && "TODO: Game::render_room_minimap() is not implemented");
+
+#if 0
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for (int row = 0; row < ROOM_HEIGHT; ++row) {
         for (int col = 0; col < ROOM_WIDTH; ++col) {
@@ -789,18 +765,17 @@ void Game::render_room_minimap(SDL_Renderer *renderer,
             }
         }
     }
+#endif
 }
 
 void Game::render_room_row_minimap(SDL_Renderer *renderer,
                                    Vec2f position)
 {
-    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
-
     for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
         render_room_minimap(
             renderer,
             {i},
-            position + vec2((MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING) * (float) i, 0.0f));
+            position + vec2((MINIMAP_ROOM_BOUNDARY.w) * (float) i, 0.0f));
     }
 }
 
@@ -808,12 +783,10 @@ void Game::render_entity_on_minimap(SDL_Renderer *renderer,
                                     Vec2f position,
                                     Vec2f entity_position)
 {
-    const float MINIMAP_ROOM_PADDING = MINIMAP_ROOM_BOUNDARY.w / ROOM_BOUNDARY.w * ROOM_PADDING;
-
     const Vec2f minimap_position =
         entity_position /
-        vec2(ROOM_BOUNDARY.w + ROOM_PADDING, ROOM_BOUNDARY.h) *
-        vec2((float) MINIMAP_ROOM_BOUNDARY.w + MINIMAP_ROOM_PADDING, (float) MINIMAP_ROOM_BOUNDARY.h);
+        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
+        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
 
     const Vec2f screen_position =
         minimap_position + position;
