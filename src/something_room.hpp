@@ -69,7 +69,6 @@ struct Room
     void copy_from(const Room *room, Tile_Grid *tile_grid) const;
     bool is_tile_inbounds(Vec2i p) const;
 
-    bool a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid);
     void bfs_to_tile(Vec2i src, Tile_Grid *tile_grid);
     Maybe<Vec2i> next_in_bfs(Vec2i dst, Tile_Grid *tile_grid);
 };

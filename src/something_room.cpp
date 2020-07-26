@@ -75,23 +75,6 @@ void Room::copy_from(const Room *room, Tile_Grid *tile_grid) const
     }
 }
 
-bool Room::a_sees_b(Vec2f a, Vec2f b, Tile_Grid *tile_grid)
-{
-    // TODO: Room::a_sees_b is not particularly smart
-    //   It is implemented using a very simple ray marching which sometimes skips
-    //   the corners. We need to evaluate whether this is important or not
-    Vec2f d = normalize(b - a);
-    float s = TILE_SIZE * 0.5f;
-    float n = sqrtf(sqr_dist(a, b)) / s;
-    for (float i = 0; i < n; i += 1.0f) {
-        Vec2f p = a + d * s * i;
-        if (!tile_grid->is_tile_empty_abs(p)) {
-            return false;
-        }
-    }
-
-    return true;
-}
 
 void Room::bfs_to_tile(Vec2i src0, Tile_Grid *grid)
 {

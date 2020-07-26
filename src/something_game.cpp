@@ -248,7 +248,7 @@ void Game::update(float dt)
             if (enemy.state == Entity_State::Alive) {
                 size_t enemy_index = room_index_at(enemy.pos).unwrap;
                 if (player_index == enemy_index) {
-                    if (room_row[player_index].a_sees_b(enemy.pos, player.pos, &grid)) {
+                    if (grid.a_sees_b(enemy.pos, player.pos)) {
                         enemy.stop();
                         enemy.point_gun_at(player.pos);
                         entity_shoot({i});

@@ -49,6 +49,7 @@ struct Tile_Grid
     bool is_tile_empty_tile(Vec2i coord);
     bool is_tile_empty_abs(Vec2f pos);
     Tile *tile_at_abs(Vec2f pos);
+    bool a_sees_b(Vec2f a, Vec2f b);
 };
 
 #endif  // TILE_GRID_HPP_

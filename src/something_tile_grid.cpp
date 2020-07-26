@@ -128,3 +128,21 @@ void Tile_Grid::resolve_point_collision(Vec2f *origin)
 
     *origin = sides[closest].np;
 }
+
+bool Tile_Grid::a_sees_b(Vec2f a, Vec2f b)
+{
+    // TODO: Tile_Grid::a_sees_b is not particularly smart
+    //   It is implemented using a very simple ray marching which sometimes skips
+    //   the corners. We need to evaluate whether this is important or not
+    Vec2f d = normalize(b - a);
+    float s = TILE_SIZE * 0.5f;
+    float n = sqrtf(sqr_dist(a, b)) / s;
+    for (float i = 0; i < n; i += 1.0f) {
+        Vec2f p = a + d * s * i;
+        if (!is_tile_empty_abs(p)) {
+            return false;
+        }
+    }
+
+    return true;
+}
