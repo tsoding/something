@@ -374,6 +374,10 @@ void Game::render(SDL_Renderer *renderer)
 {
     auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
 
+    room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap].render_debug_bfs_overlay(
+        renderer,
+        &camera);
+
     grid.render(renderer, camera);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {

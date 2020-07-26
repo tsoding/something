@@ -71,6 +71,8 @@ struct Room
 
     void bfs_to_tile(Vec2i src, Tile_Grid *tile_grid);
     Maybe<Vec2i> next_in_bfs(Vec2i dst, Tile_Grid *tile_grid);
+
+    void render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera);
 };
 
 #endif  // SOMETHING_ROOM_HPP_

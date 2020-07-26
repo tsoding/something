@@ -132,3 +132,32 @@ Maybe<Vec2i> Room::next_in_bfs(Vec2i dst0, Tile_Grid *grid)
 
     return {};
 }
+
+void fill_rect(SDL_Renderer *renderer, Camera *camera,
+               Rectf rectf, SDL_Color color)
+{
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            color.r,
+            color.g,
+            color.b,
+            color.a));
+    SDL_Rect rect = rectf_for_sdl(camera->to_screen(rectf));
+    sec(SDL_RenderFillRect(renderer, &rect));
+}
+
+void Room::render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera)
+{
+    for (int y = 0; y < ROOM_HEIGHT; ++y) {
+        for (int x = 0; x < ROOM_WIDTH; ++x) {
+            fill_rect(
+                renderer,
+                camera,
+                rect(vec2((float) (coord.x + x) * TILE_SIZE,
+                          (float) (coord.y + y) * TILE_SIZE),
+                     TILE_SIZE,
+                     TILE_SIZE),
+                {255, 0, 0, (Uint8) (clamp(255 - bfs_trace[y][x] * bfs_trace[y][x], 0, 255))});
+        }
+    }
+}
