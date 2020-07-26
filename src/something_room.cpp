@@ -40,9 +40,15 @@ void Room::load_file(const char *file_path, Tile_Grid *tile_grid)
 
 void Room::dump_stream(FILE *stream, Tile_Grid *tile_grid)
 {
-    (void) stream;
-    (void) tile_grid;
-    assert(0 && "TODO: Room::dump_stream() is not implemented");
+    Tile tmp[ROOM_WIDTH * ROOM_HEIGHT];
+    for (int y = 0; y < ROOM_HEIGHT; ++y) {
+        for (int x = 0; x < ROOM_WIDTH; ++x) {
+            tmp[y * ROOM_WIDTH + x] = tile_grid->get_tile(coord + vec2(x, y));
+        }
+    }
+
+    size_t n = fwrite(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, stream);
+    assert(n == ROOM_WIDTH * ROOM_HEIGHT);
 }
 
 void Room::load_stream(FILE *stream, Tile_Grid *tile_grid)
