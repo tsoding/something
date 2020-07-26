@@ -123,7 +123,7 @@ Maybe<Vec2i> Room::next_in_bfs(Vec2i dst0, Tile_Grid *grid)
                         grid->is_tile_empty_tile(dst1 + coord) &&
                         bfs_trace[dst1.y][dst1.x] < bfs_trace[dst.y][dst.x])
                     {
-                        return {true, dst1};
+                        return {true, dst1 + coord};
                     }
                 }
             }
