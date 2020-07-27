@@ -12,7 +12,7 @@
 #include "aids.hpp"
 using namespace aids;
 
-#include "common_config.cpp"
+#include "config_common.cpp"
 
 const char * const CONFIG_FILE_PATH = "./assets/config.vars";
 

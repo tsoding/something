@@ -18,7 +18,7 @@ using namespace aids;
 #include "something_math.cpp"
 
 #ifndef SOMETHING_RELEASE
-#include "common_config.cpp"
+#include "config_common.cpp"
 #else
 #include "./baked_config.hpp"
 #endif
