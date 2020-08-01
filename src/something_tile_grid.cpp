@@ -160,3 +160,24 @@ void Tile_Grid::load_from_file(const char *filepath)
 
     fclose(f);
 }
+
+void Tile_Grid::load_room_from_file(const char *filepath, Vec2i coord)
+{
+    Tile tmp[ROOM_HEIGHT][ROOM_WIDTH] = {};
+
+    FILE *f = fopen(filepath, "rb");
+    if (f == NULL) {
+        println(stderr, "Could not load from file `", filepath, "`: ", strerror(errno));
+        abort();
+    }
+
+    size_t n = fread(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, f);
+    assert(n == ROOM_WIDTH * ROOM_HEIGHT);
+
+    for (size_t y = 0; y < ROOM_HEIGHT; ++y) {
+        for (size_t x = 0; x < ROOM_WIDTH; ++x) {
+            // TODO: check oob
+            tiles[coord.y + y][coord.x + x] = tmp[y][x];
+        }
+    }
+}

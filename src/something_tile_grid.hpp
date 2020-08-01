@@ -33,11 +33,15 @@ Tile_Def tile_defs[TILE_COUNT] = {
 const float TILE_SIZE = 128.0f * 0.5f;
 const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
+const int ROOM_WIDTH  = 10 * 2;
+const int ROOM_HEIGHT = 10 * 2;
+
 struct Tile_Grid
 {
     Tile tiles[TILE_GRID_HEIGHT][TILE_GRID_WIDTH];
 
     void load_from_file(const char *filepath);
+    void load_room_from_file(const char *filepath, Vec2i coord);
 
     void render(SDL_Renderer *renderer, Camera camera);
     void resolve_point_collision(Vec2f *origin);

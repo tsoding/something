@@ -136,7 +136,9 @@ int main(void)
     // SOUND END //////////////////////////////
 
     game.reset_entities();
-    game.grid.load_from_file("grid.bin");
+    for (int i = 0; i < 10; ++i) {
+        game.grid.load_room_from_file("assets/rooms/room-1.bin", vec2(i * ROOM_WIDTH, 0));
+    }
 
     sec(SDL_SetRenderDrawBlendMode(
             renderer,
