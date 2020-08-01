@@ -1,10 +1,5 @@
 #include "something_game.hpp"
 
-Vec2f rect_center(Rectf rect)
-{
-    return vec2(rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f);
-}
-
 const char *projectile_state_as_cstr(Projectile_State state)
 {
     switch (state) {

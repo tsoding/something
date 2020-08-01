@@ -79,6 +79,12 @@ bool rect_contains_vec2(Rect<T> rect, Vec2<T> point)
 }
 
 template <typename T>
+Vec2<T> rect_center(Rect<T> rect)
+{
+    return vec2(rect.x + rect.w / 2, rect.y + rect.h / 2);
+}
+
+template <typename T>
 Vec2<T> rect_top_left(Rect<T> rect)
 {
     return vec2(rect.x, rect.y);
