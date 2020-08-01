@@ -1,16 +1,5 @@
 #include "something_game.hpp"
 
-Rectf rect_from_tiles_to_abs(Recti rect)
-{
-    Rectf result = {
-        rect.x * TILE_SIZE,
-        rect.y * TILE_SIZE,
-        rect.w * TILE_SIZE,
-        rect.h * TILE_SIZE,
-    };
-    return result;
-}
-
 Vec2f rect_center(Rectf rect)
 {
     return vec2(rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f);
@@ -262,7 +251,7 @@ void Game::update(float dt)
     camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
 
     for (size_t i = 0; i < camera_locks_count; ++i) {
-        Rectf lock_abs = rect_from_tiles_to_abs(camera_locks[i]);
+        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
         if (rect_contains_vec2(lock_abs, player_pos)) {
             camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
         }
