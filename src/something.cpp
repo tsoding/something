@@ -31,7 +31,6 @@ using namespace aids;
 #include "something_texture.cpp"
 #include "something_sprite.cpp"
 #include "something_tile_grid.cpp"
-#include "something_room.cpp"
 #include "something_sound.cpp"
 #include "something_entity.cpp"
 #include "something_popup.cpp"

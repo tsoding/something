@@ -135,8 +135,8 @@ int main(void)
     SDL_PauseAudioDevice(dev, 0);
     // SOUND END //////////////////////////////
 
-    game.load_rooms();
     game.reset_entities();
+    game.grid.load_from_file("grid.bin");
 
     sec(SDL_SetRenderDrawBlendMode(
             renderer,

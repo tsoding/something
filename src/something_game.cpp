@@ -1,13 +1,5 @@
 #include "something_game.hpp"
 
-const float MINIMAP_TILE_SIZE = 10.0f * 0.5f;
-const Rectf MINIMAP_ROOM_BOUNDARY = {
-    0, 0,
-    ROOM_WIDTH * MINIMAP_TILE_SIZE,
-    ROOM_HEIGHT * MINIMAP_TILE_SIZE
-};
-const float MINIMAP_ENTITY_SIZE = MINIMAP_TILE_SIZE;
-
 const char *projectile_state_as_cstr(Projectile_State state)
 {
     switch (state) {
@@ -17,12 +9,6 @@ const char *projectile_state_as_cstr(Projectile_State state)
     }
 
     assert(0 && "Incorrect Projectile_State");
-}
-
-static char *file_path_of_room(char *buffer, size_t buffer_size, Room_Index index)
-{
-    snprintf(buffer, buffer_size, "assets/rooms/room-%lu.bin", index.unwrap);
-    return buffer;
 }
 
 // TODO(#25): Turn displayf into println style
@@ -62,115 +48,36 @@ void Game::handle_event(SDL_Event *event)
     } break;
 
     case SDL_KEYDOWN: {
-        // The reason we are not using isdigit here is because
-        // isdigit(event->key.keysym.sym) maybe crash on
-        // clang++ with -O0. Probably because SDL_Keycode is
-        // not a char and can be bigger than char and that
-        // kills isdigit if it's not optimized away?
-        const auto sym = event->key.keysym.sym;
-        if ('0' <= sym && sym <= '9') {
-            if (debug) {
-                int room_index = sym - '0' - 1;
-                if (0 <= room_index && (size_t) room_index < ROOM_ROW_COUNT) {
-                    entities[PLAYER_ENTITY_INDEX].pos =
-                        room_row[room_index].center();
-                }
+        switch (event->key.keysym.sym) {
+        case SDLK_SPACE: {
+            if (!event->key.repeat) {
+                entity_jump({PLAYER_ENTITY_INDEX});
             }
-        } else {
-            switch (event->key.keysym.sym) {
-            case SDLK_SPACE: {
-                if (!event->key.repeat) {
-                    entity_jump({PLAYER_ENTITY_INDEX});
-                }
-            } break;
-
-            case SDLK_c: {
-                if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    if (room_index.has_value) {
-                        room_index_clipboard = room_index.unwrap;
-                    }
-                }
-            } break;
-
-            case SDLK_v: {
-                if (debug && (event->key.keysym.mod & KMOD_LCTRL)) {
-                    auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                    if (room_index.has_value) {
-                        room_row[room_index_at(entities[PLAYER_ENTITY_INDEX].pos).unwrap.unwrap]
-                            .copy_from(&room_row[room_index_clipboard.unwrap], &grid);
-                    }
-                }
-            } break;
+        } break;
 
 #ifndef SOMETHING_RELEASE
-            case SDLK_F5: {
-                auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
-                if (result.is_error) {
-                    println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-                    popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
-                } else {
-                    popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
-                }
-            } break;
+        case SDLK_F5: {
+            auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+            if (result.is_error) {
+                println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+            } else {
+                popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
+            }
+        } break;
 #endif  // SOMETHING_RELEASE
 
-            case SDLK_q: {
-                debug = !debug;
-            } break;
+        case SDLK_q: {
+            debug = !debug;
+        } break;
 
-            case SDLK_z: {
-                step_debug = !step_debug;
-            } break;
+        case SDLK_z: {
+            step_debug = !step_debug;
+        } break;
 
-            case SDLK_e: {
-                auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                if (room_index.has_value) {
-                    room_row[room_index.unwrap.unwrap].dump_file(
-                        file_path_of_room(
-                            room_file_path,
-                            sizeof(room_file_path),
-                            room_index.unwrap),
-                        &grid);
-                    popup.notify(FONT_SUCCESS_COLOR,
-                                 "Saved room %lu to `%s`",
-                                 room_index.unwrap,
-                                 room_file_path);
-                } else {
-                    popup.notify(FONT_SUCCESS_COLOR,
-                                 "Player is outside of any rooms.\n"
-                                 "Cannot save anything.",
-                                 room_index.unwrap,
-                                 room_file_path);
-                }
-            } break;
-
-            case SDLK_i: {
-                auto room_index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-                if (room_index.has_value) {
-                    room_row[room_index.unwrap.unwrap].load_file(
-                        file_path_of_room(
-                            room_file_path,
-                            sizeof(room_file_path),
-                            room_index.unwrap),
-                        &grid);
-                    popup.notify(FONT_SUCCESS_COLOR,
-                                 "Load room %lu from `%s`\n",
-                                 room_index.unwrap,
-                                 room_file_path);
-                } else {
-                    popup.notify(FONT_SUCCESS_COLOR,
-                                 "Player is outside of any rooms.\n"
-                                 "Cannot load anything.",
-                                 room_index.unwrap,
-                                 room_file_path);
-                }
-            } break;
-
-            case SDLK_r: {
-                reset_entities();
-            } break;
-            }
+        case SDLK_r: {
+            reset_entities();
+        } break;
         }
     } break;
 
@@ -258,53 +165,6 @@ void Game::update(float dt)
     SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
-    // Enemy AI //////////////////////////////
-    if (!debug) {
-        auto &player = entities[PLAYER_ENTITY_INDEX];
-        auto player_index = room_index_at(player.pos);
-        if (player_index.has_value) {
-            auto player_tile = grid.abs_to_tile_coord(player.pos);
-            room_row[player_index.unwrap.unwrap].bfs_to_tile(player_tile, &grid);
-
-            for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
-                auto &enemy =  entities[i];
-                if (enemy.state == Entity_State::Alive) {
-                    auto enemy_index = room_index_at(enemy.pos);
-                    if (enemy_index.has_value && player_index.unwrap.unwrap == enemy_index.unwrap.unwrap) {
-                        if (grid.a_sees_b(enemy.pos, player.pos)) {
-                            enemy.stop();
-                            enemy.point_gun_at(player.pos);
-                            entity_shoot({i});
-                        } else {
-                            auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
-                            auto next = room_row[player_index.unwrap.unwrap].next_in_bfs(enemy_tile, &grid);
-                            if (next.has_value) {
-                                auto d = next.unwrap - enemy_tile;
-
-                                if (d.y < 0) {
-                                    enemy.jump();
-                                }
-                                if (d.x > 0) {
-                                    enemy.move(Entity::Right);
-                                }
-                                if (d.x < 0) {
-                                    enemy.move(Entity::Left);
-                                }
-                                if (d.x == 0) {
-                                    enemy.stop();
-                                }
-                            } else {
-                                enemy.stop();
-                            }
-                        }
-                    } else {
-                        enemy.stop();
-                    }
-                }
-            }
-        }
-    }
-
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(dt, &mixer);
@@ -384,12 +244,6 @@ void Game::update(float dt)
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
     camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
-    const auto room_index = room_index_at(player_pos);
-    if (room_index.has_value) {
-        const auto room_center = room_row[room_index_at(player_pos).unwrap.unwrap].center();
-        camera.vel += (room_center - camera.pos) * CENTER_CAMERA_FORCE;
-    }
-
     camera.update(dt);
 
     // Popup //////////////////////////////
@@ -398,35 +252,18 @@ void Game::update(float dt)
 
 void Game::render(SDL_Renderer *renderer)
 {
-    const auto index = room_index_at(entities[PLAYER_ENTITY_INDEX].pos);
-
-    // if (index.has_value) {
-    //     room_row[index.unwrap.unwrap].render_debug_bfs_overlay(
-    //         renderer,
-    //         &camera);
-    // }
-
     grid.render(renderer, camera);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         // TODO(#106): display health bar differently for enemies in a different room
-        const auto entity_index = room_index_at(entities[i].pos);
-        if (index != entity_index) {
-            entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
-        } else {
-            entities[i].render(renderer, camera);
-        }
+        entities[i].render(renderer, camera);
     }
 
     render_projectiles(renderer, camera);
 
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type != ITEM_NONE) {
-            if (index != room_index_at(items[i].pos)) {
-                items[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
-            } else {
-                items[i].render(renderer, camera);
-            }
+            items[i].render(renderer, camera);
         }
     }
 
@@ -461,14 +298,7 @@ void Game::entity_jump(Entity_Index entity_index)
 void Game::reset_entities()
 {
     static_assert(ROOM_ROW_COUNT > 0);
-    entities[PLAYER_ENTITY_INDEX] = player_entity(room_row[0].center());
-
-    for (size_t i = 0; i < ROOM_ROW_COUNT - 1; ++i) {
-        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i] = enemy_entity(
-            room_row[i + 1].center() - vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
-        entities[ENEMY_ENTITY_INDEX_OFFSET + 2 * i + 1] = enemy_entity(
-            room_row[i + 1].center() + vec2(ROOM_BOUNDARY.w * 0.25f, 0.0f));
-    }
+    entities[PLAYER_ENTITY_INDEX] = player_entity(vec2(200.0f, 200.0f));
 }
 
 void Game::entity_resolve_collision(Entity_Index entity_index)
@@ -571,14 +401,6 @@ void Game::render_debug_overlay(SDL_Renderer *renderer)
              "Player velocity: (%.4f, %.4f)",
              entities[PLAYER_ENTITY_INDEX].vel.x,
              entities[PLAYER_ENTITY_INDEX].vel.y);
-
-    const auto minimap_position = vec2(PADDING, 6 * 50 + PADDING);
-    render_room_row_minimap(renderer, minimap_position);
-    render_entity_on_minimap(
-        renderer,
-        vec2((float) minimap_position.x, (float) minimap_position.y),
-        entities[PLAYER_ENTITY_INDEX].pos);
-
 
     if (tracking_projectile.has_value) {
         auto projectile = projectiles[tracking_projectile.unwrap.unwrap];
@@ -749,84 +571,6 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
     }
 
     return {};
-}
-
-Maybe<Room_Index> Game::room_index_at(Vec2f p)
-{
-    for (size_t index = 0; index < ROOM_ROW_COUNT; ++index) {
-        if (room_row[index].contains_point(p)) {
-            return {true, {index}};
-        }
-    }
-
-    return {};
-}
-
-void Game::load_rooms()
-{
-    const int ROOM_PADDING = 2;
-    for (size_t room_index = 0; room_index < ROOM_ROW_COUNT; ++room_index) {
-        room_row[room_index].coord = vec2((int) (room_index * (ROOM_WIDTH + ROOM_PADDING)), 0);
-        room_row[room_index].load_file(
-            file_path_of_room(
-                room_file_path,
-                sizeof(room_file_path),
-                {room_index}),
-            &grid);
-    }
-}
-
-void Game::render_room_minimap(SDL_Renderer *renderer,
-                               Room_Index index,
-                               Vec2f position)
-{
-    assert(index.unwrap < ROOM_ROW_COUNT);
-
-    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-    for (int y = 0; y < ROOM_HEIGHT; ++y) {
-        for (int x = 0; x < ROOM_WIDTH; ++x) {
-            if (!grid.is_tile_empty_tile(vec2(x, y) + room_row[index.unwrap].coord)) {
-                SDL_Rect rect = {
-                    (int) (position.x + (float) (room_row[index.unwrap].coord.x + x) * MINIMAP_TILE_SIZE),
-                    (int) (position.y + (float) (room_row[index.unwrap].coord.y + y) * MINIMAP_TILE_SIZE),
-                    (int) MINIMAP_TILE_SIZE,
-                    (int) MINIMAP_TILE_SIZE
-                };
-                sec(SDL_RenderFillRect(renderer, &rect));
-            }
-        }
-    }
-}
-
-void Game::render_room_row_minimap(SDL_Renderer *renderer,
-                                   Vec2f position)
-{
-    for (size_t i = 0; i < ROOM_ROW_COUNT; ++i) {
-        render_room_minimap(renderer, {i}, position);
-    }
-}
-
-void Game::render_entity_on_minimap(SDL_Renderer *renderer,
-                                    Vec2f position,
-                                    Vec2f entity_position)
-{
-    const Vec2f minimap_position =
-        entity_position /
-        vec2(ROOM_BOUNDARY.w, ROOM_BOUNDARY.h) *
-        vec2((float) MINIMAP_ROOM_BOUNDARY.w, (float) MINIMAP_ROOM_BOUNDARY.h);
-
-    const Vec2f screen_position =
-        minimap_position + position;
-
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
-
-    SDL_Rect rect = {
-        (int) (screen_position.x - MINIMAP_ENTITY_SIZE * 0.5f),
-        (int) (screen_position.y - MINIMAP_ENTITY_SIZE * 0.5f),
-        (int) MINIMAP_ENTITY_SIZE,
-        (int) MINIMAP_ENTITY_SIZE
-    };
-    sec(SDL_RenderFillRect(renderer, &rect));
 }
 
 void Game::spawn_health_at_mouse()

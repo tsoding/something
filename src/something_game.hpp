@@ -14,6 +14,22 @@ enum class Debug_Draw_State {
     Delete
 };
 
+template <typename That>
+struct Index
+{
+    size_t unwrap;
+
+    bool operator==(const That that) const
+    {
+        return this->unwrap == that.unwrap;
+    }
+
+    bool operator!=(const That that) const
+    {
+        return !(*this == that);
+    }
+};
+
 struct Entity_Index: public Index<Entity_Index> {};
 struct Projectile_Index: public Index<Projectile_Index> {};
 
@@ -77,10 +93,6 @@ struct Game
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
 
-    Room room_row[ROOM_ROW_COUNT];
-    char room_file_path[256];
-    Room_Index room_index_clipboard;
-
     Item items[ITEMS_COUNT];
 
     Tile_Grid grid;
@@ -107,18 +119,6 @@ struct Game
 
     // Items of the Game
     void spawn_health_at_mouse();
-
-    // Rooms of the Game
-    Maybe<Room_Index> room_index_at(Vec2f p);
-    void load_rooms();
-    void render_room_minimap(SDL_Renderer *renderer,
-                             Room_Index index,
-                             Vec2f position);
-    void render_room_row_minimap(SDL_Renderer *renderer,
-                                 Vec2f position);
-    void render_entity_on_minimap(SDL_Renderer *renderer,
-                                  Vec2f position,
-                                  Vec2f entity_position);
 };
 
 #endif  // SOMETHING_GAME_HPP_

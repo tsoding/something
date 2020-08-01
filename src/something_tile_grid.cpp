@@ -146,3 +146,17 @@ bool Tile_Grid::a_sees_b(Vec2f a, Vec2f b)
 
     return true;
 }
+
+void Tile_Grid::load_from_file(const char *filepath)
+{
+    FILE *f = fopen(filepath, "rb");
+    if (f == NULL) {
+        println(stderr, "Could not load from file `", filepath, "`: ", strerror(errno));
+        abort();
+    }
+
+    size_t n = fread(tiles, sizeof(Tile), TILE_GRID_WIDTH * TILE_GRID_HEIGHT, f);
+    assert(n == TILE_GRID_WIDTH * TILE_GRID_HEIGHT);
+
+    fclose(f);
+}

@@ -37,6 +37,8 @@ struct Tile_Grid
 {
     Tile tiles[TILE_GRID_HEIGHT][TILE_GRID_WIDTH];
 
+    void load_from_file(const char *filepath);
+
     void render(SDL_Renderer *renderer, Camera camera);
     void resolve_point_collision(Vec2f *origin);
     Vec2i abs_to_tile_coord(Vec2f pos);
