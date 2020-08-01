@@ -174,10 +174,13 @@ void Tile_Grid::load_room_from_file(const char *filepath, Vec2i coord)
     size_t n = fread(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, f);
     assert(n == ROOM_WIDTH * ROOM_HEIGHT);
 
-    for (size_t y = 0; y < ROOM_HEIGHT; ++y) {
-        for (size_t x = 0; x < ROOM_WIDTH; ++x) {
-            // TODO: check oob
-            tiles[coord.y + y][coord.x + x] = tmp[y][x];
+    for (size_t dy = 0; dy < ROOM_HEIGHT; ++dy) {
+        for (size_t dx = 0; dx < ROOM_WIDTH; ++dx) {
+            size_t x = coord.x + dx;
+            size_t y = coord.y + dy;
+            if (x < (size_t) TILE_GRID_WIDTH && y < (size_t) TILE_GRID_HEIGHT) {
+                tiles[y][x] = tmp[dy][dx];
+            }
         }
     }
 }
