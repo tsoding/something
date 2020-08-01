@@ -59,6 +59,7 @@ const size_t PLAYER_ENTITY_INDEX = 0;
 const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
+const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
 
 // TODO(#136): camera anchors in the centers of the "rooms"
@@ -99,6 +100,11 @@ struct Game
     Item items[ITEMS_COUNT];
 
     Tile_Grid grid;
+
+    Recti camera_locks[CAMERA_LOCKS_CAPACITY];
+    size_t camera_locks_count;
+
+    void add_camera_lock(Recti rect);
 
     // Whole Game State
     void update(float dt);

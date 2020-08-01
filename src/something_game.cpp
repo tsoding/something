@@ -1,5 +1,21 @@
 #include "something_game.hpp"
 
+Rectf rect_from_tiles_to_abs(Recti rect)
+{
+    Rectf result = {
+        rect.x * TILE_SIZE,
+        rect.y * TILE_SIZE,
+        rect.w * TILE_SIZE,
+        rect.h * TILE_SIZE,
+    };
+    return result;
+}
+
+Vec2f rect_center(Rectf rect)
+{
+    return vec2(rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f);
+}
+
 const char *projectile_state_as_cstr(Projectile_State state)
 {
     switch (state) {
@@ -244,6 +260,14 @@ void Game::update(float dt)
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
     camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
+
+    for (size_t i = 0; i < camera_locks_count; ++i) {
+        Rectf lock_abs = rect_from_tiles_to_abs(camera_locks[i]);
+        if (rect_contains_vec2(lock_abs, player_pos)) {
+            camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+        }
+    }
+
     camera.update(dt);
 
     // Popup //////////////////////////////
@@ -581,4 +605,10 @@ void Game::spawn_health_at_mouse()
             break;
         }
     }
+}
+
+void Game::add_camera_lock(Recti rect)
+{
+    assert(camera_locks_count < CAMERA_LOCKS_CAPACITY);
+    camera_locks[camera_locks_count++] = rect;
 }

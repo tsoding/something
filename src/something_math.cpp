@@ -45,6 +45,7 @@ struct Rect
 };
 
 using Rectf = Rect<float>;
+using Recti = Rect<int>;
 
 template <typename T>
 bool rect_contains_vec2(Rect<T> rect, Vec2<T> point)
