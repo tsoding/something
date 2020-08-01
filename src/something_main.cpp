@@ -135,8 +135,15 @@ int main(void)
     SDL_PauseAudioDevice(dev, 0);
     // SOUND END //////////////////////////////
 
-    game.load_rooms();
     game.reset_entities();
+    char filepath[256];
+    const int PADDING = 1;
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 10; ++x) {
+            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % 3);
+            game.grid.load_room_from_file(filepath, vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING)));
+        }
+    }
 
     sec(SDL_SetRenderDrawBlendMode(
             renderer,

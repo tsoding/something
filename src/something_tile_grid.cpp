@@ -146,3 +146,41 @@ bool Tile_Grid::a_sees_b(Vec2f a, Vec2f b)
 
     return true;
 }
+
+void Tile_Grid::load_from_file(const char *filepath)
+{
+    FILE *f = fopen(filepath, "rb");
+    if (f == NULL) {
+        println(stderr, "Could not load from file `", filepath, "`: ", strerror(errno));
+        abort();
+    }
+
+    size_t n = fread(tiles, sizeof(Tile), TILE_GRID_WIDTH * TILE_GRID_HEIGHT, f);
+    assert(n == TILE_GRID_WIDTH * TILE_GRID_HEIGHT);
+
+    fclose(f);
+}
+
+void Tile_Grid::load_room_from_file(const char *filepath, Vec2i coord)
+{
+    Tile tmp[ROOM_HEIGHT][ROOM_WIDTH] = {};
+
+    FILE *f = fopen(filepath, "rb");
+    if (f == NULL) {
+        println(stderr, "Could not load from file `", filepath, "`: ", strerror(errno));
+        abort();
+    }
+
+    size_t n = fread(tmp, sizeof(Tile), ROOM_WIDTH * ROOM_HEIGHT, f);
+    assert(n == ROOM_WIDTH * ROOM_HEIGHT);
+
+    for (size_t dy = 0; dy < ROOM_HEIGHT; ++dy) {
+        for (size_t dx = 0; dx < ROOM_WIDTH; ++dx) {
+            size_t x = coord.x + dx;
+            size_t y = coord.y + dy;
+            if (x < (size_t) TILE_GRID_WIDTH && y < (size_t) TILE_GRID_HEIGHT) {
+                tiles[y][x] = tmp[dy][dx];
+            }
+        }
+    }
+}
