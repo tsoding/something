@@ -43,7 +43,7 @@ struct Tile_Grid
     void load_from_file(const char *filepath);
     void load_room_from_file(const char *filepath, Vec2i coord);
 
-    void render(SDL_Renderer *renderer, Camera camera);
+    void render(SDL_Renderer *renderer, Camera camera, Recti *lock);
     void resolve_point_collision(Vec2f *origin);
     Vec2i abs_to_tile_coord(Vec2f pos);
 

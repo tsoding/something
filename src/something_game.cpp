@@ -260,7 +260,15 @@ void Game::update(float dt)
 
 void Game::render(SDL_Renderer *renderer)
 {
-    grid.render(renderer, camera);
+    Recti *lock = NULL;
+    for (size_t i = 0; i < camera_locks_count; ++i) {
+        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+        if (rect_contains_vec2(lock_abs, entities[PLAYER_ENTITY_INDEX].pos)) {
+            lock = &camera_locks[i];
+        }
+    }
+
+    grid.render(renderer, camera, lock);
 
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         // TODO(#106): display health bar differently for enemies in a different room

@@ -56,7 +56,7 @@ Tile *Tile_Grid::tile_at_abs(Vec2f pos)
     return NULL;
 }
 
-void Tile_Grid::render(SDL_Renderer *renderer, Camera camera)
+void Tile_Grid::render(SDL_Renderer *renderer, Camera camera, Recti *lock)
 {
     const Vec2i begin = abs_to_tile_coord(
         camera.pos - vec2(SCREEN_WIDTH, SCREEN_HEIGHT) * 0.5f);
@@ -71,10 +71,16 @@ void Tile_Grid::render(SDL_Renderer *renderer, Camera camera)
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE),
                 TILE_SIZE, TILE_SIZE);
 
+            SDL_Color shade_color = ROOM_NEIGHBOR_DIM_COLOR;
+
+            if (lock && rect_contains_vec2(*lock, coord)) {
+                shade_color = {0, 0, 0, 0};
+            }
+
             if (is_tile_empty_tile(vec2(coord.x, coord.y - 1))) {
-                tile_defs[tile].top_texture.render(renderer, dstrect);
+                tile_defs[tile].top_texture.render(renderer, dstrect, SDL_FLIP_NONE, shade_color);
             } else {
-                tile_defs[tile].bottom_texture.render(renderer, dstrect);
+                tile_defs[tile].bottom_texture.render(renderer, dstrect, SDL_FLIP_NONE, shade_color);
             }
         }
     }
