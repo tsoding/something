@@ -61,7 +61,7 @@ const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
 const size_t ROOM_ROW_COUNT = 8;
 
-// TODO: camera anchors in the centers of the "rooms"
+// TODO(#136): camera anchors in the centers of the "rooms"
 // TODO: highlight areas to emulate "rooms"
 // TODO: reimplement back the enemy AI
 struct Game
