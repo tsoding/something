@@ -62,7 +62,7 @@ const size_t ITEMS_COUNT = 69;
 const size_t ROOM_ROW_COUNT = 8;
 
 // TODO(#136): camera anchors in the centers of the "rooms"
-// TODO: highlight areas to emulate "rooms"
+// TODO(#137): highlight areas to emulate "rooms"
 // TODO: reimplement back the enemy AI
 struct Game
 {
