@@ -136,8 +136,13 @@ int main(void)
     // SOUND END //////////////////////////////
 
     game.reset_entities();
-    for (int i = 0; i < 10; ++i) {
-        game.grid.load_room_from_file("assets/rooms/room-1.bin", vec2(i * ROOM_WIDTH, 0));
+    char filepath[256];
+    const int PADDING = 1;
+    for (int y = 0; y < 10; ++y) {
+        for (int x = 0; x < 10; ++x) {
+            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % 3);
+            game.grid.load_room_from_file(filepath, vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING)));
+        }
     }
 
     sec(SDL_SetRenderDrawBlendMode(
