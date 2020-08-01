@@ -244,6 +244,14 @@ void Game::update(float dt)
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
     camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
+
+    for (size_t i = 0; i < camera_locks_count; ++i) {
+        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+        if (rect_contains_vec2(lock_abs, player_pos)) {
+            camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+        }
+    }
+
     camera.update(dt);
 
     // Popup //////////////////////////////
@@ -581,4 +589,10 @@ void Game::spawn_health_at_mouse()
             break;
         }
     }
+}
+
+void Game::add_camera_lock(Recti rect)
+{
+    assert(camera_locks_count < CAMERA_LOCKS_CAPACITY);
+    camera_locks[camera_locks_count++] = rect;
 }

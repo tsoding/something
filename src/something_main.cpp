@@ -141,7 +141,9 @@ int main(void)
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
             snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % 3);
-            game.grid.load_room_from_file(filepath, vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING)));
+            auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
+            game.grid.load_room_from_file(filepath, coord);
+            game.add_camera_lock(rect(coord, ROOM_WIDTH, ROOM_HEIGHT));
         }
     }
 

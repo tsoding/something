@@ -45,12 +45,43 @@ struct Rect
 };
 
 using Rectf = Rect<float>;
+using Recti = Rect<int>;
+
+template <typename U, typename T>
+Rect<U> rect_cast(Rect<T> rect)
+{
+    Rect<U> result = {
+        (U) rect.x,
+        (U) rect.y,
+        (U) rect.w,
+        (U) rect.h
+    };
+    return result;
+}
+
+template <typename T>
+Rect<T> operator*(Rect<T> rect, T s)
+{
+    Rect<T> result = {
+        rect.x * s,
+        rect.y * s,
+        rect.w * s,
+        rect.h * s
+    };
+    return result;
+}
 
 template <typename T>
 bool rect_contains_vec2(Rect<T> rect, Vec2<T> point)
 {
     return rect.x <= point.x && point.x < (rect.x + rect.w)
         && rect.y <= point.y && point.y < (rect.y + rect.h);
+}
+
+template <typename T>
+Vec2<T> rect_center(Rect<T> rect)
+{
+    return vec2(rect.x + rect.w / 2, rect.y + rect.h / 2);
 }
 
 template <typename T>
