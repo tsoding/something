@@ -35,6 +35,12 @@ struct Entity
     Entity_State state;
     Alive_State alive_state;
     Jump_State jump_state;
+    // NOTE: indicates that the entity jump_state has transitioned
+    // from Jump_State::Prepare to Jump_State::Jump and the force that
+    // drives the entity up has been applied. That flag is used by the
+    // collision system to know when to not cancel out the vertical
+    // velocity which can accidentally cancel out the whole jump.
+    bool has_jumped;
 
     Rectf texbox_local;
     Rectf hitbox_local;
