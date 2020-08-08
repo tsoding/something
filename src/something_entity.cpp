@@ -195,6 +195,7 @@ void Entity::update(float dt, Sample_Mixer *mixer)
             if (prepare_for_jump_animat.finished()) {
                 jump_animat.reset();
                 jump_state = Jump_State::Jump;
+                has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
                 mixer->play_sample(jump_samples[rand() % 2]);
             }

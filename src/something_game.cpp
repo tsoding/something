@@ -169,6 +169,7 @@ void Game::update(float dt)
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(dt, &mixer);
         entity_resolve_collision({i});
+        entities[i].has_jumped = false;
     }
 
     // Update All Projectiles //////////////////////////////
@@ -338,7 +339,7 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                 Vec2f d = t1 - t0;
 
                 const int IMPACT_THRESHOLD = 5;
-                if (abs(d.y) >= IMPACT_THRESHOLD) entity->vel.y = 0;
+                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) entity->vel.y = 0;
                 if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
                 entity->pos += d;
