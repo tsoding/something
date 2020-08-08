@@ -55,6 +55,10 @@ void Game::handle_event(SDL_Event *event)
             }
         } break;
 
+        case SDLK_BACKQUOTE: {
+            console.visible = !console.visible;
+        } break;
+
 #ifndef SOMETHING_RELEASE
         case SDLK_F5: {
             auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
@@ -285,6 +289,7 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     popup.render(renderer);
+    console.render(renderer);
 }
 
 void Game::entity_shoot(Entity_Index entity_index)

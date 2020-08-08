@@ -79,6 +79,7 @@ struct Game
     Sample_Mixer mixer;
     const Uint8 *keyboard;
     Popup popup;
+    Console console;
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
