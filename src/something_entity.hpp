@@ -55,7 +55,7 @@ struct Entity
 
     Frame_Animat idle;
     Frame_Animat walking;
-    Squash_Animat poof;
+    Rubber_Animat poof_animat;
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;
 

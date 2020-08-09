@@ -3,21 +3,6 @@
 void Entity::kill()
 {
     if (state == Entity_State::Alive) {
-        poof.a = 0.0f;
-
-        switch (alive_state) {
-        case Alive_State::Idle:
-            if (idle.frame_current < idle.frame_count) {
-                poof.sprite = idle.frames[idle.frame_current];
-            }
-            break;
-        case Alive_State::Walking:
-            if (walking.frame_current < walking.frame_count) {
-                poof.sprite = walking.frames[walking.frame_current];
-            }
-            break;
-        }
-
         state = Entity_State::Poof;
     }
 }
@@ -134,7 +119,9 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
     } break;
 
     case Entity_State::Poof: {
-        poof.render(renderer, camera.to_screen(pos), camera.to_screen(texbox_world()), flip);
+        texbox = poof_animat.transform_rect(texbox_local, pos)
+        // TODO: Poof state loses last alive frame
+        idle.render(renderer, camera.to_screen(texbox), flip, shade);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -234,8 +221,8 @@ void Entity::update(float dt, Sample_Mixer *mixer)
     } break;
 
     case Entity_State::Poof: {
-        poof.update(dt);
-        if (poof.a >= 1) {
+        poof_animat.update(dt);
+        if (poof_animat.finished()) {
             state = Entity_State::Ded;
         }
     } break;
@@ -284,7 +271,6 @@ Entity player_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-    entity.poof.duration = PROJECTILE_POOF_DURATION;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -297,6 +283,10 @@ Entity player_entity(Vec2f pos)
     entity.jump_animat.rubber_animats[1].begin = -0.2f;
     entity.jump_animat.rubber_animats[1].end = 0.0f;
     entity.jump_animat.rubber_animats[1].duration = 0.2f;
+
+    entity.poof_animat.begin = 0.0f;
+    entity.poof_animat.end = 1.0f;
+    entity.poof_animat.duration = 0.5f;
 
     return entity;
 }
@@ -325,7 +315,6 @@ Entity enemy_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-    entity.poof.duration = PROJECTILE_POOF_DURATION;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -338,6 +327,10 @@ Entity enemy_entity(Vec2f pos)
     entity.jump_animat.rubber_animats[1].begin = -0.2f;
     entity.jump_animat.rubber_animats[1].end = 0.0f;
     entity.jump_animat.rubber_animats[1].duration = 0.2f;
+
+    entity.poof_animat.begin = 0.0f;
+    entity.poof_animat.end = 1.0f;
+    entity.poof_animat.duration = 0.5f;
 
     return entity;
 }
