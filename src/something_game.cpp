@@ -56,7 +56,7 @@ void Game::handle_event(SDL_Event *event)
         } break;
 
         case SDLK_BACKQUOTE: {
-            console.visible = !console.visible;
+            console.toggle_visible();
         } break;
 
 #ifndef SOMETHING_RELEASE
@@ -294,7 +294,7 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     popup.render(renderer);
-    console.render(renderer);
+    console.render(renderer, &debug_font);
 }
 
 void Game::entity_shoot(Entity_Index entity_index)
