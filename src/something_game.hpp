@@ -5,6 +5,7 @@ enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
     DEBUG_TOOLBAR_HEALS,
+    DEBUG_TOOLBAR_ENEMIES,
     DEBUG_TOOLBAR_COUNT
 };
 

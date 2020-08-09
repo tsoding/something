@@ -138,6 +138,11 @@ void Game::handle_event(SDL_Event *event)
                         spawn_health_at_mouse();
                     } break;
 
+                    case DEBUG_TOOLBAR_ENEMIES: {
+                        // TODO: Adding enemies in debug mode can only add a single enemy
+                        entities[PLAYER_ENTITY_INDEX + 1] = enemy_entity(mouse_position);
+                    } break;
+
                     default: {}
                     }
                 }
