@@ -42,6 +42,8 @@ void Projectile::kill()
 
 void Game::handle_event(SDL_Event *event)
 {
+    console.handle_event(event);
+
     switch (event->type) {
     case SDL_QUIT: {
         quit = true;

@@ -113,6 +113,9 @@ int main(void)
         snprintf(buffer, sizeof(buffer), "%2d hello, world", i);
         game.console.println(buffer);
     }
+    memcpy(game.console.edit_field, "hello, world", 5);
+    game.console.edit_field_size = 5;
+    game.console.edit_field_cursor = 3;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
