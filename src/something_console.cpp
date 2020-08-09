@@ -29,8 +29,10 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
                        (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
                        (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
                   FONT_DEBUG_COLOR);
-        font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                     CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+        if (edit_field_cursor < edit_field_size) {
+            font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                         CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+        }
     }
 }
 
@@ -44,11 +46,11 @@ void Console::toggle_visible()
     visible = !visible;
 }
 
-void Console::println(const char *cstr)
+void Console::println(const char *buffer, size_t buffer_size)
 {
     const size_t index = (begin + count) % CONSOLE_ROWS;
-    rows_count[index] = min(strlen(cstr), CONSOLE_COLUMNS);
-    memcpy(rows[index], cstr, rows_count[index]);
+    rows_count[index] = min(buffer_size, CONSOLE_COLUMNS);
+    memcpy(rows[index], buffer, rows_count[index]);
 
     if (count < (int) CONSOLE_ROWS) {
         count += 1;
@@ -67,6 +69,18 @@ void Console::cursor_right()
     edit_field_cursor = clamp(edit_field_cursor + 1, (size_t) 0, edit_field_size);
 }
 
+void Console::insert_char(char x)
+{
+    if (edit_field_size < CONSOLE_COLUMNS) {
+        memmove(edit_field + edit_field_cursor + 1,
+                edit_field + edit_field_cursor,
+                edit_field_size - edit_field_cursor);
+        edit_field[edit_field_cursor] = x;
+        edit_field_cursor += 1;
+        edit_field_size += 1;
+    }
+}
+
 void Console::handle_event(SDL_Event *event)
 {
     if (visible) {
@@ -80,6 +94,20 @@ void Console::handle_event(SDL_Event *event)
             case SDLK_RIGHT: {
                 cursor_right();
             } break;
+
+            case SDLK_RETURN: {
+                String_View command = {edit_field_size, edit_field};
+                if (command == "quit"_sv) {
+                    exit(0);
+                }
+                println(edit_field, edit_field_size);
+                edit_field_size = 0;
+                edit_field_cursor = 0;
+            } break;
+
+            default: {
+                insert_char(event->key.keysym.sym);
+            }
             }
         } break;
         }

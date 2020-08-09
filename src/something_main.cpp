@@ -108,14 +108,7 @@ int main(void)
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
 
-    char buffer[256];
-    for (int i = 0; i < CONSOLE_VISIBLE_ROWS; ++i) {
-        snprintf(buffer, sizeof(buffer), "%2d hello, world", i);
-        game.console.println(buffer);
-    }
-    memcpy(game.console.edit_field, "hello, world", 5);
-    game.console.edit_field_size = 5;
-    game.console.edit_field_cursor = 3;
+    game.console.visible = true;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

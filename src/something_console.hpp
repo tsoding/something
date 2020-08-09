@@ -21,9 +21,12 @@ struct Console
     void render(SDL_Renderer *renderer, Bitmap_Font *font);
     void update(float dt);
     void toggle_visible();
+
     void cursor_left();
     void cursor_right();
-    void println(const char *cstr);
+    void insert_char(char x);
+
+    void println(const char *buffer, size_t buffer_size);
 
     void handle_event(SDL_Event *event);
 };
