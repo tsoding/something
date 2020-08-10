@@ -121,6 +121,9 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
     case Entity_State::Poof: {
         Rectf texbox = poof_animat.transform_rect(texbox_local, pos);
         // TODO: Poof state loses last alive frame
+        //   Previous animation implementation was capturing texture of last alive state.
+        //   So if entity was shot in running pose it was squashing in this position.
+        //   So there's no sudden graphical switch to idle texture.
         idle.render(renderer, camera.to_screen(texbox), flip, shade);
     } break;
 
