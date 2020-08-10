@@ -204,30 +204,6 @@ struct Compose_Rubber_Animat
     }
 };
 
-// TODO(#52): Replace Squash_Animat with Rubber_Animat
-struct Squash_Animat
-{
-    Sprite sprite;
-    float duration;
-    float a;
-
-    void render(SDL_Renderer *renderer,
-                Vec2f pos,
-                Rectf texbox,
-                SDL_RendererFlip flip = SDL_FLIP_NONE) const
-    {
-        const float w = texbox.w + texbox.w * a;
-        const float h = texbox.h * (1.0f - a);
-        Rectf dstrect = {pos.x - w * 0.5f, pos.y + (texbox.h * 0.5f) - h, w, h};
-        sprite.render(renderer, dstrect, flip);
-    }
-
-    void update(float dt)
-    {
-        a += dt / duration;
-    }
-};
-
 struct Frame_Animat_File {
     const char *file_path;
     Frame_Animat animat;
