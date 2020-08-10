@@ -286,7 +286,7 @@ Entity player_entity(Vec2f pos)
 
     entity.poof_animat.begin = 0.0f;
     entity.poof_animat.end = 1.0f;
-    entity.poof_animat.duration = 0.5f;
+    entity.poof_animat.duration = 0.1f;
 
     return entity;
 }
@@ -330,7 +330,7 @@ Entity enemy_entity(Vec2f pos)
 
     entity.poof_animat.begin = 0.0f;
     entity.poof_animat.end = 1.0f;
-    entity.poof_animat.duration = 0.5f;
+    entity.poof_animat.duration = 0.1f;
 
     return entity;
 }
