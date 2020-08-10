@@ -5,6 +5,7 @@ enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
     DEBUG_TOOLBAR_HEALS,
+    DEBUG_TOOLBAR_ENEMIES,
     DEBUG_TOOLBAR_COUNT
 };
 
@@ -79,6 +80,7 @@ struct Game
     Sample_Mixer mixer;
     const Uint8 *keyboard;
     Popup popup;
+    Console console;
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
@@ -110,7 +112,7 @@ struct Game
     void update(float dt);
     void render(SDL_Renderer *renderer);
     void handle_event(SDL_Event *event);
-    void render_debug_overlay(SDL_Renderer *renderer);
+    void render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec);
 
     // Entities of the Game
     void reset_entities();

@@ -36,5 +36,6 @@ using namespace aids;
 #include "something_popup.cpp"
 #include "something_item.cpp"
 #include "something_toolbar.cpp"
+#include "something_console.cpp"
 #include "something_game.cpp"
 #include "something_main.cpp"

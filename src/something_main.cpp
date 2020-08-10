@@ -31,7 +31,6 @@ int main(void)
     // TODO(#8): replace fantasy_tiles.png with our own assets
     size_t tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
 
-
     load_textures(renderer);
     load_samples();
     load_frame_animat_files();
@@ -106,6 +105,8 @@ int main(void)
         texture_index_by_name(
             ITEM_HEALTH_TEXTURE));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
@@ -208,7 +209,7 @@ int main(void)
         }
         game.render(renderer);
         if (game.debug) {
-            game.render_debug_overlay(renderer);
+            game.render_debug_overlay(renderer, elapsed_sec);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////
