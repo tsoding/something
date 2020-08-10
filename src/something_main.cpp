@@ -209,7 +209,7 @@ int main(void)
         }
         game.render(renderer);
         if (game.debug) {
-            game.render_debug_overlay(renderer);
+            game.render_debug_overlay(renderer, elapsed_sec);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////

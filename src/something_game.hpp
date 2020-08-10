@@ -112,7 +112,7 @@ struct Game
     void update(float dt);
     void render(SDL_Renderer *renderer);
     void handle_event(SDL_Event *event);
-    void render_debug_overlay(SDL_Renderer *renderer);
+    void render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec);
 
     // Entities of the Game
     void reset_entities();
