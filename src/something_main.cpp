@@ -108,8 +108,6 @@ int main(void)
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
 
-    game.console.visible = true;
-
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
     want.freq = SOMETHING_SOUND_FREQ;

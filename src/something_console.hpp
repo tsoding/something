@@ -11,8 +11,8 @@ struct Console
     char rows[CONSOLE_ROWS][CONSOLE_COLUMNS];
     size_t rows_count[CONSOLE_ROWS];
 
-    int begin;
-    int count;
+    size_t begin;
+    size_t count;
 
     char edit_field[CONSOLE_COLUMNS];
     size_t edit_field_size;

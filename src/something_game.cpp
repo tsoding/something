@@ -42,6 +42,7 @@ void Projectile::kill()
 
 void Game::handle_event(SDL_Event *event)
 {
+    // TODO: Console events fall through to the actual gameplay
     console.handle_event(event);
 
     switch (event->type) {

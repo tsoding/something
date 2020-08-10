@@ -10,8 +10,8 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
         fill_rect(renderer, rect(vec2(0.0f, 0.0f), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
 
         // ROWS
-        for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, count); ++i) {
-            const auto index = mod(begin + count - 1 - i, (int) CONSOLE_ROWS);
+        for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
+            const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
             const auto position = vec2(0.0f, (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
             font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                          FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
@@ -36,6 +36,7 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
     }
 }
 
+// TODO: Console does not slide down
 void Console::update(float dt)
 {
     (void) dt;
@@ -61,12 +62,16 @@ void Console::println(const char *buffer, size_t buffer_size)
 
 void Console::cursor_left()
 {
-    edit_field_cursor = clamp(edit_field_cursor - 1, (size_t) 0, CONSOLE_COLUMNS - 1);
+    if (edit_field_cursor > 0) {
+        edit_field_cursor -= 1;
+    }
 }
 
 void Console::cursor_right()
 {
-    edit_field_cursor = clamp(edit_field_cursor + 1, (size_t) 0, edit_field_size);
+    if (edit_field_cursor < edit_field_size) {
+        edit_field_cursor += 1;
+    }
 }
 
 void Console::insert_char(char x)
@@ -84,6 +89,8 @@ void Console::insert_char(char x)
 void Console::handle_event(SDL_Event *event)
 {
     if (visible) {
+        // TODO: No support for delete or backspace in console
+        // TODO: Console does not use Text Input SDL events
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
