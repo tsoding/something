@@ -378,7 +378,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec)
     }
 
     const float PADDING = 10.0f;
-    // TODO: the FPS is recalculated way too often which makes it pretty hard to read
+    // TODO(#150): the FPS is recalculated way too often which makes it pretty hard to read
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
