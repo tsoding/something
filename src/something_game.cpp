@@ -42,6 +42,9 @@ void Projectile::kill()
 
 void Game::handle_event(SDL_Event *event)
 {
+    // TODO(#148): Console events fall through to the actual gameplay
+    console.handle_event(event);
+
     switch (event->type) {
     case SDL_QUIT: {
         quit = true;
@@ -53,6 +56,10 @@ void Game::handle_event(SDL_Event *event)
             if (!event->key.repeat) {
                 entity_jump({PLAYER_ENTITY_INDEX});
             }
+        } break;
+
+        case SDLK_BACKQUOTE: {
+            console.toggle_visible();
         } break;
 
 #ifndef SOMETHING_RELEASE
@@ -132,6 +139,11 @@ void Game::handle_event(SDL_Event *event)
 
                     case DEBUG_TOOLBAR_HEALS: {
                         spawn_health_at_mouse();
+                    } break;
+
+                    case DEBUG_TOOLBAR_ENEMIES: {
+                        // TODO(#149): Adding enemies in debug mode can only add a single enemy
+                        entities[PLAYER_ENTITY_INDEX + 1] = enemy_entity(mouse_position);
                     } break;
 
                     default: {}
@@ -285,6 +297,7 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     popup.render(renderer);
+    console.render(renderer, &debug_font);
 }
 
 void Game::entity_shoot(Entity_Index entity_index)

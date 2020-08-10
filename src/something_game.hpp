@@ -5,6 +5,7 @@ enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
     DEBUG_TOOLBAR_HEALS,
+    DEBUG_TOOLBAR_ENEMIES,
     DEBUG_TOOLBAR_COUNT
 };
 
@@ -79,6 +80,7 @@ struct Game
     Sample_Mixer mixer;
     const Uint8 *keyboard;
     Popup popup;
+    Console console;
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
