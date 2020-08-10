@@ -36,7 +36,7 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
     }
 }
 
-// TODO: Console does not slide down
+// TODO(#145): Console does not slide down
 void Console::update(float dt)
 {
     (void) dt;
