@@ -90,7 +90,7 @@ void Console::handle_event(SDL_Event *event)
 {
     if (visible) {
         // TODO(#146): No support for delete or backspace in console
-        // TODO: Console does not use Text Input SDL events
+        // TODO(#147): Console does not use Text Input SDL events
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
