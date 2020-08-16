@@ -143,7 +143,7 @@ void Game::handle_event(SDL_Event *event)
 
                     case DEBUG_TOOLBAR_ENEMIES: {
                         bool added_enemy = false;
-                        for (size_t i = PLAYER_ENTITY_INDEX; i < ENTITIES_COUNT; ++i) {
+                        for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
                             if(added_enemy) break;
                             if(entities[i].state == Entity_State::Alive) continue;
                             entities[i] = enemy_entity(mouse_position);
