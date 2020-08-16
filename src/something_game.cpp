@@ -142,8 +142,13 @@ void Game::handle_event(SDL_Event *event)
                     } break;
 
                     case DEBUG_TOOLBAR_ENEMIES: {
-                        // TODO(#149): Adding enemies in debug mode can only add a single enemy
-                        entities[PLAYER_ENTITY_INDEX + 1] = enemy_entity(mouse_position);
+                        bool added_enemy = false;
+                        for (size_t i = PLAYER_ENTITY_INDEX; i < ENTITIES_COUNT; ++i) {
+                            if(added_enemy) break;
+                            if(entities[i].state == Entity_State::Alive) continue;
+                            entities[i] = enemy_entity(mouse_position);
+                            added_enemy = true;
+                        }
                     } break;
 
                     default: {}
