@@ -9,8 +9,11 @@ void print1(FILE *stream, Vec2<T> v)
 
 Game game = {};
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    (void) argc;
+    (void) argv;
+
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
 
     SDL_Window *window =
@@ -123,7 +126,7 @@ int main(void)
         0,
         &want,
         &have,
-        SDL_AUDIO_ALLOW_FORMAT_CHANGE);
+        0);
     defer(SDL_CloseAudioDevice(dev));
     if (dev == 0) {
         println(stderr, "SDL pooped itself: Failed to open audio: ", SDL_GetError());
