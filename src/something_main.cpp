@@ -161,7 +161,7 @@ int main(void)
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
         float instant_fps = 1.0 / elapsed_sec;
-        if (elapsed_sec == 0) instant_fps = 60;
+        if (elapsed_sec < 1.0E-5) instant_fps = 60;
         fps = fps * 0.99 + instant_fps * 0.01;
 
         //// HANDLE INPUT //////////////////////////////
