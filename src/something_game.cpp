@@ -42,9 +42,9 @@ void Projectile::kill()
 
 void Game::handle_event(SDL_Event *event)
 {
-    // TODO(#148): Console events fall through to the actual gameplay
-    console.handle_event(event);
+    bool just_toggled_the_visibility_of_the_console = false;
 
+    // GLOBAL KEYBINDINGS //////
     switch (event->type) {
     case SDL_QUIT: {
         quit = true;
@@ -52,15 +52,11 @@ void Game::handle_event(SDL_Event *event)
 
     case SDL_KEYDOWN: {
         switch (event->key.keysym.sym) {
-        case SDLK_SPACE: {
-            if (!event->key.repeat) {
-                entity_jump({PLAYER_ENTITY_INDEX});
-            }
-        } break;
-
         case SDLK_BACKQUOTE: {
             console.toggle_visible();
+            just_toggled_the_visibility_of_the_console = true;
         } break;
+
 
 #ifndef SOMETHING_RELEASE
         case SDLK_F5: {
@@ -73,18 +69,6 @@ void Game::handle_event(SDL_Event *event)
             }
         } break;
 #endif  // SOMETHING_RELEASE
-
-        case SDLK_q: {
-            debug = !debug;
-        } break;
-
-        case SDLK_z: {
-            step_debug = !step_debug;
-        } break;
-
-        case SDLK_r: {
-            reset_entities();
-        } break;
         }
     } break;
 
@@ -170,6 +154,36 @@ void Game::handle_event(SDL_Event *event)
         } break;
         }
     } break;
+    }
+
+    // TODO(#148): Console events fall through to the actual gameplay
+
+    if (console.visible && !just_toggled_the_visibility_of_the_console) {
+        console.handle_event(event);
+    } else {
+        switch (event->type) {
+        case SDL_KEYDOWN: {
+            switch (event->key.keysym.sym) {
+            case SDLK_SPACE: {
+                if (!event->key.repeat) {
+                    entity_jump({PLAYER_ENTITY_INDEX});
+                }
+            } break;
+
+            case SDLK_q: {
+                debug = !debug;
+            } break;
+
+            case SDLK_z: {
+                step_debug = !step_debug;
+            } break;
+
+            case SDLK_r: {
+                reset_entities();
+            } break;
+            }
+        } break;
+        }
     }
 }
 
@@ -301,12 +315,14 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    if (keyboard[SDL_SCANCODE_D]) {
-        entities[PLAYER_ENTITY_INDEX].move(Entity::Right);
-    } else if (keyboard[SDL_SCANCODE_A]) {
-        entities[PLAYER_ENTITY_INDEX].move(Entity::Left);
-    } else {
-        entities[PLAYER_ENTITY_INDEX].stop();
+    if (!console.visible) {
+        if (keyboard[SDL_SCANCODE_D]) {
+            entities[PLAYER_ENTITY_INDEX].move(Entity::Right);
+        } else if (keyboard[SDL_SCANCODE_A]) {
+            entities[PLAYER_ENTITY_INDEX].move(Entity::Left);
+        } else {
+            entities[PLAYER_ENTITY_INDEX].stop();
+        }
     }
 
     // Camera "Physics" //////////////////////////////
