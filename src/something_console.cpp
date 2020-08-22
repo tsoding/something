@@ -74,15 +74,17 @@ void Console::cursor_right()
     }
 }
 
-void Console::insert_char(char x)
+void Console::insert_cstr(const char *cstr)
 {
-    if (edit_field_size < CONSOLE_COLUMNS) {
-        memmove(edit_field + edit_field_cursor + 1,
+    const size_t n = strlen(cstr);
+
+    if (edit_field_size + n <= CONSOLE_COLUMNS) {
+        memmove(edit_field + edit_field_cursor + n,
                 edit_field + edit_field_cursor,
                 edit_field_size - edit_field_cursor);
-        edit_field[edit_field_cursor] = x;
-        edit_field_cursor += 1;
-        edit_field_size += 1;
+        memcpy(edit_field + edit_field_cursor, cstr, n);
+        edit_field_cursor += n;
+        edit_field_size += n;
     }
 }
 
@@ -90,7 +92,7 @@ void Console::handle_event(SDL_Event *event)
 {
     if (visible) {
         // TODO(#146): No support for delete or backspace in console
-        // TODO(#147): Console does not use Text Input SDL events
+        // TODO: Console does not integrate with the OS clipboard
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
@@ -111,11 +113,11 @@ void Console::handle_event(SDL_Event *event)
                 edit_field_size = 0;
                 edit_field_cursor = 0;
             } break;
+            }
+        } break;
 
-            default: {
-                insert_char(event->key.keysym.sym);
-            }
-            }
+        case SDL_TEXTINPUT: {
+            insert_cstr(event->text.text);
         } break;
         }
     }
