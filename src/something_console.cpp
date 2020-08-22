@@ -93,7 +93,7 @@ void Console::handle_event(SDL_Event *event)
     // TODO(#158): Backtick event bleeds into the Console
     if (visible) {
         // TODO(#146): No support for delete or backspace in console
-        // TODO: Console does not integrate with the OS clipboard
+        // TODO(#159): Console does not integrate with the OS clipboard
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
