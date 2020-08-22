@@ -90,7 +90,7 @@ void Console::insert_cstr(const char *cstr)
 
 void Console::handle_event(SDL_Event *event)
 {
-    // TODO: Backtick event bleeds into the Console
+    // TODO(#158): Backtick event bleeds into the Console
     if (visible) {
         // TODO(#146): No support for delete or backspace in console
         // TODO: Console does not integrate with the OS clipboard
