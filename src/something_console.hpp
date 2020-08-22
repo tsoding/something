@@ -24,7 +24,7 @@ struct Console
 
     void cursor_left();
     void cursor_right();
-    void insert_char(char x);
+    void insert_cstr(const char *cstr);
 
     void println(const char *buffer, size_t buffer_size);
 

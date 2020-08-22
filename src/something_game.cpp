@@ -42,8 +42,6 @@ void Projectile::kill()
 
 void Game::handle_event(SDL_Event *event)
 {
-    bool just_toggled_the_visibility_of_the_console = false;
-
     // GLOBAL KEYBINDINGS //////
     switch (event->type) {
     case SDL_QUIT: {
@@ -54,7 +52,6 @@ void Game::handle_event(SDL_Event *event)
         switch (event->key.keysym.sym) {
         case SDLK_BACKQUOTE: {
             console.toggle_visible();
-            just_toggled_the_visibility_of_the_console = true;
         } break;
 
 
@@ -158,7 +155,7 @@ void Game::handle_event(SDL_Event *event)
 
     // TODO(#148): Console events fall through to the actual gameplay
 
-    if (console.visible && !just_toggled_the_visibility_of_the_console) {
+    if (console.visible) {
         console.handle_event(event);
     } else {
         switch (event->type) {
