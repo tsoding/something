@@ -179,50 +179,52 @@ void Game::update(float dt)
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
+
     // Enemy AI //////////////////////////////
-    if (!debug) {
-        auto &player = entities[PLAYER_ENTITY_INDEX];
-
-        Recti *lock = NULL;
-        for (size_t i = 0; i < camera_locks_count; ++i) {
-            Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
-            if (rect_contains_vec2(lock_abs, player.pos)) {
-                lock = &camera_locks[i];
-            }
+    auto &player = entities[PLAYER_ENTITY_INDEX];
+    Recti *lock = NULL;
+    for (size_t i = 0; i < camera_locks_count; ++i) {
+        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+        if (rect_contains_vec2(lock_abs, player.pos)) {
+            lock = &camera_locks[i];
         }
-        if (lock) {
-            Rectf lock_abs = rect_cast<float>(*lock) * TILE_SIZE;
-            auto player_tile = grid.abs_to_tile_coord(player.pos);
-            grid.bfs_to_tile(player_tile, lock);
-            for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
-                auto &enemy =  entities[i];
-                if (enemy.state == Entity_State::Alive) {
-                    if (rect_contains_vec2(lock_abs, enemy.pos)) {
-                        if (grid.a_sees_b(enemy.pos, player.pos)) {
-                            enemy.stop();
-                            enemy.point_gun_at(player.pos);
-                            entity_shoot({i});
-                        } else {
-                            auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
-                            auto next = grid.next_in_bfs(enemy_tile, lock);
-                            if (next.has_value) {
-                                auto d = next.unwrap - enemy_tile;
+    }
 
-                                if (d.y < 0) {
-                                    enemy.jump();
-                                }
-                                if (d.x > 0) {
-                                    enemy.move(Entity::Right);
-                                }
-                                if (d.x < 0) {
-                                    enemy.move(Entity::Left);
-                                }
-                                if (d.x == 0) {
-                                    enemy.stop();
-                                }
-                            } else {
+    auto player_tile = grid.abs_to_tile_coord(player.pos);
+    if (lock) {
+        grid.bfs_to_tile(player_tile, lock);
+    }
+
+    if (!debug && lock) {
+        Rectf lock_abs = rect_cast<float>(*lock) * TILE_SIZE;
+        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+            auto &enemy =  entities[i];
+            if (enemy.state == Entity_State::Alive) {
+                if (rect_contains_vec2(lock_abs, enemy.pos)) {
+                    if (grid.a_sees_b(enemy.pos, player.pos)) {
+                        enemy.stop();
+                        enemy.point_gun_at(player.pos);
+                        entity_shoot({i});
+                    } else {
+                        auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
+                        auto next = grid.next_in_bfs(enemy_tile, lock);
+                        if (next.has_value) {
+                            auto d = next.unwrap - enemy_tile;
+
+                            if (d.y < 0) {
+                                enemy.jump();
+                            }
+                            if (d.x > 0) {
+                                enemy.move(Entity::Right);
+                            }
+                            if (d.x < 0) {
+                                enemy.move(Entity::Left);
+                            }
+                            if (d.x == 0) {
                                 enemy.stop();
                             }
+                        } else {
+                            enemy.stop();
                         }
                     }
                 }
@@ -333,12 +335,13 @@ void Game::render(SDL_Renderer *renderer)
             lock = &camera_locks[i];
         }
     }
-    // if (lock) {
-    //     grid.render_debug_bfs_overlay(
-    //         renderer,
-    //         &camera,
-    //         lock);
-    // }
+
+    if (debug && lock) {
+        grid.render_debug_bfs_overlay(
+            renderer,
+            &camera,
+            lock);
+    }
 
     grid.render(renderer, camera, lock);
 
