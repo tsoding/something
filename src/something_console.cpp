@@ -134,6 +134,20 @@ void Console::insert_cstr(const char *cstr)
     edit_field_size += n;
 }
 
+void Console::backspace_char()
+{
+    if (edit_field_cursor > 0) {
+        const size_t n = edit_field_size - edit_field_cursor;
+        memmove(
+            edit_field + edit_field_cursor - 1,
+            edit_field + edit_field_cursor,
+            n);
+        edit_field_cursor -= 1;
+        edit_field_size -= 1;
+        edit_field_selection_begin = edit_field_cursor;
+    }
+}
+
 void Console::handle_event(SDL_Event *event)
 {
     // TODO(#158): Backtick event bleeds into the Console
@@ -143,6 +157,14 @@ void Console::handle_event(SDL_Event *event)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            // case SDLK_DELETE: {
+            //     delete_char();
+            // } break;
+
+            case SDLK_BACKSPACE: {
+                backspace_char();
+            } break;
+
             case SDLK_LEFT: {
                 cursor_left(event->key.keysym.mod & KMOD_LSHIFT);
             } break;
