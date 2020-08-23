@@ -46,6 +46,7 @@ struct Console
     void cursor_right(bool selection);
     void insert_cstr(const char *cstr);
     void backspace_char();
+    void delete_char();
 
     void println(const char *buffer, size_t buffer_size);
 
