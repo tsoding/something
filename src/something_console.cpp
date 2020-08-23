@@ -134,6 +134,46 @@ void Console::insert_cstr(const char *cstr)
     edit_field_size += n;
 }
 
+void Console::delete_selection(Selection selection)
+{
+    assert(selection.begin < edit_field_size);
+    assert(selection.end <= edit_field_size);
+
+    memmove(edit_field + selection.begin,
+            edit_field + selection.end,
+            edit_field_size - selection.end);
+    edit_field_cursor = selection.begin;
+    edit_field_size -= selection.size();
+    edit_field_selection_begin = edit_field_cursor;
+}
+
+void Console::delete_char()
+{
+    if (edit_field_cursor < edit_field_size) {
+        const size_t n = edit_field_size - edit_field_cursor - 1;
+        memmove(
+            edit_field + edit_field_cursor,
+            edit_field + edit_field_cursor + 1,
+            n);
+        edit_field_size -= 1;
+        edit_field_selection_begin = edit_field_cursor;
+    }
+}
+
+void Console::backspace_char()
+{
+    if (edit_field_cursor > 0) {
+        const size_t n = edit_field_size - edit_field_cursor;
+        memmove(
+            edit_field + edit_field_cursor - 1,
+            edit_field + edit_field_cursor,
+            n);
+        edit_field_cursor -= 1;
+        edit_field_size -= 1;
+        edit_field_selection_begin = edit_field_cursor;
+    }
+}
+
 void Console::handle_event(SDL_Event *event)
 {
     // TODO(#158): Backtick event bleeds into the Console
@@ -143,6 +183,24 @@ void Console::handle_event(SDL_Event *event)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            case SDLK_DELETE: {
+                const auto selection = get_selection();
+                if (selection.is_empty()) {
+                    delete_char();
+                } else {
+                    delete_selection(selection);
+                }
+            } break;
+
+            case SDLK_BACKSPACE: {
+                const auto selection = get_selection();
+                if (selection.is_empty()) {
+                    backspace_char();
+                } else {
+                    delete_selection(selection);
+                }
+            } break;
+
             case SDLK_LEFT: {
                 cursor_left(event->key.keysym.mod & KMOD_LSHIFT);
             } break;

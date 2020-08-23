@@ -11,12 +11,12 @@ struct Console
         size_t begin;
         size_t end;
 
-        bool is_empty()
+        bool is_empty() const
         {
             return size() == 0;
         }
 
-        size_t size()
+        size_t size() const
         {
             return end - begin;
         }
@@ -45,6 +45,9 @@ struct Console
     void cursor_left(bool selection);
     void cursor_right(bool selection);
     void insert_cstr(const char *cstr);
+    void backspace_char();
+    void delete_char();
+    void delete_selection(Selection selection);
 
     void println(const char *buffer, size_t buffer_size);
 
