@@ -106,7 +106,14 @@ void Console::handle_event(SDL_Event *event)
 
             case SDLK_v: {
                 if (event->key.keysym.mod & KMOD_LCTRL) {
-                    insert_cstr(SDL_GetClipboardText());
+                    insert_cstr(sec(SDL_GetClipboardText()));
+                }
+            } break;
+
+            case SDLK_c: {
+                if (event->key.keysym.mod & KMOD_LCTRL) {
+                    edit_field[edit_field_size] = '\0';
+                    sec(SDL_SetClipboardText(edit_field));
                 }
             } break;
 

@@ -14,7 +14,7 @@ struct Console
     size_t begin;
     size_t count;
 
-    char edit_field[CONSOLE_COLUMNS];
+    char edit_field[CONSOLE_COLUMNS + 1];
     size_t edit_field_size;
     size_t edit_field_cursor;
 
