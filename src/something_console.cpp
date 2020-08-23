@@ -1,5 +1,21 @@
 #include "something_console.hpp"
 
+Console::Selection Console::get_selection() const
+{
+    Selection result = {};
+
+    if (edit_field_selection_begin <= edit_field_cursor) {
+        result.begin = edit_field_selection_begin;
+        result.end = edit_field_cursor;
+    } else {
+        result.begin = edit_field_cursor + 1;
+        result.end = edit_field_selection_begin + 1;
+    }
+
+    assert(result.begin <= result.end);
+    return result;
+}
+
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
     if (visible) {
@@ -33,6 +49,30 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
             font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                          CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
         }
+
+        // SELECTION
+        // text:              the q[uick bro]w[n fox jump]s over the lazy dog
+        // cursor:                           ^
+        // selection_begin:         ^                   ^
+        {
+            auto selection = get_selection();
+
+            if (!selection.is_empty()) {
+                const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+                const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+                const float width = end_x - begin_x;
+
+                fill_rect(renderer,
+                          rect(vec2(begin_x, position.y),
+                               width,
+                               (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                          CONSOLE_SELECTION_COLOR);
+
+                font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                             CONSOLE_BACKGROUND_COLOR,
+                             String_View {selection.end - selection.begin, edit_field + selection.begin});
+            }
+        }
     }
 }
 
@@ -60,17 +100,23 @@ void Console::println(const char *buffer, size_t buffer_size)
     }
 }
 
-void Console::cursor_left()
+void Console::cursor_left(bool selection)
 {
     if (edit_field_cursor > 0) {
         edit_field_cursor -= 1;
+        if (!selection) {
+            edit_field_selection_begin = edit_field_cursor;
+        }
     }
 }
 
-void Console::cursor_right()
+void Console::cursor_right(bool selection)
 {
     if (edit_field_cursor < edit_field_size) {
         edit_field_cursor += 1;
+        if (!selection) {
+            edit_field_selection_begin = edit_field_cursor;
+        }
     }
 }
 
@@ -84,6 +130,7 @@ void Console::insert_cstr(const char *cstr)
             edit_field_size - edit_field_cursor);
     memcpy(edit_field + edit_field_cursor, cstr, n);
     edit_field_cursor += n;
+    edit_field_selection_begin = edit_field_cursor;
     edit_field_size += n;
 }
 
@@ -97,11 +144,11 @@ void Console::handle_event(SDL_Event *event)
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
             case SDLK_LEFT: {
-                cursor_left();
+                cursor_left(event->key.keysym.mod & KMOD_LSHIFT);
             } break;
 
             case SDLK_RIGHT: {
-                cursor_right();
+                cursor_right(event->key.keysym.mod & KMOD_LSHIFT);
             } break;
 
             case SDLK_v: {
@@ -112,8 +159,12 @@ void Console::handle_event(SDL_Event *event)
 
             case SDLK_c: {
                 if (event->key.keysym.mod & KMOD_LCTRL) {
-                    edit_field[edit_field_size] = '\0';
-                    sec(SDL_SetClipboardText(edit_field));
+                    auto selection = get_selection();
+                    if (!selection.is_empty()) {
+                        memcpy(clipboard_buffer, edit_field + selection.begin, selection.size());
+                        clipboard_buffer[selection.size()] = '\0';
+                        sec(SDL_SetClipboardText(clipboard_buffer));
+                    }
                 }
             } break;
 
@@ -125,6 +176,7 @@ void Console::handle_event(SDL_Event *event)
                 println(edit_field, edit_field_size);
                 edit_field_size = 0;
                 edit_field_cursor = 0;
+                edit_field_selection_begin = 0;
             } break;
             }
         } break;

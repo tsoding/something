@@ -6,6 +6,22 @@ const size_t CONSOLE_COLUMNS = 256;
 
 struct Console
 {
+    struct Selection
+    {
+        size_t begin;
+        size_t end;
+
+        bool is_empty()
+        {
+            return size() == 0;
+        }
+
+        size_t size()
+        {
+            return end - begin;
+        }
+    };
+
     bool visible;
 
     char rows[CONSOLE_ROWS][CONSOLE_COLUMNS];
@@ -14,16 +30,20 @@ struct Console
     size_t begin;
     size_t count;
 
-    char edit_field[CONSOLE_COLUMNS + 1];
+    char clipboard_buffer[CONSOLE_COLUMNS + 1];
+    char edit_field[CONSOLE_COLUMNS];
     size_t edit_field_size;
     size_t edit_field_cursor;
+    size_t edit_field_selection_begin;
+
+    Selection get_selection() const;
 
     void render(SDL_Renderer *renderer, Bitmap_Font *font);
     void update(float dt);
     void toggle_visible();
 
-    void cursor_left();
-    void cursor_right();
+    void cursor_left(bool selection);
+    void cursor_right(bool selection);
     void insert_cstr(const char *cstr);
 
     void println(const char *buffer, size_t buffer_size);
