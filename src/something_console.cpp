@@ -134,6 +134,19 @@ void Console::insert_cstr(const char *cstr)
     edit_field_size += n;
 }
 
+void Console::delete_selection(Selection selection)
+{
+    assert(selection.begin < edit_field_size);
+    assert(selection.end <= edit_field_size);
+
+    memmove(edit_field + selection.begin,
+            edit_field + selection.end,
+            edit_field_size - selection.end);
+    edit_field_cursor = selection.begin;
+    edit_field_size -= selection.size();
+    edit_field_selection_begin = edit_field_cursor;
+}
+
 void Console::delete_char()
 {
     if (edit_field_cursor < edit_field_size) {
@@ -171,11 +184,21 @@ void Console::handle_event(SDL_Event *event)
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
             case SDLK_DELETE: {
-                delete_char();
+                const auto selection = get_selection();
+                if (selection.is_empty()) {
+                    delete_char();
+                } else {
+                    delete_selection(selection);
+                }
             } break;
 
             case SDLK_BACKSPACE: {
-                backspace_char();
+                const auto selection = get_selection();
+                if (selection.is_empty()) {
+                    backspace_char();
+                } else {
+                    delete_selection(selection);
+                }
             } break;
 
             case SDLK_LEFT: {
