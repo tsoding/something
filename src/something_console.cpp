@@ -76,16 +76,15 @@ void Console::cursor_right()
 
 void Console::insert_cstr(const char *cstr)
 {
-    const size_t n = strlen(cstr);
+    const size_t remaining = CONSOLE_COLUMNS - edit_field_size;
+    const size_t n = min(strlen(cstr), remaining);
 
-    if (edit_field_size + n <= CONSOLE_COLUMNS) {
-        memmove(edit_field + edit_field_cursor + n,
-                edit_field + edit_field_cursor,
-                edit_field_size - edit_field_cursor);
-        memcpy(edit_field + edit_field_cursor, cstr, n);
-        edit_field_cursor += n;
-        edit_field_size += n;
-    }
+    memmove(edit_field + edit_field_cursor + n,
+            edit_field + edit_field_cursor,
+            edit_field_size - edit_field_cursor);
+    memcpy(edit_field + edit_field_cursor, cstr, n);
+    edit_field_cursor += n;
+    edit_field_size += n;
 }
 
 void Console::handle_event(SDL_Event *event)
@@ -103,6 +102,12 @@ void Console::handle_event(SDL_Event *event)
 
             case SDLK_RIGHT: {
                 cursor_right();
+            } break;
+
+            case SDLK_v: {
+                if (event->key.keysym.mod & KMOD_LCTRL) {
+                    insert_cstr(SDL_GetClipboardText());
+                }
             } break;
 
             case SDLK_RETURN: {
