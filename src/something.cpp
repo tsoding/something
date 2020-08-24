@@ -33,6 +33,7 @@ using namespace aids;
 #include "something_tile_grid.cpp"
 #include "something_sound.cpp"
 #include "something_entity.cpp"
+#include "something_exploded_tile.cpp"
 #include "something_popup.cpp"
 #include "something_item.cpp"
 #include "something_toolbar.cpp"

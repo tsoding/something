@@ -133,6 +133,37 @@ void Game::handle_event(SDL_Event *event)
                     default: {}
                     }
                 }
+            } else {
+                Vec2i mouse_tile = vec_cast<int>(mouse_position / TILE_SIZE);
+                const int r = EXPLOSION_RADIUS / TILE_SIZE;
+                size_t search_index = 0;
+                for (int y = -r; y <= r; ++y) {
+                    for (int x = -r; x <= r; ++x) {
+                        auto probe = vec2(x, y);
+                        // NOTE: Subtraction of r is needed for rounded corners (2 <= r <= 6).
+                        if(sqr_len(probe) < r*r-r) {
+                            Vec2i tile_pos = mouse_tile + probe;
+                            Tile tile = grid.get_tile(tile_pos);
+                            if(tile == TILE_EMPTY) continue;
+                            grid.set_tile(tile_pos, TILE_EMPTY);
+
+                            while (search_index < EXPLODED_TILES_COUNT) {
+                                if (exploded_tiles[search_index].state == Exploded_Tile_State::Ded) {
+                                    Vec2f center_of_tile = (vec_cast<float, int>(tile_pos) + vec2(0.5f, 0.5f)) * TILE_SIZE;
+                                    exploded_tiles[search_index] = make_exploded_tile(center_of_tile, tile, mouse_position);
+                                    Vec2f vec_from_epicenter = center_of_tile - mouse_position;
+                                    float dist_from_epicenter_sqr = sqr_len(vec_from_epicenter);
+                                    float power = (float) EXPLOSION_RADIUS_SQR / dist_from_epicenter_sqr;
+                                    Vec2f impulse = vec_from_epicenter * clamp(power, 0.0f, MAX_EXPLOSION_POWER);
+                                    exploded_tiles[search_index].vel = impulse * EXPLOSION_POWER;
+                                    exploded_tiles[search_index].cooldown_radius_sqr = EXPLOSION_COOLDOWN_RADIUS;
+                                    break;
+                                }
+                                search_index++;
+                            }
+                        }
+                    }
+                }
             }
         } break;
 
@@ -241,6 +272,12 @@ void Game::update(float dt)
                 }
             }
         }
+    }
+
+    // Update All Exploded Tiles //////////////////////////////
+    for (size_t i = 0; i < EXPLODED_TILES_COUNT; ++i) {
+        exploded_tiles[i].update(dt);
+        exploded_tile_resolve_collision({i});
     }
 
     // Update All Entities //////////////////////////////
@@ -371,6 +408,12 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
+    for (size_t i = 0; i < EXPLODED_TILES_COUNT; ++i) {
+        if (exploded_tiles[i].state != Exploded_Tile_State::Ded) {
+            exploded_tiles[i].render(renderer, camera);
+        }
+    }
+
     popup.render(renderer);
     console.render(renderer, &debug_font);
 }
@@ -431,6 +474,35 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                 if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
                 entity->pos += d;
+            }
+        }
+    }
+}
+
+void Game::exploded_tile_resolve_collision(Exploded_Tile_Index exploded_tile_index)
+{
+    assert(exploded_tile_index.unwrap < EXPLODED_TILES_COUNT);
+    Exploded_Tile *exploded_tile = &exploded_tiles[exploded_tile_index.unwrap];
+
+    if (exploded_tile->state == Exploded_Tile_State::Alive) {
+        for (int rows = 0; rows <= 1; ++rows) {
+            for (int cols = 0; cols <= 1; ++cols) {
+                Vec2f t0 = exploded_tile->pos +
+                    vec2(exploded_tile->texbox_local.x, exploded_tile->texbox_local.y) +
+                    vec2(cols * exploded_tile->texbox_local.w, rows * exploded_tile->texbox_local.h);
+                Vec2f t1 = t0;
+
+                grid.resolve_point_collision(&t1);
+
+                Vec2f d = t1 - t0;
+                exploded_tile->pos += d;
+
+                if (abs(d.x) > 0 || abs(d.y) > 0) {
+                    if(sqr_dist(exploded_tile->epicenter, exploded_tile->pos) > exploded_tile->cooldown_radius_sqr) {
+                        grid.set_tile(grid.abs_to_tile_coord(exploded_tile->pos), exploded_tile->tile);
+                    }
+                    exploded_tile->state = Exploded_Tile_State::Ded;
+                }
             }
         }
     }
