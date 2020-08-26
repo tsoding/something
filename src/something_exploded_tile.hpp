@@ -15,7 +15,6 @@ struct Exploded_Tile
     Vec2f pos;
     Vec2f vel;
     Vec2f epicenter;
-    float cooldown_radius_sqr;
 
     inline Rectf texbox_world() const
     {
