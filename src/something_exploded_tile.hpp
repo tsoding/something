@@ -11,21 +11,9 @@ struct Exploded_Tile
 {
     Exploded_Tile_State state;
     Tile tile;
-    Rectf texbox_local;
     Vec2f pos;
     Vec2f vel;
     Vec2f epicenter;
-
-    inline Rectf texbox_world() const
-    {
-        Rectf dstrect = {
-            texbox_local.x + pos.x,
-            texbox_local.y + pos.y,
-            texbox_local.w,
-            texbox_local.h
-        };
-        return dstrect;
-    }
 
     void render(SDL_Renderer *renderer, Camera camera) const;
     void update(float dt);

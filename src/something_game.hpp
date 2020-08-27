@@ -64,7 +64,7 @@ const size_t ITEMS_COUNT = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
 
-const float EXPLOSION_MULTIPIER = 3.0f;
+const float EXPLOSION_POWER = 3.0f;
 const float MAX_EXPLOSION_IMPULSE = 15.0f;
 const int EXPLOSION_RADIUS_IN_TILES = 3;
 const float EXPLOSION_RADIUS = (float) EXPLOSION_RADIUS_IN_TILES * TILE_SIZE;
@@ -126,7 +126,7 @@ struct Game
     void entity_shoot(Entity_Index entity_index);
     void entity_jump(Entity_Index entity_index);
     void entity_resolve_collision(Entity_Index entity_index);
-    void exploded_tile_resolve_collision(Exploded_Tile_Index exploded_tile_index);
+    void exploded_tile_check_for_collision(Exploded_Tile_Index exploded_tile_index);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
