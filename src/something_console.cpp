@@ -76,6 +76,11 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
                              String_View {selection.end - selection.begin, edit_field + selection.begin});
             }
         }
+
+        // POPUP
+        if (popup_enabled) {
+            popup.render(renderer, font, vec2(cursor_x, position.y));
+        }
     }
 }
 
@@ -187,13 +192,14 @@ void Console::backspace_char()
 
 void Console::start_autocompletion()
 {
+    popup.clear();
     String_View prefix = {edit_field_cursor, edit_field};
-    for (size_t i = 0; i < commands_count; ++i) {
+    for (size_t i = 0; i < commands_count && !popup.full(); ++i) {
         if (commands[i].name.has_prefix(prefix)) {
-            // TODO: Console::start_autocompletion() does not use any autocompletion popups
-            println(commands[i].name.data, commands[i].name.count);
+            popup.push(commands[i].name);
         }
     }
+    popup_enabled = true;
 }
 
 void Console::handle_event(SDL_Event *event, Game *game)
@@ -218,6 +224,10 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 } else {
                     delete_selection(selection);
                 }
+            } break;
+
+            case SDLK_ESCAPE: {
+                popup_enabled = false;
             } break;
 
             case SDLK_BACKSPACE: {
