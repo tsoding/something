@@ -471,7 +471,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, PADDING),
-             "FPS: %.0d", fps);
+             "FPS: %d", fps);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
