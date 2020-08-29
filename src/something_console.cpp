@@ -18,73 +18,76 @@ Console::Selection Console::get_selection() const
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
-    if (visible) {
-        const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
-        const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
+    const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
+    const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
 
-        // BACKGROUND
-        fill_rect(renderer, rect(vec2(0.0f, 0.0f), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
+    const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a;
 
-        // ROWS
-        for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
-            const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
-            const auto position = vec2(0.0f, (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
-            font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                         FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
-        }
+    // BACKGROUND
+    fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
 
-        // EDIT FIELD
-        const auto position = vec2(0.0f, (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
+    // ROWS
+    for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
+        const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
+        const auto position = vec2(0.0f, console_y + (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
         font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                     FONT_DEBUG_COLOR, String_View {edit_field_size, edit_field});
+                     FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
+    }
 
-        // CURSOR
-        const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-        fill_rect(renderer,
-                  rect(vec2(cursor_x, position.y),
-                       (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
-                       (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-                  FONT_DEBUG_COLOR);
-        if (edit_field_cursor < edit_field_size) {
-            font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                         CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
-        }
+    // EDIT FIELD
+    const auto position = vec2(0.0f, console_y + (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
+    font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                 FONT_DEBUG_COLOR, String_View {edit_field_size, edit_field});
 
-        // SELECTION
-        // text:              the q[uick bro]w[n fox jump]s over the lazy dog
-        // cursor:                           ^
-        // selection_begin:         ^                   ^
-        {
-            auto selection = get_selection();
+    // CURSOR
+    const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+    fill_rect(renderer,
+              rect(vec2(cursor_x, position.y),
+                   (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
+                   (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+              FONT_DEBUG_COLOR);
+    if (edit_field_cursor < edit_field_size) {
+        font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                     CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+    }
 
-            if (!selection.is_empty()) {
-                const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-                const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-                const float width = end_x - begin_x;
+    // SELECTION
+    // text:              the q[uick bro]w[n fox jump]s over the lazy dog
+    // cursor:                           ^
+    // selection_begin:         ^                   ^
+    {
+        auto selection = get_selection();
 
-                fill_rect(renderer,
-                          rect(vec2(begin_x, position.y),
-                               width,
-                               (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-                          CONSOLE_SELECTION_COLOR);
+        if (!selection.is_empty()) {
+            const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+            const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+            const float width = end_x - begin_x;
 
-                font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                             CONSOLE_BACKGROUND_COLOR,
-                             String_View {selection.end - selection.begin, edit_field + selection.begin});
-            }
+            fill_rect(renderer,
+                      rect(vec2(begin_x, position.y),
+                           width,
+                           (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                      CONSOLE_SELECTION_COLOR);
+
+            font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                         CONSOLE_BACKGROUND_COLOR,
+                         String_View {selection.end - selection.begin, edit_field + selection.begin});
         }
     }
 }
 
-// TODO(#145): Console does not slide down
 void Console::update(float dt)
 {
-    (void) dt;
+    if (enabled) {
+        if (a < 1.0f) a += dt * CONSOLE_SLIDE_SPEED;
+    } else {
+        if (a > 0.0f) a -= dt * CONSOLE_SLIDE_SPEED;
+    }
 }
 
-void Console::toggle_visible()
+void Console::toggle()
 {
-    visible = !visible;
+    enabled = !enabled;
 }
 
 void Console::println(const char *buffer, size_t buffer_size)
@@ -177,7 +180,7 @@ void Console::backspace_char()
 void Console::handle_event(SDL_Event *event)
 {
     // TODO(#158): Backtick event bleeds into the Console
-    if (visible) {
+    if (enabled) {
         // TODO(#146): No support for delete or backspace in console
         // TODO(#159): Console does not integrate with the OS clipboard
         switch (event->type) {

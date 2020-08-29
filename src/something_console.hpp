@@ -22,7 +22,8 @@ struct Console
         }
     };
 
-    bool visible;
+    bool enabled;
+    float a;
 
     char rows[CONSOLE_ROWS][CONSOLE_COLUMNS];
     size_t rows_count[CONSOLE_ROWS];
@@ -40,7 +41,7 @@ struct Console
 
     void render(SDL_Renderer *renderer, Bitmap_Font *font);
     void update(float dt);
-    void toggle_visible();
+    void toggle();
 
     void cursor_left(bool selection);
     void cursor_right(bool selection);

@@ -51,7 +51,7 @@ void Game::handle_event(SDL_Event *event)
     case SDL_KEYDOWN: {
         switch (event->key.keysym.sym) {
         case SDLK_BACKQUOTE: {
-            console.toggle_visible();
+            console.toggle();
         } break;
 
 
@@ -155,7 +155,7 @@ void Game::handle_event(SDL_Event *event)
 
     // TODO(#148): Console events fall through to the actual gameplay
 
-    if (console.visible) {
+    if (console.enabled) {
         console.handle_event(event);
     } else {
         switch (event->type) {
@@ -312,7 +312,7 @@ void Game::update(float dt)
     }
 
     // Player Movement //////////////////////////////
-    if (!console.visible) {
+    if (!console.enabled) {
         if (keyboard[SDL_SCANCODE_D]) {
             entities[PLAYER_ENTITY_INDEX].move(Entity::Right);
         } else if (keyboard[SDL_SCANCODE_A]) {
@@ -337,6 +337,9 @@ void Game::update(float dt)
 
     // Popup //////////////////////////////
     popup.update(dt);
+
+    // Console //////////////////////////////
+    console.update(dt);
 }
 
 void Game::render(SDL_Renderer *renderer)
