@@ -156,7 +156,7 @@ void Game::handle_event(SDL_Event *event)
     // TODO(#148): Console events fall through to the actual gameplay
 
     if (console.enabled) {
-        console.handle_event(event);
+        console.handle_event(event, this);
     } else {
         switch (event->type) {
         case SDL_KEYDOWN: {

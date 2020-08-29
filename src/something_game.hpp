@@ -1,6 +1,8 @@
 #ifndef SOMETHING_GAME_HPP_
 #define SOMETHING_GAME_HPP_
 
+#include "something_console.hpp"
+
 enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,

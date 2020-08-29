@@ -1,3 +1,4 @@
+#include "something_game.hpp"
 #include "something_console.hpp"
 
 Console::Selection Console::get_selection() const
@@ -184,7 +185,7 @@ void Console::backspace_char()
     }
 }
 
-void Console::handle_event(SDL_Event *event)
+void Console::handle_event(SDL_Event *event, Game *game)
 {
     // TODO(#158): Backtick event bleeds into the Console
     if (enabled) {
@@ -240,6 +241,8 @@ void Console::handle_event(SDL_Event *event)
                 String_View command = {edit_field_size, edit_field};
                 if (command == "quit"_sv) {
                     exit(0);
+                } else if (command == "reset"_sv) {
+                    game->reset_entities();
                 }
                 println(edit_field, edit_field_size);
                 edit_field_size = 0;
