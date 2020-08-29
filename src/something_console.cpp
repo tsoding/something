@@ -238,13 +238,20 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
 
             case SDLK_RETURN: {
-                String_View command = {edit_field_size, edit_field};
+                String_View command_expr = {edit_field_size, edit_field};
+                const auto command = command_expr.chop_word();
                 if (command == "quit"_sv) {
                     exit(0);
                 } else if (command == "reset"_sv) {
                     game->reset_entities();
                 } else if (command == "spawn_enemy"_sv) {
-                    game->spawn_enemy_at(game->mouse_position);
+                    const auto x = command_expr.chop_word().as_float();
+                    const auto y = command_expr.chop_word().as_float();
+                    if (!x.has_value && !y.has_value) {
+                        game->spawn_enemy_at(game->entities[PLAYER_ENTITY_INDEX].pos);
+                    } else {
+                        game->spawn_enemy_at({x.unwrap, y.unwrap});
+                    }
                 } else if (command == "close"_sv) {
                     toggle();
                 }
