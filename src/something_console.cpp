@@ -18,60 +18,62 @@ Console::Selection Console::get_selection() const
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
-    const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
-    const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
+    if (a > 0.0f) {
+        const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
+        const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
 
-    const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a * a;
+        const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a * a;
 
-    // BACKGROUND
-    fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
+        // BACKGROUND
+        fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
 
-    // ROWS
-    for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
-        const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
-        const auto position = vec2(0.0f, console_y + (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
+        // ROWS
+        for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
+            const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
+            const auto position = vec2(0.0f, console_y + (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
+            font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                         FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
+        }
+
+        // EDIT FIELD
+        const auto position = vec2(0.0f, console_y + (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
         font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                     FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
-    }
+                     FONT_DEBUG_COLOR, String_View {edit_field_size, edit_field});
 
-    // EDIT FIELD
-    const auto position = vec2(0.0f, console_y + (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
-    font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                 FONT_DEBUG_COLOR, String_View {edit_field_size, edit_field});
+        // CURSOR
+        const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+        fill_rect(renderer,
+                  rect(vec2(cursor_x, position.y),
+                       (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
+                       (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                  FONT_DEBUG_COLOR);
+        if (edit_field_cursor < edit_field_size) {
+            font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                         CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+        }
 
-    // CURSOR
-    const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-    fill_rect(renderer,
-              rect(vec2(cursor_x, position.y),
-                   (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
-                   (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-              FONT_DEBUG_COLOR);
-    if (edit_field_cursor < edit_field_size) {
-        font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                     CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
-    }
+        // SELECTION
+        // text:              the q[uick bro]w[n fox jump]s over the lazy dog
+        // cursor:                           ^
+        // selection_begin:         ^                   ^
+        {
+            auto selection = get_selection();
 
-    // SELECTION
-    // text:              the q[uick bro]w[n fox jump]s over the lazy dog
-    // cursor:                           ^
-    // selection_begin:         ^                   ^
-    {
-        auto selection = get_selection();
+            if (!selection.is_empty()) {
+                const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+                const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+                const float width = end_x - begin_x;
 
-        if (!selection.is_empty()) {
-            const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-            const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-            const float width = end_x - begin_x;
+                fill_rect(renderer,
+                          rect(vec2(begin_x, position.y),
+                               width,
+                               (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                          CONSOLE_SELECTION_COLOR);
 
-            fill_rect(renderer,
-                      rect(vec2(begin_x, position.y),
-                           width,
-                           (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-                      CONSOLE_SELECTION_COLOR);
-
-            font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                         CONSOLE_BACKGROUND_COLOR,
-                         String_View {selection.end - selection.begin, edit_field + selection.begin});
+                font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                             CONSOLE_BACKGROUND_COLOR,
+                             String_View {selection.end - selection.begin, edit_field + selection.begin});
+            }
         }
     }
 }
@@ -88,6 +90,11 @@ void Console::update(float dt)
 void Console::toggle()
 {
     enabled = !enabled;
+    if (enabled) {
+        SDL_StartTextInput();
+    } else {
+        SDL_StopTextInput();
+    }
 }
 
 void Console::println(const char *buffer, size_t buffer_size)
