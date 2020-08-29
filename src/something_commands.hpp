@@ -3,7 +3,7 @@
 
 struct Game;
 
-// TODO: no command to set the values of the config variables
+// TODO(#168): no command to set the values of the config variables
 void command_quit(Game *game, String_View args);
 void command_reset(Game *game, String_View args);
 void command_spawn_enemy(Game *game, String_View args);
