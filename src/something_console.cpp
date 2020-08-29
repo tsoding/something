@@ -240,26 +240,25 @@ void Console::handle_event(SDL_Event *event, Game *game)
             case SDLK_RETURN: {
                 // TODO(#166): Console does not support autocompletion
                 String_View command_expr = {edit_field_size, edit_field};
-                const auto command = command_expr.chop_word();
-                if (command == "quit"_sv) {
-                    exit(0);
-                } else if (command == "reset"_sv) {
-                    game->reset_entities();
-                } else if (command == "spawn_enemy"_sv) {
-                    const auto x = command_expr.chop_word().as_float();
-                    const auto y = command_expr.chop_word().as_float();
-                    if (!x.has_value && !y.has_value) {
-                        game->spawn_enemy_at(game->entities[PLAYER_ENTITY_INDEX].pos);
-                    } else {
-                        game->spawn_enemy_at({x.unwrap, y.unwrap});
-                    }
-                } else if (command == "close"_sv) {
-                    toggle();
-                }
+                const auto command_name = command_expr.chop_word();
+
                 println(edit_field, edit_field_size);
                 edit_field_size = 0;
                 edit_field_cursor = 0;
                 edit_field_selection_begin = 0;
+
+                bool command_found = false;
+                for (size_t i = 0; !command_found && i < commands_count; ++i) {
+                    if (commands[i].name == command_name) {
+                        commands[i].run(game, command_expr);
+                        command_found = true;
+                    }
+                }
+
+                if (!command_found) {
+                    const char *message = "Command not found";
+                    println(message, strlen(message));
+                }
             } break;
             }
         } break;
