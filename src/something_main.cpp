@@ -154,15 +154,15 @@ int main(void)
 
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
-    float fps = 60.0;
+    float fps = 60.0f;
     while (!game.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
-        float instant_fps = 1.0 / elapsed_sec;
-        if (elapsed_sec < 1.0E-5) instant_fps = 60;
-        fps = fps * 0.99 + instant_fps * 0.01;
+        float instant_fps = 1.0f / elapsed_sec;
+        if (elapsed_sec < 1.0e-5) instant_fps = 60.0f;
+        fps = fps * 0.99f + instant_fps * 0.01f;
 
         //// HANDLE INPUT //////////////////////////////
         SDL_Event event;
