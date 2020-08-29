@@ -238,6 +238,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
 
             case SDLK_RETURN: {
+                // TODO: Console does not support autocompletion
                 String_View command_expr = {edit_field_size, edit_field};
                 const auto command = command_expr.chop_word();
                 if (command == "quit"_sv) {
