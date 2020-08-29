@@ -90,6 +90,11 @@ void Console::update(float dt)
 void Console::toggle()
 {
     enabled = !enabled;
+    if (enabled) {
+        SDL_StartTextInput();
+    } else {
+        SDL_StopTextInput();
+    }
 }
 
 void Console::println(const char *buffer, size_t buffer_size)

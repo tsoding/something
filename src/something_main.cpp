@@ -24,6 +24,8 @@ int main(void)
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
+    SDL_StopTextInput();
+
     sec(SDL_RenderSetLogicalSize(renderer,
                                  SCREEN_WIDTH,
                                  SCREEN_HEIGHT));
