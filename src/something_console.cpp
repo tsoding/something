@@ -243,6 +243,10 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     exit(0);
                 } else if (command == "reset"_sv) {
                     game->reset_entities();
+                } else if (command == "spawn_enemy"_sv) {
+                    game->spawn_enemy_at(game->mouse_position);
+                } else if (command == "close"_sv) {
+                    toggle();
                 }
                 println(edit_field, edit_field_size);
                 edit_field_size = 0;
