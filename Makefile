@@ -1,6 +1,5 @@
 WERROR?=-Werror
 PKGS=sdl2
-# TODO(#118): try to enable -Weverything and disable things that don't make sense
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
 ifeq ($(OS),Windows_NT)
 	CXXFLAGS=$(CFLAGS) -std=c++17 -fno-exceptions -Wno-missing-braces -Wswitch-enum $(shell pkg-config --cflags $(PKGS)) -lmingw32 -lSDL2main -lSDL2
