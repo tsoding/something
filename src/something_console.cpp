@@ -185,6 +185,17 @@ void Console::backspace_char()
     }
 }
 
+void Console::start_autocompletion()
+{
+    String_View prefix = {edit_field_cursor, edit_field};
+    for (size_t i = 0; i < commands_count; ++i) {
+        if (commands[i].name.has_prefix(prefix)) {
+            // TODO: Console::start_autocompletion() does not use any autocompletion popups
+            println(commands[i].name.data, commands[i].name.count);
+        }
+    }
+}
+
 void Console::handle_event(SDL_Event *event, Game *game)
 {
     // TODO(#158): Backtick event bleeds into the Console
@@ -194,6 +205,12 @@ void Console::handle_event(SDL_Event *event, Game *game)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            case SDLK_SPACE: {
+                if (event->key.keysym.mod & KMOD_LCTRL) {
+                    start_autocompletion();
+                }
+            } break;
+
             case SDLK_DELETE: {
                 const auto selection = get_selection();
                 if (selection.is_empty()) {

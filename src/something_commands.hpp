@@ -3,6 +3,7 @@
 
 struct Game;
 
+// TODO: no command to set the values of the config variables
 void command_quit(Game *game, String_View args);
 void command_reset(Game *game, String_View args);
 void command_spawn_enemy(Game *game, String_View args);
@@ -17,8 +18,10 @@ struct Command
 const Command commands[] = {
     {"quit"_sv, command_quit},
     {"reset"_sv, command_reset},
+    {"restart"_sv, command_reset},
     {"spawn_enemy"_sv, command_spawn_enemy},
     {"close"_sv, command_close},
+    {"claw"_sv, command_close},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 

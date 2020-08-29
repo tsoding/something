@@ -45,6 +45,7 @@ struct Console
     void update(float dt);
     void toggle();
 
+    void start_autocompletion();
     void cursor_left(bool selection);
     void cursor_right(bool selection);
     void insert_cstr(const char *cstr);
