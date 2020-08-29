@@ -452,7 +452,7 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     }
 }
 
-void Game::render_debug_overlay(SDL_Renderer *renderer, Uint32 fps)
+void Game::render_debug_overlay(SDL_Renderer *renderer, Uint16 fps)
 {
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
