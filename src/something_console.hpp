@@ -4,6 +4,8 @@
 const size_t CONSOLE_ROWS = 1024;
 const size_t CONSOLE_COLUMNS = 256;
 
+struct Game;
+
 struct Console
 {
     struct Selection
@@ -52,7 +54,7 @@ struct Console
 
     void println(const char *buffer, size_t buffer_size);
 
-    void handle_event(SDL_Event *event);
+    void handle_event(SDL_Event *event, Game *game);
 };
 
 #endif  // SOMETHING_CONSOLE_HPP_

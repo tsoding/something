@@ -123,11 +123,7 @@ void Game::handle_event(SDL_Event *event)
                     } break;
 
                     case DEBUG_TOOLBAR_ENEMIES: {
-                        for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
-                            if(entities[i].state == Entity_State::Alive) continue;
-                            entities[i] = enemy_entity(mouse_position);
-                            break;
-                        }
+                        spawn_enemy_at(mouse_position);
                     } break;
 
                     default: {}
@@ -156,7 +152,7 @@ void Game::handle_event(SDL_Event *event)
     // TODO(#148): Console events fall through to the actual gameplay
 
     if (console.enabled) {
-        console.handle_event(event);
+        console.handle_event(event, this);
     } else {
         switch (event->type) {
         case SDL_KEYDOWN: {
@@ -695,4 +691,14 @@ void Game::add_camera_lock(Recti rect)
 {
     assert(camera_locks_count < CAMERA_LOCKS_CAPACITY);
     camera_locks[camera_locks_count++] = rect;
+}
+
+void Game::spawn_enemy_at(Vec2f pos)
+{
+    for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Ded) {
+            entities[i] = enemy_entity(pos);
+            break;
+        }
+    }
 }

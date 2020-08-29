@@ -1,6 +1,8 @@
 #ifndef SOMETHING_GAME_HPP_
 #define SOMETHING_GAME_HPP_
 
+#include "something_console.hpp"
+
 enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
@@ -119,6 +121,7 @@ struct Game
     void entity_shoot(Entity_Index entity_index);
     void entity_jump(Entity_Index entity_index);
     void entity_resolve_collision(Entity_Index entity_index);
+    void spawn_enemy_at(Vec2f pos);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);

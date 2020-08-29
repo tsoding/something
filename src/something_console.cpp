@@ -1,3 +1,4 @@
+#include "something_game.hpp"
 #include "something_console.hpp"
 
 Console::Selection Console::get_selection() const
@@ -184,7 +185,7 @@ void Console::backspace_char()
     }
 }
 
-void Console::handle_event(SDL_Event *event)
+void Console::handle_event(SDL_Event *event, Game *game)
 {
     // TODO(#158): Backtick event bleeds into the Console
     if (enabled) {
@@ -237,9 +238,23 @@ void Console::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_RETURN: {
-                String_View command = {edit_field_size, edit_field};
+                // TODO(#166): Console does not support autocompletion
+                String_View command_expr = {edit_field_size, edit_field};
+                const auto command = command_expr.chop_word();
                 if (command == "quit"_sv) {
                     exit(0);
+                } else if (command == "reset"_sv) {
+                    game->reset_entities();
+                } else if (command == "spawn_enemy"_sv) {
+                    const auto x = command_expr.chop_word().as_float();
+                    const auto y = command_expr.chop_word().as_float();
+                    if (!x.has_value && !y.has_value) {
+                        game->spawn_enemy_at(game->entities[PLAYER_ENTITY_INDEX].pos);
+                    } else {
+                        game->spawn_enemy_at({x.unwrap, y.unwrap});
+                    }
+                } else if (command == "close"_sv) {
+                    toggle();
                 }
                 println(edit_field, edit_field_size);
                 edit_field_size = 0;
