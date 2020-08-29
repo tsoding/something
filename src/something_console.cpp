@@ -21,7 +21,7 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
     const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
     const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
 
-    const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a;
+    const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a * a;
 
     // BACKGROUND
     fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
