@@ -136,6 +136,20 @@ void Console::cursor_right(bool selection)
     }
 }
 
+void Console::insert_sv(String_View sv)
+{
+    const size_t remaining = CONSOLE_COLUMNS - edit_field_size;
+    const size_t n = min(sv.count, remaining);
+
+    memmove(edit_field + edit_field_cursor + n,
+            edit_field + edit_field_cursor,
+            edit_field_size - edit_field_cursor);
+    memcpy(edit_field + edit_field_cursor, sv.data, n);
+    edit_field_cursor += n;
+    edit_field_selection_begin = edit_field_cursor;
+    edit_field_size += n;
+}
+
 void Console::insert_cstr(const char *cstr)
 {
     const size_t remaining = CONSOLE_COLUMNS - edit_field_size;
@@ -208,91 +222,111 @@ void Console::handle_event(SDL_Event *event, Game *game)
     if (enabled) {
         // TODO(#146): No support for delete or backspace in console
         // TODO(#159): Console does not integrate with the OS clipboard
-        switch (event->type) {
-        case SDL_KEYDOWN: {
-            switch (event->key.keysym.sym) {
-            case SDLK_SPACE: {
-                if (event->key.keysym.mod & KMOD_LCTRL) {
-                    start_autocompletion();
-                }
-            } break;
-
-            case SDLK_DELETE: {
-                const auto selection = get_selection();
-                if (selection.is_empty()) {
-                    delete_char();
-                } else {
-                    delete_selection(selection);
-                }
-            } break;
-
-            case SDLK_ESCAPE: {
-                popup_enabled = false;
-            } break;
-
-            case SDLK_BACKSPACE: {
-                const auto selection = get_selection();
-                if (selection.is_empty()) {
-                    backspace_char();
-                } else {
-                    delete_selection(selection);
-                }
-            } break;
-
-            case SDLK_LEFT: {
-                cursor_left(event->key.keysym.mod & KMOD_LSHIFT);
-            } break;
-
-            case SDLK_RIGHT: {
-                cursor_right(event->key.keysym.mod & KMOD_LSHIFT);
-            } break;
-
-            case SDLK_v: {
-                if (event->key.keysym.mod & KMOD_LCTRL) {
-                    insert_cstr(sec(SDL_GetClipboardText()));
-                }
-            } break;
-
-            case SDLK_c: {
-                if (event->key.keysym.mod & KMOD_LCTRL) {
-                    auto selection = get_selection();
-                    if (!selection.is_empty()) {
-                        memcpy(clipboard_buffer, edit_field + selection.begin, selection.size());
-                        clipboard_buffer[selection.size()] = '\0';
-                        sec(SDL_SetClipboardText(clipboard_buffer));
-                    }
-                }
-            } break;
-
-            case SDLK_RETURN: {
-                // TODO(#166): Console does not support autocompletion
-                String_View command_expr = {edit_field_size, edit_field};
-                const auto command_name = command_expr.chop_word();
-
-                println(edit_field, edit_field_size);
-                edit_field_size = 0;
-                edit_field_cursor = 0;
-                edit_field_selection_begin = 0;
-
-                bool command_found = false;
-                for (size_t i = 0; !command_found && i < commands_count; ++i) {
-                    if (commands[i].name == command_name) {
-                        commands[i].run(game, command_expr);
-                        command_found = true;
-                    }
-                }
-
-                if (!command_found) {
-                    const char *message = "Command not found";
-                    println(message, strlen(message));
+        if (popup_enabled) {
+            switch (event->type) {
+            case SDL_KEYDOWN: {
+                switch (event->key.keysym.sym) {
+                case SDLK_ESCAPE: {
+                    popup_enabled = false;
+                } break;
+                case SDLK_UP: {
+                    popup.up();
+                } break;
+                case SDLK_DOWN: {
+                    popup.down();
+                } break;
+                case SDLK_RETURN: {
+                    auto s = popup.items[popup.items_cursor];
+                    s.chop(edit_field_cursor);
+                    insert_sv(s);
+                    popup_enabled = false;
+                } break;
                 }
             } break;
             }
-        } break;
+        } else {
+            switch (event->type) {
+            case SDL_KEYDOWN: {
+                switch (event->key.keysym.sym) {
+                case SDLK_SPACE: {
+                    if (event->key.keysym.mod & KMOD_LCTRL) {
+                        start_autocompletion();
+                    }
+                } break;
 
-        case SDL_TEXTINPUT: {
-            insert_cstr(event->text.text);
-        } break;
+                case SDLK_DELETE: {
+                    const auto selection = get_selection();
+                    if (selection.is_empty()) {
+                        delete_char();
+                    } else {
+                        delete_selection(selection);
+                    }
+                } break;
+
+                case SDLK_BACKSPACE: {
+                    const auto selection = get_selection();
+                    if (selection.is_empty()) {
+                        backspace_char();
+                    } else {
+                        delete_selection(selection);
+                    }
+                } break;
+
+                case SDLK_LEFT: {
+                    cursor_left(event->key.keysym.mod & KMOD_LSHIFT);
+                } break;
+
+                case SDLK_RIGHT: {
+                    cursor_right(event->key.keysym.mod & KMOD_LSHIFT);
+                } break;
+
+                case SDLK_v: {
+                    if (event->key.keysym.mod & KMOD_LCTRL) {
+                        insert_cstr(sec(SDL_GetClipboardText()));
+                    }
+                } break;
+
+                case SDLK_c: {
+                    if (event->key.keysym.mod & KMOD_LCTRL) {
+                        auto selection = get_selection();
+                        if (!selection.is_empty()) {
+                            memcpy(clipboard_buffer, edit_field + selection.begin, selection.size());
+                            clipboard_buffer[selection.size()] = '\0';
+                            sec(SDL_SetClipboardText(clipboard_buffer));
+                        }
+                    }
+                } break;
+
+                case SDLK_RETURN: {
+                    // TODO(#166): Console does not support autocompletion
+                    String_View command_expr = {edit_field_size, edit_field};
+                    const auto command_name = command_expr.chop_word();
+
+                    println(edit_field, edit_field_size);
+                    edit_field_size = 0;
+                    edit_field_cursor = 0;
+                    edit_field_selection_begin = 0;
+
+                    bool command_found = false;
+                    for (size_t i = 0; !command_found && i < commands_count; ++i) {
+                        if (commands[i].name == command_name) {
+                            commands[i].run(game, command_expr);
+                            command_found = true;
+                        }
+                    }
+
+                    if (!command_found) {
+                        const char *message = "Command not found";
+                        println(message, strlen(message));
+                    }
+                } break;
+                }
+            } break;
+
+            case SDL_TEXTINPUT: {
+                insert_cstr(event->text.text);
+            } break;
+            }
         }
     }
 }

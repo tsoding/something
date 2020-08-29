@@ -53,6 +53,7 @@ struct Console
     void cursor_left(bool selection);
     void cursor_right(bool selection);
     void insert_cstr(const char *cstr);
+    void insert_sv(String_View sv);
     void backspace_char();
     void delete_char();
     void delete_selection(Selection selection);

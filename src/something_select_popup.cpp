@@ -1,5 +1,6 @@
 #include "something_select_popup.hpp"
 
+// TODO: Select_Popup does not handle well out of the screen rendering
 void Select_Popup::render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f pos)
 {
     size_t longest_length = 0;
@@ -13,10 +14,15 @@ void Select_Popup::render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f pos)
 
     fill_rect(renderer, rect(pos, popup_width, popup_height), SELECT_POPUP_BACKGROUND_COLOR);
 
-    // TODO: Select_Popup does not render its cursor
     for (size_t i = 0; i < items_size; ++i) {
-        const auto position = pos + vec2(0.0f, i * item_height) + vec2(SELECT_POPUP_PAD, SELECT_POPUP_PAD);
-        font->render(renderer, position, vec2(SELECT_POPUP_FONT_SIZE, SELECT_POPUP_FONT_SIZE), SELECT_POPUP_FOREGROUND_COLOR, items[i]);
+        const auto item_position = pos + vec2(0.0f, i * item_height);
+        const auto text_position = item_position + vec2(SELECT_POPUP_PAD, SELECT_POPUP_PAD);
+        if (i == items_cursor) {
+            fill_rect(renderer, rect(item_position, popup_width, item_height), SELECT_POPUP_FOREGROUND_COLOR);
+            font->render(renderer, text_position, vec2(SELECT_POPUP_FONT_SIZE, SELECT_POPUP_FONT_SIZE), SELECT_POPUP_BACKGROUND_COLOR, items[i]);
+        } else {
+            font->render(renderer, text_position, vec2(SELECT_POPUP_FONT_SIZE, SELECT_POPUP_FONT_SIZE), SELECT_POPUP_FOREGROUND_COLOR, items[i]);
+        }
     }
 }
 
