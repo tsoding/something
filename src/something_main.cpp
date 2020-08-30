@@ -24,6 +24,8 @@ int main(void)
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
+    sec(SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear"));
+
     SDL_StopTextInput();
 
     sec(SDL_RenderSetLogicalSize(renderer,
