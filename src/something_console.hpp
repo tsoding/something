@@ -58,7 +58,20 @@ struct Console
     void delete_char();
     void delete_selection(Selection selection);
 
-    void println(const char *buffer, size_t buffer_size);
+    template <typename ... Types>
+    void println(Types... args)
+    {
+        const size_t index = (begin + count) % CONSOLE_ROWS;
+        String_Buffer sbuffer = {CONSOLE_COLUMNS, rows[index], rows_count[index]};
+        sprintln(&sbuffer, args...);
+        rows_count[index] = sbuffer.size;
+
+        if (count < (int) CONSOLE_ROWS) {
+            count += 1;
+        } else {
+            begin = (begin + 1) % CONSOLE_ROWS;
+        }
+    }
 
     void handle_event(SDL_Event *event, Game *game);
 };
