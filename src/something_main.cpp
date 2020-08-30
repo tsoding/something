@@ -166,7 +166,7 @@ int main(void)
 
         if (next_sec >= 1) {
             fps = frames_of_current_second;
-            next_sec = 0;
+            next_sec -= 1.0f;
             frames_of_current_second = 0;
         }
 
