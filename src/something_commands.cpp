@@ -26,6 +26,7 @@ void sprint1(String_Buffer *sbuffer, SDL_Color color)
     sprint(sbuffer, "{", color.r, ",", color.g, ",", color.b, ",", color.a, "}");
 }
 
+#ifndef SOMETHING_RELEASE
 void command_set(Game *game, String_View args)
 {
     const auto varname = args.chop_word();
@@ -66,10 +67,9 @@ void command_set(Game *game, String_View args)
         game->console.println("TODO: setting string variables is not implemented yet");
     } break;
     case CONFIG_TYPE_UNKNOWN:
-    case CONFIG_TYPE_SDL_BLENDFACTOR:
-    case CONFIG_TYPE_SDL_BLENDOPERATION:
     default: {
         game->console.println("Variable `", varname, "` has unknown type");
     }
     }
 }
+#endif // SOMETHING_RELEASE
