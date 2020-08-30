@@ -35,19 +35,36 @@ void command_set(Game *game, String_View args)
         return;
     }
 
+    const auto varvalue = args.trim();
+
     switch (config_types[varindex]) {
-    case CONFIG_TYPE_INT:
-        game->console.println(varname, " = ", config_values[varindex].int_value);
-        break;
-    case CONFIG_TYPE_FLOAT:
-        game->console.println(varname, " = ", config_values[varindex].float_value);
-        break;
-    case CONFIG_TYPE_COLOR:
-        game->console.println(varname, " = ", config_values[varindex].color_value);
-        break;
-    case CONFIG_TYPE_STRING:
-        game->console.println(varname, " = ", config_values[varindex].string_value);
-        break;
+    case CONFIG_TYPE_INT: {
+        auto x = varvalue.as_integer<int>();
+        if (!x.has_value) {
+            game->console.println("`", varvalue, "` is not an int");
+        } else {
+            config_values[varindex].int_value = x.unwrap;
+        }
+    } break;
+    case CONFIG_TYPE_FLOAT: {
+        auto x = varvalue.as_float();
+        if (!x.has_value) {
+            game->console.println("`", varvalue, "` is not a float");
+        } else {
+            config_values[varindex].float_value = x.unwrap;
+        }
+    } break;
+    case CONFIG_TYPE_COLOR: {
+        auto x = string_view_as_color(varvalue);
+        if (!x.has_value) {
+            game->console.println("`", varvalue, "` is not a color");
+        } else {
+            config_values[varindex].color_value = x.unwrap;
+        }
+    } break;
+    case CONFIG_TYPE_STRING: {
+        game->console.println("TODO: setting string variables is not implemented yet");
+    } break;
     case CONFIG_TYPE_UNKNOWN:
     case CONFIG_TYPE_SDL_BLENDFACTOR:
     case CONFIG_TYPE_SDL_BLENDOPERATION:
@@ -55,6 +72,4 @@ void command_set(Game *game, String_View args)
         game->console.println("Variable `", varname, "` has unknown type");
     }
     }
-
-    // const auto varvalue = args.trim();
 }
