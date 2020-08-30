@@ -82,6 +82,7 @@ struct Game
     Sample_Mixer mixer;
     const Uint8 *keyboard;
     Popup popup;
+    // TODO(#178): disable game console in release mode
     Console console;
 
     Frame_Animat entity_walking_animat;

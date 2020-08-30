@@ -21,7 +21,7 @@
 //
 // ============================================================
 //
-// aids — 0.5.0 — std replacement for C++. Designed to aid developers
+// aids — 0.10.0 — std replacement for C++. Designed to aid developers
 // to a better programming experience.
 //
 // https://github.com/rexim/aids
@@ -30,6 +30,13 @@
 //
 // ChangeLog (https://semver.org/ is implied)
 //
+//   0.10.0 sprint1(String_Buffer *buffer, String_View view)
+//   0.9.0  String_Buffer
+//          sprintln
+//   0.8.0  Args
+//   0.7.0  String_View::operator<()
+//          print1(FILE*, bool)
+//   0.6.0  swap
 //   0.5.0  Equality operations for Maybe<T>
 //   0.4.0  mod
 //   0.3.0  Stretchy_Buffer
@@ -91,6 +98,14 @@ namespace aids
     T mod(T a, T b)
     {
         return (a % b + b) % b;
+    }
+
+    template <typename T>
+    void swap(T *a, T *b)
+    {
+        T t = *a;
+        *a = *b;
+        *b = t;
     }
 
     ////////////////////////////////////////////////////////////
@@ -307,6 +322,20 @@ namespace aids
             return {};
         }
 
+        bool operator<(String_View b) const
+        {
+            auto a = *this;
+            while (a.count > 0 && b.count > 0) {
+                if (*a.data != *b.data) {
+                    return *a.data < *b.data;
+                }
+                a.chop(1);
+                b.chop(1);
+            }
+
+            return a.count < b.count;
+        }
+
         bool operator==(String_View view) const
         {
             if (this->count != view.count) return false;
@@ -398,6 +427,153 @@ namespace aids
     }
 
     ////////////////////////////////////////////////////////////
+    // ARGS
+    ////////////////////////////////////////////////////////////
+
+    struct Args
+    {
+        int argc;
+        char **argv;
+
+        char *pop()
+        {
+            char *result = *argv;
+            argv += 1;
+            argc -= 1;
+            return result;
+        }
+
+        bool empty()
+        {
+            return argc == 0;
+        }
+    };
+
+    ////////////////////////////////////////////////////////////
+    // SPRINT
+    ////////////////////////////////////////////////////////////
+
+    struct String_Buffer
+    {
+        size_t capacity;
+        char *data;
+        size_t size;
+    };
+
+    void sprint1(String_Buffer *buffer, const char *cstr)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%s", cstr);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, String_View view)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%.*s", (int) view.count, view.data);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, char c)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%c", c);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, float f)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%f", f);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, unsigned long long x)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%lld", x);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, long unsigned int x)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%lu", x);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, int x)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%d", x);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, long int x)
+    {
+        int n = snprintf(
+            buffer->data + buffer->size,
+            buffer->capacity - buffer->size,
+            "%ld", x);
+        buffer->size = min(buffer->size + n, buffer->capacity - 1);
+    }
+
+    void sprint1(String_Buffer *buffer, bool b)
+    {
+        sprint1(buffer, b ? "true" : "false");
+    }
+
+    template <typename ... Types>
+    void sprint(String_Buffer *buffer, Types... args)
+    {
+        (sprint1(buffer, args), ...);
+    }
+
+    template <typename T>
+    void sprint1(String_Buffer *buffer, Maybe<T> maybe)
+    {
+        if (!maybe.has_value) {
+            sprint(buffer, "None");
+        } else {
+            sprint(buffer, "Some(", maybe.unwrap, ")");
+        }
+    }
+
+    template <typename ... Types>
+    void sprintln(String_Buffer *buffer, Types... args)
+    {
+        (sprint1(buffer, args), ...);
+        sprint1(buffer, '\n');
+    }
+
+    struct Pad
+    {
+        size_t n;
+        char c;
+    };
+
+    void sprint1(String_Buffer *buffer, Pad pad)
+    {
+        for (size_t i = 0; i < pad.n; ++i) {
+            sprint1(buffer, pad.c);
+        }
+    }
+
+    ////////////////////////////////////////////////////////////
     // PRINT
     ////////////////////////////////////////////////////////////
 
@@ -447,6 +623,11 @@ namespace aids
         (print1(stream, args), ...);
     }
 
+    void print1(FILE *stream, bool b)
+    {
+        print1(stream, b ? "true" : "false");
+    }
+
     template <typename T>
     void print1(FILE *stream, Maybe<T> maybe)
     {
@@ -463,12 +644,6 @@ namespace aids
         (print1(stream, args), ...);
         print1(stream, '\n');
     }
-
-    struct Pad
-    {
-        size_t n;
-        char c;
-    };
 
     void print1(FILE *stream, Pad pad)
     {

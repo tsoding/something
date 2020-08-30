@@ -103,19 +103,6 @@ void Console::toggle()
     }
 }
 
-void Console::println(const char *buffer, size_t buffer_size)
-{
-    const size_t index = (begin + count) % CONSOLE_ROWS;
-    rows_count[index] = min(buffer_size, CONSOLE_COLUMNS);
-    memcpy(rows[index], buffer, rows_count[index]);
-
-    if (count < (int) CONSOLE_ROWS) {
-        count += 1;
-    } else {
-        begin = (begin + 1) % CONSOLE_ROWS;
-    }
-}
-
 void Console::cursor_left(bool selection)
 {
     if (edit_field_cursor > 0) {
@@ -302,7 +289,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     String_View command_expr = {edit_field_size, edit_field};
                     const auto command_name = command_expr.chop_word();
 
-                    println(edit_field, edit_field_size);
+                    this->println(String_View {edit_field_size, edit_field});
                     edit_field_size = 0;
                     edit_field_cursor = 0;
                     edit_field_selection_begin = 0;
@@ -316,8 +303,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     }
 
                     if (!command_found) {
-                        const char *message = "Command not found";
-                        println(message, strlen(message));
+                        this->println("Command `", command_name, "` not found");
                     }
                 } break;
                 }
