@@ -64,7 +64,7 @@ void command_set(Game *game, String_View args)
         }
     } break;
     case CONFIG_TYPE_STRING: {
-        game->console.println("TODO: setting string variables is not implemented yet");
+        game->console.println("TODO(#177): setting string variables is not implemented yet");
     } break;
     case CONFIG_TYPE_UNKNOWN:
     default: {
