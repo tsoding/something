@@ -25,7 +25,13 @@ using namespace aids;
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #ifndef SOMETHING_RELEASE
-#include "something_fmw_inotify.cpp"
+// TODO: config autoreloading does not work on Windows
+// TODO: config autoreloading does not work on MacOS
+#  ifdef __linux__
+#    include "something_fmw_inotify.cpp"
+#  else
+#    include "something_fmw_dummy.cpp"
+#  endif // __linux__
 #endif // SOMETHING_RELEASE
 #include "something_error.cpp"
 #include "something_render.cpp"
