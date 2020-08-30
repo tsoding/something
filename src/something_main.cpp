@@ -184,6 +184,7 @@ int main(void)
             game.handle_event(&event);
         }
 
+#ifndef SOMETHING_RELEASE
         if (fmw_poll(fmw)) {
             auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
             if (result.is_error) {
@@ -193,6 +194,7 @@ int main(void)
                 game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
             }
         }
+#endif // SOMETHING_RELEASE
         //// HANDLE INPUT END //////////////////////////////
 
         //// UPDATE STATE //////////////////////////////

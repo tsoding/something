@@ -24,7 +24,9 @@ using namespace aids;
 #endif
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
+#ifndef SOMETHING_RELEASE
 #include "something_fmw_inotify.cpp"
+#endif // SOMETHING_RELEASE
 #include "something_error.cpp"
 #include "something_render.cpp"
 #include "something_font.cpp"
