@@ -26,7 +26,7 @@ const Command commands[] = {
     {"spawn_enemy"_sv, "Spawn an enemy"_sv,                  command_spawn_enemy},
     {"close"_sv,       "Close the console"_sv,               command_close},
 #ifndef SOMETHING_RELEASE
-    {"set"_sv,         "Set the value of the variable"_sv,   command_set},
+    {"set"_sv,         "Set the value of a variable"_sv,     command_set},
 #endif // SOMETHING_RELEASE
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
