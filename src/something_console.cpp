@@ -2,7 +2,7 @@
 #include "something_console.hpp"
 
 // TODO(#181): console does not support history
-// TODO: console does not support scrolling
+// TODO(#182): console does not support scrolling
 
 Console::Selection Console::get_selection() const
 {
