@@ -207,7 +207,6 @@ void Console::handle_event(SDL_Event *event, Game *game)
 {
     // TODO(#158): Backtick event bleeds into the Console
     if (enabled) {
-        // TODO(#146): No support for delete or backspace in console
         if (popup_enabled) {
             switch (event->type) {
             case SDL_KEYDOWN: {
