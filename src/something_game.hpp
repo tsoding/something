@@ -67,7 +67,6 @@ const size_t ROOM_ROW_COUNT = 8;
 
 // TODO(#136): camera anchors in the centers of the "rooms"
 // TODO(#137): highlight areas to emulate "rooms"
-// TODO(#138): reimplement back the enemy AI
 struct Game
 {
     bool quit;
