@@ -1,6 +1,9 @@
 #include "something_game.hpp"
 #include "something_console.hpp"
 
+// TODO: console does not support history
+// TODO: console does not support scrolling
+
 Console::Selection Console::get_selection() const
 {
     Selection result = {};
@@ -282,24 +285,26 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 } break;
 
                 case SDLK_RETURN: {
-                    String_View command_expr = {edit_field_size, edit_field};
-                    const auto command_name = command_expr.chop_word();
+                    String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
                     this->println(String_View {edit_field_size, edit_field});
                     edit_field_size = 0;
                     edit_field_cursor = 0;
                     edit_field_selection_begin = 0;
 
-                    bool command_found = false;
-                    for (size_t i = 0; !command_found && i < commands_count; ++i) {
-                        if (commands[i].name == command_name) {
-                            commands[i].run(game, command_expr);
-                            command_found = true;
+                    if (command_expr.count > 0) {
+                        bool command_found = false;
+                        const auto command_name = command_expr.chop_word();
+                        for (size_t i = 0; !command_found && i < commands_count; ++i) {
+                            if (commands[i].name == command_name) {
+                                commands[i].run(game, command_expr);
+                                command_found = true;
+                            }
                         }
-                    }
 
-                    if (!command_found) {
-                        this->println("Command `", command_name, "` not found");
+                        if (!command_found) {
+                            this->println("Command `", command_name, "` not found");
+                        }
                     }
                 } break;
                 }
