@@ -1,6 +1,13 @@
 #include "./something_game.hpp"
 #include "./something_commands.hpp"
 
+void command_help(Game *game, String_View)
+{
+    for (size_t i = 0; i < commands_count; ++i) {
+        game->console.println(commands[i].name, " - ", commands[i].description);
+    }
+}
+
 void command_quit(Game *, String_View)
 {
     exit(0);
