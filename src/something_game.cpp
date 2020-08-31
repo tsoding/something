@@ -149,7 +149,6 @@ void Game::handle_event(SDL_Event *event)
     } break;
     }
 
-    // TODO(#148): Console events fall through to the actual gameplay
 
     if (console.enabled) {
         console.handle_event(event, this);
