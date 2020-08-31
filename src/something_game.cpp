@@ -450,7 +450,7 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     }
 }
 
-void Game::render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec)
+void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
 {
     sec(SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255));
 
@@ -469,7 +469,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec)
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, PADDING),
-             "FPS: %.0f", 1.0f / elapsed_sec);
+             "FPS: %d", fps);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
