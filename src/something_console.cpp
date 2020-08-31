@@ -205,7 +205,6 @@ void Console::start_autocompletion()
 
 void Console::handle_event(SDL_Event *event, Game *game)
 {
-    // TODO(#158): Backtick event bleeds into the Console
     if (enabled) {
         if (popup_enabled) {
             switch (event->type) {
