@@ -66,7 +66,6 @@ const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
 
 // TODO(#136): camera anchors in the centers of the "rooms"
-// TODO(#137): highlight areas to emulate "rooms"
 struct Game
 {
     bool quit;
