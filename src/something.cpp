@@ -27,8 +27,11 @@ using namespace aids;
 #ifndef SOMETHING_RELEASE
 // TODO(#173): config autoreloading does not work on Windows
 // TODO(#174): config autoreloading does not work on MacOS
-#  ifdef __linux__
+#  if defined(__linux__)
 #    include "something_fmw_inotify.cpp"
+#  elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
+	|| defined(__DragonFly__)
+#    include "something_fmw_kqueue.cpp"
 #  else
 #    include "something_fmw_dummy.cpp"
 #  endif // __linux__
