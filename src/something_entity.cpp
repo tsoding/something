@@ -30,6 +30,9 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
         SDL_FLIP_NONE :
         SDL_FLIP_HORIZONTAL;
 
+    // TODO(#185): should we use shade for the particles of an entity?
+    particles.render(renderer, camera);
+
     switch (state) {
     case Entity_State::Alive: {
         // Figuring out texbox
@@ -159,6 +162,8 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
 
 void Entity::update(float dt, Sample_Mixer *mixer)
 {
+    particles.update(dt, pos);
+
     switch (state) {
     case Entity_State::Alive: {
         flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
@@ -348,9 +353,12 @@ void Entity::move(Direction direction)
 {
     alive_state = Alive_State::Walking;
     walking_direction = direction;
+    // TODO(#186): entity should play particles only while being on the ground
+    particles.state = Particles::EMITTING;
 }
 
 void Entity::stop()
 {
     alive_state = Alive_State::Idle;
+    particles.state = Particles::DISABLED;
 }

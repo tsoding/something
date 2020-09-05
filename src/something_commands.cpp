@@ -93,3 +93,15 @@ void command_reload(Game *game, String_View)
 }
 
 #endif // SOMETHING_RELEASE
+
+void sprint1(String_Buffer *sbuffer, Particles::State state)
+{
+    switch (state) {
+    case Particles::DISABLED:
+        sprint(sbuffer, "DISABLED");
+        break;
+    case Particles::EMITTING:
+        sprint(sbuffer, "EMITTING");
+        break;
+    }
+}

@@ -2,6 +2,7 @@
 #define SOMETHING_GAME_HPP_
 
 #include "something_console.hpp"
+#include "something_particles.hpp"
 
 enum Debug_Toolbar_Button
 {

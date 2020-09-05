@@ -50,5 +50,6 @@ using namespace aids;
 #include "something_commands.cpp"
 #include "something_select_popup.cpp"
 #include "something_console.cpp"
+#include "something_particles.cpp"
 #include "something_game.cpp"
 #include "something_main.cpp"
