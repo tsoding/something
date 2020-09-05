@@ -30,7 +30,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
         SDL_FLIP_NONE :
         SDL_FLIP_HORIZONTAL;
 
-    // TODO: should we use shade for the particles of an entity?
+    // TODO(#185): should we use shade for the particles of an entity?
     particles.render(renderer, camera);
 
     switch (state) {
