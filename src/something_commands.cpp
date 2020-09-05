@@ -79,7 +79,6 @@ void command_set(Game *game, String_View args)
     }
     }
 }
-#endif // SOMETHING_RELEASE
 
 void command_reload(Game *game, String_View)
 {
@@ -92,3 +91,5 @@ void command_reload(Game *game, String_View)
         game->popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
     }
 }
+
+#endif // SOMETHING_RELEASE
