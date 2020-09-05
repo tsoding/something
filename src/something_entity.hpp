@@ -1,6 +1,8 @@
 #ifndef SOMETHING_ENTITY_H_
 #define SOMETHING_ENTITY_H_
 
+#include "something_particles.hpp"
+
 enum class Jump_State
 {
     No_Jump = 0,
@@ -61,6 +63,8 @@ struct Entity
 
     Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16 shoot_sample;
+
+    Particles particles;
 
     void kill();
 

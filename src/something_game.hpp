@@ -82,7 +82,6 @@ struct Game
     Popup popup;
     // TODO(#178): disable game console in release mode
     Console console;
-    Particles particles;
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;

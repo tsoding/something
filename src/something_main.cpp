@@ -91,8 +91,6 @@ int main(void)
     game.damage_enemy_sample      = sample_s16_by_name("./assets/sounds/Hurt_Old.wav"_sv);
     game.kill_enemy_sample        = sample_s16_by_name("./assets/sounds/Fallbig1.wav"_sv);
 
-    game.particles.state = Particles::EMITTING;
-
 #ifndef SOMETHING_RELEASE
     {
         auto result = reload_config_file(CONFIG_VARS_FILE_PATH);

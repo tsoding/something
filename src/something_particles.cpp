@@ -1,6 +1,6 @@
 #include "something_particles.hpp"
 
-void Particles::render(SDL_Renderer *renderer, Camera camera)
+void Particles::render(SDL_Renderer *renderer, Camera camera) const
 {
     for (size_t i = 0; i < count; ++i) {
         const size_t j = (begin + i) % PARTICLES_CAPACITY;
@@ -34,6 +34,7 @@ void Particles::push(Vec2f source)
             rand_float_range(0.0f, 2.0f * PI));
         lifetimes[j] = PARTICLE_LIFETIME;
         sizes[j] = rand_float_range(PARTICLE_SIZE_LOW, PARTICLE_SIZE_HIGH);
+        // TODO: implement HSL based generation of color for particles
         colors[j] = {
             (Uint8) (rand() % 255),
             (Uint8) (rand() % 255),

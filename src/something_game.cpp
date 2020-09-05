@@ -232,9 +232,6 @@ void Game::update(float dt)
         }
     }
 
-    // Update Particles //////////////////////////////
-    particles.update(dt, entities[PLAYER_ENTITY_INDEX].pos);
-
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(dt, &mixer);
@@ -357,8 +354,6 @@ void Game::render(SDL_Renderer *renderer)
         // TODO(#106): display health bar differently for enemies in a different room
         entities[i].render(renderer, camera);
     }
-
-    particles.render(renderer, camera);
 
     render_projectiles(renderer, camera);
 

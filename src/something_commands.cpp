@@ -105,9 +105,3 @@ void sprint1(String_Buffer *sbuffer, Particles::State state)
         break;
     }
 }
-
-void command_patty(Game *game, String_View )
-{
-    game->console.println("Particle count: ", game->particles.count);
-    game->console.println("Particle state: ", game->particles.state);
-}
