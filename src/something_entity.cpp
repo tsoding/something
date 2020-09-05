@@ -353,7 +353,7 @@ void Entity::move(Direction direction)
 {
     alive_state = Alive_State::Walking;
     walking_direction = direction;
-    // TODO: entity should play particles only while being on the ground
+    // TODO(#186): entity should play particles only while being on the ground
     particles.state = Particles::EMITTING;
 }
 
