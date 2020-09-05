@@ -12,6 +12,7 @@ void command_close(Game *game, String_View args);
 void command_set(Game *game, String_View args);
 void command_reload(Game *game, String_View args);
 #endif // SOMETHING_RELEASE
+void command_patty(Game *game, String_View args);
 
 struct Command
 {
@@ -30,6 +31,7 @@ const Command commands[] = {
     {"set"_sv,         "Set the value of a variable"_sv,     command_set},
     {"reload"_sv,      "Reloads the configuration file"_sv,  command_reload},
 #endif // SOMETHING_RELEASE
+    {"patty"_sv,       "Check particle info"_sv,             command_patty},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 

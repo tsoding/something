@@ -2,6 +2,7 @@
 #define SOMETHING_GAME_HPP_
 
 #include "something_console.hpp"
+#include "something_particles.hpp"
 
 enum Debug_Toolbar_Button
 {
@@ -81,6 +82,7 @@ struct Game
     Popup popup;
     // TODO(#178): disable game console in release mode
     Console console;
+    Particles particles;
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
