@@ -57,13 +57,7 @@ void Game::handle_event(SDL_Event *event)
 
 #ifndef SOMETHING_RELEASE
         case SDLK_F5: {
-            auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
-            if (result.is_error) {
-                println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-                popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
-            } else {
-                popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
-            }
+            command_reload(this, ""_sv);
         } break;
 #endif  // SOMETHING_RELEASE
         }

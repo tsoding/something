@@ -11,6 +11,7 @@ void command_close(Game *game, String_View args);
 #ifndef SOMETHING_RELEASE
 void command_set(Game *game, String_View args);
 #endif // SOMETHING_RELEASE
+void command_reload(Game *game, String_View args);
 
 struct Command
 {
@@ -28,6 +29,7 @@ const Command commands[] = {
 #ifndef SOMETHING_RELEASE
     {"set"_sv,         "Set the value of a variable"_sv,     command_set},
 #endif // SOMETHING_RELEASE
+    {"reload"_sv,      "Reloads the configuration file"_sv,  command_reload},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 
