@@ -91,12 +91,14 @@ struct Entity
     void render(SDL_Renderer *renderer, Camera camera,
                 SDL_Color shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera) const;
-    void update(float dt, Sample_Mixer *mixer);
+    void update(float dt, Sample_Mixer *mixer, Tile_Grid *grid);
     void point_gun_at(Vec2f target);
     void jump();
     void flash(SDL_Color color);
     void move(Direction direction);
     void stop();
+    Vec2f feet();
+    bool ground(Tile_Grid *grid);
 };
 
 Entity player_entity(Vec2f pos);

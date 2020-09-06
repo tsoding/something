@@ -160,9 +160,15 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-void Entity::update(float dt, Sample_Mixer *mixer)
+void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
-    particles.update(dt, pos);
+    if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
+        particles.state = Particles::EMITTING;
+    } else {
+        particles.state = Particles::DISABLED;
+    }
+
+    particles.update(dt, feet(), grid);
 
     switch (state) {
     case Entity_State::Alive: {
@@ -353,12 +359,22 @@ void Entity::move(Direction direction)
 {
     alive_state = Alive_State::Walking;
     walking_direction = direction;
-    // TODO(#186): entity should play particles only while being on the ground
-    particles.state = Particles::EMITTING;
 }
 
 void Entity::stop()
 {
     alive_state = Alive_State::Idle;
-    particles.state = Particles::DISABLED;
+}
+
+Vec2f Entity::feet()
+{
+    auto hitbox = hitbox_local;
+    hitbox.x += pos.x;
+    hitbox.y += pos.y;
+    return vec2(hitbox.x, hitbox.y) + vec2(0.5f, 1.0f) * vec2(hitbox.w, hitbox.h);
+}
+
+bool Entity::ground(Tile_Grid *grid)
+{
+    return !grid->is_tile_empty_abs(feet() + vec2(0.0f, TILE_SIZE * 0.5f));
 }

@@ -234,7 +234,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, &mixer);
+        entities[i].update(dt, &mixer, &grid);
         entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
