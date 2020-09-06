@@ -118,7 +118,7 @@ void command_save_room(Game *game, String_View)
         fclose(f);
 
         rooms_count += 1;
-        game->console.println("New room is saved! You may want to update rooms_count to ", rooms_count);
+        game->console.println("Saved! Change rooms_count to ", rooms_count, ", please");
     } else {
         game->console.println("Can't find a room with Player in it");
     }
