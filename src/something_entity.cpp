@@ -1,3 +1,4 @@
+#include "./something_print.hpp"
 #include "./something_entity.hpp"
 
 void Entity::kill()
@@ -158,11 +159,6 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
             }
         }
     }
-}
-
-void print1(FILE *stream, SDL_Color color)
-{
-    print(stream, "{", color.r, ",", color.g, ",", color.b, ",", color.a, "}");
 }
 
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
