@@ -99,9 +99,6 @@ void command_save_room(Game *game, String_View)
         }
     }
     if(lock) {
-        const auto varname = "ROOMS_COUNT"_sv;
-        const auto varindex = config_index_by_name(varname);
-
         size_t count = 0;
         for (int y = lock->y; y < lock->y + ROOM_HEIGHT; ++y) {
             for (int x = lock->x; x < lock->x + ROOM_WIDTH; ++x) {
@@ -111,7 +108,7 @@ void command_save_room(Game *game, String_View)
         }
 
         char filepath[256];
-        snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", config_values[varindex].int_value);
+        snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rooms_count);
         FILE *f = fopen(filepath, "wb");
         if (!f) {
             game->console.println("Could not open file `", filepath, "`: ",
@@ -120,9 +117,8 @@ void command_save_room(Game *game, String_View)
         fwrite(room_to_save, sizeof(room_to_save[0]), ROOM_HEIGHT * ROOM_WIDTH, f);
         fclose(f);
 
-        config_values[varindex].int_value += 1;
-        game->console.println("New room is saved! You may want to update config.vars file");
-        game->console.println("For that you have to set ROOMS_COUNT to ", config_values[varindex].int_value, " and recompile game");
+        rooms_count += 1;
+        game->console.println("New room is saved! You may want to update rooms_count to ", rooms_count);
     } else {
         game->console.println("Can't find a room with Player in it");
     }

@@ -65,6 +65,7 @@ const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
+int rooms_count = 10;
 
 struct Game
 {

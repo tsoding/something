@@ -141,8 +141,7 @@ int main(void)
     const int PADDING = 1;
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
-            auto n = rand() % ROOMS_COUNT;
-            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", n);
+            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % rooms_count);
             auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
             game.grid.load_room_from_file(filepath, coord);
             game.add_camera_lock(rect(coord, ROOM_WIDTH, ROOM_HEIGHT));
