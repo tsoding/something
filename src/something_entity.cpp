@@ -160,10 +160,33 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
+void print1(FILE *stream, SDL_Color color)
+{
+    print(stream, "{", color.r, ",", color.g, ",", color.b, ",", color.a, "}");
+}
+
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
     if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
         particles.state = Particles::EMITTING;
+
+        const auto tile_sprite = tile_defs[*grid->tile_at_abs(feet() + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
+        const auto surface = surfaces[tile_sprite.texture_index.unwrap];
+        const auto x = rand() % tile_sprite.srcrect.w;
+        sec(SDL_LockSurface(surface));
+        {
+            assert(surface->format->format == SDL_PIXELFORMAT_RGBA32);
+            const auto pixel = *(Uint32*) ((uint8_t *) surface->pixels + tile_sprite.srcrect.y * surface->pitch + (tile_sprite.srcrect.x + x) * sizeof(Uint32));
+            SDL_GetRGBA(
+                pixel,
+                surface->format,
+                &particles.current_color.r,
+                &particles.current_color.g,
+                &particles.current_color.b,
+                &particles.current_color.a);
+            println(stdout, particles.current_color);
+        }
+        SDL_UnlockSurface(surface);
     } else {
         particles.state = Particles::DISABLED;
     }

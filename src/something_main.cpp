@@ -33,7 +33,7 @@ int main(void)
                                  SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
-    size_t tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
+    auto tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
 
     load_textures(renderer);
     load_samples();

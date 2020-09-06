@@ -4,7 +4,7 @@
 struct Sprite
 {
     SDL_Rect srcrect;
-    size_t texture_index;
+    Texture_Index texture_index;
 
     void render(SDL_Renderer *renderer,
                 Rectf destrect,

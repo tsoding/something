@@ -79,7 +79,7 @@ void Game::handle_event(SDL_Event *event)
         Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
         switch (state) {
         case Debug_Draw_State::Create: {
-            grid.set_tile(tile, TILE_WALL);
+            grid.set_tile(tile, TILE_DESTROYABLE_0);
         } break;
 
         case Debug_Draw_State::Delete: {
