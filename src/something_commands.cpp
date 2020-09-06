@@ -113,6 +113,7 @@ void command_save_room(Game *game, String_View)
         if (!f) {
             game->console.println("Could not open file `", filepath, "`: ",
                     strerror(errno));
+            return;
         }
         fwrite(room_to_save, sizeof(room_to_save[0]), ROOM_HEIGHT * ROOM_WIDTH, f);
         fclose(f);
