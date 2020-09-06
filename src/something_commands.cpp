@@ -88,4 +88,44 @@ void command_reload(Game *game, String_View)
     }
 }
 
+void command_save_room(Game *game, String_View)
+{
+    auto &player = game->entities[PLAYER_ENTITY_INDEX];
+    Recti *lock = NULL;
+    for (size_t i = 0; i < game->camera_locks_count; ++i) {
+        Rectf lock_abs = rect_cast<float>(game->camera_locks[i]) * TILE_SIZE;
+        if (rect_contains_vec2(lock_abs, player.pos)) {
+            lock = &game->camera_locks[i];
+        }
+    }
+    if(lock) {
+        const auto varname = "ROOMS_COUNT"_sv;
+        const auto varindex = config_index_by_name(varname);
+
+        size_t count = 0;
+        for (int y = lock->y; y < lock->y + ROOM_HEIGHT; ++y) {
+            for (int x = lock->x; x < lock->x + ROOM_WIDTH; ++x) {
+                room_to_save[count] = game->grid.tiles[y][x];
+                count++;
+            }
+        }
+
+        char filepath[256];
+        snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", config_values[varindex].int_value);
+        FILE *f = fopen(filepath, "wb");
+        if (!f) {
+            game->console.println("Could not open file `", filepath, "`: ",
+                    strerror(errno));
+        }
+        fwrite(room_to_save, sizeof(room_to_save[0]), ROOM_HEIGHT * ROOM_WIDTH, f);
+        fclose(f);
+
+        config_values[varindex].int_value += 1;
+        game->console.println("New room is saved! You may want to update config.vars file");
+        game->console.println("For that you have to set ROOMS_COUNT to ", config_values[varindex].int_value, " and recompile game");
+    } else {
+        game->console.println("Can't find a room with Player in it");
+    }
+}
+
 #endif // SOMETHING_RELEASE
