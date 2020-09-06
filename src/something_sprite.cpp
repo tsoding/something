@@ -1,10 +1,10 @@
 #include "./something_sprite.hpp"
 
-Sprite sprite_from_texture_index(size_t texture_index)
+Sprite sprite_from_texture_index(Texture_Index texture_index)
 {
     Sprite result = {};
     result.texture_index = texture_index;
-    sec(SDL_QueryTexture(textures[texture_index],
+    sec(SDL_QueryTexture(textures[texture_index.unwrap],
                          NULL,
                          NULL,
                          &result.srcrect.w,
@@ -17,12 +17,12 @@ void Sprite::render(SDL_Renderer *renderer,
                     SDL_RendererFlip flip,
                     SDL_Color shade) const
 {
-    if (texture_index < TEXTURE_COUNT) {
+    if (texture_index.unwrap < TEXTURE_COUNT) {
         SDL_Rect rect = rectf_for_sdl(destrect);
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                textures[texture_index],
+                textures[texture_index.unwrap],
                 &srcrect,
                 &rect,
                 0.0,
@@ -30,13 +30,13 @@ void Sprite::render(SDL_Renderer *renderer,
                 flip));
 
         sec(SDL_SetTextureColorMod(
-                texture_masks[texture_index],
+                texture_masks[texture_index.unwrap],
                 shade.r, shade.g, shade.b));
-        sec(SDL_SetTextureAlphaMod(texture_masks[texture_index], shade.a));
+        sec(SDL_SetTextureAlphaMod(texture_masks[texture_index.unwrap], shade.a));
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                texture_masks[texture_index],
+                texture_masks[texture_index.unwrap],
                 &srcrect,
                 &rect,
                 0.0,
@@ -246,7 +246,7 @@ Frame_Animat load_animat_file(const char *animat_filepath)
 
     String_View input = source.unwrap;
     Frame_Animat animat = {};
-    Maybe<size_t> spritesheet_texture = {};
+    Maybe<Texture_Index> spritesheet_texture = {};
 
     while (input.count != 0) {
         auto value = input.chop_by_delim('\n');

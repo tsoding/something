@@ -37,12 +37,7 @@ void Particles::push(Vec2f source)
         lifetimes[j] = PARTICLE_LIFETIME;
         sizes[j] = rand_float_range(PARTICLE_SIZE_LOW, PARTICLE_SIZE_HIGH);
         // TODO(#187): implement HSL based generation of color for particles
-        colors[j] = {
-            (Uint8) (rand() % 255),
-            (Uint8) (rand() % 255),
-            (Uint8) (rand() % 255),
-            255
-        };
+        colors[j] = current_color;
         count += 1;
     }
 }
