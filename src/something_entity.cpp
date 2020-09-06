@@ -180,7 +180,6 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 &particles.current_color.g,
                 &particles.current_color.b,
                 &particles.current_color.a);
-            println(stdout, particles.current_color);
         }
         SDL_UnlockSurface(surface);
     } else {
