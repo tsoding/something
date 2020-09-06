@@ -98,6 +98,7 @@ struct Entity
     void move(Direction direction);
     void stop();
     Vec2f feet();
+    bool ground(Tile_Grid *grid);
 };
 
 Entity player_entity(Vec2f pos);
