@@ -11,25 +11,21 @@ const char *projectile_state_as_cstr(Projectile_State state)
     assert(0 && "Incorrect Projectile_State");
 }
 
-// TODO(#25): Turn displayf into println style
+template <typename ... Types>
 void displayf(SDL_Renderer *renderer,
               Bitmap_Font *font,
               SDL_Color color,
               SDL_Color shadow_color,
               Vec2f p,
-              const char *format, ...)
+              Types... args)
 {
-    va_list args;
-    va_start(args, format);
-
     char text[256];
-    vsnprintf(text, sizeof(text), format, args);
+    String_Buffer sbuffer = {256, text, 0};
+    sprintln(&sbuffer, args...);
 
     auto font_size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
     font->render(renderer, p - vec2(2.0f, 2.0f), font_size, shadow_color, text);
     font->render(renderer, p, font_size, color, text);
-
-    va_end(args);
 }
 
 void Projectile::kill()
@@ -463,40 +459,40 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, PADDING),
-             "FPS: %d", fps);
+             "FPS: ", fps);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, 50 + PADDING),
-             "Mouse Position: (%.4f, %.4f)",
-             mouse_position.x,
+             "Mouse Position: ",
+             mouse_position.x, " ",
              mouse_position.y);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, 2 * 50 + PADDING),
-             "Collision Probe: (%.4f, %.4f)",
-             collision_probe.x,
+             "Collision Probe: ",
+             collision_probe.x, " ",
              collision_probe.y);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, 3 * 50 + PADDING),
-             "Projectiles: %d",
+             "Projectiles: ",
              count_alive_projectiles());
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, 4 * 50 + PADDING),
-             "Player position: (%.4f, %.4f)",
-             entities[PLAYER_ENTITY_INDEX].pos.x,
+             "Player position: ",
+             entities[PLAYER_ENTITY_INDEX].pos.x, " ",
              entities[PLAYER_ENTITY_INDEX].pos.y);
     displayf(renderer, &debug_font,
              FONT_DEBUG_COLOR,
              FONT_SHADOW_COLOR,
              vec2(PADDING, 5 * 50 + PADDING),
-             "Player velocity: (%.4f, %.4f)",
-             entities[PLAYER_ENTITY_INDEX].vel.x,
+             "Player velocity: ",
+             entities[PLAYER_ENTITY_INDEX].vel.x, " ",
              entities[PLAYER_ENTITY_INDEX].vel.y);
 
     if (tracking_projectile.has_value) {
@@ -507,24 +503,24 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, PADDING),
-                 "State: %s", projectile_state_as_cstr(projectile.state));
+                 "State: ", projectile_state_as_cstr(projectile.state));
         displayf(renderer, &debug_font,
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 50 + PADDING),
-                 "Position: (%.4f, %.4f)",
-                 projectile.pos.x, projectile.pos.y);
+                 "Position: ",
+                 projectile.pos.x, " ", projectile.pos.y);
         displayf(renderer, &debug_font,
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 2 * 50 + PADDING),
-                 "Velocity: (%.4f, %.4f)",
-                 projectile.vel.x, projectile.vel.y);
+                 "Velocity: ",
+                 projectile.vel.x, " ", projectile.vel.y);
         displayf(renderer, &debug_font,
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,
                  vec2(PADDING + SECOND_COLUMN_OFFSET, 3 * 50 + PADDING),
-                 "Shooter Index: %d",
+                 "Shooter Index: ",
                  projectile.shooter.unwrap);
     }
 
