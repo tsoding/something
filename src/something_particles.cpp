@@ -60,7 +60,8 @@ void Particles::update(float dt, Vec2f source, Tile_Grid *grid)
 
         if (!grid->is_tile_empty_abs(positions[j])) {
             // lifetimes[j] = 0.0;
-            velocities[j] = velocities[j] * -0.5f;
+            positions[j] -= velocities[j] * dt;
+            velocities[j] *= -PARTICLE_BOUNCE;
         }
     }
 
