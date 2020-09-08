@@ -160,6 +160,10 @@ int main(void)
     while (!game.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
+        if(game.fps_debug) {
+            game.frame_delays[game.frame_delays_begin] = elapsed_sec;
+            game.frame_delays_begin = (game.frame_delays_begin + 1) % FPS_BARS_COUNT;
+        }
 
         frames_of_current_second += 1;
         next_sec += elapsed_sec;

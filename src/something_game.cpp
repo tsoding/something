@@ -52,6 +52,14 @@ void Game::handle_event(SDL_Event *event)
 
 
 #ifndef SOMETHING_RELEASE
+        case SDLK_F2: {
+            fps_debug = !fps_debug;
+        } break;
+
+        case SDLK_F3: {
+            bfs_debug = !bfs_debug;
+        } break;
+
         case SDLK_F5: {
             command_reload(this, ""_sv);
         } break;
@@ -337,7 +345,7 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
-    if (debug && lock) {
+    if (bfs_debug && lock) {
         grid.render_debug_bfs_overlay(
             renderer,
             &camera,
@@ -356,6 +364,24 @@ void Game::render(SDL_Renderer *renderer)
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type != ITEM_NONE) {
             items[i].render(renderer, camera);
+        }
+    }
+
+    const float PADDING = 20.0f;
+    const float SCALE = 5000.0f;
+    if (fps_debug) {
+        for (size_t i = 0; i < FPS_BARS_COUNT - 10; ++i) {
+            size_t j = (frame_delays_begin + i) % FPS_BARS_COUNT;
+            fill_rect(
+                renderer,
+                rect(
+                    vec2(SCREEN_WIDTH - PADDING - (float) (FPS_BARS_COUNT - j) * 2,
+                        SCREEN_HEIGHT - PADDING - frame_delays[j] * SCALE),
+                    2.0f,
+                    frame_delays[j] * SCALE),
+                {   (Uint8) (clamp(      (int) (frame_delays[j] * 1000 * 15) - 255, 0, 255)),
+                    (Uint8) (clamp(510 - (int) (frame_delays[j] * 1000 * 15)      , 0, 255)),
+                    0, 255});
         }
     }
 
