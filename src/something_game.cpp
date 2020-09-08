@@ -367,22 +367,8 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
-    const float PADDING = 20.0f;
-    const float SCALE = 5000.0f;
     if (fps_debug) {
-        for (size_t i = 0; i < FPS_BARS_COUNT - 10; ++i) {
-            size_t j = (frame_delays_begin + i) % FPS_BARS_COUNT;
-            fill_rect(
-                renderer,
-                rect(
-                    vec2(SCREEN_WIDTH - PADDING - (float) (FPS_BARS_COUNT - j) * 2,
-                        SCREEN_HEIGHT - PADDING - frame_delays[j] * SCALE),
-                    2.0f,
-                    frame_delays[j] * SCALE),
-                {   (Uint8) (clamp(      (int) (frame_delays[j] * 1000 * 15) - 255, 0, 255)),
-                    (Uint8) (clamp(510 - (int) (frame_delays[j] * 1000 * 15)      , 0, 255)),
-                    0, 255});
-        }
+        render_fps_overlay(renderer);
     }
 
     popup.render(renderer);
@@ -595,6 +581,25 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
     }
 
     debug_toolbar.render(renderer, debug_font);
+}
+
+void Game::render_fps_overlay(SDL_Renderer *renderer) {
+    const float PADDING = 20.0f;
+    const float SCALE = 5000.0f;
+    const float BAR_WIDTH = 2.0f;
+    for (size_t i = 0; i < FPS_BARS_COUNT; ++i) {
+        size_t j = (frame_delays_begin + i) % FPS_BARS_COUNT;
+        fill_rect(
+            renderer,
+            rect(
+                vec2(SCREEN_WIDTH - PADDING - (float) (FPS_BARS_COUNT - j) * BAR_WIDTH,
+                    SCREEN_HEIGHT - PADDING - frame_delays[j] * SCALE),
+                BAR_WIDTH,
+                frame_delays[j] * SCALE),
+                {   (Uint8) (clamp(      (int) (frame_delays[j] * 1000 * 15) - 255, 0, 255)),
+                    (Uint8) (clamp(510 - (int) (frame_delays[j] * 1000 * 15)      , 0, 255)),
+                    0, (Uint8) clamp((int) i, 0, 255)});
+    }
 }
 
 int Game::count_alive_projectiles(void)
