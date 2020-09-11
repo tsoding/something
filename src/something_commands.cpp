@@ -99,13 +99,15 @@ void command_save_room(Game *game, String_View)
         }
     }
     if(lock) {
-        size_t count = 0;
+        size_t tile_index = 0;
         for (int y = lock->y; y < lock->y + ROOM_HEIGHT; ++y) {
             for (int x = lock->x; x < lock->x + ROOM_WIDTH; ++x) {
-                room_to_save[count] = game->grid.tiles[y][x];
-                count++;
+                room_to_save[tile_index] = game->grid.tiles[y][x];
+                tile_index++;
             }
         }
+
+        const int rooms_count = game->get_rooms_count();
 
         char filepath[256];
         snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rooms_count);
@@ -118,7 +120,6 @@ void command_save_room(Game *game, String_View)
         fwrite(room_to_save, sizeof(room_to_save[0]), ROOM_HEIGHT * ROOM_WIDTH, f);
         fclose(f);
 
-        rooms_count += 1;
         game->console.println("New room is saved");
     } else {
         game->console.println("Can't find a room with Player in it");

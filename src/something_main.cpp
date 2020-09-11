@@ -1,5 +1,4 @@
 #include "something_fmw.hpp"
-#include <dirent.h>
 
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
@@ -138,18 +137,12 @@ int main(void)
     // SOUND END //////////////////////////////
 
     game.reset_entities();
-    DIR *rooms_dir = opendir("./assets/rooms/");
-    if (rooms_dir == NULL) {
-        println(stderr, "Can't open asset folder: ./assets/rooms/");
+
+    const int rooms_count = game.get_rooms_count();
+    if (rooms_count <= 0) {
+        println(stderr, "Assets folder is empty: ./assets/rooms/");
         abort();
     }
-    for (struct dirent *d = readdir(rooms_dir);
-        d != NULL;
-        d = readdir(rooms_dir)) {
-        if (*d->d_name == '.') continue;
-        rooms_count++;
-    }
-    closedir(rooms_dir);
 
     char filepath[256];
     const int PADDING = 1;
