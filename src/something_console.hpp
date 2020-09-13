@@ -31,7 +31,7 @@ struct Console
     {
         char entries[CONSOLE_HISTORY_CAPACITY][CONSOLE_COLUMNS];
         size_t entry_sizes[CONSOLE_HISTORY_CAPACITY];
-        // TODO: try to organize history as end+count instead of begin+count
+        // TODO(#199): try to organize history as end+count instead of begin+count
         int begin;
         int count;
         int cursor;
