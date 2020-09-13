@@ -18,7 +18,7 @@ struct Particles
     float sizes[PARTICLES_CAPACITY];
     SDL_Color colors[PARTICLES_CAPACITY];
     float cooldown;
-    SDL_Color current_color;
+    HSLA current_color;
 
     size_t begin;
     size_t count;
