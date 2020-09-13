@@ -12,6 +12,7 @@ void command_close(Game *game, String_View args);
 void command_set(Game *game, String_View args);
 void command_reload(Game *game, String_View args);
 #endif // SOMETHING_RELEASE
+void command_history(Game *game, String_View args);
 
 struct Command
 {
@@ -21,15 +22,16 @@ struct Command
 };
 
 const Command commands[] = {
-    {"help"_sv,        "Print this help"_sv,                 command_help},
-    {"quit"_sv,        "Quit the game"_sv,                   command_quit},
-    {"reset"_sv,       "Reset the state of the entities"_sv, command_reset},
-    {"spawn_enemy"_sv, "Spawn an enemy"_sv,                  command_spawn_enemy},
-    {"close"_sv,       "Close the console"_sv,               command_close},
+    {"help"_sv,        "Print this help"_sv,                  command_help},
+    {"quit"_sv,        "Quit the game"_sv,                    command_quit},
+    {"reset"_sv,       "Reset the state of the entities"_sv,  command_reset},
+    {"spawn_enemy"_sv, "Spawn an enemy"_sv,                   command_spawn_enemy},
+    {"close"_sv,       "Close the console"_sv,                command_close},
 #ifndef SOMETHING_RELEASE
-    {"set"_sv,         "Set the value of a variable"_sv,     command_set},
-    {"reload"_sv,      "Reloads the configuration file"_sv,  command_reload},
+    {"set"_sv,         "Set the value of a variable"_sv,      command_set},
+    {"reload"_sv,      "Reloads the configuration file"_sv,   command_reload},
 #endif // SOMETHING_RELEASE
+    {"history"_sv,     "Print the history of the Console"_sv, command_history},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 
