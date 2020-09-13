@@ -267,6 +267,28 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     cursor_right(event->key.keysym.mod & KMOD_LSHIFT);
                 } break;
 
+                case SDLK_UP: {
+                    const auto j = history.current();
+                    if (j >= 0) {
+                        memcpy(edit_field, &history.entries[j], history.entry_sizes[j]);
+                        edit_field_size = history.entry_sizes[j];
+                        edit_field_cursor = history.entry_sizes[j];
+                        edit_field_selection_begin = edit_field_cursor;
+                    }
+                    history.up();
+                } break;
+
+                case SDLK_DOWN: {
+                    const auto j = history.current();
+                    if (j >= 0) {
+                        memcpy(edit_field, &history.entries[j], history.entry_sizes[j]);
+                        edit_field_size = history.entry_sizes[j];
+                        edit_field_cursor = history.entry_sizes[j];
+                        edit_field_selection_begin = edit_field_cursor;
+                    }
+                    history.down();
+                } break;
+
                 case SDLK_v: {
                     if (event->key.keysym.mod & KMOD_LCTRL) {
                         insert_cstr(sec(SDL_GetClipboardText()));
@@ -340,10 +362,23 @@ void Console::History::push(char *entry, size_t entry_size)
 
 void Console::History::up()
 {
-    assert(0 && "TODO: Console::History::up() is not implemented");
+    if (cursor < count) {
+        cursor += 1;
+    }
 }
 
 void Console::History::down()
 {
-    assert(0 && "TODO: Console::History::down() is not implemented");
+    if (cursor > 0) {
+        cursor -= 1;
+    }
+}
+
+int Console::History::current()
+{
+    if ((count - cursor) > 0) {
+        return mod(begin + count - 1 - cursor, CONSOLE_HISTORY_CAPACITY);
+    } else {
+        return -1;
+    }
 }

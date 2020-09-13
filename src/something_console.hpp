@@ -5,7 +5,7 @@
 
 const size_t CONSOLE_ROWS = 1024;
 const size_t CONSOLE_COLUMNS = 256;
-const size_t CONSOLE_HISTORY_CAPACITY = 69;
+const int CONSOLE_HISTORY_CAPACITY = 69;
 
 struct Game;
 
@@ -31,13 +31,15 @@ struct Console
     {
         char entries[CONSOLE_HISTORY_CAPACITY][CONSOLE_COLUMNS];
         size_t entry_sizes[CONSOLE_HISTORY_CAPACITY];
-        size_t begin;
-        size_t count;
-        size_t cursor;
+        // TODO: try to organize history as end+count instead of begin+count
+        int begin;
+        int count;
+        int cursor;
 
         void push(char *entry, size_t entry_size);
         void up();
         void down();
+        int current();
     };
 
     bool enabled;
