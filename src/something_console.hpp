@@ -56,8 +56,8 @@ struct Console
     size_t edit_field_size;
     size_t edit_field_cursor;
     size_t edit_field_selection_begin;
-    Select_Popup popup;
-    bool popup_enabled;
+    Select_Popup completion_popup;
+    bool completion_popup_enabled;
 
     Selection get_selection() const;
 

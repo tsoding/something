@@ -81,8 +81,8 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
         }
 
         // POPUP
-        if (popup_enabled) {
-            popup.render(renderer, font, vec2(cursor_x, position.y));
+        if (completion_popup_enabled) {
+            completion_popup.render(renderer, font, vec2(cursor_x, position.y));
         }
     }
 }
@@ -196,37 +196,37 @@ void Console::backspace_char()
 
 void Console::start_autocompletion()
 {
-    popup.clear();
+    completion_popup.clear();
     String_View prefix = {edit_field_cursor, edit_field};
-    for (size_t i = 0; i < commands_count && !popup.full(); ++i) {
+    for (size_t i = 0; i < commands_count && !completion_popup.full(); ++i) {
         if (commands[i].name.has_prefix(prefix)) {
-            popup.push(commands[i].name);
+            completion_popup.push(commands[i].name);
         }
     }
-    popup_enabled = true;
+    completion_popup_enabled = true;
 }
 
 void Console::handle_event(SDL_Event *event, Game *game)
 {
     if (enabled) {
-        if (popup_enabled) {
+        if (completion_popup_enabled) {
             switch (event->type) {
             case SDL_KEYDOWN: {
                 switch (event->key.keysym.sym) {
                 case SDLK_ESCAPE: {
-                    popup_enabled = false;
+                    completion_popup_enabled = false;
                 } break;
                 case SDLK_UP: {
-                    popup.up();
+                    completion_popup.up();
                 } break;
                 case SDLK_DOWN: {
-                    popup.down();
+                    completion_popup.down();
                 } break;
                 case SDLK_RETURN: {
-                    auto s = popup.items[popup.items_cursor];
+                    auto s = completion_popup.items[completion_popup.items_cursor];
                     s.chop(edit_field_cursor);
                     insert_sv(s);
-                    popup_enabled = false;
+                    completion_popup_enabled = false;
                 } break;
                 }
             } break;
