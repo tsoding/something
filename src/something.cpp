@@ -36,6 +36,7 @@ using namespace aids;
 #  endif // __linux__
 #endif // SOMETHING_RELEASE
 #include "something_error.cpp"
+#include "something_color.cpp"
 #include "something_render.cpp"
 #include "something_font.cpp"
 #include "something_camera.cpp"

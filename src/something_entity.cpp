@@ -173,13 +173,15 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
         {
             assert(surface->format->format == SDL_PIXELFORMAT_RGBA32);
             const auto pixel = *(Uint32*) ((uint8_t *) surface->pixels + tile_sprite.srcrect.y * surface->pitch + (tile_sprite.srcrect.x + x) * sizeof(Uint32));
+            SDL_Color color = {};
             SDL_GetRGBA(
                 pixel,
                 surface->format,
-                &particles.current_color.r,
-                &particles.current_color.g,
-                &particles.current_color.b,
-                &particles.current_color.a);
+                &color.r,
+                &color.g,
+                &color.b,
+                &color.a);
+            particles.current_color = sdl_to_rgba(color).to_hsla();
         }
         SDL_UnlockSurface(surface);
     } else {
