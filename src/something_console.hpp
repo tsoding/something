@@ -5,6 +5,7 @@
 
 const size_t CONSOLE_ROWS = 1024;
 const size_t CONSOLE_COLUMNS = 256;
+const size_t CONSOLE_HISTORY_CAPACITY = 69;
 
 struct Game;
 
@@ -26,6 +27,19 @@ struct Console
         }
     };
 
+    struct History
+    {
+        char entries[CONSOLE_HISTORY_CAPACITY][CONSOLE_COLUMNS];
+        size_t entry_sizes[CONSOLE_HISTORY_CAPACITY];
+        size_t begin;
+        size_t count;
+        size_t cursor;
+
+        void push(char *entry, size_t entry_size);
+        void up();
+        void down();
+    };
+
     bool enabled;
     float a;
 
@@ -34,6 +48,8 @@ struct Console
 
     size_t begin;
     size_t count;
+
+    History history;
 
     char clipboard_buffer[CONSOLE_COLUMNS + 1];
     char edit_field[CONSOLE_COLUMNS];

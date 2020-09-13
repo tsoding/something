@@ -317,3 +317,32 @@ void Console::handle_event(SDL_Event *event, Game *game)
         }
     }
 }
+
+void Console::History::push(char *entry, size_t entry_size)
+{
+    if (entry_size > CONSOLE_COLUMNS) {
+        entry_size = CONSOLE_COLUMNS;
+    }
+
+    const size_t j = (begin + count) % CONSOLE_HISTORY_CAPACITY;
+    memcpy(&entries[j], entry, entry_size);
+    entry_sizes[j] = entry_size;
+
+    if (count < CONSOLE_HISTORY_CAPACITY) {
+        count += 1;
+    } else {
+        begin = (begin + 1) % CONSOLE_HISTORY_CAPACITY;
+    }
+
+    cursor = begin;
+}
+
+void Console::History::up()
+{
+    assert(0 && "TODO: Console::History::up() is not implemented");
+}
+
+void Console::History::down()
+{
+    assert(0 && "TODO: Console::History::down() is not implemented");
+}
