@@ -163,6 +163,7 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
 
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
+    // TODO(#197): introduce some particle "puffs" when jumping or landing
     if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
         particles.state = Particles::EMITTING;
 
