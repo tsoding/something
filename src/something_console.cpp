@@ -288,6 +288,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
                     this->println(String_View {edit_field_size, edit_field});
+                    history.push(edit_field, edit_field_size);
                     edit_field_size = 0;
                     edit_field_cursor = 0;
                     edit_field_selection_begin = 0;
