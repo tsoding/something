@@ -137,11 +137,19 @@ int main(void)
     // SOUND END //////////////////////////////
 
     game.reset_entities();
+
+    const int rooms_count = game.get_rooms_count();
+    if (rooms_count <= 0) {
+        println(stderr, "Assets folder is empty: ./assets/rooms/");
+        abort();
+    }
+
     char filepath[256];
     const int PADDING = 1;
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
-            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % 3);
+            // TODO(#200): It is not possible to call the room files arbitrary names
+            snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rand() % rooms_count);
             auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
             game.grid.load_room_from_file(filepath, coord);
             game.add_camera_lock(rect(coord, ROOM_WIDTH, ROOM_HEIGHT));

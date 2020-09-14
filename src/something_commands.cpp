@@ -90,6 +90,44 @@ void command_reload(Game *game, String_View)
 
 #endif // SOMETHING_RELEASE
 
+void command_save_room(Game *game, String_View)
+{
+    auto &player = game->entities[PLAYER_ENTITY_INDEX];
+    Recti *lock = NULL;
+    for (size_t i = 0; i < game->camera_locks_count; ++i) {
+        Rectf lock_abs = rect_cast<float>(game->camera_locks[i]) * TILE_SIZE;
+        if (rect_contains_vec2(lock_abs, player.pos)) {
+            lock = &game->camera_locks[i];
+        }
+    }
+    if(lock) {
+        size_t tile_index = 0;
+        for (int y = lock->y; y < lock->y + ROOM_HEIGHT; ++y) {
+            for (int x = lock->x; x < lock->x + ROOM_WIDTH; ++x) {
+                room_to_save[tile_index] = game->grid.tiles[y][x];
+                tile_index++;
+            }
+        }
+
+        const int rooms_count = game->get_rooms_count();
+
+        char filepath[256];
+        snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rooms_count);
+        FILE *f = fopen(filepath, "wb");
+        if (!f) {
+            game->console.println("Could not open file `", filepath, "`: ",
+                    strerror(errno));
+            return;
+        }
+        fwrite(room_to_save, sizeof(room_to_save[0]), ROOM_HEIGHT * ROOM_WIDTH, f);
+        fclose(f);
+
+        game->console.println("New room is saved");
+    } else {
+        game->console.println("Can't find a room with Player in it");
+    }
+}
+
 void command_history(Game *game, String_View)
 {
     game->console.println("--------------------");

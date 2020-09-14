@@ -691,3 +691,23 @@ void Game::spawn_enemy_at(Vec2f pos)
         }
     }
 }
+
+int Game::get_rooms_count(void)
+{
+    int result = 0;
+    DIR *rooms_dir = opendir("./assets/rooms/");
+    if (rooms_dir == NULL) {
+        println(stderr, "Can't open asset folder: ./assets/rooms/");
+        abort();
+    }
+
+    for (struct dirent *d = readdir(rooms_dir);
+        d != NULL;
+        d = readdir(rooms_dir)) {
+        if (*d->d_name == '.') continue;
+        result++;
+    }
+
+    closedir(rooms_dir);
+    return result;
+}

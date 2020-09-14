@@ -35,6 +35,11 @@ using namespace aids;
 #    include "something_fmw_dummy.cpp"
 #  endif // __linux__
 #endif // SOMETHING_RELEASE
+#ifdef _WIN32
+#include "something_dirent.cpp"
+#else
+#include <dirent.h>
+#endif // _WIN32
 #include "something_error.cpp"
 #include "something_color.cpp"
 #include "something_render.cpp"

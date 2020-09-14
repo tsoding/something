@@ -132,6 +132,7 @@ struct Game
 
     // Items of the Game
     void spawn_health_at_mouse();
+    int get_rooms_count(void);
 };
 
 #endif  // SOMETHING_GAME_HPP_
