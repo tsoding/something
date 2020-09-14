@@ -5,7 +5,7 @@ void Item::update(float delta_time)
     a = fmodf(a + ITEM_OSC_FREQ * delta_time, 2 * PI);
 }
 
-void Item::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) const
+void Item::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
 {
     if (type != ITEM_NONE) {
         sprite.render(

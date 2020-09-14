@@ -267,7 +267,7 @@ void Game::update(float dt)
                     mixer.play_sample(kill_enemy_sample);
                 } else {
                     entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
-                    entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
+                    entity->flash(sdl_to_rgba(ENTITY_DAMAGE_FLASH_COLOR));
                 }
             }
         }
@@ -286,7 +286,7 @@ void Game::update(float dt)
                 if (entity->state == Entity_State::Alive) {
                     if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
                         entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
-                        entity->flash(ENTITY_HEAL_FLASH_COLOR);
+                        entity->flash(sdl_to_rgba(ENTITY_HEAL_FLASH_COLOR));
                         mixer.play_sample(item->sound);
                         item->type = ITEM_NONE;
                         break;

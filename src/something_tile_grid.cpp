@@ -71,7 +71,7 @@ void Tile_Grid::render(SDL_Renderer *renderer, Camera camera, Recti *lock)
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE),
                 TILE_SIZE, TILE_SIZE);
 
-            SDL_Color shade_color = ROOM_NEIGHBOR_DIM_COLOR;
+            RGBA shade_color = sdl_to_rgba(ROOM_NEIGHBOR_DIM_COLOR);
 
             if (lock && rect_contains_vec2(*lock, coord)) {
                 shade_color = {0, 0, 0, 0};
