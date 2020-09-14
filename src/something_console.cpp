@@ -81,8 +81,8 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
         }
 
         // POPUP
-        if (popup_enabled) {
-            popup.render(renderer, font, vec2(cursor_x, position.y));
+        if (completion_popup_enabled) {
+            completion_popup.render(renderer, font, vec2(cursor_x, position.y));
         }
     }
 }
@@ -196,37 +196,37 @@ void Console::backspace_char()
 
 void Console::start_autocompletion()
 {
-    popup.clear();
+    completion_popup.clear();
     String_View prefix = {edit_field_cursor, edit_field};
-    for (size_t i = 0; i < commands_count && !popup.full(); ++i) {
+    for (size_t i = 0; i < commands_count && !completion_popup.full(); ++i) {
         if (commands[i].name.has_prefix(prefix)) {
-            popup.push(commands[i].name);
+            completion_popup.push(commands[i].name);
         }
     }
-    popup_enabled = true;
+    completion_popup_enabled = true;
 }
 
 void Console::handle_event(SDL_Event *event, Game *game)
 {
     if (enabled) {
-        if (popup_enabled) {
+        if (completion_popup_enabled) {
             switch (event->type) {
             case SDL_KEYDOWN: {
                 switch (event->key.keysym.sym) {
                 case SDLK_ESCAPE: {
-                    popup_enabled = false;
+                    completion_popup_enabled = false;
                 } break;
                 case SDLK_UP: {
-                    popup.up();
+                    completion_popup.up();
                 } break;
                 case SDLK_DOWN: {
-                    popup.down();
+                    completion_popup.down();
                 } break;
                 case SDLK_RETURN: {
-                    auto s = popup.items[popup.items_cursor];
+                    auto s = completion_popup.items[completion_popup.items_cursor];
                     s.chop(edit_field_cursor);
                     insert_sv(s);
-                    popup_enabled = false;
+                    completion_popup_enabled = false;
                 } break;
                 }
             } break;
@@ -267,6 +267,28 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     cursor_right(event->key.keysym.mod & KMOD_LSHIFT);
                 } break;
 
+                case SDLK_UP: {
+                    const auto j = history.current();
+                    if (j >= 0) {
+                        memcpy(edit_field, &history.entries[j], history.entry_sizes[j]);
+                        edit_field_size = history.entry_sizes[j];
+                        edit_field_cursor = history.entry_sizes[j];
+                        edit_field_selection_begin = edit_field_cursor;
+                    }
+                    history.up();
+                } break;
+
+                case SDLK_DOWN: {
+                    const auto j = history.current();
+                    if (j >= 0) {
+                        memcpy(edit_field, &history.entries[j], history.entry_sizes[j]);
+                        edit_field_size = history.entry_sizes[j];
+                        edit_field_cursor = history.entry_sizes[j];
+                        edit_field_selection_begin = edit_field_cursor;
+                    }
+                    history.down();
+                } break;
+
                 case SDLK_v: {
                     if (event->key.keysym.mod & KMOD_LCTRL) {
                         insert_cstr(sec(SDL_GetClipboardText()));
@@ -288,6 +310,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
                     this->println(String_View {edit_field_size, edit_field});
+                    history.push(edit_field, edit_field_size);
                     edit_field_size = 0;
                     edit_field_cursor = 0;
                     edit_field_selection_begin = 0;
@@ -315,5 +338,47 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
             }
         }
+    }
+}
+
+void Console::History::push(char *entry, size_t entry_size)
+{
+    if (entry_size > CONSOLE_COLUMNS) {
+        entry_size = CONSOLE_COLUMNS;
+    }
+
+    const size_t j = (begin + count) % CONSOLE_HISTORY_CAPACITY;
+    memcpy(&entries[j], entry, entry_size);
+    entry_sizes[j] = entry_size;
+
+    if (count < CONSOLE_HISTORY_CAPACITY) {
+        count += 1;
+    } else {
+        begin = (begin + 1) % CONSOLE_HISTORY_CAPACITY;
+    }
+
+    cursor = begin;
+}
+
+void Console::History::up()
+{
+    if (cursor < count) {
+        cursor += 1;
+    }
+}
+
+void Console::History::down()
+{
+    if (cursor > 0) {
+        cursor -= 1;
+    }
+}
+
+int Console::History::current()
+{
+    if ((count - cursor) > 0) {
+        return mod(begin + count - 1 - cursor, CONSOLE_HISTORY_CAPACITY);
+    } else {
+        return -1;
     }
 }
