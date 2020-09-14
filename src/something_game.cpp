@@ -1,4 +1,3 @@
-#include <dirent.h>
 #include "something_game.hpp"
 
 const char *projectile_state_as_cstr(Projectile_State state)
