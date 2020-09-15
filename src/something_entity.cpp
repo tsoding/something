@@ -65,28 +65,30 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 ENTITY_LIVEBAR_WIDTH * percent,
                 ENTITY_LIVEBAR_HEIGHT
             };
-
             if (percent > 0.75f) {
+                SDL_Color entity_livebar_full_color = rgba_to_sdl(ENTITY_LIVEBAR_FULL_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_FULL_COLOR.r,
-                        ENTITY_LIVEBAR_FULL_COLOR.g,
-                        ENTITY_LIVEBAR_FULL_COLOR.b,
-                        ENTITY_LIVEBAR_FULL_COLOR.a));
+                        entity_livebar_full_color.r,
+                        entity_livebar_full_color.g,
+                        entity_livebar_full_color.b,
+                        entity_livebar_full_color.a));
             } else if (0.25f < percent && percent < 0.75f) {
+                SDL_Color entity_livebar_half_color = rgba_to_sdl(ENTITY_LIVEBAR_HALF_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_HALF_COLOR.r,
-                        ENTITY_LIVEBAR_HALF_COLOR.g,
-                        ENTITY_LIVEBAR_HALF_COLOR.b,
-                        ENTITY_LIVEBAR_HALF_COLOR.a));
+                        entity_livebar_half_color.r,
+                        entity_livebar_half_color.g,
+                        entity_livebar_half_color.b,
+                        entity_livebar_half_color.a));
             } else {
+                SDL_Color entity_livebar_low_color = rgba_to_sdl(ENTITY_LIVEBAR_LOW_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_LOW_COLOR.r,
-                        ENTITY_LIVEBAR_LOW_COLOR.g,
-                        ENTITY_LIVEBAR_LOW_COLOR.b,
-                        ENTITY_LIVEBAR_LOW_COLOR.a));
+                        entity_livebar_low_color.r,
+                        entity_livebar_low_color.g,
+                        entity_livebar_low_color.b,
+                        entity_livebar_low_color.a));
             }
             const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
             sec(SDL_RenderDrawRect(renderer, &rect_border));
@@ -117,7 +119,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
             renderer,
             camera.to_screen(gun_begin),
             camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH),
-            {255, 0, 0, 255});
+            {1.0f, 0.0f, 0.0f, 1.0f});
     } break;
 
     case Entity_State::Poof: {

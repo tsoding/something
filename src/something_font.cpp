@@ -15,10 +15,11 @@ SDL_Rect Bitmap_Font::char_rect(char x)
     }
 }
 
-void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, String_View sv)
+void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, RGBA color, String_View sv)
 {
-    sec(SDL_SetTextureColorMod(bitmap, color.r, color.g, color.b));
-    sec(SDL_SetTextureAlphaMod(bitmap, color.a));
+    SDL_Color sdl_color = rgba_to_sdl(color);
+    sec(SDL_SetTextureColorMod(bitmap, sdl_color.r, sdl_color.g, sdl_color.b));
+    sec(SDL_SetTextureAlphaMod(bitmap, sdl_color.a));
 
     for (int row = 0; sv.count > 0; ++row) {
         auto line = sv.chop_by_delim('\n');
@@ -36,7 +37,7 @@ void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL
     }
 }
 
-void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, const char *cstr)
+void Bitmap_Font::render(SDL_Renderer *renderer, Vec2f position, Vec2f size, RGBA color, const char *cstr)
 {
     render(renderer, position, size, color, cstr_as_string_view(cstr));
 }

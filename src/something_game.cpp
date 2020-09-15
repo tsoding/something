@@ -14,8 +14,8 @@ const char *projectile_state_as_cstr(Projectile_State state)
 template <typename ... Types>
 void displayf(SDL_Renderer *renderer,
               Bitmap_Font *font,
-              SDL_Color color,
-              SDL_Color shadow_color,
+              RGBA color,
+              RGBA shadow_color,
               Vec2f p,
               Types... args)
 {
@@ -267,7 +267,7 @@ void Game::update(float dt)
                     mixer.play_sample(kill_enemy_sample);
                 } else {
                     entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
-                    entity->flash(sdl_to_rgba(ENTITY_DAMAGE_FLASH_COLOR));
+                    entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
                 }
             }
         }
@@ -286,7 +286,7 @@ void Game::update(float dt)
                 if (entity->state == Entity_State::Alive) {
                     if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
                         entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
-                        entity->flash(sdl_to_rgba(ENTITY_HEAL_FLASH_COLOR));
+                        entity->flash(ENTITY_HEAL_FLASH_COLOR);
                         mixer.play_sample(item->sound);
                         item->type = ITEM_NONE;
                         break;
@@ -498,7 +498,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
     if (tracking_projectile.has_value) {
         auto projectile = projectiles[tracking_projectile.unwrap.unwrap];
         const float SECOND_COLUMN_OFFSET = 700.0f;
-        const SDL_Color TRACKING_DEBUG_COLOR = {255, 255, 150, 255};
+        const RGBA TRACKING_DEBUG_COLOR = sdl_to_rgba({255, 255, 150, 255});
         displayf(renderer, &debug_font,
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,

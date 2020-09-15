@@ -223,19 +223,21 @@ int main(void)
         //// UPDATE STATE END //////////////////////////////
 
         //// RENDER //////////////////////////////
+        SDL_Color background_color = rgba_to_sdl(BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                BACKGROUND_COLOR.r,
-                BACKGROUND_COLOR.g,
-                BACKGROUND_COLOR.b,
-                BACKGROUND_COLOR.a));
+                background_color.r,
+                background_color.g,
+                background_color.b,
+                background_color.a));
         sec(SDL_RenderClear(renderer));
+        SDL_Color canvas_background_color = rgba_to_sdl(CANVAS_BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                CANVAS_BACKGROUND_COLOR.r,
-                CANVAS_BACKGROUND_COLOR.g,
-                CANVAS_BACKGROUND_COLOR.b,
-                CANVAS_BACKGROUND_COLOR.a));
+                canvas_background_color.r,
+                canvas_background_color.g,
+                canvas_background_color.b,
+                canvas_background_color.a));
         {
             SDL_Rect canvas = {0, 0, (int) floorf(SCREEN_WIDTH), (int) floorf(SCREEN_HEIGHT)};
             SDL_RenderFillRect(renderer, &canvas);

@@ -20,12 +20,13 @@ void Item::render_debug(SDL_Renderer *renderer, Camera camera) const
 {
     if (type != ITEM_NONE) {
         auto rect = rectf_for_sdl(camera.to_screen(hitbox_world()));
+        SDL_Color item_debug_hitbox_color = rgba_to_sdl(ITEM_DEBUG_HITBOX_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                ITEM_DEBUG_HITBOX_COLOR.r,
-                ITEM_DEBUG_HITBOX_COLOR.g,
-                ITEM_DEBUG_HITBOX_COLOR.b,
-                ITEM_DEBUG_HITBOX_COLOR.a));
+                item_debug_hitbox_color.r,
+                item_debug_hitbox_color.g,
+                item_debug_hitbox_color.b,
+                item_debug_hitbox_color.a));
         sec(SDL_RenderDrawRect(renderer, &rect));
     }
 }

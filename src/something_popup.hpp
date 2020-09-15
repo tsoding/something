@@ -8,10 +8,10 @@ struct Popup
     char buffer[POPUP_BUFFER_CAPACITY];
     int buffer_size;
     Bitmap_Font font;
-    SDL_Color color;
+    RGBA color;
     float a;
 
-    void notify(SDL_Color color, const char *format, ...);
+    void notify(RGBA color, const char *format, ...);
     void render(SDL_Renderer *renderer);
     void update(float delta_time);
 };
