@@ -73,9 +73,9 @@ void Game::handle_event(SDL_Event *event)
         grid.resolve_point_collision(&collision_probe);
 
         Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
-        switch (state) {
+        switch (draw_state) {
         case Debug_Draw_State::Create: {
-            grid.set_tile(tile, TILE_DESTROYABLE_0);
+            grid.set_tile(tile, draw_tile);
         } break;
 
         case Debug_Draw_State::Delete: {
@@ -96,14 +96,21 @@ void Game::handle_event(SDL_Event *event)
 
                 if (!tracking_projectile.has_value) {
                     switch (debug_toolbar.active_button) {
-                    case DEBUG_TOOLBAR_TILES: {
+                    case DEBUG_TOOLBAR_TILES:
+                    case DEBUG_TOOLBAR_DESTROYABLE: {
+                        if (debug_toolbar.active_button == DEBUG_TOOLBAR_TILES) {
+                            draw_tile = TILE_WALL;
+                        } else {
+                            draw_tile = TILE_DESTROYABLE_0;
+                        }
+
                         Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
 
                         if (grid.get_tile(tile) == TILE_EMPTY) {
-                            state = Debug_Draw_State::Create;
-                            grid.set_tile(tile, TILE_WALL);
+                            draw_state = Debug_Draw_State::Create;
+                            grid.set_tile(tile, draw_tile);
                         } else {
-                            state = Debug_Draw_State::Delete;
+                            draw_state = Debug_Draw_State::Delete;
                             grid.set_tile(tile, TILE_EMPTY);
                         }
                     } break;
@@ -133,7 +140,7 @@ void Game::handle_event(SDL_Event *event)
     case SDL_MOUSEBUTTONUP: {
         switch (event->button.button) {
         case SDL_BUTTON_RIGHT: {
-            state = Debug_Draw_State::Idle;
+            draw_state = Debug_Draw_State::Idle;
         } break;
         }
     } break;
