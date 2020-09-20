@@ -44,6 +44,7 @@ struct Console
 
     bool enabled;
     float slide_position;
+    float blink_angle;
 
     char rows[CONSOLE_ROWS][CONSOLE_COLUMNS];
     size_t rows_count[CONSOLE_ROWS];

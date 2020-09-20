@@ -46,14 +46,21 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 
         // CURSOR
         const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-        fill_rect(renderer,
-                  rect(vec2(cursor_x, position.y),
-                       (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
-                       (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-                  FONT_DEBUG_COLOR);
-        if (edit_field_cursor < edit_field_size) {
-            font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                         CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+        {
+            SDL_Color cursor_color = FONT_DEBUG_COLOR;
+            const float blink_alpha = cosf(blink_angle * CONSOLE_BLINK_FREQUENCY) * 0.5f + 0.5f;
+            cursor_color.a = (Uint8) floorf(blink_alpha * 255.0f);
+            fill_rect(renderer,
+                      rect(vec2(cursor_x, position.y),
+                           (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
+                           (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                      cursor_color);
+            if (edit_field_cursor < edit_field_size) {
+                SDL_Color overlay_text_color = CONSOLE_BACKGROUND_COLOR;
+                overlay_text_color.a = cursor_color.a;
+                font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                             overlay_text_color, String_View {1, edit_field + edit_field_cursor});
+            }
         }
 
         // SELECTION
@@ -91,6 +98,7 @@ void Console::update(float dt)
 {
     if (enabled) {
         if (slide_position < 1.0f) slide_position += dt * CONSOLE_SLIDE_SPEED;
+        blink_angle = fmodf(blink_angle + 2 * PI * dt, 2 * PI);
     } else {
         if (slide_position > 0.0f) slide_position -= dt * CONSOLE_SLIDE_SPEED;
     }
@@ -232,6 +240,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
             }
         } else {
+            blink_angle = 0.0;
             switch (event->type) {
             case SDL_KEYDOWN: {
                 switch (event->key.keysym.sym) {
