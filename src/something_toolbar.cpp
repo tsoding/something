@@ -15,7 +15,7 @@ static void render_tooltip(SDL_Renderer *renderer,
         (int) floorf(tooltip_box.x),
         (int) floorf(tooltip_box.y)
     };
-    SDL_Color tooltip_background_color = rgba_to_sdl(TOOLTIP_BACKGROUND_COLOR);
+    const SDL_Color tooltip_background_color = rgba_to_sdl(TOOLTIP_BACKGROUND_COLOR);
     sec(SDL_SetRenderDrawColor(
             renderer,
             tooltip_background_color.r,
@@ -56,7 +56,7 @@ void Toolbar::render(SDL_Renderer *renderer, Bitmap_Font font)
         auto hitbox = button_hitbox(i);
         const auto shade_rect = rectf_for_sdl(hitbox);
 
-        SDL_Color toolbar_button_color = rgba_to_sdl(TOOLBAR_BUTTON_COLOR);
+        const SDL_Color toolbar_button_color = rgba_to_sdl(TOOLBAR_BUTTON_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
                 toolbar_button_color.r,

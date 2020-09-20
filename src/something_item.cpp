@@ -20,7 +20,7 @@ void Item::render_debug(SDL_Renderer *renderer, Camera camera) const
 {
     if (type != ITEM_NONE) {
         auto rect = rectf_for_sdl(camera.to_screen(hitbox_world()));
-        SDL_Color item_debug_hitbox_color = rgba_to_sdl(ITEM_DEBUG_HITBOX_COLOR);
+        const SDL_Color item_debug_hitbox_color = rgba_to_sdl(ITEM_DEBUG_HITBOX_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
                 item_debug_hitbox_color.r,

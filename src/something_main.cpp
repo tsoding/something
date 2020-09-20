@@ -225,7 +225,7 @@ int main(void)
         //// UPDATE STATE END //////////////////////////////
 
         //// RENDER //////////////////////////////
-        SDL_Color background_color = rgba_to_sdl(BACKGROUND_COLOR);
+        const SDL_Color background_color = rgba_to_sdl(BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
                 background_color.r,
@@ -233,7 +233,7 @@ int main(void)
                 background_color.b,
                 background_color.a));
         sec(SDL_RenderClear(renderer));
-        SDL_Color canvas_background_color = rgba_to_sdl(CANVAS_BACKGROUND_COLOR);
+        const SDL_Color canvas_background_color = rgba_to_sdl(CANVAS_BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
                 canvas_background_color.r,

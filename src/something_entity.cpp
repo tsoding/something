@@ -66,7 +66,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 ENTITY_LIVEBAR_HEIGHT
             };
             if (percent > 0.75f) {
-                SDL_Color entity_livebar_full_color = rgba_to_sdl(ENTITY_LIVEBAR_FULL_COLOR);
+                const SDL_Color entity_livebar_full_color = rgba_to_sdl(ENTITY_LIVEBAR_FULL_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
                         entity_livebar_full_color.r,
@@ -74,7 +74,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                         entity_livebar_full_color.b,
                         entity_livebar_full_color.a));
             } else if (0.25f < percent && percent < 0.75f) {
-                SDL_Color entity_livebar_half_color = rgba_to_sdl(ENTITY_LIVEBAR_HALF_COLOR);
+                const SDL_Color entity_livebar_half_color = rgba_to_sdl(ENTITY_LIVEBAR_HALF_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
                         entity_livebar_half_color.r,
@@ -82,7 +82,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                         entity_livebar_half_color.b,
                         entity_livebar_half_color.a));
             } else {
-                SDL_Color entity_livebar_low_color = rgba_to_sdl(ENTITY_LIVEBAR_LOW_COLOR);
+                const SDL_Color entity_livebar_low_color = rgba_to_sdl(ENTITY_LIVEBAR_LOW_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
                         entity_livebar_low_color.r,
