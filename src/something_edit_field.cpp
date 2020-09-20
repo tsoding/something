@@ -9,16 +9,16 @@ void Edit_Field::render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f edit_fi
     // CURSOR
     const auto cursor_pos = cursor_position(edit_field_position);
     {
-        SDL_Color cursor_color = FONT_DEBUG_COLOR;
+        RGBA cursor_color = FONT_DEBUG_COLOR;
         const float blink_alpha = cosf(blink_angle * CONSOLE_BLINK_FREQUENCY) * 0.5f + 0.5f;
-        cursor_color.a = (Uint8) floorf(blink_alpha * 255.0f);
+        cursor_color.a = blink_alpha;
         fill_rect(renderer,
                   rect(cursor_pos,
                        (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
                        (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
                   cursor_color);
         if (edit_field_cursor < edit_field_size) {
-            SDL_Color overlay_text_color = CONSOLE_BACKGROUND_COLOR;
+            RGBA overlay_text_color = CONSOLE_BACKGROUND_COLOR;
             overlay_text_color.a = cursor_color.a;
             font->render(renderer, cursor_pos, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                          overlay_text_color, String_View {1, edit_field + edit_field_cursor});
