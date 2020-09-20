@@ -7,6 +7,7 @@
 enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
+    DEBUG_TOOLBAR_DESTROYABLE,
     DEBUG_TOOLBAR_HEALS,
     DEBUG_TOOLBAR_ENEMIES,
     DEBUG_TOOLBAR_COUNT
@@ -75,7 +76,8 @@ struct Game
     Vec2f mouse_position;
     Vec2i original_mouse_position;
     Maybe<Projectile_Index> tracking_projectile;
-    Debug_Draw_State state;
+    Debug_Draw_State draw_state;
+    Tile draw_tile;
     Camera camera;
     Sample_Mixer mixer;
     const Uint8 *keyboard;
