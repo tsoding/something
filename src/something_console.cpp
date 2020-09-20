@@ -22,11 +22,11 @@ Console::Selection Console::get_selection() const
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
-    if (a > 0.0f) {
+    if (slide_position > 0.0f) {
         const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
         const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
 
-        const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a * a;
+        const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * slide_position * slide_position;
 
         // BACKGROUND
         fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
@@ -90,9 +90,9 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 void Console::update(float dt)
 {
     if (enabled) {
-        if (a < 1.0f) a += dt * CONSOLE_SLIDE_SPEED;
+        if (slide_position < 1.0f) slide_position += dt * CONSOLE_SLIDE_SPEED;
     } else {
-        if (a > 0.0f) a -= dt * CONSOLE_SLIDE_SPEED;
+        if (slide_position > 0.0f) slide_position -= dt * CONSOLE_SLIDE_SPEED;
     }
 }
 
