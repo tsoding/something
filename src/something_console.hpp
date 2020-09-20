@@ -51,6 +51,7 @@ struct Console
 
     size_t begin;
     size_t count;
+    size_t scroll;
 
     History history;
 

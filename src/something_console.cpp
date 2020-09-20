@@ -33,7 +33,7 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 
         // ROWS
         for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
-            const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
+            const auto index = mod(begin + count - 1 - i - scroll, CONSOLE_ROWS);
             const auto position = vec2(0.0f, console_y + (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
             font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                          FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
@@ -316,6 +316,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 } break;
 
                 case SDLK_RETURN: {
+                    scroll = 0;
                     String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
                     this->println(String_View {edit_field_size, edit_field});
@@ -339,6 +340,14 @@ void Console::handle_event(SDL_Event *event, Game *game)
                         }
                     }
                 } break;
+                }
+            } break;
+
+            case SDL_MOUSEWHEEL: {
+                if (event->wheel.y > 0) {
+                    scroll += 1;
+                } else if (event->wheel.y < 0) {
+                    if (scroll > 0) scroll -= 1;
                 }
             } break;
 
