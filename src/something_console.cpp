@@ -40,25 +40,29 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
         }
 
         // EDIT FIELD
-        const auto position = vec2(0.0f, console_y + (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
-        font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+        const auto prompt_size = font->text_size(vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE), CONSOLE_PROMPT);
+        const auto edit_field_position =
+            vec2(prompt_size.x, console_y + (float)(CONSOLE_VISIBLE_ROWS * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
+        font->render(renderer, edit_field_position - vec2(prompt_size.x, 0.0f), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                     FONT_DEBUG_COLOR, CONSOLE_PROMPT);
+        font->render(renderer, edit_field_position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                      FONT_DEBUG_COLOR, String_View {edit_field_size, edit_field});
 
         // CURSOR
-        const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+        const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE + prompt_size.x;
         {
             SDL_Color cursor_color = FONT_DEBUG_COLOR;
             const float blink_alpha = cosf(blink_angle * CONSOLE_BLINK_FREQUENCY) * 0.5f + 0.5f;
             cursor_color.a = (Uint8) floorf(blink_alpha * 255.0f);
             fill_rect(renderer,
-                      rect(vec2(cursor_x, position.y),
+                      rect(vec2(cursor_x, edit_field_position.y),
                            (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
                            (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
                       cursor_color);
             if (edit_field_cursor < edit_field_size) {
                 SDL_Color overlay_text_color = CONSOLE_BACKGROUND_COLOR;
                 overlay_text_color.a = cursor_color.a;
-                font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                font->render(renderer, vec2(cursor_x, edit_field_position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                              overlay_text_color, String_View {1, edit_field + edit_field_cursor});
             }
         }
@@ -71,17 +75,17 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
             auto selection = get_selection();
 
             if (!selection.is_empty()) {
-                const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-                const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
+                const float begin_x = (float) selection.begin * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE + prompt_size.x;
+                const float end_x = (float) selection.end * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE + prompt_size.x;
                 const float width = end_x - begin_x;
 
                 fill_rect(renderer,
-                          rect(vec2(begin_x, position.y),
+                          rect(vec2(begin_x, edit_field_position.y),
                                width,
                                (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
                           CONSOLE_SELECTION_COLOR);
 
-                font->render(renderer, vec2(begin_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                font->render(renderer, vec2(begin_x, edit_field_position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                              CONSOLE_BACKGROUND_COLOR,
                              String_View {selection.end - selection.begin, edit_field + selection.begin});
             }
@@ -89,7 +93,7 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 
         // POPUP
         if (completion_popup_enabled) {
-            completion_popup.render(renderer, font, vec2(cursor_x, position.y));
+            completion_popup.render(renderer, font, vec2(cursor_x, edit_field_position.y));
         }
     }
 }
@@ -319,7 +323,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     scroll = 0;
                     String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
-                    this->println(String_View {edit_field_size, edit_field});
+                    this->println(CONSOLE_PROMPT, String_View {edit_field_size, edit_field});
                     history.push(edit_field, edit_field_size);
                     edit_field_size = 0;
                     edit_field_cursor = 0;
