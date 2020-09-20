@@ -22,18 +22,18 @@ Console::Selection Console::get_selection() const
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
-    if (a > 0.0f) {
+    if (slide_position > 0.0f) {
         const float CONSOLE_EDIT_FIELD_ROW = 1.0f;
         const float CONSOLE_HEIGHT = BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE * (CONSOLE_VISIBLE_ROWS + CONSOLE_EDIT_FIELD_ROW);
 
-        const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * a * a;
+        const float console_y = -CONSOLE_HEIGHT + CONSOLE_HEIGHT * slide_position * slide_position;
 
         // BACKGROUND
         fill_rect(renderer, rect(vec2(0.0f, console_y), SCREEN_WIDTH, CONSOLE_HEIGHT), CONSOLE_BACKGROUND_COLOR);
 
         // ROWS
         for (int i = 0; i < min(CONSOLE_VISIBLE_ROWS, (int) count); ++i) {
-            const auto index = mod(begin + count - 1 - i, CONSOLE_ROWS);
+            const auto index = mod(begin + count - 1 - i - scroll, CONSOLE_ROWS);
             const auto position = vec2(0.0f, console_y + (float)((CONSOLE_VISIBLE_ROWS - i - 1) * BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE));
             font->render(renderer, position, vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
                          FONT_DEBUG_COLOR, String_View {rows_count[index], rows[index]});
@@ -46,14 +46,21 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 
         // CURSOR
         const auto cursor_x = edit_field_cursor * BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE;
-        fill_rect(renderer,
-                  rect(vec2(cursor_x, position.y),
-                       (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
-                       (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
-                  FONT_DEBUG_COLOR);
-        if (edit_field_cursor < edit_field_size) {
-            font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
-                         CONSOLE_BACKGROUND_COLOR, String_View {1, edit_field + edit_field_cursor});
+        {
+            SDL_Color cursor_color = FONT_DEBUG_COLOR;
+            const float blink_alpha = cosf(blink_angle * CONSOLE_BLINK_FREQUENCY) * 0.5f + 0.5f;
+            cursor_color.a = (Uint8) floorf(blink_alpha * 255.0f);
+            fill_rect(renderer,
+                      rect(vec2(cursor_x, position.y),
+                           (float) (BITMAP_FONT_CHAR_WIDTH * CONSOLE_FONT_SIZE),
+                           (float) (BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE)),
+                      cursor_color);
+            if (edit_field_cursor < edit_field_size) {
+                SDL_Color overlay_text_color = CONSOLE_BACKGROUND_COLOR;
+                overlay_text_color.a = cursor_color.a;
+                font->render(renderer, vec2(cursor_x, position.y), vec2(CONSOLE_FONT_SIZE, CONSOLE_FONT_SIZE),
+                             overlay_text_color, String_View {1, edit_field + edit_field_cursor});
+            }
         }
 
         // SELECTION
@@ -90,9 +97,10 @@ void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 void Console::update(float dt)
 {
     if (enabled) {
-        if (a < 1.0f) a += dt * CONSOLE_SLIDE_SPEED;
+        if (slide_position < 1.0f) slide_position += dt * CONSOLE_SLIDE_SPEED;
+        blink_angle = fmodf(blink_angle + 2 * PI * dt, 2 * PI);
     } else {
-        if (a > 0.0f) a -= dt * CONSOLE_SLIDE_SPEED;
+        if (slide_position > 0.0f) slide_position -= dt * CONSOLE_SLIDE_SPEED;
     }
 }
 
@@ -232,6 +240,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
             }
         } else {
+            blink_angle = 0.0;
             switch (event->type) {
             case SDL_KEYDOWN: {
                 switch (event->key.keysym.sym) {
@@ -307,6 +316,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 } break;
 
                 case SDLK_RETURN: {
+                    scroll = 0;
                     String_View command_expr = String_View {edit_field_size, edit_field}.trim();
 
                     this->println(String_View {edit_field_size, edit_field});
@@ -330,6 +340,14 @@ void Console::handle_event(SDL_Event *event, Game *game)
                         }
                     }
                 } break;
+                }
+            } break;
+
+            case SDL_MOUSEWHEEL: {
+                if (event->wheel.y > 0) {
+                    scroll += 1;
+                } else if (event->wheel.y < 0) {
+                    if (scroll > 0) scroll -= 1;
                 }
             } break;
 

@@ -101,6 +101,8 @@ int main(void)
     game.debug_toolbar.buttons_count = DEBUG_TOOLBAR_COUNT;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].icon = tile_defs[TILE_WALL].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tooltip = "Edit walls"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tooltip = "Destroyable Tile"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
         texture_index_by_name(
             ITEM_HEALTH_TEXTURE));
