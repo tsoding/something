@@ -66,12 +66,18 @@ const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
+const size_t FPS_BARS_COUNT = 256;
 
 struct Game
 {
     bool quit;
     bool debug;
     bool step_debug;
+    bool bfs_debug;
+    bool fps_debug;
+    float frame_delays[FPS_BARS_COUNT];
+    size_t frame_delays_begin;
+
     Vec2f collision_probe;
     Vec2f mouse_position;
     Vec2i original_mouse_position;
@@ -116,6 +122,7 @@ struct Game
     void render(SDL_Renderer *renderer);
     void handle_event(SDL_Event *event);
     void render_debug_overlay(SDL_Renderer *renderer, size_t fps);
+    void render_fps_overlay(SDL_Renderer *renderer);
 
     // Entities of the Game
     void reset_entities();
