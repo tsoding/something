@@ -1,34 +1,67 @@
 #ifndef SOMETHING_CONSOLE_HPP_
 #define SOMETHING_CONSOLE_HPP_
 
-const size_t CONSOLE_ROWS = 1024;
-const size_t CONSOLE_COLUMNS = 256;
+#include "something_select_popup.hpp"
+#include "something_edit_field.hpp"
+
+struct Game;
 
 struct Console
 {
-    bool visible;
+    struct History
+    {
+        char entries[CONSOLE_HISTORY_CAPACITY][CONSOLE_COLUMNS];
+        size_t entry_sizes[CONSOLE_HISTORY_CAPACITY];
+        // TODO(#199): try to organize history as end+count instead of begin+count
+        int begin;
+        int count;
+        int cursor;
+
+        void push(String_View entry);
+        void up();
+        void down();
+        int current();
+    };
+
+    bool enabled;
+    float slide_position;
 
     char rows[CONSOLE_ROWS][CONSOLE_COLUMNS];
     size_t rows_count[CONSOLE_ROWS];
 
     size_t begin;
     size_t count;
+    size_t scroll;
 
-    char edit_field[CONSOLE_COLUMNS];
-    size_t edit_field_size;
-    size_t edit_field_cursor;
+    History history;
+
+    Edit_Field edit_field;
+    bool completion_popup_enabled;
+    Select_Popup completion_popup;
 
     void render(SDL_Renderer *renderer, Bitmap_Font *font);
     void update(float dt);
-    void toggle_visible();
+    void toggle();
 
-    void cursor_left();
-    void cursor_right();
-    void insert_char(char x);
+    void start_autocompletion();
 
-    void println(const char *buffer, size_t buffer_size);
 
-    void handle_event(SDL_Event *event);
+    template <typename ... Types>
+    void println(Types... args)
+    {
+        const size_t index = (begin + count) % CONSOLE_ROWS;
+        String_Buffer sbuffer = {CONSOLE_COLUMNS, rows[index], rows_count[index]};
+        sprintln(&sbuffer, args...);
+        rows_count[index] = sbuffer.size;
+
+        if (count < (int) CONSOLE_ROWS) {
+            count += 1;
+        } else {
+            begin = (begin + 1) % CONSOLE_ROWS;
+        }
+    }
+
+    void handle_event(SDL_Event *event, Game *game);
 };
 
 #endif  // SOMETHING_CONSOLE_HPP_

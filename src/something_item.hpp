@@ -18,7 +18,7 @@ struct Item
 
     void update(float delta_time);
     void render(SDL_Renderer *renderer, Camera camera,
-                SDL_Color shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera) const;
     Rectf hitbox_world() const;
 };

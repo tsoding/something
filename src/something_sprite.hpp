@@ -4,16 +4,16 @@
 struct Sprite
 {
     SDL_Rect srcrect;
-    size_t texture_index;
+    Texture_Index texture_index;
 
     void render(SDL_Renderer *renderer,
                 Rectf destrect,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                SDL_Color shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0}) const;
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                SDL_Color shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0}) const;
 };
 
 Sprite sprite_from_texture_index(size_t texture_index);
@@ -31,12 +31,12 @@ struct Frame_Animat
     void render(SDL_Renderer *renderer,
                 Rectf dstrect,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                SDL_Color shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0}) const;
 
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                SDL_Color shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0}) const;
 
     void update(float dt);
 };

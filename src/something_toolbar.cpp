@@ -15,12 +15,13 @@ static void render_tooltip(SDL_Renderer *renderer,
         (int) floorf(tooltip_box.x),
         (int) floorf(tooltip_box.y)
     };
+    const SDL_Color tooltip_background_color = rgba_to_sdl(TOOLTIP_BACKGROUND_COLOR);
     sec(SDL_SetRenderDrawColor(
             renderer,
-            TOOLTIP_BACKGROUND_COLOR.r,
-            TOOLTIP_BACKGROUND_COLOR.g,
-            TOOLTIP_BACKGROUND_COLOR.b,
-            TOOLTIP_BACKGROUND_COLOR.a));
+            tooltip_background_color.r,
+            tooltip_background_color.g,
+            tooltip_background_color.b,
+            tooltip_background_color.a));
     sec(SDL_RenderFillRect(renderer, &tooltip_rect));
     font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
 }
@@ -49,18 +50,19 @@ void Toolbar::render(SDL_Renderer *renderer, Bitmap_Font font)
         SDL_Color shade = {};
 
         if (i != active_button) {
-            shade = TOOLBAR_INACTIVE_SHADE;
+            shade = rgba_to_sdl(TOOLBAR_INACTIVE_SHADE);
         }
 
         auto hitbox = button_hitbox(i);
         const auto shade_rect = rectf_for_sdl(hitbox);
 
+        const SDL_Color toolbar_button_color = rgba_to_sdl(TOOLBAR_BUTTON_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                TOOLBAR_BUTTON_COLOR.r,
-                TOOLBAR_BUTTON_COLOR.g,
-                TOOLBAR_BUTTON_COLOR.b,
-                TOOLBAR_BUTTON_COLOR.a));
+                toolbar_button_color.r,
+                toolbar_button_color.g,
+                toolbar_button_color.b,
+                toolbar_button_color.a));
         sec(SDL_RenderFillRect(renderer, &shade_rect));
 
         buttons[i].icon.render(renderer, rect_shrink(hitbox, TOOLBAR_BUTTON_ICON_PADDING));

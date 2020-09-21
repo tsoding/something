@@ -71,7 +71,7 @@ void Tile_Grid::render(SDL_Renderer *renderer, Camera camera, Recti *lock)
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE),
                 TILE_SIZE, TILE_SIZE);
 
-            SDL_Color shade_color = ROOM_NEIGHBOR_DIM_COLOR;
+            RGBA shade_color = ROOM_NEIGHBOR_DIM_COLOR;
 
             if (lock && rect_contains_vec2(*lock, coord)) {
                 shade_color = {0, 0, 0, 0};
@@ -133,6 +133,90 @@ void Tile_Grid::resolve_point_collision(Vec2f *origin)
     }
 
     *origin = sides[closest].np;
+}
+void Tile_Grid::bfs_to_tile(Vec2i src, Recti *lock)
+{
+    if (rect_contains_vec2(*lock, src)) {
+        Room_Queue bfs_q = {};
+        memset(bfs_trace, 0, sizeof(bfs_trace));
+
+        bfs_q.nq(src);
+        bfs_trace[src.y - lock->y][src.x - lock->x] = 1;
+        while (bfs_q.count > 0) {
+            Vec2i p0 = bfs_q.dq();
+            for (int dy = -1; dy <= 1; ++dy) {
+                for (int dx = -1; dx <= 1; ++dx) {
+                    if ((dy == 0) != (dx == 0)) {
+                        Vec2i p1 = {p0.x + dx, p0.y + dy};
+                        if (rect_contains_vec2(*lock, p1) &&
+                            is_tile_empty_tile(p1) &&
+                            bfs_trace[p1.y - lock->y][p1.x - lock->x] == 0)
+                        {
+                            bfs_trace[p1.y - lock->y][p1.x - lock->x] = bfs_trace[p0.y - lock->y][p0.x - lock->x] + 1;
+                            bfs_q.nq(p1);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+Maybe<Vec2i> Tile_Grid::next_in_bfs(Vec2i dst, Recti *lock)
+{
+
+    if (rect_contains_vec2(*lock, dst) && bfs_trace[dst.y - lock->y][dst.x - lock->x] > 0) {
+        for (int dy = -1; dy <= 1; ++dy) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                if ((dy == 0) != (dx == 0)) {
+                    Vec2i dst1 = {
+                        dst.x + dx,
+                        dst.y + dy
+                    };
+
+                    if (rect_contains_vec2(*lock, dst1) &&
+                        is_tile_empty_tile(dst1) &&
+                        bfs_trace[dst1.y - lock->y][dst1.x - lock->x] < bfs_trace[dst.y - lock->y][dst.x - lock->x])
+                    {
+                        return {true, dst1};
+                    }
+                }
+            }
+        }
+    }
+
+    return {};
+}
+
+void fill_rect(SDL_Renderer *renderer, Camera *camera,
+               Rectf rectf, RGBA color)
+{
+    SDL_Color sdl_color = rgba_to_sdl(color);
+    sec(SDL_SetRenderDrawColor(
+            renderer,
+            sdl_color.r,
+            sdl_color.g,
+            sdl_color.b,
+            sdl_color.a));
+    SDL_Rect rect = rectf_for_sdl(camera->to_screen(rectf));
+    sec(SDL_RenderFillRect(renderer, &rect));
+}
+
+void Tile_Grid::render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera, Recti *lock)
+{
+    for (int y = 0; y < lock->h; ++y) {
+        for (int x = 0; x < lock->w; ++x) {
+            fill_rect(
+                renderer,
+                camera,
+                rect(vec2((float) (lock->x + x) * TILE_SIZE,
+                          (float) (lock->y + y) * TILE_SIZE),
+                     TILE_SIZE,
+                     TILE_SIZE),
+                {1.0f, 0.0f, 0.0f, clamp(1.0f - bfs_trace[y][x] * bfs_trace[y][x] / 255.0f, 0.0f, 1.0f)});
+        }
+    }
 }
 
 bool Tile_Grid::a_sees_b(Vec2f a, Vec2f b)

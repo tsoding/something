@@ -36,6 +36,47 @@ const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 const int ROOM_WIDTH  = 10 * 2;
 const int ROOM_HEIGHT = 10 * 2;
 
+template <typename T, size_t Capacity>
+struct Queue
+{
+    T items[Capacity];
+    size_t begin;
+    size_t count;
+
+    void nq(T x)
+    {
+        assert(count < Capacity);
+        items[(begin + count) % Capacity] = x;
+        count++;
+    }
+
+    T dq()
+    {
+        assert(count > 0);
+        T result = items[begin];
+        begin = (begin + 1) % Capacity;
+        count -= 1;
+        return result;
+    }
+
+    void clear()
+    {
+        count = 0;
+    }
+
+    T &operator[](size_t index)
+    {
+        return items[(begin + index) % Capacity];
+    }
+
+    const T &operator[](size_t index) const
+    {
+        return items[(begin + index) % Capacity];
+    }
+};
+
+using Room_Queue = Queue<Vec2i, ROOM_WIDTH * ROOM_HEIGHT>;
+
 struct Tile_Grid
 {
     Tile tiles[TILE_GRID_HEIGHT][TILE_GRID_WIDTH];
@@ -55,6 +96,11 @@ struct Tile_Grid
     bool is_tile_empty_tile(Vec2i coord);
     bool is_tile_empty_abs(Vec2f pos);
     Tile *tile_at_abs(Vec2f pos);
+
+    int bfs_trace[ROOM_WIDTH][ROOM_HEIGHT];
+    void bfs_to_tile(Vec2i src, Recti *lock);
+    Maybe<Vec2i> next_in_bfs(Vec2i dst0, Recti *lock);
+    void render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera, Recti *lock);
     bool a_sees_b(Vec2f a, Vec2f b);
 };
 

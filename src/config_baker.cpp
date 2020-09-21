@@ -37,25 +37,15 @@ int main(int argc, char *argv[])
         } break;
 
         case CONFIG_TYPE_COLOR: {
-            println(stdout, "const SDL_Color ", name, " = {",
-                    config_values[index].color_value.r, ",",
-                    config_values[index].color_value.g, ",",
-                    config_values[index].color_value.b, ",",
-                    config_values[index].color_value.a, "};");
+            println(stdout, "const RGBA ", name, " = {",
+                    (float) config_values[index].color_value.r, "f,",
+                    (float) config_values[index].color_value.g, "f,",
+                    (float) config_values[index].color_value.b, "f,",
+                    (float) config_values[index].color_value.a, "f};");
         } break;
 
         case CONFIG_TYPE_STRING: {
             println(stdout, "#define ", name, " \"", config_values[index].string_value, "\"_sv");
-        } break;
-
-        case CONFIG_TYPE_SDL_BLENDFACTOR: {
-            println(stdout, "#define ", name, " ",
-                    string_view_of_sdl_blend_factor(config_values[index].SDL_BlendFactor_value));
-        } break;
-
-        case CONFIG_TYPE_SDL_BLENDOPERATION: {
-            println(stdout, "#define ", name, " ",
-                    string_view_of_sdl_blend_operation(config_values[index].SDL_BlendOperation_value));
         } break;
 
         case CONFIG_TYPE_UNKNOWN: {

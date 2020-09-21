@@ -1,11 +1,7 @@
+#include "something_fmw.hpp"
+
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
-
-template <typename T>
-void print1(FILE *stream, Vec2<T> v)
-{
-    print(stream, '(', v.x, ',', v.y, ')');
-}
 
 Game game = {};
 
@@ -27,12 +23,14 @@ int main(int argc, char *argv[])
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
+    SDL_StopTextInput();
+
     sec(SDL_RenderSetLogicalSize(renderer,
                                  SCREEN_WIDTH,
                                  SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
-    size_t tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
+    auto tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
 
     load_textures(renderer);
     load_samples();
@@ -98,12 +96,16 @@ int main(int argc, char *argv[])
             game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
         }
     }
+
+    auto fmw = fmw_init(CONFIG_VARS_FILE_PATH);
 #endif // SOMETHING_RELEASE
 
     static_assert(DEBUG_TOOLBAR_COUNT <= TOOLBAR_BUTTONS_CAPACITY);
     game.debug_toolbar.buttons_count = DEBUG_TOOLBAR_COUNT;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].icon = tile_defs[TILE_WALL].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tooltip = "Edit walls"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tooltip = "Destroyable Tile"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
         texture_index_by_name(
             ITEM_HEALTH_TEXTURE));
@@ -140,11 +142,19 @@ int main(int argc, char *argv[])
     // SOUND END //////////////////////////////
 
     game.reset_entities();
+
+    const int rooms_count = game.get_rooms_count();
+    if (rooms_count <= 0) {
+        println(stderr, "Assets folder is empty: ./assets/rooms/");
+        abort();
+    }
+
     char filepath[256];
     const int PADDING = 1;
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
-            snprintf(filepath, sizeof(filepath), "assets/rooms/room-%d.bin", rand() % 3);
+            // TODO(#200): It is not possible to call the room files arbitrary names
+            snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rand() % rooms_count);
             auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
             game.grid.load_room_from_file(filepath, coord);
             game.add_camera_lock(rect(coord, ROOM_WIDTH, ROOM_HEIGHT));
@@ -157,9 +167,26 @@ int main(int argc, char *argv[])
 
     Uint32 prev_ticks = SDL_GetTicks();
     float lag_sec = 0;
+    float next_sec = 0;
+    size_t frames_of_current_second = 0;
+    size_t fps = 0;
     while (!game.quit) {
         Uint32 curr_ticks = SDL_GetTicks();
         float elapsed_sec = (float) (curr_ticks - prev_ticks) / 1000.0f;
+        if(game.fps_debug) {
+            game.frame_delays[game.frame_delays_begin] = elapsed_sec;
+            game.frame_delays_begin = (game.frame_delays_begin + 1) % FPS_BARS_COUNT;
+        }
+
+        frames_of_current_second += 1;
+        next_sec += elapsed_sec;
+
+        if (next_sec >= 1) {
+            fps = frames_of_current_second;
+            next_sec -= 1.0f;
+            frames_of_current_second = 0;
+        }
+
         prev_ticks = curr_ticks;
         lag_sec += elapsed_sec;
 
@@ -180,6 +207,18 @@ int main(int argc, char *argv[])
 
             game.handle_event(&event);
         }
+
+#ifndef SOMETHING_RELEASE
+        if (fmw_poll(fmw)) {
+            auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+            if (result.is_error) {
+                println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
+                game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+            } else {
+                game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
+            }
+        }
+#endif // SOMETHING_RELEASE
         //// HANDLE INPUT END //////////////////////////////
 
         //// UPDATE STATE //////////////////////////////
@@ -193,26 +232,28 @@ int main(int argc, char *argv[])
         //// UPDATE STATE END //////////////////////////////
 
         //// RENDER //////////////////////////////
+        const SDL_Color background_color = rgba_to_sdl(BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                BACKGROUND_COLOR.r,
-                BACKGROUND_COLOR.g,
-                BACKGROUND_COLOR.b,
-                BACKGROUND_COLOR.a));
+                background_color.r,
+                background_color.g,
+                background_color.b,
+                background_color.a));
         sec(SDL_RenderClear(renderer));
+        const SDL_Color canvas_background_color = rgba_to_sdl(CANVAS_BACKGROUND_COLOR);
         sec(SDL_SetRenderDrawColor(
                 renderer,
-                CANVAS_BACKGROUND_COLOR.r,
-                CANVAS_BACKGROUND_COLOR.g,
-                CANVAS_BACKGROUND_COLOR.b,
-                CANVAS_BACKGROUND_COLOR.a));
+                canvas_background_color.r,
+                canvas_background_color.g,
+                canvas_background_color.b,
+                canvas_background_color.a));
         {
             SDL_Rect canvas = {0, 0, (int) floorf(SCREEN_WIDTH), (int) floorf(SCREEN_HEIGHT)};
             SDL_RenderFillRect(renderer, &canvas);
         }
         game.render(renderer);
         if (game.debug) {
-            game.render_debug_overlay(renderer, elapsed_sec);
+            game.render_debug_overlay(renderer, fps);
         }
         SDL_RenderPresent(renderer);
         //// RENDER END //////////////////////////////

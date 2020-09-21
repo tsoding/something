@@ -1,9 +1,13 @@
 #ifndef SOMETHING_GAME_HPP_
 #define SOMETHING_GAME_HPP_
 
+#include "something_console.hpp"
+#include "something_particles.hpp"
+
 enum Debug_Toolbar_Button
 {
     DEBUG_TOOLBAR_TILES = 0,
+    DEBUG_TOOLBAR_DESTROYABLE,
     DEBUG_TOOLBAR_HEALS,
     DEBUG_TOOLBAR_ENEMIES,
     DEBUG_TOOLBAR_COUNT
@@ -62,24 +66,29 @@ const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
+const size_t FPS_BARS_COUNT = 256;
 
-// TODO(#136): camera anchors in the centers of the "rooms"
-// TODO(#137): highlight areas to emulate "rooms"
-// TODO(#138): reimplement back the enemy AI
 struct Game
 {
     bool quit;
     bool debug;
     bool step_debug;
+    bool bfs_debug;
+    bool fps_debug;
+    float frame_delays[FPS_BARS_COUNT];
+    size_t frame_delays_begin;
+
     Vec2f collision_probe;
     Vec2f mouse_position;
     Vec2i original_mouse_position;
     Maybe<Projectile_Index> tracking_projectile;
-    Debug_Draw_State state;
+    Debug_Draw_State draw_state;
+    Tile draw_tile;
     Camera camera;
     Sample_Mixer mixer;
     const Uint8 *keyboard;
     Popup popup;
+    // TODO(#178): disable game console in release mode
     Console console;
 
     Frame_Animat entity_walking_animat;
@@ -112,13 +121,15 @@ struct Game
     void update(float dt);
     void render(SDL_Renderer *renderer);
     void handle_event(SDL_Event *event);
-    void render_debug_overlay(SDL_Renderer *renderer, float elapsed_sec);
+    void render_debug_overlay(SDL_Renderer *renderer, size_t fps);
+    void render_fps_overlay(SDL_Renderer *renderer);
 
     // Entities of the Game
     void reset_entities();
     void entity_shoot(Entity_Index entity_index);
     void entity_jump(Entity_Index entity_index);
     void entity_resolve_collision(Entity_Index entity_index);
+    void spawn_enemy_at(Vec2f pos);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
@@ -130,6 +141,7 @@ struct Game
 
     // Items of the Game
     void spawn_health_at_mouse();
+    int get_rooms_count(void);
 };
 
 #endif  // SOMETHING_GAME_HPP_

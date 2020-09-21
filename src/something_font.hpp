@@ -9,8 +9,8 @@ struct Bitmap_Font
 {
     SDL_Texture *bitmap;
 
-    void render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, String_View sv);
-    void render(SDL_Renderer *renderer, Vec2f position, Vec2f size, SDL_Color color, const char *cstr);
+    void render(SDL_Renderer *renderer, Vec2f position, Vec2f size, RGBA color, String_View sv);
+    void render(SDL_Renderer *renderer, Vec2f position, Vec2f size, RGBA color, const char *cstr);
     SDL_Rect char_rect(char x);
 
     Vec2f text_size(Vec2f size, String_View sv);

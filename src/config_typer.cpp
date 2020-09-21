@@ -17,18 +17,6 @@ String_View names[CONFIG_VAR_CAPACITY];
 String_View types[CONFIG_VAR_CAPACITY];
 size_t config_count = 0;
 
-struct Caps
-{
-    String_View unwrap;
-};
-
-void print1(FILE *stream, Caps caps)
-{
-    for (size_t i = 0; i < caps.unwrap.count; ++i) {
-        print1(stream, (char) toupper(caps.unwrap.data[i]));
-    }
-}
-
 int main(int argc, char *argv[])
 {
     if (argc < 2) {
