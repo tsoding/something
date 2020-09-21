@@ -11,7 +11,7 @@ void Particles::render(SDL_Renderer *renderer, Camera camera) const
                 sizes[j], sizes[j]);
             const auto opacity = lifetimes[j] / PARTICLE_LIFETIME;
             fill_rect(renderer, camera.to_screen(particle),
-                      {colors[j].r, colors[j].g, colors[j].b, (Uint8) (colors[j].a * opacity)});
+                      {colors[j].r, colors[j].g, colors[j].b, colors[j].a * opacity});
         }
     }
 }
@@ -40,7 +40,7 @@ void Particles::push(Vec2f source)
         // TODO(#187): implement HSL based generation of color for particles
         HSLA hsla = current_color;
         hsla.h += rand_float_range(0.0, 2.0 * PARTICLES_HUE_DEVIATION_DEGREE) - PARTICLES_HUE_DEVIATION_DEGREE;
-        colors[j] = rgba_to_sdl(hsla.to_rgba());
+        colors[j] = hsla.to_rgba();
         count += 1;
     }
 }

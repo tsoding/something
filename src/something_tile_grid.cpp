@@ -71,7 +71,7 @@ void Tile_Grid::render(SDL_Renderer *renderer, Camera camera, Recti *lock)
                 camera.to_screen(vec2((float) x, (float) y) * TILE_SIZE),
                 TILE_SIZE, TILE_SIZE);
 
-            SDL_Color shade_color = ROOM_NEIGHBOR_DIM_COLOR;
+            RGBA shade_color = ROOM_NEIGHBOR_DIM_COLOR;
 
             if (lock && rect_contains_vec2(*lock, coord)) {
                 shade_color = {0, 0, 0, 0};
@@ -190,14 +190,15 @@ Maybe<Vec2i> Tile_Grid::next_in_bfs(Vec2i dst, Recti *lock)
 }
 
 void fill_rect(SDL_Renderer *renderer, Camera *camera,
-               Rectf rectf, SDL_Color color)
+               Rectf rectf, RGBA color)
 {
+    SDL_Color sdl_color = rgba_to_sdl(color);
     sec(SDL_SetRenderDrawColor(
             renderer,
-            color.r,
-            color.g,
-            color.b,
-            color.a));
+            sdl_color.r,
+            sdl_color.g,
+            sdl_color.b,
+            sdl_color.a));
     SDL_Rect rect = rectf_for_sdl(camera->to_screen(rectf));
     sec(SDL_RenderFillRect(renderer, &rect));
 }
@@ -213,7 +214,7 @@ void Tile_Grid::render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera,
                           (float) (lock->y + y) * TILE_SIZE),
                      TILE_SIZE,
                      TILE_SIZE),
-                {255, 0, 0, (Uint8) (clamp(255 - bfs_trace[y][x] * bfs_trace[y][x], 0, 255))});
+                {1.0f, 0.0f, 0.0f, clamp(1.0f - bfs_trace[y][x] * bfs_trace[y][x] / 255.0f, 0.0f, 1.0f)});
         }
     }
 }

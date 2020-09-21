@@ -16,7 +16,7 @@ struct Particles
     Vec2f velocities[PARTICLES_CAPACITY];
     float lifetimes[PARTICLES_CAPACITY];
     float sizes[PARTICLES_CAPACITY];
-    SDL_Color colors[PARTICLES_CAPACITY];
+    RGBA colors[PARTICLES_CAPACITY];
     float cooldown;
     HSLA current_color;
 

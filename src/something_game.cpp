@@ -14,8 +14,8 @@ const char *projectile_state_as_cstr(Projectile_State state)
 template <typename ... Types>
 void displayf(SDL_Renderer *renderer,
               Bitmap_Font *font,
-              SDL_Color color,
-              SDL_Color shadow_color,
+              RGBA color,
+              RGBA shadow_color,
               Vec2f p,
               Types... args)
 {
@@ -517,7 +517,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
     if (tracking_projectile.has_value) {
         auto projectile = projectiles[tracking_projectile.unwrap.unwrap];
         const float SECOND_COLUMN_OFFSET = 700.0f;
-        const SDL_Color TRACKING_DEBUG_COLOR = {255, 255, 150, 255};
+        const RGBA TRACKING_DEBUG_COLOR = sdl_to_rgba({255, 255, 150, 255});
         displayf(renderer, &debug_font,
                  TRACKING_DEBUG_COLOR,
                  FONT_SHADOW_COLOR,

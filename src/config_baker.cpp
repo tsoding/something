@@ -35,11 +35,11 @@ int main()
         } break;
 
         case CONFIG_TYPE_COLOR: {
-            println(stdout, "const SDL_Color ", name, " = {",
-                    config_values[index].color_value.r, ",",
-                    config_values[index].color_value.g, ",",
-                    config_values[index].color_value.b, ",",
-                    config_values[index].color_value.a, "};");
+            println(stdout, "const RGBA ", name, " = {",
+                    (float) config_values[index].color_value.r, "f,",
+                    (float) config_values[index].color_value.g, "f,",
+                    (float) config_values[index].color_value.b, "f,",
+                    (float) config_values[index].color_value.a, "f};");
         } break;
 
         case CONFIG_TYPE_STRING: {

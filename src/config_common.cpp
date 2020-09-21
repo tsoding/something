@@ -8,6 +8,7 @@ enum Config_Type
 };
 
 #include "./config_types.hpp"
+#include "something_color.hpp"
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
 
@@ -37,7 +38,7 @@ union Config_Value
 {
     float float_value;
     int int_value;
-    SDL_Color color_value;
+    RGBA color_value;
     String_View string_value;
 };
 
@@ -73,8 +74,17 @@ Config_Parse_Result parse_failure(const char *message, size_t line)
     result.line = line;
     return result;
 }
-
-Maybe<SDL_Color> string_view_as_color(String_View input)
+// Can't link original function sdl_to_rgba from something_color.cpp
+RGBA sdl_to_rgba2(SDL_Color sdl_color)
+{
+    RGBA rgba = {};
+    rgba.r = (float) sdl_color.r / 255.0f;
+    rgba.g = (float) sdl_color.g / 255.0f;
+    rgba.b = (float) sdl_color.b / 255.0f;
+    rgba.a = (float) sdl_color.a / 255.0f;
+    return rgba;
+}
+Maybe<RGBA> string_view_as_color(String_View input)
 {
     if (input.count != 8) return {};
 
@@ -84,7 +94,7 @@ Maybe<SDL_Color> string_view_as_color(String_View input)
     unwrap_into(result.b, input.subview(4, 2).from_hex<Uint8>());
     unwrap_into(result.a, input.subview(6, 2).from_hex<Uint8>());
 
-    return {true, result};
+    return {true, sdl_to_rgba2(result)};
 }
 
 Maybe<String_View> string_view_of_string_literal(String_View input)

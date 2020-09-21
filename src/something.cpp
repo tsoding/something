@@ -16,6 +16,7 @@
 using namespace aids;
 
 #include "something_math.cpp"
+#include "something_color.hpp"
 
 #ifndef SOMETHING_RELEASE
 #include "config_common.cpp"

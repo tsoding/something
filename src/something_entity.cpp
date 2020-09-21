@@ -8,23 +8,21 @@ void Entity::kill()
     }
 }
 
-SDL_Color mix_colors(SDL_Color b32, SDL_Color a32)
+RGBA mix_colors(RGBA b32, RGBA a32)
 {
-    const float a32_alpha = a32.a / 255.0;
-    const float b32_alpha = b32.a / 255.0;
-    const float r_alpha = a32_alpha + b32_alpha * (1.0f - a32_alpha);
+    const float r_alpha = a32.a + b32.a * (1.0f - a32.a);
 
-    SDL_Color r = {};
+    RGBA r = {};
 
-    r.r = (Uint8) ((a32.r * a32_alpha + b32.r * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
-    r.g = (Uint8) ((a32.g * a32_alpha + b32.g * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
-    r.b = (Uint8) ((a32.b * a32_alpha + b32.b * b32_alpha * (1.0f - a32_alpha)) / r_alpha);
-    r.a = (Uint8) (r_alpha * 255.0f);
+    r.r = (a32.r * a32.a + b32.r * b32.a * (1.0f - a32.a)) / r_alpha;
+    r.g = (a32.g * a32.a + b32.g * b32.a * (1.0f - a32.a)) / r_alpha;
+    r.b = (a32.b * a32.a + b32.b * b32.a * (1.0f - a32.a)) / r_alpha;
+    r.a = r_alpha;
 
     return r;
 }
 
-void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) const
+void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
 {
     const SDL_RendererFlip flip =
         gun_dir.x > 0.0f ?
@@ -67,28 +65,30 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
                 ENTITY_LIVEBAR_WIDTH * percent,
                 ENTITY_LIVEBAR_HEIGHT
             };
-
             if (percent > 0.75f) {
+                const SDL_Color entity_livebar_full_color = rgba_to_sdl(ENTITY_LIVEBAR_FULL_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_FULL_COLOR.r,
-                        ENTITY_LIVEBAR_FULL_COLOR.g,
-                        ENTITY_LIVEBAR_FULL_COLOR.b,
-                        ENTITY_LIVEBAR_FULL_COLOR.a));
+                        entity_livebar_full_color.r,
+                        entity_livebar_full_color.g,
+                        entity_livebar_full_color.b,
+                        entity_livebar_full_color.a));
             } else if (0.25f < percent && percent < 0.75f) {
+                const SDL_Color entity_livebar_half_color = rgba_to_sdl(ENTITY_LIVEBAR_HALF_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_HALF_COLOR.r,
-                        ENTITY_LIVEBAR_HALF_COLOR.g,
-                        ENTITY_LIVEBAR_HALF_COLOR.b,
-                        ENTITY_LIVEBAR_HALF_COLOR.a));
+                        entity_livebar_half_color.r,
+                        entity_livebar_half_color.g,
+                        entity_livebar_half_color.b,
+                        entity_livebar_half_color.a));
             } else {
+                const SDL_Color entity_livebar_low_color = rgba_to_sdl(ENTITY_LIVEBAR_LOW_COLOR);
                 sec(SDL_SetRenderDrawColor(
                         renderer,
-                        ENTITY_LIVEBAR_LOW_COLOR.r,
-                        ENTITY_LIVEBAR_LOW_COLOR.g,
-                        ENTITY_LIVEBAR_LOW_COLOR.b,
-                        ENTITY_LIVEBAR_LOW_COLOR.a));
+                        entity_livebar_low_color.r,
+                        entity_livebar_low_color.g,
+                        entity_livebar_low_color.b,
+                        entity_livebar_low_color.a));
             }
             const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
             sec(SDL_RenderDrawRect(renderer, &rect_border));
@@ -96,8 +96,8 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
             sec(SDL_RenderFillRect(renderer, &rect_remain));
         }
 
-        SDL_Color effective_flash_color = flash_color;
-        effective_flash_color.a = flash_alpha * 255.0f;
+        RGBA effective_flash_color = flash_color;
+        effective_flash_color.a = flash_alpha;
 
         // Render the character
         switch (alive_state) {
@@ -119,7 +119,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, SDL_Color shade) cons
             renderer,
             camera.to_screen(gun_begin),
             camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH),
-            {255, 0, 0, 255});
+            {1.0f, 0.0f, 0.0f, 1.0f});
     } break;
 
     case Entity_State::Poof: {
@@ -370,7 +370,7 @@ Entity enemy_entity(Vec2f pos)
     return entity;
 }
 
-void Entity::flash(SDL_Color color)
+void Entity::flash(RGBA color)
 {
     flash_alpha = 1.0f;
     flash_color = color;
