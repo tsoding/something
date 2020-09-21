@@ -23,6 +23,6 @@ $ ## UNIX-like system
 $ make -B
 $ ./something.debug
 $ ## Windows
-$ mingw32-make
+$ set __MINGW32__=1 && mingw32-make -B
 $ something.debug
 ```
