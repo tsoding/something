@@ -16,7 +16,7 @@ $ ## Manjaro
 $ sudo pacman -S sdl2
 $ ## (add your distro here)
 $ ## Windows
-$ ### MinGW (with MSYS)
+$ ### MinGW (with MSYS2)
 $ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
 $ # Build
 $ ## UNIX-like system
