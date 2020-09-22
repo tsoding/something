@@ -603,9 +603,9 @@ void Game::render_fps_overlay(SDL_Renderer *renderer) {
                     SCREEN_HEIGHT - PADDING - frame_delays[j] * SCALE),
                 BAR_WIDTH,
                 frame_delays[j] * SCALE),
-                {   (Uint8) (clamp(      (int) (frame_delays[j] * 1000 * 15) - 255, 0, 255)),
-                    (Uint8) (clamp(510 - (int) (frame_delays[j] * 1000 * 15)      , 0, 255)),
-                    0, (Uint8) clamp((int) i, 0, 255)});
+                {   clamp(       frame_delays[j] * 60.0f - 1.0f, 0.0f, 1.0f),
+                    clamp(2.0f - frame_delays[j] * 60.0f       , 0.0f, 1.0f),
+                    0, (float) i / (float) FPS_BARS_COUNT});
     }
 }
 
