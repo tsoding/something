@@ -5,6 +5,32 @@ const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
 
 Game game = {};
 
+Dynamic_Array<Dynamic_Array<char>> load_room_files_from_dir(const char *room_dir_path)
+{
+    Dynamic_Array<Dynamic_Array<char>> room_files = {};
+
+    DIR *rooms_dir = opendir(room_dir_path);
+    defer(closedir(rooms_dir));
+    if (rooms_dir == NULL) {
+        println(stderr, "Can't open asset folder: ", room_dir_path);
+        abort();
+    }
+
+    for (struct dirent *d = readdir(rooms_dir);
+         d != NULL;
+         d = readdir(rooms_dir))
+    {
+        if (*d->d_name == '.') continue;
+        Dynamic_Array<char> room_file = {};
+        room_file.concat(room_dir_path, strlen(room_dir_path));
+        room_file.concat(d->d_name, strlen(d->d_name));
+        room_file.push('\0');
+        room_files.push(room_file);
+    }
+
+    return room_files;
+}
+
 int main(void)
 {
     sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
@@ -140,20 +166,14 @@ int main(void)
 
     game.reset_entities();
 
-    const int rooms_count = game.get_rooms_count();
-    if (rooms_count <= 0) {
-        println(stderr, "Assets folder is empty: ./assets/rooms/");
-        abort();
-    }
+    auto room_files = load_room_files_from_dir("./assets/rooms/");
 
-    char filepath[256];
     const int PADDING = 1;
     for (int y = 0; y < 10; ++y) {
         for (int x = 0; x < 10; ++x) {
-            // TODO(#200): It is not possible to call the room files arbitrary names
-            snprintf(filepath, sizeof(filepath), "./assets/rooms/room-%d.bin", rand() % rooms_count);
-            auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
-            game.grid.load_room_from_file(filepath, coord);
+            const auto coord = vec2(x * (ROOM_WIDTH + PADDING), y * (ROOM_HEIGHT + PADDING));
+            const size_t room_index = rand() % room_files.size;
+            game.grid.load_room_from_file(room_files.data[room_index].data, coord);
             game.add_camera_lock(rect(coord, ROOM_WIDTH, ROOM_HEIGHT));
         }
     }
