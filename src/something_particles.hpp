@@ -19,13 +19,14 @@ struct Particles
     RGBA colors[PARTICLES_CAPACITY];
     float cooldown;
     HSLA current_color;
+    Vec2f source;
 
     size_t begin;
     size_t count;
 
     void render(SDL_Renderer *renderer, Camera camera) const;
-    void update(float dt, Vec2f source, Tile_Grid *grid);
-    void push(Vec2f source);
+    void update(float dt, Tile_Grid *grid);
+    void push(float impact);
     void pop();
 };
 

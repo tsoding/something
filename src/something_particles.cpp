@@ -16,25 +16,13 @@ void Particles::render(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
-Vec2f polar(float mag, float angle)
-{
-    return vec2(cosf(angle), sinf(angle)) * mag;
-}
 
-float rand_float_range(float low, float high)
+void Particles::push(float impact)
 {
-    const auto r = (float)rand()/(float)(RAND_MAX);
-    return low + r * (high - low);
-}
-
-void Particles::push(Vec2f source)
-{
-    if (count < PARTICLES_CAPACITY && state == Particles::EMITTING) {
+    if (count < PARTICLES_CAPACITY) {
         const size_t j = (begin + count) % PARTICLES_CAPACITY;
         positions[j] = source;
-        velocities[j] = polar(
-            rand_float_range(PARTICLE_VEL_LOW, PARTICLE_VEL_HIGH),
-            rand_float_range(PI, 2.0f * PI));
+        velocities[j] = polar(impact, rand_float_range(PI, 2.0f * PI));
         lifetimes[j] = PARTICLE_LIFETIME;
         sizes[j] = rand_float_range(PARTICLE_SIZE_LOW, PARTICLE_SIZE_HIGH);
         // TODO(#187): implement HSL based generation of color for particles
@@ -52,7 +40,7 @@ void Particles::pop()
     count -= 1;
 }
 
-void Particles::update(float dt, Vec2f source, Tile_Grid *grid)
+void Particles::update(float dt, Tile_Grid *grid)
 {
 
     for (size_t i = 0; i < count; ++i) {
@@ -73,8 +61,8 @@ void Particles::update(float dt, Vec2f source, Tile_Grid *grid)
 
     cooldown -= dt;
 
-    if (cooldown <= 0.0f) {
-        push(source);
+    if (cooldown <= 0.0f && state == Particles::EMITTING) {
+        push(rand_float_range(PARTICLE_VEL_LOW, PARTICLE_VEL_HIGH));
         const float PARTICLE_COOLDOWN = 1.0f / PARTICLES_RATE;
         cooldown = PARTICLE_COOLDOWN;
     }

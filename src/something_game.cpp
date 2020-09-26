@@ -434,7 +434,15 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                 Vec2f d = t1 - t0;
 
                 const int IMPACT_THRESHOLD = 5;
-                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) entity->vel.y = 0;
+                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) {
+                    if (fabsf(entity->vel.y) > LANDING_PARTICLE_BURST_THRESHOLD) {
+                        for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
+                            entity->particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, fabsf(entity->vel.y) * 0.25f));
+                        }
+                    }
+
+                    entity->vel.y = 0;
+                }
                 if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
                 entity->pos += d;
