@@ -39,7 +39,7 @@ void command_set(Game *game, String_View args)
         return;
     }
 
-    const auto varvalue = args.trim();
+    auto varvalue = args.trim();
 
     switch (config_types[varindex]) {
     case CONFIG_TYPE_INT: {
@@ -67,7 +67,29 @@ void command_set(Game *game, String_View args)
         }
     } break;
     case CONFIG_TYPE_STRING: {
-        game->console.println("TODO(#177): setting string variables is not implemented yet");
+        if (varvalue.count > 0 && *varvalue.data != '"') {
+            game->console.println("`", varvalue, "` is not a string");
+            break;
+        }
+
+        varvalue.chop(1);
+        auto string_value = varvalue.chop_by_delim('"');
+
+        if (config_file_buffer_size + string_value.count > CONFIG_FILE_CAPACITY) {
+            game->console.println("Not enough config file memory to set this variable");
+            break;
+        }
+
+        memcpy(config_file_buffer + config_file_buffer_size,
+               string_value.data,
+               string_value.count);
+
+        config_values[varindex].string_value = {
+            string_value.count,
+            config_file_buffer + config_file_buffer_size
+        };
+
+        config_file_buffer_size += string_value.count;
     } break;
     case CONFIG_TYPE_UNKNOWN:
     default: {

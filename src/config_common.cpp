@@ -46,7 +46,7 @@ Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
 
 const size_t CONFIG_FILE_CAPACITY = 1 * 1024 * 1024;
 char config_file_buffer[CONFIG_FILE_CAPACITY];
-
+size_t config_file_buffer_size = 0;
 
 const size_t CONFIG_ERROR_CAPACITY = 1024;
 char config_error_buffer[CONFIG_ERROR_CAPACITY];
@@ -214,7 +214,8 @@ Config_Parse_Result reload_config_file(const char *file_path)
     }
 
     String_View input = {};
-    input.count = fread(config_file_buffer, 1, CONFIG_FILE_CAPACITY, f);
+    config_file_buffer_size = fread(config_file_buffer, 1, CONFIG_FILE_CAPACITY, f);
+    input.count = config_file_buffer_size;
     input.data = config_file_buffer;
     fclose(f);
 
