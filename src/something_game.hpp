@@ -3,6 +3,8 @@
 
 #include "something_console.hpp"
 #include "something_particles.hpp"
+#include "something_texture.hpp"
+#include "something_background.hpp"
 
 enum Debug_Toolbar_Button
 {
@@ -114,6 +116,8 @@ struct Game
 
     Recti camera_locks[CAMERA_LOCKS_CAPACITY];
     size_t camera_locks_count;
+
+    Background background;
 
     void add_camera_lock(Recti rect);
 
