@@ -7,7 +7,11 @@ const char *texture_files[] = {
     "./assets/sprites/spark1-sheet.png",
     "./assets/sprites/walking-12px-zoom.png",
     "./assets/sprites/64.png",
-    "./assets/sprites/tsodinw.png"
+    "./assets/sprites/tsodinw.png",
+    "./assets/sprites/parallax-forest-back-trees.png",
+    "./assets/sprites/parallax-forest-middle-trees.png",
+    "./assets/sprites/parallax-forest-front-trees.png",
+    "./assets/sprites/parallax-forest-lights.png",
 };
 const size_t TEXTURE_COUNT = sizeof(texture_files) / sizeof(texture_files[0]);
 

@@ -352,6 +352,8 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
+    background.render(renderer, camera);
+
     if (bfs_debug && lock) {
         grid.render_debug_bfs_overlay(
             renderer,
