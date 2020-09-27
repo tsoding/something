@@ -73,6 +73,7 @@ void Console::start_autocompletion()
 void Console::handle_event(SDL_Event *event, Game *game)
 {
     if (enabled) {
+#ifndef SOMETHING_RELEASE
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
@@ -96,6 +97,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             }
         } break;
         }
+#endif
 
         if (completion_popup_enabled) {
             switch (event->type) {
