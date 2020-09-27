@@ -99,10 +99,10 @@ int main(void)
     };
     tile_defs[TILE_DESTROYABLE_3].bottom_texture = tile_defs[TILE_DESTROYABLE_3].top_texture;
 
-    game.background.layers[0] = sprite_from_texture_index(texture_index_by_name("./assets/sprite/parallax-forest-back-trees.png"_sv));
-    game.background.layers[1] = sprite_from_texture_index(texture_index_by_name("./assets/sprite/parallax-forest-lights.png"_sv));
-    game.background.layers[2] = sprite_from_texture_index(texture_index_by_name("./assets/sprite/parallax-forest-middle-trees.png"_sv));
-    game.background.layers[3] = sprite_from_texture_index(texture_index_by_name("./assets/sprite/parallax-forest-front-trees.png"_sv));
+    game.background.layers[0] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-back-trees.png"_sv));
+    game.background.layers[1] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-lights.png"_sv));
+    game.background.layers[2] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-middle-trees.png"_sv));
+    game.background.layers[3] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-front-trees.png"_sv));
 
     game.player_shoot_sample      = sample_s16_by_name("./assets/sounds/enemy_shoot-48000-decay.wav"_sv);
     game.entity_walking_animat    = frame_animat_by_name("./assets/animats/walking.txt"_sv);
