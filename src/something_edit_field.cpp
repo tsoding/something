@@ -114,7 +114,9 @@ void Edit_Field::handle_event(SDL_Event *event)
 
 
     case SDL_TEXTINPUT: {
-        insert_cstr(event->text.text);
+        if (!(SDL_GetModState() & KMOD_LCTRL)) {
+            insert_cstr(event->text.text);
+        }
     } break;
     }
 }

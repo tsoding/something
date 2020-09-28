@@ -353,6 +353,8 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
+    background.render(renderer, camera);
+
     if (bfs_debug && lock) {
         grid.render_debug_bfs_overlay(
             renderer,
@@ -435,7 +437,15 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
                 Vec2f d = t1 - t0;
 
                 const int IMPACT_THRESHOLD = 5;
-                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) entity->vel.y = 0;
+                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) {
+                    if (fabsf(entity->vel.y) > LANDING_PARTICLE_BURST_THRESHOLD) {
+                        for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
+                            entity->particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, fabsf(entity->vel.y) * 0.25f));
+                        }
+                    }
+
+                    entity->vel.y = 0;
+                }
                 if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
 
                 entity->pos += d;
@@ -604,9 +614,9 @@ void Game::render_fps_overlay(SDL_Renderer *renderer) {
                     SCREEN_HEIGHT - PADDING - frame_delays[j] * SCALE),
                 BAR_WIDTH,
                 frame_delays[j] * SCALE),
-                {   (Uint8) (clamp(      (int) (frame_delays[j] * 1000 * 15) - 255, 0, 255)),
-                    (Uint8) (clamp(510 - (int) (frame_delays[j] * 1000 * 15)      , 0, 255)),
-                    0, (Uint8) clamp((int) i, 0, 255)});
+                {   clamp(       frame_delays[j] * 60.0f - 1.0f, 0.0f, 1.0f),
+                    clamp(2.0f - frame_delays[j] * 60.0f       , 0.0f, 1.0f),
+                    0, (float) i / (float) FPS_BARS_COUNT});
     }
 }
 

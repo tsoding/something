@@ -161,35 +161,41 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
     }
 }
 
+HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
+{
+    const auto tile_sprite = tile_defs[*grid->tile_at_abs(pos + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
+    const auto surface = surfaces[tile_sprite.texture_index.unwrap];
+    const auto x = rand() % tile_sprite.srcrect.w;
+    sec(SDL_LockSurface(surface));
+    HSLA result = {};
+    {
+        assert(surface->format->format == SDL_PIXELFORMAT_RGBA32);
+        const auto pixel = *(Uint32*) ((uint8_t *) surface->pixels + tile_sprite.srcrect.y * surface->pitch + (tile_sprite.srcrect.x + x) * sizeof(Uint32));
+        SDL_Color color = {};
+        SDL_GetRGBA(
+            pixel,
+            surface->format,
+            &color.r,
+            &color.g,
+            &color.b,
+            &color.a);
+        result = sdl_to_rgba(color).to_hsla();
+    }
+    SDL_UnlockSurface(surface);
+    return result;
+}
+
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
-    // TODO(#197): introduce some particle "puffs" when jumping or landing
     if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
         particles.state = Particles::EMITTING;
-
-        const auto tile_sprite = tile_defs[*grid->tile_at_abs(feet() + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
-        const auto surface = surfaces[tile_sprite.texture_index.unwrap];
-        const auto x = rand() % tile_sprite.srcrect.w;
-        sec(SDL_LockSurface(surface));
-        {
-            assert(surface->format->format == SDL_PIXELFORMAT_RGBA32);
-            const auto pixel = *(Uint32*) ((uint8_t *) surface->pixels + tile_sprite.srcrect.y * surface->pitch + (tile_sprite.srcrect.x + x) * sizeof(Uint32));
-            SDL_Color color = {};
-            SDL_GetRGBA(
-                pixel,
-                surface->format,
-                &color.r,
-                &color.g,
-                &color.b,
-                &color.a);
-            particles.current_color = sdl_to_rgba(color).to_hsla();
-        }
-        SDL_UnlockSurface(surface);
+        particles.current_color = get_particle_color_for_tile(grid, feet());
     } else {
         particles.state = Particles::DISABLED;
     }
 
-    particles.update(dt, feet(), grid);
+    particles.source = feet();
+    particles.update(dt, grid);
 
     switch (state) {
     case Entity_State::Alive: {
@@ -220,6 +226,11 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
                 mixer->play_sample(jump_samples[rand() % 2]);
+                if (ground(grid)) {
+                    for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
+                        particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, PARTICLE_JUMP_VEL_HIGH));
+                    }
+                }
             }
             break;
 
@@ -294,7 +305,6 @@ Entity player_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-
     entity.idle = frame_animat_by_name(PLAYER_IDLE);
     entity.walking = frame_animat_by_name(PLAYER_WALKING);
     entity.jump_samples[0] = sample_s16_by_name(PLAYER_JUMP_SAMPLE_0);
@@ -317,7 +327,7 @@ Entity player_entity(Vec2f pos)
 
     entity.jump_animat.rubber_animats[1].begin = -0.2f;
     entity.jump_animat.rubber_animats[1].end = 0.0f;
-    entity.jump_animat.rubber_animats[1].duration = 0.2f;
+    entity.jump_animat.rubber_animats[1].duration = 0.05f;
 
     entity.poof_animat.begin = 0.0f;
     entity.poof_animat.end = 1.0f;

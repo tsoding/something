@@ -73,6 +73,32 @@ void Console::start_autocompletion()
 void Console::handle_event(SDL_Event *event, Game *game)
 {
     if (enabled) {
+#ifndef SOMETHING_RELEASE
+        switch (event->type) {
+        case SDL_KEYDOWN: {
+            switch (event->key.keysym.sym) {
+            case SDLK_EQUALS: {
+                if (event->key.keysym.mod & KMOD_LCTRL) {
+                    const auto varindex = config_index_by_name("CONSOLE_FONT_SIZE"_sv);
+                    assert(varindex >= 0);
+                    assert(config_types[varindex] == CONFIG_TYPE_FLOAT);
+                    config_values[varindex].float_value += CONSOLE_FONT_SIZE_STEP;
+                }
+            } break;
+
+            case SDLK_MINUS: {
+                if (event->key.keysym.mod & KMOD_LCTRL) {
+                    const auto varindex = config_index_by_name("CONSOLE_FONT_SIZE"_sv);
+                    assert(varindex >= 0);
+                    assert(config_types[varindex] == CONFIG_TYPE_FLOAT);
+                    config_values[varindex].float_value -= CONSOLE_FONT_SIZE_STEP;
+                }
+            } break;
+            }
+        } break;
+        }
+#endif
+
         if (completion_popup_enabled) {
             switch (event->type) {
             case SDL_KEYDOWN: {
