@@ -9,6 +9,7 @@ const char *projectile_state_as_cstr(Projectile_State state)
     }
 
     assert(0 && "Incorrect Projectile_State");
+    return "";
 }
 
 template <typename ... Types>

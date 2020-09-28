@@ -15,7 +15,14 @@ $ sudo apt-get install libsdl2-dev
 $ ## Manjaro
 $ sudo pacman -S sdl2
 $ ## (add your distro here)
+$ ## Windows
+$ ### MinGW (with MSYS2)
+$ pacman -S mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-SDL2 mingw-w64-x86_64-pkg-config
 $ # Build
+$ ## UNIX-like system
 $ make -B
 $ ./something.debug
+$ ## Windows
+$ set __MINGW32__=1 && mingw32-make -B
+$ something.debug
 ```
