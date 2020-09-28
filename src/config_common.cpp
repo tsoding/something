@@ -110,7 +110,7 @@ Maybe<String_View> string_view_of_string_literal(String_View input)
     return {true, input};
 }
 
-// TODO: In config.vars, you can currently only reference variables defined before current line. For example:
+// TODO(#215): In config.vars, you can currently only reference variables defined before current line. For example:
 //   Works:
 //     PLAYER_SIZE   : float = 50
 //     PLAYER_WIDTH  : float = PLAYER_SIZE
@@ -144,6 +144,11 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
     return parse_success();
 }
 
+// TODO: get rid of duplicate code in parse_config_text by trying to parse the value as the variable first
+// That will require somehow distinguishing the variable names and the color values.
+// The easiest way to do that is to introduce a prefix for color values. Usually it is `#`. For example `#69696969`.
+// But we already use `#` as the comment prefix. So we have to also choose a different comment prefix and migrate the
+// current `config.var`.
 Config_Parse_Result parse_config_text(String_View input)
 {
     for (size_t line_number = 1; input.count > 0; ++line_number) {
@@ -197,7 +202,7 @@ Config_Parse_Result parse_config_text(String_View input)
                 if (other_variable_result.is_error) {
                     return other_variable_result;
                 }
-                
+
                 config_values[index].color_value = config_values[other_variable_index].color_value;
                 continue;
             }
@@ -221,7 +226,7 @@ Config_Parse_Result parse_config_text(String_View input)
                 if (other_variable_result.is_error) {
                     return other_variable_result;
                 }
-                
+
                 config_values[index].int_value = config_values[other_variable_index].int_value;
                 continue;
             }
@@ -245,7 +250,7 @@ Config_Parse_Result parse_config_text(String_View input)
                 if (other_variable_result.is_error) {
                     return other_variable_result;
                 }
-                
+
                 config_values[index].float_value = config_values[other_variable_index].float_value;
                 continue;
             }
@@ -269,7 +274,7 @@ Config_Parse_Result parse_config_text(String_View input)
                 if (other_variable_result.is_error) {
                     return other_variable_result;
                 }
-                
+
                 config_values[index].string_value = config_values[other_variable_index].string_value;
                 continue;
             }
