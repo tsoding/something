@@ -144,7 +144,7 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
     return parse_success();
 }
 
-// TODO: get rid of duplicate code in parse_config_text by trying to parse the value as the variable first
+// TODO(#216): get rid of duplicate code in parse_config_text by trying to parse the value as the variable first
 // That will require somehow distinguishing the variable names and the color values.
 // The easiest way to do that is to introduce a prefix for color values. Usually it is `#`. For example `#69696969`.
 // But we already use `#` as the comment prefix. So we have to also choose a different comment prefix and migrate the
