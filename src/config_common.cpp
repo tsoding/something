@@ -110,6 +110,45 @@ Maybe<String_View> string_view_of_string_literal(String_View input)
     return {true, input};
 }
 
+// TODO(#215): In config.vars, you can currently only reference variables defined before current line. For example:
+//   Works:
+//     PLAYER_SIZE   : float = 50
+//     PLAYER_WIDTH  : float = PLAYER_SIZE
+//   Does not work:
+//     PLAYER_WIDTH  : float = PLAYER_SIZE
+//     PLAYER_SIZE   : float = 50
+Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t other_index, String_View other_name,
+                                            Config_Type expected_type, ssize_t line_number)
+{
+    if (other_index < 0) {
+        snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                 "Unknown variable `%.*s`",
+                 (int) other_name.count, other_name.data);
+        return parse_failure(config_error_buffer, line_number);
+    }
+
+    auto other_var_type = config_types[other_index];
+    auto other_var_type_name = config_name_by_type(other_var_type);
+
+    if (expected_type != other_var_type) {
+        auto expected_type_name = config_name_by_type(expected_type);
+            snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                     "Expected type of `%.*s` was `%.*s`, but found `%.*s`, which has a type of `%.*s`.",
+                     (int) name.count, name.data,
+                     (int) expected_type_name.count, expected_type_name.data,
+                     (int) other_name.count, other_name.data,
+                     (int) other_var_type_name.count, other_var_type_name.data);
+            return parse_failure(config_error_buffer, line_number);
+    }
+
+    return parse_success();
+}
+
+// TODO(#216): get rid of duplicate code in parse_config_text by trying to parse the value as the variable first
+// That will require somehow distinguishing the variable names and the color values.
+// The easiest way to do that is to introduce a prefix for color values. Usually it is `#`. For example `#69696969`.
+// But we already use `#` as the comment prefix. So we have to also choose a different comment prefix and migrate the
+// current `config.var`.
 Config_Parse_Result parse_config_text(String_View input)
 {
     for (size_t line_number = 1; input.count > 0; ++line_number) {
@@ -149,11 +188,23 @@ Config_Parse_Result parse_config_text(String_View input)
         case CONFIG_TYPE_COLOR: {
             auto x = string_view_as_color(value);
             if (!x.has_value) {
-                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                         "`%.*s` is not a color (variable `%.*s`)",
-                         (int) value.count, value.data,
-                         (int) name.count, name.data);
-                return parse_failure(config_error_buffer, line_number);
+                auto other_variable_index = config_index_by_name(value);
+
+                if (other_variable_index < 0) {
+                    snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                            "`%.*s` is not a color (variable `%.*s`)",
+                            (int) value.count, value.data,
+                            (int) name.count, name.data);
+                    return parse_failure(config_error_buffer, line_number);
+                }
+
+                auto other_variable_result = parse_other_variable_compatibility(name, other_variable_index, value, actual_config_type, line_number);
+                if (other_variable_result.is_error) {
+                    return other_variable_result;
+                }
+
+                config_values[index].color_value = config_values[other_variable_index].color_value;
+                continue;
             }
             config_values[index].color_value = x.unwrap;
         } break;
@@ -161,11 +212,23 @@ Config_Parse_Result parse_config_text(String_View input)
         case CONFIG_TYPE_INT: {
             auto x = value.as_integer<int>();
             if (!x.has_value) {
-                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                         "`%.*s` is not an int (variable `%.*s`)",
-                         (int) value.count, value.data,
-                         (int) name.count, name.data);
-                return parse_failure(config_error_buffer, line_number);
+                auto other_variable_index = config_index_by_name(value);
+
+                if (other_variable_index < 0) {
+                    snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                            "`%.*s` is not an int (variable `%.*s`)",
+                            (int) value.count, value.data,
+                            (int) name.count, name.data);
+                    return parse_failure(config_error_buffer, line_number);
+                }
+
+                auto other_variable_result = parse_other_variable_compatibility(name, other_variable_index, value, actual_config_type, line_number);
+                if (other_variable_result.is_error) {
+                    return other_variable_result;
+                }
+
+                config_values[index].int_value = config_values[other_variable_index].int_value;
+                continue;
             }
             config_values[index].int_value = x.unwrap;
         } break;
@@ -173,11 +236,23 @@ Config_Parse_Result parse_config_text(String_View input)
         case CONFIG_TYPE_FLOAT: {
             auto x = value.as_float();
             if (!x.has_value) {
-                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                         "`%.*s` is not a float (variable `%.*s`)",
-                         (int) value.count, value.data,
-                         (int) name.count, name.data);
-                return parse_failure(config_error_buffer, line_number);
+                auto other_variable_index = config_index_by_name(value);
+
+                if (other_variable_index < 0) {
+                    snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                            "`%.*s` is not a float (variable `%.*s`)",
+                            (int) value.count, value.data,
+                            (int) name.count, name.data);
+                    return parse_failure(config_error_buffer, line_number);
+                }
+
+                auto other_variable_result = parse_other_variable_compatibility(name, other_variable_index, value, actual_config_type, line_number);
+                if (other_variable_result.is_error) {
+                    return other_variable_result;
+                }
+
+                config_values[index].float_value = config_values[other_variable_index].float_value;
+                continue;
             }
             config_values[index].float_value = x.unwrap;
         } break;
@@ -185,11 +260,23 @@ Config_Parse_Result parse_config_text(String_View input)
         case CONFIG_TYPE_STRING: {
             auto x = string_view_of_string_literal(value);
             if (!x.has_value) {
-                snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                         "`%.*s` is not a string (variable `%.*s`)",
-                         (int) value.count, value.data,
-                         (int) name.count, name.data);
-                return parse_failure(config_error_buffer, line_number);
+                auto other_variable_index = config_index_by_name(value);
+
+                if (other_variable_index < 0) {
+                    snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
+                            "`%.*s` is not a string (variable `%.*s`)",
+                            (int) value.count, value.data,
+                            (int) name.count, name.data);
+                    return parse_failure(config_error_buffer, line_number);
+                }
+
+                auto other_variable_result = parse_other_variable_compatibility(name, other_variable_index, value, actual_config_type, line_number);
+                if (other_variable_result.is_error) {
+                    return other_variable_result;
+                }
+
+                config_values[index].string_value = config_values[other_variable_index].string_value;
+                continue;
             }
             config_values[index].string_value = x.unwrap;
         } break;
