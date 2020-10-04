@@ -390,18 +390,28 @@ void Game::entity_shoot(Entity_Index entity_index)
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
 
-    if (entity->state != Entity_State::Alive) return;
-    if (entity->cooldown_weapon > 0) return;
+    if (entity->state == Entity_State::Alive && entity->cooldown_weapon <= 0) {
+        switch (entity->current_weapon) {
+        case Weapon::Gun: {
+            spawn_projectile(
+                entity->pos,
+                normalize(entity->gun_dir) * PROJECTILE_SPEED,
+               entity_index);
+            entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
-    const float PROJECTILE_SPEED = 1200.0f;
+            mixer.play_sample(entity->shoot_sample);
+        } break;
 
-    spawn_projectile(
-        entity->pos,
-        entity->gun_dir * PROJECTILE_SPEED,
-        entity_index);
-    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-
-    mixer.play_sample(entity->shoot_sample);
+        case Weapon::Dirt_Block: {
+            const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
+            const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
+            const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+            if (grid.get_tile(target_tile) == TILE_EMPTY) {
+                grid.set_tile(target_tile, TILE_DESTROYABLE_0);
+            }
+        } break;
+        }
+    }
 }
 
 void Game::entity_jump(Entity_Index entity_index)

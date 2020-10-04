@@ -279,7 +279,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
 void Entity::point_gun_at(Vec2f target)
 {
-    gun_dir = normalize(target - pos);
+    gun_dir = target - pos;
 }
 
 void Entity::jump()
@@ -295,6 +295,8 @@ void Entity::jump()
 Entity player_entity(Vec2f pos)
 {
     Entity entity = {};
+
+    entity.current_weapon = Weapon::Dirt_Block;
 
     entity.texbox_local.w = PLAYER_TEXBOX_W;
     entity.texbox_local.h = PLAYER_TEXBOX_H;
