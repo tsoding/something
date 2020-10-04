@@ -94,6 +94,10 @@ void Game::handle_event(SDL_Event *event)
         case Debug_Draw_State::Idle:
         default: {}
         }
+
+        if (entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block && holding_down_mouse) {
+            entity_shoot({PLAYER_ENTITY_INDEX});
+        }
     } break;
 
     case SDL_MOUSEBUTTONDOWN: {
@@ -139,9 +143,11 @@ void Game::handle_event(SDL_Event *event)
         } break;
 
         case SDL_BUTTON_LEFT: {
-            if (!debug_toolbar.handle_click_at({(float)event->button.x, (float)event->button.y})) {
+            if (!debug_toolbar.handle_click_at({(float) event->button.x, (float) event->button.y})) {
                 entity_shoot({PLAYER_ENTITY_INDEX});
             }
+
+            holding_down_mouse = true;
         } break;
         }
     } break;
@@ -150,6 +156,10 @@ void Game::handle_event(SDL_Event *event)
         switch (event->button.button) {
         case SDL_BUTTON_RIGHT: {
             draw_state = Debug_Draw_State::Idle;
+        } break;
+
+        case SDL_BUTTON_LEFT: {
+            holding_down_mouse = false;
         } break;
         }
     } break;
@@ -387,7 +397,9 @@ void Game::render(SDL_Renderer *renderer)
 
         tile_defs[TILE_DESTROYABLE_0].top_texture.render(
             renderer,
-            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE));
+            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
+            SDL_FLIP_NONE,
+            grid.get_tile(target_tile) == TILE_EMPTY ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
     } break;
 
     case Weapon::Gun: {
@@ -415,16 +427,18 @@ void Game::entity_shoot(Entity_Index entity_index)
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
 
-    if (entity->state == Entity_State::Alive && entity->cooldown_weapon <= 0) {
+    if (entity->state == Entity_State::Alive) {
         switch (entity->current_weapon) {
         case Weapon::Gun: {
-            spawn_projectile(
-                entity->pos,
-                normalize(entity->gun_dir) * PROJECTILE_SPEED,
-               entity_index);
-            entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+            if (entity->cooldown_weapon <= 0) {
+                spawn_projectile(
+                    entity->pos,
+                    normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                    entity_index);
+                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
-            mixer.play_sample(entity->shoot_sample);
+                mixer.play_sample(entity->shoot_sample);
+            }
         } break;
 
         case Weapon::Dirt_Block: {
