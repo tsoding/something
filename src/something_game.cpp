@@ -377,6 +377,23 @@ void Game::render(SDL_Renderer *renderer)
         entities[i].render(renderer, camera);
     }
 
+    switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
+    case Weapon::Dirt_Block: {
+        const auto allowed_length =
+            min(length(entities[PLAYER_ENTITY_INDEX].gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
+        const auto allowed_target =
+            entities[PLAYER_ENTITY_INDEX].pos + allowed_length * normalize(entities[PLAYER_ENTITY_INDEX].gun_dir);
+        const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+
+        tile_defs[TILE_DESTROYABLE_0].top_texture.render(
+            renderer,
+            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE));
+    } break;
+
+    case Weapon::Gun: {
+    } break;
+    }
+
     render_projectiles(renderer, camera);
 
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
