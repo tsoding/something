@@ -162,6 +162,14 @@ void Game::handle_event(SDL_Event *event)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            case SDLK_1: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Gun;
+            } break;
+
+            case SDLK_2: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Dirt_Block;
+            } break;
+
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
                     entity_jump({PLAYER_ENTITY_INDEX});
