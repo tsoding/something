@@ -4,6 +4,12 @@ template <typename T>
 struct Vec2
 {
     T x, y;
+
+    template <typename Function>
+    Vec2<T> map(Function f)
+    {
+        return {f(x), f(y)};
+    }
 };
 
 using Vec2f = Vec2<float>;
