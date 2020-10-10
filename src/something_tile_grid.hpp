@@ -96,6 +96,7 @@ struct Tile_Grid
     bool is_tile_empty_tile(Vec2i coord);
     bool is_tile_empty_abs(Vec2f pos);
     Tile *tile_at_abs(Vec2f pos);
+    Vec2f abs_center_of_tile(Vec2i coord);
 
     int bfs_trace[ROOM_WIDTH][ROOM_HEIGHT];
     void bfs_to_tile(Vec2i src, Recti *lock);

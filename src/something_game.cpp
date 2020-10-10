@@ -389,17 +389,14 @@ void Game::render(SDL_Renderer *renderer)
 
     switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
     case Weapon::Dirt_Block: {
-        const auto allowed_length =
-            min(length(entities[PLAYER_ENTITY_INDEX].gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
-        const auto allowed_target =
-            entities[PLAYER_ENTITY_INDEX].pos + allowed_length * normalize(entities[PLAYER_ENTITY_INDEX].gun_dir);
-        const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+        bool can_place = false;
+        auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
 
         tile_defs[TILE_DESTROYABLE_0].top_texture.render(
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
             SDL_FLIP_NONE,
-            grid.get_tile(target_tile) == TILE_EMPTY ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
+            can_place ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
     } break;
 
     case Weapon::Gun: {
@@ -442,18 +439,32 @@ void Game::entity_shoot(Entity_Index entity_index)
         } break;
 
         case Weapon::Dirt_Block: {
-            // TODO(#221): dirt block should not be placed in the tiles that blocked by other tiles
             // TODO(#222): dirt blocks must not be placed on the player
-            const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
-            const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
-            const auto target_tile = grid.abs_to_tile_coord(allowed_target);
-            if (grid.get_tile(target_tile) == TILE_EMPTY) {
+            bool can_place = false;
+            auto target_tile = where_entity_can_place_block(entity_index, &can_place);
+            if (can_place) {
                 grid.set_tile(target_tile, TILE_DESTROYABLE_0);
             }
         } break;
         }
     }
 }
+
+Vec2i Game::where_entity_can_place_block(Entity_Index index, bool *can_place)
+{
+    Entity *entity = &entities[index.unwrap];
+    const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
+    const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
+    const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+
+    if (can_place) {
+        *can_place = grid.a_sees_b(entity->pos, grid.abs_center_of_tile(target_tile)) &&
+            grid.get_tile(target_tile) == TILE_EMPTY;
+    }
+
+    return target_tile;
+}
+
 
 void Game::entity_jump(Entity_Index entity_index)
 {
