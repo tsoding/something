@@ -443,7 +443,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 
         case Weapon::Dirt_Block: {
             // TODO(#221): dirt block should not be placed in the tiles that blocked by other tiles
-            // TODO: dirt blocks must not be placed on the player
+            // TODO(#222): dirt blocks must not be placed on the player
             const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
             const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
             const auto target_tile = grid.abs_to_tile_coord(allowed_target);
