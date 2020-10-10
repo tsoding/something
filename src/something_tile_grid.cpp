@@ -279,3 +279,8 @@ Vec2f Tile_Grid::abs_center_of_tile(Vec2i coord)
 {
     return vec_cast<float>(coord) * TILE_SIZE + vec2(TILE_SIZE, TILE_SIZE) * 0.5f;
 }
+
+Rectf Tile_Grid::rect_of_tile(Vec2i coord)
+{
+    return rect(vec_cast<float>(coord) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+}

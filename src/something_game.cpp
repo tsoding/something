@@ -450,6 +450,19 @@ void Game::entity_shoot(Entity_Index entity_index)
     }
 }
 
+bool Game::does_tile_contain_entity(Vec2i tile_coord)
+{
+    Rectf tile_rect = grid.rect_of_tile(tile_coord);
+
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Alive && rects_overlap(tile_rect, entities[i].hitbox_world())) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 Vec2i Game::where_entity_can_place_block(Entity_Index index, bool *can_place)
 {
     Entity *entity = &entities[index.unwrap];
@@ -458,8 +471,9 @@ Vec2i Game::where_entity_can_place_block(Entity_Index index, bool *can_place)
     const auto target_tile = grid.abs_to_tile_coord(allowed_target);
 
     if (can_place) {
-        *can_place = grid.a_sees_b(entity->pos, grid.abs_center_of_tile(target_tile)) &&
-            grid.get_tile(target_tile) == TILE_EMPTY;
+        *can_place = grid.get_tile(target_tile) == TILE_EMPTY &&
+            grid.a_sees_b(entity->pos, grid.abs_center_of_tile(target_tile)) &&
+            !does_tile_contain_entity(target_tile);
     }
 
     return target_tile;
