@@ -142,6 +142,8 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tooltip = "Add dirt block items"_sv;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

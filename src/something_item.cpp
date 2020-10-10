@@ -53,3 +53,19 @@ Item make_health_item(Vec2f pos)
 
     return item;
 }
+
+Item make_dirt_block_item(Vec2f pos)
+{
+    Item item = {};
+    item.pos = pos;
+    item.type = ITEM_DIRT_BLOCK;
+    item.sprite = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    item.hitbox_local = {
+        ITEM_HITBOX_WIDTH * -0.5f,
+        ITEM_HITBOX_HEIGHT * -0.5f,
+        ITEM_HITBOX_WIDTH,
+        ITEM_HITBOX_HEIGHT
+    };
+    item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
+    return item;
+}

@@ -12,6 +12,7 @@ enum Debug_Toolbar_Button
     DEBUG_TOOLBAR_DESTROYABLE,
     DEBUG_TOOLBAR_HEALS,
     DEBUG_TOOLBAR_ENEMIES,
+    DEBUG_TOOLBAR_DIRT,
     DEBUG_TOOLBAR_COUNT
 };
 
@@ -148,6 +149,7 @@ struct Game
 
     // Items of the Game
     void spawn_health_at_mouse();
+    void spawn_dirt_block_item_at_mouse();
     int get_rooms_count(void);
 
     // Player related operations

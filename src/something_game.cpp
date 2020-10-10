@@ -132,6 +132,10 @@ void Game::handle_event(SDL_Event *event)
                         spawn_health_at_mouse();
                     } break;
 
+                    case DEBUG_TOOLBAR_DIRT: {
+                        spawn_dirt_block_item_at_mouse();
+                    } break;
+
                     case DEBUG_TOOLBAR_ENEMIES: {
                         spawn_enemy_at(mouse_position);
                     } break;
@@ -310,7 +314,7 @@ void Game::update(float dt)
     // Entities/Items interaction
     for (size_t index = 0; index < ITEMS_COUNT; ++index) {
         auto item = items + index;
-        if (item->type == ITEM_HEALTH) {
+        if (item->type != ITEM_NONE) {
             for (size_t entity_index = 0;
                  entity_index < ENTITIES_COUNT;
                  ++entity_index)
@@ -319,10 +323,24 @@ void Game::update(float dt)
 
                 if (entity->state == Entity_State::Alive) {
                     if (rects_overlap(entity->hitbox_world(), item->hitbox_world())) {
-                        entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
-                        entity->flash(ENTITY_HEAL_FLASH_COLOR);
-                        mixer.play_sample(item->sound);
-                        item->type = ITEM_NONE;
+                        switch (item->type) {
+                        case ITEM_NONE: {
+                            assert(0 && "unreachable");
+                        } break;
+
+                        case ITEM_HEALTH: {
+                            entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
+                            entity->flash(ENTITY_HEAL_FLASH_COLOR);
+                            mixer.play_sample(item->sound);
+                            item->type = ITEM_NONE;
+                        } break;
+
+                        case ITEM_DIRT_BLOCK: {
+                            entity->dirt_blocks_count += 1;
+                            mixer.play_sample(item->sound);
+                            item->type = ITEM_NONE;
+                        } break;
+                        }
                         break;
                     }
                 }
@@ -794,6 +812,16 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
     }
 
     return {};
+}
+
+void Game::spawn_dirt_block_item_at_mouse()
+{
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        if (items[i].type == ITEM_NONE) {
+            items[i] = make_dirt_block_item(mouse_position);
+            break;
+        }
+    }
 }
 
 void Game::spawn_health_at_mouse()
