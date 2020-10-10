@@ -297,6 +297,7 @@ Entity player_entity(Vec2f pos)
     Entity entity = {};
 
     entity.current_weapon = Weapon::Dirt_Block;
+    entity.dirt_blocks_count = 3;
 
     entity.texbox_local.w = PLAYER_TEXBOX_W;
     entity.texbox_local.h = PLAYER_TEXBOX_H;

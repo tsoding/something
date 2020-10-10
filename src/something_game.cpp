@@ -392,6 +392,8 @@ void Game::render(SDL_Renderer *renderer)
         bool can_place = false;
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
 
+        can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
+
         tile_defs[TILE_DESTROYABLE_0].top_texture.render(
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
@@ -442,8 +444,9 @@ void Game::entity_shoot(Entity_Index entity_index)
             // TODO(#222): dirt blocks must not be placed on the player
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
-            if (can_place) {
+            if (can_place && entity->dirt_blocks_count > 0) {
                 grid.set_tile(target_tile, TILE_DESTROYABLE_0);
+                entity->dirt_blocks_count -= 1;
             }
         } break;
         }
