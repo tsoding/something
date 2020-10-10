@@ -136,6 +136,7 @@ struct Game
     void entity_resolve_collision(Entity_Index entity_index);
     void spawn_enemy_at(Vec2f pos);
     Vec2i where_entity_can_place_block(Entity_Index index, bool *can_place = nullptr);
+    bool does_tile_contain_entity(Vec2i tile_coord);
 
     // Projectiles of the Game
     void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
