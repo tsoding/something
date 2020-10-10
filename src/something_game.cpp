@@ -417,6 +417,8 @@ void Game::render(SDL_Renderer *renderer)
         render_fps_overlay(renderer);
     }
 
+    render_player_hud(renderer);
+
     popup.render(renderer);
     console.render(renderer, &debug_font);
 }
@@ -838,4 +840,29 @@ int Game::get_rooms_count(void)
 
     closedir(rooms_dir);
     return result;
+}
+
+void Game::render_player_hud(SDL_Renderer *renderer)
+{
+    char buffer[256];
+    String_Buffer sbuffer = {};
+    sbuffer.capacity = sizeof(buffer);
+    sbuffer.data = buffer;
+
+    sprintln(&sbuffer, "Dirt blocks: ", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
+
+    auto hud_position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN);
+    auto font_size = vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE);
+    auto board_rect =
+        rect(
+            hud_position,
+            debug_font.text_size(font_size, buffer) + 2.0f * vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING));
+    fill_rect(renderer, board_rect, PLAYER_HUD_BACKGROUND_COLOR);
+
+    debug_font.render(
+        renderer,
+        hud_position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
+        font_size,
+        PLAYER_HUD_FONT_COLOR,
+        buffer);
 }
