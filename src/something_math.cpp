@@ -187,9 +187,14 @@ Vec2<int> vec_cast(Vec2<float> v)
     return { (int) floorf(v.x), (int) floorf(v.y) };
 }
 
+float length(Vec2<float> a)
+{
+    return sqrtf(sqr_len(a));
+}
+
 Vec2<float> normalize(Vec2<float> a)
 {
-    return a / sqrtf(sqr_len(a));
+    return a / length(a);
 }
 
 template <typename T> T sgn(T val) {

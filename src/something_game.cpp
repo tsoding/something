@@ -94,6 +94,10 @@ void Game::handle_event(SDL_Event *event)
         case Debug_Draw_State::Idle:
         default: {}
         }
+
+        if (entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block && holding_down_mouse) {
+            entity_shoot({PLAYER_ENTITY_INDEX});
+        }
     } break;
 
     case SDL_MOUSEBUTTONDOWN: {
@@ -139,9 +143,11 @@ void Game::handle_event(SDL_Event *event)
         } break;
 
         case SDL_BUTTON_LEFT: {
-            if (!debug_toolbar.handle_click_at({(float)event->button.x, (float)event->button.y})) {
+            if (!debug_toolbar.handle_click_at({(float) event->button.x, (float) event->button.y})) {
                 entity_shoot({PLAYER_ENTITY_INDEX});
             }
+
+            holding_down_mouse = true;
         } break;
         }
     } break;
@@ -150,6 +156,10 @@ void Game::handle_event(SDL_Event *event)
         switch (event->button.button) {
         case SDL_BUTTON_RIGHT: {
             draw_state = Debug_Draw_State::Idle;
+        } break;
+
+        case SDL_BUTTON_LEFT: {
+            holding_down_mouse = false;
         } break;
         }
     } break;
@@ -162,6 +172,14 @@ void Game::handle_event(SDL_Event *event)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            case SDLK_1: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Gun;
+            } break;
+
+            case SDLK_2: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Dirt_Block;
+            } break;
+
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
                     entity_jump({PLAYER_ENTITY_INDEX});
@@ -369,6 +387,25 @@ void Game::render(SDL_Renderer *renderer)
         entities[i].render(renderer, camera);
     }
 
+    switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
+    case Weapon::Dirt_Block: {
+        const auto allowed_length =
+            min(length(entities[PLAYER_ENTITY_INDEX].gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
+        const auto allowed_target =
+            entities[PLAYER_ENTITY_INDEX].pos + allowed_length * normalize(entities[PLAYER_ENTITY_INDEX].gun_dir);
+        const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+
+        tile_defs[TILE_DESTROYABLE_0].top_texture.render(
+            renderer,
+            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
+            SDL_FLIP_NONE,
+            grid.get_tile(target_tile) == TILE_EMPTY ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
+    } break;
+
+    case Weapon::Gun: {
+    } break;
+    }
+
     render_projectiles(renderer, camera);
 
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
@@ -390,18 +427,32 @@ void Game::entity_shoot(Entity_Index entity_index)
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
 
-    if (entity->state != Entity_State::Alive) return;
-    if (entity->cooldown_weapon > 0) return;
+    if (entity->state == Entity_State::Alive) {
+        switch (entity->current_weapon) {
+        case Weapon::Gun: {
+            if (entity->cooldown_weapon <= 0) {
+                spawn_projectile(
+                    entity->pos,
+                    normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                    entity_index);
+                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
-    const float PROJECTILE_SPEED = 1200.0f;
+                mixer.play_sample(entity->shoot_sample);
+            }
+        } break;
 
-    spawn_projectile(
-        entity->pos,
-        entity->gun_dir * PROJECTILE_SPEED,
-        entity_index);
-    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-
-    mixer.play_sample(entity->shoot_sample);
+        case Weapon::Dirt_Block: {
+            // TODO(#221): dirt block should not be placed in the tiles that blocked by other tiles
+            // TODO(#222): dirt blocks must not be placed on the player
+            const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
+            const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
+            const auto target_tile = grid.abs_to_tile_coord(allowed_target);
+            if (grid.get_tile(target_tile) == TILE_EMPTY) {
+                grid.set_tile(target_tile, TILE_DESTROYABLE_0);
+            }
+        } break;
+        }
+    }
 }
 
 void Game::entity_jump(Entity_Index entity_index)

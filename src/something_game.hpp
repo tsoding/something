@@ -77,6 +77,7 @@ struct Game
     bool step_debug;
     bool bfs_debug;
     bool fps_debug;
+    bool holding_down_mouse;
     float frame_delays[FPS_BARS_COUNT];
     size_t frame_delays_begin;
 
