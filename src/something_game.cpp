@@ -399,7 +399,7 @@ void Game::render(SDL_Renderer *renderer)
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
             SDL_FLIP_NONE,
-            grid.get_tile(target_tile) == TILE_EMPTY ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
+            grid.a_sees_b(entities[PLAYER_ENTITY_INDEX].pos, grid.abs_center_of_tile(target_tile)) && grid.get_tile(target_tile) == TILE_EMPTY ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
     } break;
 
     case Weapon::Gun: {
@@ -447,7 +447,9 @@ void Game::entity_shoot(Entity_Index entity_index)
             const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
             const auto allowed_target = entity->pos + allowed_length *normalize(entity->gun_dir);
             const auto target_tile = grid.abs_to_tile_coord(allowed_target);
-            if (grid.get_tile(target_tile) == TILE_EMPTY) {
+            if (grid.a_sees_b(entity->pos, grid.abs_center_of_tile(target_tile)) &&
+                grid.get_tile(target_tile) == TILE_EMPTY)
+            {
                 grid.set_tile(target_tile, TILE_DESTROYABLE_0);
             }
         } break;
