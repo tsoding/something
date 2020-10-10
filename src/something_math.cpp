@@ -167,6 +167,12 @@ constexpr Rect<T> rect(Vec2<T> pos, T w, T h)
     return {pos.x, pos.y, w, h};
 }
 
+template <typename T>
+constexpr Rect<T> rect(Vec2<T> pos, Vec2<T> size)
+{
+    return {pos.x, pos.y, size.x, size.y};
+}
+
 SDL_Rect rectf_for_sdl(Rectf rect)
 {
     return {(int) floorf(rect.x),

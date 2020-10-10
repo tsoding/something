@@ -149,6 +149,9 @@ struct Game
     // Items of the Game
     void spawn_health_at_mouse();
     int get_rooms_count(void);
+
+    // Player related operations
+    void render_player_hud(SDL_Renderer *renderer);
 };
 
 #endif  // SOMETHING_GAME_HPP_

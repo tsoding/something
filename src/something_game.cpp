@@ -392,6 +392,8 @@ void Game::render(SDL_Renderer *renderer)
         bool can_place = false;
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
 
+        can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
+
         tile_defs[TILE_DESTROYABLE_0].top_texture.render(
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
@@ -414,6 +416,8 @@ void Game::render(SDL_Renderer *renderer)
     if (fps_debug) {
         render_fps_overlay(renderer);
     }
+
+    render_player_hud(renderer);
 
     popup.render(renderer);
     console.render(renderer, &debug_font);
@@ -442,8 +446,9 @@ void Game::entity_shoot(Entity_Index entity_index)
             // TODO(#222): dirt blocks must not be placed on the player
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
-            if (can_place) {
+            if (can_place && entity->dirt_blocks_count > 0) {
                 grid.set_tile(target_tile, TILE_DESTROYABLE_0);
+                entity->dirt_blocks_count -= 1;
             }
         } break;
         }
@@ -835,4 +840,29 @@ int Game::get_rooms_count(void)
 
     closedir(rooms_dir);
     return result;
+}
+
+void Game::render_player_hud(SDL_Renderer *renderer)
+{
+    char buffer[256];
+    String_Buffer sbuffer = {};
+    sbuffer.capacity = sizeof(buffer);
+    sbuffer.data = buffer;
+
+    sprintln(&sbuffer, "Dirt blocks: ", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
+
+    auto hud_position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN);
+    auto font_size = vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE);
+    auto board_rect =
+        rect(
+            hud_position,
+            debug_font.text_size(font_size, buffer) + 2.0f * vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING));
+    fill_rect(renderer, board_rect, PLAYER_HUD_BACKGROUND_COLOR);
+
+    debug_font.render(
+        renderer,
+        hud_position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
+        font_size,
+        PLAYER_HUD_FONT_COLOR,
+        buffer);
 }
