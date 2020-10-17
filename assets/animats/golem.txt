@@ -1,0 +1,8 @@
+sprite = ./assets/sprites/golem.png
+count = 1
+duration = 200
+
+frames.0.x = 0
+frames.0.y = 0
+frames.0.w = 64
+frames.0.h = 64

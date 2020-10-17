@@ -149,6 +149,7 @@ struct Game
 
     // Items of the Game
     void spawn_health_at_mouse();
+    void spawn_dirt_block_item_at(Vec2f pos);
     void spawn_dirt_block_item_at_mouse();
     int get_rooms_count(void);
 

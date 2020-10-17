@@ -110,5 +110,6 @@ struct Entity
 
 Entity player_entity(Vec2f pos);
 Entity enemy_entity(Vec2f pos);
+Entity golem_entity(Vec2f pos);
 
 #endif  // SOMETHING_ENTITY_H_

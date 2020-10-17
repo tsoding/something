@@ -301,6 +301,9 @@ void Game::update(float dt)
 
                 mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
+                    if (entity_index != PLAYER_ENTITY_INDEX) {
+                        spawn_dirt_block_item_at(entity->pos);
+                    }
                     entity->kill();
                     mixer.play_sample(kill_enemy_sample);
                 } else {
@@ -797,7 +800,7 @@ Rectf Game::hitbox_of_projectile(Projectile_Index index)
             projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
             PROJECTILE_TRACKING_PADDING,
             PROJECTILE_TRACKING_PADDING
-            };
+    };
 }
 
 Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
@@ -814,14 +817,19 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
     return {};
 }
 
-void Game::spawn_dirt_block_item_at_mouse()
+void Game::spawn_dirt_block_item_at(Vec2f pos)
 {
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type == ITEM_NONE) {
-            items[i] = make_dirt_block_item(mouse_position);
+            items[i] = make_dirt_block_item(pos);
             break;
         }
     }
+}
+
+void Game::spawn_dirt_block_item_at_mouse()
+{
+    spawn_dirt_block_item_at(mouse_position);
 }
 
 void Game::spawn_health_at_mouse()
@@ -844,7 +852,7 @@ void Game::spawn_enemy_at(Vec2f pos)
 {
     for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
         if (entities[i].state == Entity_State::Ded) {
-            entities[i] = enemy_entity(pos);
+            entities[i] = golem_entity(pos);
             break;
         }
     }
