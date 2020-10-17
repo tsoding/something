@@ -10,7 +10,7 @@ void Item::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
     if (type != ITEM_NONE) {
         sprite.render(
             renderer,
-            camera.to_screen(pos + vec2(0.0f, sin(a) * ITEM_AMP_VALUE)),
+            camera.to_screen(texbox_world() + vec2(0.0f, sin(a) * ITEM_AMP_VALUE)),
             SDL_FLIP_NONE,
             shade);
     }
@@ -36,6 +36,11 @@ Rectf Item::hitbox_world() const
     return hitbox_local + pos;
 }
 
+Rectf Item::texbox_world() const
+{
+    return texbox_local + pos;
+}
+
 Item make_health_item(Vec2f pos)
 {
     Item item = {};
@@ -48,6 +53,12 @@ Item make_health_item(Vec2f pos)
         ITEM_HITBOX_HEIGHT * -0.5f,
         ITEM_HITBOX_WIDTH,
         ITEM_HITBOX_HEIGHT
+    };
+    item.texbox_local = {
+        ITEM_TEXBOX_WIDTH * -0.5f,
+        ITEM_TEXBOX_HEIGHT * -0.5f,
+        ITEM_TEXBOX_WIDTH,
+        ITEM_TEXBOX_HEIGHT
     };
     item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
 
@@ -65,6 +76,12 @@ Item make_dirt_block_item(Vec2f pos)
         ITEM_HITBOX_HEIGHT * -0.5f,
         ITEM_HITBOX_WIDTH,
         ITEM_HITBOX_HEIGHT
+    };
+    item.texbox_local = {
+        ITEM_TEXBOX_WIDTH * -0.5f,
+        ITEM_TEXBOX_HEIGHT * -0.5f,
+        ITEM_TEXBOX_WIDTH,
+        ITEM_TEXBOX_HEIGHT
     };
     item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
     return item;

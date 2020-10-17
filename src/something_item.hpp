@@ -15,6 +15,8 @@ struct Item
     Vec2f pos;
     float a;
     Rectf hitbox_local;
+    Rectf texbox_local;
+
     Sample_S16 sound;
 
     void update(float delta_time);
@@ -22,6 +24,7 @@ struct Item
                 RGBA shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera) const;
     Rectf hitbox_world() const;
+    Rectf texbox_world() const;
 };
 
 Item make_health_item(Vec2f pos);
