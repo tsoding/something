@@ -343,6 +343,8 @@ Entity golem_entity(Vec2f pos)
 {
     Entity entity = {};
 
+    entity.dirt_blocks_count = 1;
+
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0;
     entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0;

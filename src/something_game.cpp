@@ -305,8 +305,12 @@ void Game::update(float dt)
 
                 mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
-                    if (entity_index != PLAYER_ENTITY_INDEX) {
-                        spawn_dirt_block_item_at(entity->pos);
+                    for (size_t i = 0; i < entity->dirt_blocks_count; ++i) {
+                        const float ITEMS_DROP_PROXIMITY = 50.0f;
+                        auto random_vector = polar(
+                            ITEMS_DROP_PROXIMITY,
+                            rand_float_range(0, 2.0f * PI));
+                        spawn_dirt_block_item_at(entity->pos + random_vector);
                     }
                     entity->kill();
                     mixer.play_sample(kill_enemy_sample);
