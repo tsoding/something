@@ -140,6 +140,10 @@ void Game::handle_event(SDL_Event *event)
                         spawn_enemy_at(mouse_position);
                     } break;
 
+                    case DEBUG_TOOLBAR_GOLEM: {
+                        spawn_golem_at(mouse_position);
+                    } break;
+
                     default: {}
                     }
                 }
@@ -849,6 +853,16 @@ void Game::add_camera_lock(Recti rect)
 }
 
 void Game::spawn_enemy_at(Vec2f pos)
+{
+    for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Ded) {
+            entities[i] = enemy_entity(pos);
+            break;
+        }
+    }
+}
+
+void Game::spawn_golem_at(Vec2f pos)
 {
     for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
         if (entities[i].state == Entity_State::Ded) {
