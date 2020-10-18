@@ -174,8 +174,8 @@ int main(int argc, char *argv[])
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].icon = tile_defs[TILE_ICE].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tooltip = "Add ice blocks"_sv;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.type = Tool_Type::Item;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.item.item = make_dirt_block_item(vec2(0.0f, 0.0f));
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.type = Tool_Type::Tile;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.tile.tile = TILE_ICE;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

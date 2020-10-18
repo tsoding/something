@@ -29,5 +29,6 @@ struct Item
 
 Item make_health_item(Vec2f pos);
 Item make_dirt_block_item(Vec2f pos);
+Item make_ice_block_item(Vec2f pos);
 
 #endif  // SOMETHING_ITEM_HPP_
