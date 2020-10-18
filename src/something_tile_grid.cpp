@@ -167,7 +167,7 @@ Maybe<Vec2i> Tile_Grid::next_in_bfs(Vec2i dst, Recti *lock)
 {
 
     if (rect_contains_vec2(*lock, dst) && bfs_trace[dst.y - lock->y][dst.x - lock->x] > 0) {
-        for (int dy = -1; dy <= 1; ++dy) {
+        for (int dy = 1; dy >= -1; --dy) {
             for (int dx = -1; dx <= 1; ++dx) {
                 if ((dy == 0) != (dx == 0)) {
                     Vec2i dst1 = {
