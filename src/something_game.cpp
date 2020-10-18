@@ -140,6 +140,10 @@ void Game::handle_event(SDL_Event *event)
                         spawn_enemy_at(mouse_position);
                     } break;
 
+                    case DEBUG_TOOLBAR_GOLEM: {
+                        spawn_golem_at(mouse_position);
+                    } break;
+
                     default: {}
                     }
                 }
@@ -301,6 +305,13 @@ void Game::update(float dt)
 
                 mixer.play_sample(damage_enemy_sample);
                 if (entity->lives <= 0) {
+                    for (size_t i = 0; i < entity->dirt_blocks_count; ++i) {
+                        const float ITEMS_DROP_PROXIMITY = 50.0f;
+                        auto random_vector = polar(
+                            ITEMS_DROP_PROXIMITY,
+                            rand_float_range(0, 2.0f * PI));
+                        spawn_dirt_block_item_at(entity->pos + random_vector);
+                    }
                     entity->kill();
                     mixer.play_sample(kill_enemy_sample);
                 } else {
@@ -797,7 +808,7 @@ Rectf Game::hitbox_of_projectile(Projectile_Index index)
             projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
             PROJECTILE_TRACKING_PADDING,
             PROJECTILE_TRACKING_PADDING
-            };
+    };
 }
 
 Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
@@ -814,14 +825,19 @@ Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
     return {};
 }
 
-void Game::spawn_dirt_block_item_at_mouse()
+void Game::spawn_dirt_block_item_at(Vec2f pos)
 {
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
         if (items[i].type == ITEM_NONE) {
-            items[i] = make_dirt_block_item(mouse_position);
+            items[i] = make_dirt_block_item(pos);
             break;
         }
     }
+}
+
+void Game::spawn_dirt_block_item_at_mouse()
+{
+    spawn_dirt_block_item_at(mouse_position);
 }
 
 void Game::spawn_health_at_mouse()
@@ -845,6 +861,16 @@ void Game::spawn_enemy_at(Vec2f pos)
     for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
         if (entities[i].state == Entity_State::Ded) {
             entities[i] = enemy_entity(pos);
+            break;
+        }
+    }
+}
+
+void Game::spawn_golem_at(Vec2f pos)
+{
+    for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Ded) {
+            entities[i] = golem_entity(pos);
             break;
         }
     }

@@ -144,6 +144,9 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tooltip = "Add dirt block items"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].icon = sprite_from_texture_index(
+        texture_index_by_name("./assets/sprites/golem.png"_sv));
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tooltip = "Add golem enemy"_sv;
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

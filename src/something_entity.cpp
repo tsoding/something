@@ -339,6 +339,52 @@ Entity player_entity(Vec2f pos)
     return entity;
 }
 
+Entity golem_entity(Vec2f pos)
+{
+    Entity entity = {};
+
+    entity.dirt_blocks_count = 1;
+
+    entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0;
+    entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0;
+    entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0;
+    entity.hitbox_local.h = ENEMY_HITBOX_H + 32.0;
+    entity.texbox_local.x = entity.texbox_local.w * -0.5f;
+    entity.texbox_local.y = entity.texbox_local.h * -0.5f;
+    entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
+    entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+
+
+    entity.idle = frame_animat_by_name("./assets/animats/golem.txt"_sv);
+    entity.walking = frame_animat_by_name("./assets/animats/golem.txt"_sv);
+    entity.jump_samples[0] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_0);
+    entity.jump_samples[1] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_1);
+
+    entity.lives = ENTITY_INITIAL_LIVES;
+    entity.state = Entity_State::Alive;
+    entity.alive_state = Alive_State::Idle;
+    entity.pos = pos;
+    entity.gun_dir = vec2(1.0f, 0.0f);
+
+    entity.prepare_for_jump_animat.begin = 0.0f;
+    entity.prepare_for_jump_animat.end = 0.2f;
+    entity.prepare_for_jump_animat.duration = 0.2f;
+
+    entity.jump_animat.rubber_animats[0].begin = 0.2f;
+    entity.jump_animat.rubber_animats[0].end = -0.2f;
+    entity.jump_animat.rubber_animats[0].duration = 0.1f;
+
+    entity.jump_animat.rubber_animats[1].begin = -0.2f;
+    entity.jump_animat.rubber_animats[1].end = 0.0f;
+    entity.jump_animat.rubber_animats[1].duration = 0.2f;
+
+    entity.poof_animat.begin = 0.0f;
+    entity.poof_animat.end = 1.0f;
+    entity.poof_animat.duration = 0.1f;
+
+    return entity;
+}
+
 Entity enemy_entity(Vec2f pos)
 {
     Entity entity = {};
