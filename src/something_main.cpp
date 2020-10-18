@@ -102,6 +102,12 @@ int main(int argc, char *argv[])
     };
     tile_defs[TILE_DESTROYABLE_3].bottom_texture = tile_defs[TILE_DESTROYABLE_3].top_texture;
 
+    tile_defs[TILE_ICE].bottom_texture = {
+        {0, 0, 64, 64},
+        texture_index_by_name("./assets/sprites/ice.png"_sv)
+    };
+    tile_defs[TILE_ICE].top_texture = tile_defs[TILE_ICE].bottom_texture;
+
     game.background.layers[0] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-lights.png"_sv));
     game.background.layers[1] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-middle-trees.png"_sv));
     game.background.layers[2] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-front-trees.png"_sv));
@@ -132,21 +138,44 @@ int main(int argc, char *argv[])
 
     static_assert(DEBUG_TOOLBAR_COUNT <= TOOLBAR_BUTTONS_CAPACITY);
     game.debug_toolbar.buttons_count = DEBUG_TOOLBAR_COUNT;
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].icon = tile_defs[TILE_WALL].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tooltip = "Edit walls"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.type = Tool_Type::Tile;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.tile.tile = TILE_WALL;
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tooltip = "Destroyable Tile"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.type = Tool_Type::Tile;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.tile.tile = TILE_DESTROYABLE_0;
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
         texture_index_by_name(
             ITEM_HEALTH_TEXTURE));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.type = Tool_Type::Item;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.item.item = make_health_item(vec2(0.0f, 0.0f));
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.type = Tool_Type::Entity;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.entity.entity = enemy_entity(vec2(0.0f, 0.0f));
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tooltip = "Add dirt block items"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.type = Tool_Type::Item;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.item.item = make_dirt_block_item(vec2(0.0f, 0.0f));
+
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].icon = sprite_from_texture_index(
         texture_index_by_name("./assets/sprites/golem.png"_sv));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tooltip = "Add golem enemy"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.type = Tool_Type::Entity;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.entity.entity = golem_entity(vec2(0.0f, 0.0f));
+
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].icon = tile_defs[TILE_ICE].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tooltip = "Add ice blocks"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.type = Tool_Type::Item;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.item.item = make_dirt_block_item(vec2(0.0f, 0.0f));
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

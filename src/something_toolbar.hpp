@@ -1,10 +1,65 @@
 #ifndef SOMETHING_TOOLBAR_HPP_
 #define SOMETHING_TOOLBAR_HPP_
 
+enum class Tool_Type
+{
+    Item,
+    Tile,
+    Entity
+};
+
+struct Game;
+
+struct Item_Tool
+{
+    Item item;
+
+    void handle_event(Game *game, SDL_Event *event);
+};
+
+struct Tile_Tool
+{
+    Tile tile;
+
+    enum State
+    {
+        Inactive = 0,
+        Drawing,
+        Erasing,
+    };
+
+    State state;
+
+    void handle_event(Game *game, SDL_Event *event);
+};
+
+struct Entity_Tool
+{
+    Entity entity;
+
+    void handle_event(Game *game, SDL_Event *event);
+};
+
+struct Tool
+{
+    Tool_Type type;
+
+    union
+    {
+        Item_Tool item;
+        Tile_Tool tile;
+        Entity_Tool entity;
+    };
+
+    void handle_event(Game *game, SDL_Event *event);
+};
+
+
 struct Button
 {
     Sprite icon;
     String_View tooltip;
+    Tool tool;
 };
 
 const size_t TOOLBAR_BUTTONS_CAPACITY =  69;
