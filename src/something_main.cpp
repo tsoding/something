@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
 
     // TODO(#232): Ice blocks should be destroyable
     // TODO(#233): Player should be able to place ice blocks (introduce another kind of "weapon")
-    // TODO: Separate kind of fire projectiles that can destroy ice blocks
+    // TODO(#234): Separate kind of fire projectiles that can destroy ice blocks
     // TODO: Separate kind of water projectiles that can destroy dirt blocks
     // TODO: Ice golems that can drop ice items
 
