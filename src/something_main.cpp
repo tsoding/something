@@ -183,7 +183,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
     // TODO(#232): Ice blocks should be destroyable
-    // TODO: Player should be able to place ice blocks (introduce another kind of "weapon")
+    // TODO(#233): Player should be able to place ice blocks (introduce another kind of "weapon")
     // TODO: Separate kind of fire projectiles that can destroy ice blocks
     // TODO: Separate kind of water projectiles that can destroy dirt blocks
     // TODO: Ice golems that can drop ice items
