@@ -177,6 +177,17 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.type = Tool_Type::Tile;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.tile.tile = TILE_ICE;
 
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].icon = tile_defs[TILE_ICE].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tooltip = "Add ice items"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
+
+    // TODO: Ice blocks should be destroyable
+    // TODO: Player should be able to place ice blocks (introduce another kind of "weapon")
+    // TODO: Separate kind of fire projectiles that can destroy ice blocks
+    // TODO: Separate kind of water projectiles that can destroy dirt blocks
+    // TODO: Ice golems that can drop ice items
+
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
     want.freq = SOMETHING_SOUND_FREQ;

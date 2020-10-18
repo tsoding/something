@@ -6,6 +6,7 @@ enum Item_Type
     ITEM_NONE = 0,
     ITEM_HEALTH,
     ITEM_DIRT_BLOCK,
+    ITEM_ICE_BLOCK,
 };
 
 struct Item

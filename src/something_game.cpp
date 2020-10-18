@@ -301,6 +301,12 @@ void Game::update(float dt)
                             mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
+
+                        case ITEM_ICE_BLOCK: {
+                            entity->ice_blocks_count += 1;
+                            mixer.play_sample(item->sound);
+                            item->type = ITEM_NONE;
+                        } break;
                         }
                         break;
                     }

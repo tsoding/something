@@ -159,8 +159,6 @@ void Tile_Tool::handle_event(Game *game, SDL_Event *event)
         }
     } break;
     }
-
-    println(stdout, "Tile_Tool::handle_event()");
 }
 
 void Item_Tool::handle_event(Game *game, SDL_Event *event)
