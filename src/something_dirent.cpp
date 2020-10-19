@@ -1,4 +1,3 @@
-#ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "something_dirent.hpp"
@@ -12,12 +11,12 @@ struct DIR
 
 DIR *opendir(const char *dirpath)
 {
-    trace_assert(dirpath);
+    assert(dirpath);
 
     char buffer[MAX_PATH];
     snprintf(buffer, MAX_PATH, "%s\\*", dirpath);
 
-    DIR *dir = nth_calloc(1, sizeof(DIR));
+    DIR *dir = (DIR*)calloc(1, sizeof(DIR));
 
     dir->hFind = FindFirstFile(buffer, &dir->data);
     if (dir->hFind == INVALID_HANDLE_VALUE) {
@@ -36,10 +35,10 @@ fail:
 
 struct dirent *readdir(DIR *dirp)
 {
-    trace_assert(dirp);
+    assert(dirp);
 
     if (dirp->dirent == NULL) {
-        dirp->dirent = nth_calloc(1, sizeof(struct dirent));
+        dirp->dirent = (dirent*)calloc(1, sizeof(struct dirent));
     } else {
         if(!FindNextFile(dirp->hFind, &dirp->data)) {
             return NULL;
@@ -58,7 +57,7 @@ struct dirent *readdir(DIR *dirp)
 
 void closedir(DIR *dirp)
 {
-    trace_assert(dirp);
+    assert(dirp);
 
     FindClose(dirp->hFind);
     if (dirp->dirent) {
