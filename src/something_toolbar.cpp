@@ -1,4 +1,5 @@
 #include "something_toolbar.hpp"
+#include "something_game.hpp"
 
 static void render_tooltip(SDL_Renderer *renderer,
                            Bitmap_Font font,
@@ -25,7 +26,6 @@ static void render_tooltip(SDL_Renderer *renderer,
     sec(SDL_RenderFillRect(renderer, &tooltip_rect));
     font.render(renderer, position + padding, size, TOOLTIP_FOREGROUND_COLOR, tooltip);
 }
-
 
 Rectf Toolbar::button_hitbox(size_t button)
 {
@@ -106,4 +106,75 @@ bool Toolbar::handle_mouse_hover(Vec2f position)
 
     hovered_button = {};
     return false;
+}
+
+void Tool::handle_event(Game *game, SDL_Event *event)
+{
+    switch (type) {
+    case Tool_Type::Item:
+        item.handle_event(game, event);
+        break;
+    case Tool_Type::Tile:
+        tile.handle_event(game, event);
+        break;
+    case Tool_Type::Entity:
+        entity.handle_event(game, event);
+        break;
+    }
+}
+
+void Tile_Tool::handle_event(Game *game, SDL_Event *event)
+{
+    switch (event->type) {
+    case SDL_MOUSEBUTTONDOWN: {
+        Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
+
+        if (game->grid.get_tile(coord) == TILE_EMPTY) {
+            state = Drawing;
+            game->grid.set_tile(coord, tile);
+        } else {
+            state = Erasing;
+            game->grid.set_tile(coord, TILE_EMPTY);
+        }
+    } break;
+
+    case SDL_MOUSEBUTTONUP: {
+        state = Inactive;
+    } break;
+
+    case SDL_MOUSEMOTION: {
+        switch (state) {
+        case Drawing: {
+            Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
+            game->grid.set_tile(coord, tile);
+        } break;
+
+        case Erasing: {
+            Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
+            game->grid.set_tile(coord, TILE_EMPTY);
+        } break;
+
+        case Inactive:
+        default: {}
+        }
+    } break;
+    }
+}
+
+void Item_Tool::handle_event(Game *game, SDL_Event *event)
+{
+    switch (event->type) {
+    case SDL_MOUSEBUTTONDOWN: {
+        game->spawn_item_at(item, game->mouse_position);
+    } break;
+    }
+}
+
+void Entity_Tool::handle_event(Game *game, SDL_Event *event)
+{
+    switch (event->type) {
+    case SDL_MOUSEBUTTONDOWN: {
+        game->spawn_entity_at(entity, game->mouse_position);
+    } break;
+    }
 }

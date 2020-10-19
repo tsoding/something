@@ -61,6 +61,7 @@ struct Entity
     Direction walking_direction;
     Weapon current_weapon;
     size_t dirt_blocks_count;
+    size_t ice_blocks_count;
 
     Frame_Animat idle;
     Frame_Animat walking;

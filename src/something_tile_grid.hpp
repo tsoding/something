@@ -9,7 +9,8 @@ const Tile TILE_DESTROYABLE_0 = 2;
 const Tile TILE_DESTROYABLE_1 = 3;
 const Tile TILE_DESTROYABLE_2 = 4;
 const Tile TILE_DESTROYABLE_3 = 5;
-const Tile TILE_COUNT         = 6;
+const Tile TILE_ICE           = 6;
+const Tile TILE_COUNT         = 7;
 
 const size_t TILE_GRID_WIDTH = 4096;
 const size_t TILE_GRID_HEIGHT = 4096;
@@ -28,6 +29,7 @@ Tile_Def tile_defs[TILE_COUNT] = {
     {true, {}, {}},                           // TILE_DESTROYABLE_1
     {true, {}, {}},                           // TILE_DESTROYABLE_2
     {true, {}, {}},                           // TILE_DESTROYABLE_3
+    {true, {}, {}},                           // TILE_ICE
 };
 
 const float TILE_SIZE = 128.0f * 0.5f;

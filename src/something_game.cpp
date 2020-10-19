@@ -77,23 +77,10 @@ void Game::handle_event(SDL_Event *event)
         if (debug) {
             debug_toolbar.handle_mouse_hover(
                 vec_cast<float>(vec2(event->motion.x, event->motion.y)));
+            debug_toolbar.buttons[debug_toolbar.active_button].tool.handle_event(this, event);
         }
 
         grid.resolve_point_collision(&collision_probe);
-
-        Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
-        switch (draw_state) {
-        case Debug_Draw_State::Create: {
-            grid.set_tile(tile, draw_tile);
-        } break;
-
-        case Debug_Draw_State::Delete: {
-            grid.set_tile(tile, TILE_EMPTY);
-        } break;
-
-        case Debug_Draw_State::Idle:
-        default: {}
-        }
 
         if (entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block && holding_down_mouse) {
             entity_shoot({PLAYER_ENTITY_INDEX});
@@ -108,44 +95,7 @@ void Game::handle_event(SDL_Event *event)
                     projectile_at_position(mouse_position);
 
                 if (!tracking_projectile.has_value) {
-                    switch (debug_toolbar.active_button) {
-                    case DEBUG_TOOLBAR_TILES:
-                    case DEBUG_TOOLBAR_DESTROYABLE: {
-                        if (debug_toolbar.active_button == DEBUG_TOOLBAR_TILES) {
-                            draw_tile = TILE_WALL;
-                        } else {
-                            draw_tile = TILE_DESTROYABLE_0;
-                        }
-
-                        Vec2i tile = vec_cast<int>(mouse_position / TILE_SIZE);
-
-                        if (grid.get_tile(tile) == TILE_EMPTY) {
-                            draw_state = Debug_Draw_State::Create;
-                            grid.set_tile(tile, draw_tile);
-                        } else {
-                            draw_state = Debug_Draw_State::Delete;
-                            grid.set_tile(tile, TILE_EMPTY);
-                        }
-                    } break;
-
-                    case DEBUG_TOOLBAR_HEALS: {
-                        spawn_health_at_mouse();
-                    } break;
-
-                    case DEBUG_TOOLBAR_DIRT: {
-                        spawn_dirt_block_item_at_mouse();
-                    } break;
-
-                    case DEBUG_TOOLBAR_ENEMIES: {
-                        spawn_enemy_at(mouse_position);
-                    } break;
-
-                    case DEBUG_TOOLBAR_GOLEM: {
-                        spawn_golem_at(mouse_position);
-                    } break;
-
-                    default: {}
-                    }
+                    debug_toolbar.buttons[debug_toolbar.active_button].tool.handle_event(this, event);
                 }
             }
         } break;
@@ -162,13 +112,13 @@ void Game::handle_event(SDL_Event *event)
 
     case SDL_MOUSEBUTTONUP: {
         switch (event->button.button) {
-        case SDL_BUTTON_RIGHT: {
-            draw_state = Debug_Draw_State::Idle;
-        } break;
-
         case SDL_BUTTON_LEFT: {
             holding_down_mouse = false;
         } break;
+        }
+
+        if (debug) {
+            debug_toolbar.buttons[debug_toolbar.active_button].tool.handle_event(this, event);
         }
     } break;
     }
@@ -348,6 +298,12 @@ void Game::update(float dt)
 
                         case ITEM_DIRT_BLOCK: {
                             entity->dirt_blocks_count += 1;
+                            mixer.play_sample(item->sound);
+                            item->type = ITEM_NONE;
+                        } break;
+
+                        case ITEM_ICE_BLOCK: {
+                            entity->ice_blocks_count += 1;
                             mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
@@ -840,6 +796,17 @@ void Game::spawn_dirt_block_item_at_mouse()
     spawn_dirt_block_item_at(mouse_position);
 }
 
+void Game::spawn_item_at(Item item, Vec2f pos)
+{
+    item.pos = pos;
+    for (size_t i = 0; i < ITEMS_COUNT; ++i) {
+        if (items[i].type == ITEM_NONE) {
+            items[i] = item;
+            break;
+        }
+    }
+}
+
 void Game::spawn_health_at_mouse()
 {
     for (size_t i = 0; i < ITEMS_COUNT; ++i) {
@@ -854,6 +821,17 @@ void Game::add_camera_lock(Recti rect)
 {
     assert(camera_locks_count < CAMERA_LOCKS_CAPACITY);
     camera_locks[camera_locks_count++] = rect;
+}
+
+void Game::spawn_entity_at(Entity entity, Vec2f pos)
+{
+    entity.pos = pos;
+    for (size_t i = PLAYER_ENTITY_INDEX + ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Ded) {
+            entities[i] = entity;
+            break;
+        }
+    }
 }
 
 void Game::spawn_enemy_at(Vec2f pos)

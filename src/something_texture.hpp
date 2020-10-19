@@ -13,6 +13,7 @@ const char *texture_files[] = {
     "./assets/sprites/parallax-forest-front-trees.png",
     "./assets/sprites/parallax-forest-lights.png",
     "./assets/sprites/golem.png",
+    "./assets/sprites/ice.png",
 };
 const size_t TEXTURE_COUNT = sizeof(texture_files) / sizeof(texture_files[0]);
 

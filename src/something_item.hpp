@@ -6,6 +6,7 @@ enum Item_Type
     ITEM_NONE = 0,
     ITEM_HEALTH,
     ITEM_DIRT_BLOCK,
+    ITEM_ICE_BLOCK,
 };
 
 struct Item
@@ -29,5 +30,6 @@ struct Item
 
 Item make_health_item(Vec2f pos);
 Item make_dirt_block_item(Vec2f pos);
+Item make_ice_block_item(Vec2f pos);
 
 #endif  // SOMETHING_ITEM_HPP_

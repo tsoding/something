@@ -86,3 +86,25 @@ Item make_dirt_block_item(Vec2f pos)
     item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
     return item;
 }
+
+Item make_ice_block_item(Vec2f pos)
+{
+    Item item = {};
+    item.pos = pos;
+    item.type = ITEM_ICE_BLOCK;
+    item.sprite = tile_defs[TILE_ICE].top_texture;
+    item.hitbox_local = {
+        ITEM_HITBOX_WIDTH * -0.5f,
+        ITEM_HITBOX_HEIGHT * -0.5f,
+        ITEM_HITBOX_WIDTH,
+        ITEM_HITBOX_HEIGHT
+    };
+    item.texbox_local = {
+        ITEM_TEXBOX_WIDTH * -0.5f,
+        ITEM_TEXBOX_HEIGHT * -0.5f,
+        ITEM_TEXBOX_WIDTH,
+        ITEM_TEXBOX_HEIGHT
+    };
+    item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
+    return item;
+}
