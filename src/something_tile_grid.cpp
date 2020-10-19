@@ -167,21 +167,18 @@ Maybe<Vec2i> Tile_Grid::next_in_bfs(Vec2i dst, Recti *lock)
 {
 
     if (rect_contains_vec2(*lock, dst) && bfs_trace[dst.y - lock->y][dst.x - lock->x] > 0) {
-        for (int dy = -1; dy <= 1; ++dy) {
-            for (int dx = -1; dx <= 1; ++dx) {
-                if ((dy == 0) != (dx == 0)) {
-                    Vec2i dst1 = {
-                        dst.x + dx,
-                        dst.y + dy
-                    };
+        Vec2i directions[4];
+        directions[0] = {dst.x + 1, dst.y    };
+        directions[1] = {dst.x - 1, dst.y    };
+        directions[2] = {dst.x    , dst.y - 1};
+        directions[3] = {dst.x    , dst.y + 1};
 
-                    if (rect_contains_vec2(*lock, dst1) &&
-                        is_tile_empty_tile(dst1) &&
-                        bfs_trace[dst1.y - lock->y][dst1.x - lock->x] < bfs_trace[dst.y - lock->y][dst.x - lock->x])
-                    {
-                        return {true, dst1};
-                    }
-                }
+        for (auto &dst1 : directions) {
+            if (rect_contains_vec2(*lock, dst1) &&
+                is_tile_empty_tile(dst1) &&
+                bfs_trace[dst1.y - lock->y][dst1.x - lock->x] < bfs_trace[dst.y - lock->y][dst.x - lock->x])
+            {
+                return {true, dst1};
             }
         }
     }
