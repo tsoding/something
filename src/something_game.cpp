@@ -876,25 +876,47 @@ int Game::get_rooms_count(void)
 
 void Game::render_player_hud(SDL_Renderer *renderer)
 {
-    char buffer[256];
-    String_Buffer sbuffer = {};
-    sbuffer.capacity = sizeof(buffer);
-    sbuffer.data = buffer;
+    const size_t HUD_WEAPON_COUNT = 2;
 
-    sprintln(&sbuffer, "Dirt blocks: ", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
+    struct Weapon_Stat
+    {
+        Sprite icon;
+        size_t amount;
+    };
 
-    auto hud_position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN);
-    auto font_size = vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE);
-    auto board_rect =
-        rect(
-            hud_position,
-            debug_font.text_size(font_size, buffer) + 2.0f * vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING));
-    fill_rect(renderer, board_rect, PLAYER_HUD_BACKGROUND_COLOR);
+    Weapon_Stat stats[HUD_WEAPON_COUNT] = {
+        {
+            tile_defs[TILE_DESTROYABLE_0].top_texture,
+            entities[PLAYER_ENTITY_INDEX].dirt_blocks_count
+        },
+        {
+            tile_defs[TILE_ICE].top_texture,
+            entities[PLAYER_ENTITY_INDEX].ice_blocks_count,
+        },
+    };
 
-    debug_font.render(
-        renderer,
-        hud_position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
-        font_size,
-        PLAYER_HUD_FONT_COLOR,
-        buffer);
+    const size_t maximum_length = 3;
+    auto text_width = maximum_length * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
+    auto text_height = BITMAP_FONT_CHAR_HEIGHT * PLAYER_HUD_FONT_SIZE;
+
+    Vec2f border_size = vec2(
+        PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON + text_width + PLAYER_HUD_PADDING * 2,
+        max(PLAYER_HUD_ICON_HEIGHT, text_height) + PLAYER_HUD_PADDING * 2);
+
+    for (size_t i = 0; i < HUD_WEAPON_COUNT; ++i) {
+        const auto position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN + (border_size.y + PLAYER_HUD_MARGIN) * i);
+        fill_rect(renderer, rect(position, border_size), PLAYER_HUD_BACKGROUND_COLOR);
+        Rectf destrect = rect(position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
+                              vec2(PLAYER_HUD_ICON_WIDTH, PLAYER_HUD_ICON_HEIGHT));
+        stats[i].icon.render(renderer, destrect);
+
+        char buffer[maximum_length + 1];
+        snprintf(buffer, sizeof(buffer), "%ld", stats[i].amount);
+        debug_font.render(
+            renderer,
+            position + vec2(PLAYER_HUD_PADDING + PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON, PLAYER_HUD_PADDING),
+            vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE),
+            PLAYER_HUD_FONT_COLOR,
+            buffer);
+    }
 }
