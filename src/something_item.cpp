@@ -70,7 +70,7 @@ Item make_dirt_block_item(Vec2f pos)
     Item item = {};
     item.pos = pos;
     item.type = ITEM_DIRT_BLOCK;
-    item.sprite = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    item.sprite = tile_defs[TILE_DIRT_0].top_texture;
     item.hitbox_local = {
         ITEM_HITBOX_WIDTH * -0.5f,
         ITEM_HITBOX_HEIGHT * -0.5f,
@@ -92,7 +92,7 @@ Item make_ice_block_item(Vec2f pos)
     Item item = {};
     item.pos = pos;
     item.type = ITEM_ICE_BLOCK;
-    item.sprite = tile_defs[TILE_ICE].top_texture;
+    item.sprite = tile_defs[TILE_ICE_0].top_texture;
     item.hitbox_local = {
         ITEM_HITBOX_WIDTH * -0.5f,
         ITEM_HITBOX_HEIGHT * -0.5f,
