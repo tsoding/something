@@ -772,9 +772,10 @@ void Game::update_projectiles(float dt)
             auto tile = grid.tile_at_abs(projectiles[i].pos);
             if (tile && tile_defs[*tile].is_collidable) {
                 projectiles[i].kill();
-                if (TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) {
+                if ((TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) ||
+                    (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3)) {
                     *tile += 1;
-                } else if (*tile == TILE_DIRT_3) {
+                } else if (*tile == TILE_DIRT_3 || *tile == TILE_ICE_3) {
                     *tile = TILE_EMPTY;
                 }
             }

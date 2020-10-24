@@ -10,7 +10,10 @@ const Tile TILE_DIRT_1 = 3;
 const Tile TILE_DIRT_2 = 4;
 const Tile TILE_DIRT_3 = 5;
 const Tile TILE_ICE_0  = 6;
-const Tile TILE_COUNT  = 7;
+const Tile TILE_ICE_1  = 7;
+const Tile TILE_ICE_2  = 8;
+const Tile TILE_ICE_3  = 9;
+const Tile TILE_COUNT  = 10;
 
 const size_t TILE_GRID_WIDTH = 4096;
 const size_t TILE_GRID_HEIGHT = 4096;
@@ -30,6 +33,9 @@ Tile_Def tile_defs[TILE_COUNT] = {
     {true, {}, {}},                           // TILE_DIRT_2
     {true, {}, {}},                           // TILE_DIRT_3
     {true, {}, {}},                           // TILE_ICE_0
+    {true, {}, {}},                           // TILE_ICE_1
+    {true, {}, {}},                           // TILE_ICE_2
+    {true, {}, {}},                           // TILE_ICE_3
 };
 
 const float TILE_SIZE = 128.0f * 0.5f;
