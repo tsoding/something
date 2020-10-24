@@ -164,6 +164,18 @@ void Game::handle_event(SDL_Event *event)
             } break;
             }
         } break;
+
+        case SDL_MOUSEWHEEL: {
+            if (event->wheel.y < 0) {
+                entities[PLAYER_ENTITY_INDEX].current_weapon =
+                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].current_weapon + 1,
+                                 (int) WEAPON_COUNT);
+            } else if (event->wheel.y > 0) {
+                entities[PLAYER_ENTITY_INDEX].current_weapon =
+                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].current_weapon - 1,
+                                 (int) WEAPON_COUNT);
+            }
+        } break;
         }
     }
 }
