@@ -102,11 +102,11 @@ int main(int argc, char *argv[])
     };
     tile_defs[TILE_DIRT_3].bottom_texture = tile_defs[TILE_DIRT_3].top_texture;
 
-    tile_defs[TILE_ICE].bottom_texture = {
+    tile_defs[TILE_ICE_0].bottom_texture = {
         {0, 0, 64, 64},
         texture_index_by_name("./assets/sprites/ice.png"_sv)
     };
-    tile_defs[TILE_ICE].top_texture = tile_defs[TILE_ICE].bottom_texture;
+    tile_defs[TILE_ICE_0].top_texture = tile_defs[TILE_ICE_0].bottom_texture;
 
     game.background.layers[0] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-lights.png"_sv));
     game.background.layers[1] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-middle-trees.png"_sv));
@@ -172,12 +172,12 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.entity.entity = golem_entity(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].icon = tile_defs[TILE_ICE].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].icon = tile_defs[TILE_ICE_0].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tooltip = "Add ice blocks"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.type = Tool_Type::Tile;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.tile.tile = TILE_ICE;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_BLOCK].tool.tile.tile = TILE_ICE_0;
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].icon = tile_defs[TILE_ICE].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].icon = tile_defs[TILE_ICE_0].top_texture;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tooltip = "Add ice items"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
