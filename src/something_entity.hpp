@@ -28,7 +28,8 @@ const size_t JUMP_SAMPLES_CAPACITY = 2;
 enum class Weapon
 {
     Gun,
-    Dirt_Block
+    Dirt_Block,
+    Ice_Block,
 };
 
 struct Entity

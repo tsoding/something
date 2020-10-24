@@ -82,7 +82,10 @@ void Game::handle_event(SDL_Event *event)
 
         grid.resolve_point_collision(&collision_probe);
 
-        if (entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block && holding_down_mouse) {
+        if ((entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block ||
+             entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Ice_Block) &&
+            holding_down_mouse)
+        {
             entity_shoot({PLAYER_ENTITY_INDEX});
         }
     } break;
@@ -136,6 +139,10 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_2: {
                 entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Dirt_Block;
+            } break;
+
+            case SDLK_3: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Ice_Block;
             } break;
 
             case SDLK_SPACE: {
@@ -373,17 +380,27 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
+    case Weapon::Ice_Block: {
+        bool can_place = false;
+        auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
+        can_place = can_place && entities[PLAYER_ENTITY_INDEX].ice_blocks_count > 0;
+        tile_defs[TILE_ICE].top_texture.render(
+            renderer,
+            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
+            SDL_FLIP_NONE,
+            can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
+    } break;
+
     case Weapon::Dirt_Block: {
         bool can_place = false;
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
-
         can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
 
         tile_defs[TILE_DESTROYABLE_0].top_texture.render(
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
             SDL_FLIP_NONE,
-            can_place ? CAN_PLACE_DIRT_BLOCK_COLOR : CANNOT_PLACE_DIRT_BLOCK_COLOR);
+            can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
     case Weapon::Gun: {
@@ -434,6 +451,15 @@ void Game::entity_shoot(Entity_Index entity_index)
             if (can_place && entity->dirt_blocks_count > 0) {
                 grid.set_tile(target_tile, TILE_DESTROYABLE_0);
                 entity->dirt_blocks_count -= 1;
+            }
+        } break;
+
+        case Weapon::Ice_Block: {
+            bool can_place = false;
+            auto target_tile = where_entity_can_place_block(entity_index, &can_place);
+            if (can_place && entity->ice_blocks_count > 0) {
+                grid.set_tile(target_tile, TILE_ICE);
+                entity->ice_blocks_count -= 1;
             }
         } break;
         }
