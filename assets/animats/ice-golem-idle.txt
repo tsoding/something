@@ -1,0 +1,14 @@
+sprite = ./assets/sprites/walking-ice-golem-48px.png
+count = 1
+duration = 200
+
+# frames.0.x = 144
+# frames.0.y = 0
+# frames.0.w = 48
+# frames.0.h = 48
+
+frames.0.x = 96
+frames.0.y = 0
+frames.0.w = 48
+frames.0.h = 48
+
