@@ -82,8 +82,8 @@ void Game::handle_event(SDL_Event *event)
 
         grid.resolve_point_collision(&collision_probe);
 
-        if ((entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Dirt_Block ||
-             entities[PLAYER_ENTITY_INDEX].current_weapon == Weapon::Ice_Block) &&
+        if ((entities[PLAYER_ENTITY_INDEX].current_weapon == WEAPON_DIRT_BLOCK ||
+             entities[PLAYER_ENTITY_INDEX].current_weapon == WEAPON_ICE_BLOCK) &&
             holding_down_mouse)
         {
             entity_shoot({PLAYER_ENTITY_INDEX});
@@ -134,15 +134,15 @@ void Game::handle_event(SDL_Event *event)
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
             case SDLK_1: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Gun;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_GUN;
             } break;
 
             case SDLK_2: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Dirt_Block;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
             } break;
 
             case SDLK_3: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = Weapon::Ice_Block;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
             } break;
 
             case SDLK_SPACE: {
@@ -380,7 +380,7 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
-    case Weapon::Ice_Block: {
+    case WEAPON_ICE_BLOCK: {
         bool can_place = false;
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
         can_place = can_place && entities[PLAYER_ENTITY_INDEX].ice_blocks_count > 0;
@@ -391,7 +391,7 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
-    case Weapon::Dirt_Block: {
+    case WEAPON_DIRT_BLOCK: {
         bool can_place = false;
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
         can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
@@ -403,7 +403,11 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
-    case Weapon::Gun: {
+    case WEAPON_GUN: {
+    } break;
+
+    case WEAPON_COUNT: {
+        assert(0 && "Unreachable");
     } break;
     }
 
@@ -432,7 +436,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 
     if (entity->state == Entity_State::Alive) {
         switch (entity->current_weapon) {
-        case Weapon::Gun: {
+        case WEAPON_GUN: {
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
                     entity->pos,
@@ -444,7 +448,7 @@ void Game::entity_shoot(Entity_Index entity_index)
             }
         } break;
 
-        case Weapon::Dirt_Block: {
+        case WEAPON_DIRT_BLOCK: {
             // TODO(#222): dirt blocks must not be placed on the player
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
@@ -454,13 +458,17 @@ void Game::entity_shoot(Entity_Index entity_index)
             }
         } break;
 
-        case Weapon::Ice_Block: {
+        case WEAPON_ICE_BLOCK: {
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
             if (can_place && entity->ice_blocks_count > 0) {
                 grid.set_tile(target_tile, TILE_ICE);
                 entity->ice_blocks_count -= 1;
             }
+        } break;
+
+        case WEAPON_COUNT: {
+            assert(0 && "Unreachable");
         } break;
         }
     }
@@ -902,47 +910,45 @@ int Game::get_rooms_count(void)
 
 void Game::render_player_hud(SDL_Renderer *renderer)
 {
-    const size_t HUD_WEAPON_COUNT = 2;
+    const size_t MAXIMUM_LENGTH = 3;
 
     struct Weapon_Stat
     {
         Sprite icon;
-        size_t amount;
+        char label[MAXIMUM_LENGTH + 1];
     };
 
-    Weapon_Stat stats[HUD_WEAPON_COUNT] = {
-        {
-            tile_defs[TILE_DESTROYABLE_0].top_texture,
-            entities[PLAYER_ENTITY_INDEX].dirt_blocks_count
-        },
-        {
-            tile_defs[TILE_ICE].top_texture,
-            entities[PLAYER_ENTITY_INDEX].ice_blocks_count,
-        },
-    };
+    Weapon_Stat stats[WEAPON_COUNT] = {};
 
-    const size_t maximum_length = 3;
-    auto text_width = maximum_length * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
+    snprintf(stats[WEAPON_GUN].label, sizeof(stats[WEAPON_GUN].label), "inf");
+    assert(projectile_active_animat.frame_count > 0);
+    stats[WEAPON_GUN].icon = projectile_active_animat.frames[0];
+
+    snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
+    stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
+
+    snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
+    stats[WEAPON_ICE_BLOCK].icon = tile_defs[TILE_ICE].top_texture;
+
+    auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
     auto text_height = BITMAP_FONT_CHAR_HEIGHT * PLAYER_HUD_FONT_SIZE;
 
     Vec2f border_size = vec2(
         PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON + text_width + PLAYER_HUD_PADDING * 2,
         max(PLAYER_HUD_ICON_HEIGHT, text_height) + PLAYER_HUD_PADDING * 2);
 
-    for (size_t i = 0; i < HUD_WEAPON_COUNT; ++i) {
+    for (size_t i = 0; i < WEAPON_COUNT; ++i) {
         const auto position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN + (border_size.y + PLAYER_HUD_MARGIN) * i);
-        fill_rect(renderer, rect(position, border_size), PLAYER_HUD_BACKGROUND_COLOR);
+        fill_rect(renderer, rect(position, border_size), i == entities[PLAYER_ENTITY_INDEX].current_weapon ? PLAYER_HUD_SELECTED_COLOR : PLAYER_HUD_BACKGROUND_COLOR);
         Rectf destrect = rect(position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
                               vec2(PLAYER_HUD_ICON_WIDTH, PLAYER_HUD_ICON_HEIGHT));
         stats[i].icon.render(renderer, destrect);
 
-        char buffer[maximum_length + 1];
-        snprintf(buffer, sizeof(buffer), "%ld", stats[i].amount);
         debug_font.render(
             renderer,
             position + vec2(PLAYER_HUD_PADDING + PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON, PLAYER_HUD_PADDING),
             vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE),
             PLAYER_HUD_FONT_COLOR,
-            buffer);
+            stats[i].label);
     }
 }

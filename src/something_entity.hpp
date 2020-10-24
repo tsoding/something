@@ -25,11 +25,12 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
-enum class Weapon
+enum Weapon
 {
-    Gun,
-    Dirt_Block,
-    Ice_Block,
+    WEAPON_GUN = 0,
+    WEAPON_DIRT_BLOCK,
+    WEAPON_ICE_BLOCK,
+    WEAPON_COUNT,
 };
 
 struct Entity
