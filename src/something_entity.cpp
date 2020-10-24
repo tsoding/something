@@ -296,7 +296,7 @@ Entity player_entity(Vec2f pos)
 {
     Entity entity = {};
 
-    entity.current_weapon = Weapon::Gun;
+    entity.current_weapon = WEAPON_GUN;
     entity.dirt_blocks_count = 69;
     entity.ice_blocks_count = 69;
 
