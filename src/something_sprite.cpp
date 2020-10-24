@@ -217,6 +217,8 @@ Frame_Animat_File frame_animat_files[] = {
     {"./assets/animats/walking.txt", {}},
     {"./assets/animats/tsodinw.txt", {}},
     {"./assets/animats/golem.txt", {}},
+    {"./assets/animats/ice-golem-idle.txt", {}},
+    {"./assets/animats/ice-golem-walking.txt", {}},
 };
 const size_t frame_animat_files_count = sizeof(frame_animat_files) / sizeof(frame_animat_files[0]);
 

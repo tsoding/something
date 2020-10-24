@@ -200,6 +200,11 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = frame_animat_by_name(ICE_GOLEM_WALKING).frames[0];
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tooltip = "Add ice golem enemy"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));
+
     // TODO(#232): Ice blocks should be destroyable
     // TODO(#233): Player should be able to place ice blocks (introduce another kind of "weapon")
     // TODO(#234): Separate kind of fire projectiles that can destroy ice blocks
