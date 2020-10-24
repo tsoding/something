@@ -126,7 +126,6 @@ void Game::handle_event(SDL_Event *event)
     } break;
     }
 
-
     if (console.enabled) {
         console.handle_event(event, this);
     } else {
@@ -408,7 +407,7 @@ void Game::render(SDL_Renderer *renderer)
         auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
         can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
 
-        tile_defs[TILE_DESTROYABLE_0].top_texture.render(
+        tile_defs[TILE_DIRT_0].top_texture.render(
             renderer,
             rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
             SDL_FLIP_NONE,
@@ -465,7 +464,7 @@ void Game::entity_shoot(Entity_Index entity_index)
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
             if (can_place && entity->dirt_blocks_count > 0) {
-                grid.set_tile(target_tile, TILE_DESTROYABLE_0);
+                grid.set_tile(target_tile, TILE_DIRT_0);
                 entity->dirt_blocks_count -= 1;
             }
         } break;
@@ -773,9 +772,9 @@ void Game::update_projectiles(float dt)
             auto tile = grid.tile_at_abs(projectiles[i].pos);
             if (tile && tile_defs[*tile].is_collidable) {
                 projectiles[i].kill();
-                if (TILE_DESTROYABLE_0 <= *tile && *tile < TILE_DESTROYABLE_3) {
+                if (TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) {
                     *tile += 1;
-                } else if (*tile == TILE_DESTROYABLE_3) {
+                } else if (*tile == TILE_DIRT_3) {
                     *tile = TILE_EMPTY;
                 }
             }
@@ -937,7 +936,7 @@ void Game::render_player_hud(SDL_Renderer *renderer)
     stats[WEAPON_GUN].icon = projectile_active_animat.frames[0];
 
     snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
-    stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DESTROYABLE_0].top_texture;
+    stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DIRT_0].top_texture;
 
     snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
     stats[WEAPON_ICE_BLOCK].icon = tile_defs[TILE_ICE].top_texture;

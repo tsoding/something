@@ -5,10 +5,10 @@ typedef uint32_t Tile;
 
 const Tile TILE_EMPTY         = 0;
 const Tile TILE_WALL          = 1;
-const Tile TILE_DESTROYABLE_0 = 2;
-const Tile TILE_DESTROYABLE_1 = 3;
-const Tile TILE_DESTROYABLE_2 = 4;
-const Tile TILE_DESTROYABLE_3 = 5;
+const Tile TILE_DIRT_0 = 2;
+const Tile TILE_DIRT_1 = 3;
+const Tile TILE_DIRT_2 = 4;
+const Tile TILE_DIRT_3 = 5;
 const Tile TILE_ICE           = 6;
 const Tile TILE_COUNT         = 7;
 
@@ -25,10 +25,10 @@ struct Tile_Def
 Tile_Def tile_defs[TILE_COUNT] = {
     {false, {}, {}},                          // TILE_EMPTY
     {true, {}, {}},                           // TILE_WALL
-    {true, {}, {}},                           // TILE_DESTROYABLE_0
-    {true, {}, {}},                           // TILE_DESTROYABLE_1
-    {true, {}, {}},                           // TILE_DESTROYABLE_2
-    {true, {}, {}},                           // TILE_DESTROYABLE_3
+    {true, {}, {}},                           // TILE_DIRT_0
+    {true, {}, {}},                           // TILE_DIRT_1
+    {true, {}, {}},                           // TILE_DIRT_2
+    {true, {}, {}},                           // TILE_DIRT_3
     {true, {}, {}},                           // TILE_ICE
 };
 
