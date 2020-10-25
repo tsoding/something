@@ -6,8 +6,13 @@
 #include <cstring>
 #include <cctype>
 #include <cstdint>
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
 
-#include <SDL2/SDL.h>
+#define SDL_MAIN_HANDLED
+#include <SDL.h>
 
 #include "aids.hpp"
 using namespace aids;

@@ -1,3 +1,4 @@
+SDL2/
 something.debug
 something.release
 config_baker
@@ -6,5 +7,8 @@ TAGS
 baked_config.hpp
 config_types.hpp
 *.o
+*.obj
+*.pdb
+*.ilk
 *.dSYM
 *.exe

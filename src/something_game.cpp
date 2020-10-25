@@ -946,10 +946,10 @@ void Game::render_player_hud(SDL_Renderer *renderer)
     assert(projectile_active_animat.frame_count > 0);
     stats[WEAPON_GUN].icon = projectile_active_animat.frames[0];
 
-    snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
+    snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
     stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DIRT_0].top_texture;
 
-    snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%ld", entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
+    snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
     stats[WEAPON_ICE_BLOCK].icon = tile_defs[TILE_ICE_0].top_texture;
 
     auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;

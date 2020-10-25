@@ -235,9 +235,9 @@ Frame_Animat frame_animat_by_name(String_View file_path)
             "Could not find animat `", file_path, "`. ",
             "Did you forget to add it to `frame_animat_files` list?");
     abort();
-#endif // SOMETHING_RELEASE
-
+#else
     return {};
+#endif // SOMETHING_RELEASE
 }
 
 Frame_Animat load_animat_file(const char *animat_filepath)

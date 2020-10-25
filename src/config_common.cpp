@@ -7,7 +7,7 @@ enum Config_Type
     CONFIG_TYPE_STRING,
 };
 
-#include "./config_types.hpp"
+#include "../config_types.hpp"
 #include "something_color.hpp"
 
 const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
