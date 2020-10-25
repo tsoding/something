@@ -162,10 +162,10 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.type = Tool_Type::Tile;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.tile.tile = TILE_WALL;
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].icon = tile_defs[TILE_DIRT_0].top_texture;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tooltip = "Destroyable Tile"_sv;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.type = Tool_Type::Tile;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.tile.tile = TILE_DIRT_0;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].icon = tile_defs[TILE_DIRT_0].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tooltip = "Destroyable Tile"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.type = Tool_Type::Tile;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.tile.tile = TILE_DIRT_0;
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
         texture_index_by_name(
