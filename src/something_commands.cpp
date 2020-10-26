@@ -159,7 +159,7 @@ void command_history(Game *game, String_View)
             game->console.history.entry_sizes[j],
             game->console.history.entries[j]
         };
-        game->console.println(entry);
+        game->console.history.push(entry);
     }
     game->console.println("--------------------");
 }
