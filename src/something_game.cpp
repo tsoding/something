@@ -156,6 +156,9 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_z: {
                 step_debug = !step_debug;
+                if (step_debug) {
+                    popup.notify(FONT_SUCCESS_COLOR, "Step-debug mode\n\nX - step\n\nZ - resume");
+                }
             } break;
 
             case SDLK_r: {
