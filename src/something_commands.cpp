@@ -152,14 +152,14 @@ void command_save_room(Game *game, String_View)
 
 void command_history(Game *game, String_View)
 {
-    game->console.println("--------------------");
-    for (int i = 0; i < game->console.history.count; ++i) {
-        const size_t j = (game->console.history.begin + i) % CONSOLE_HISTORY_CAPACITY;
-        const String_View entry = {
-            game->console.history.entry_sizes[j],
-            game->console.history.entries[j]
-        };
-        game->console.println(entry);
-    }
-    game->console.println("--------------------");
+  game->console.println("--------------------");
+  for (int i = 0; i < game->console.history.count; ++i) {
+    const size_t j = (game->console.history.begin + i) % CONSOLE_HISTORY_CAPACITY;
+    const String_View entry = {
+      game->console.history.entry_sizes[j],
+      game->console.history.entries[j]
+    };
+    game->console.history.push(entry);
+  }
+  game->console.println("--------------------");
 }
