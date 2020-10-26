@@ -346,10 +346,10 @@ Entity ice_golem_entity(Vec2f pos)
 
     entity.ice_blocks_count = 1;
 
-    entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0;
-    entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0;
-    entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0;
-    entity.hitbox_local.h = ENEMY_HITBOX_H + 32.0;
+    entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
+    entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
+    entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0f;
+    entity.hitbox_local.h = ENEMY_HITBOX_H + 32.0f;
     entity.texbox_local.x = entity.texbox_local.w * -0.5f;
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
@@ -391,10 +391,10 @@ Entity golem_entity(Vec2f pos)
 
     entity.dirt_blocks_count = 1;
 
-    entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0;
-    entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0;
-    entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0;
-    entity.hitbox_local.h = ENEMY_HITBOX_H + 32.0;
+    entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
+    entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
+    entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0f;
+    entity.hitbox_local.h = ENEMY_HITBOX_H + 32.0f;
     entity.texbox_local.x = entity.texbox_local.w * -0.5f;
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;

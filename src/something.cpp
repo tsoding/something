@@ -18,10 +18,15 @@ using namespace aids;
 #include "something_math.cpp"
 #include "something_color.hpp"
 
+#ifdef _MSC_VER
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#endif
+
 #ifndef SOMETHING_RELEASE
 #include "config_common.cpp"
 #else
-#include "./baked_config.hpp"
+#include "../baked_config.hpp"
 #endif
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
