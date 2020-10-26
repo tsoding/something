@@ -1,4 +1,5 @@
 #include "something_fmw.hpp"
+#include "something_assets.hpp"
 
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
@@ -31,7 +32,32 @@ Dynamic_Array<Dynamic_Array<char>> load_room_files_from_dir(const char *room_dir
     return room_files;
 }
 
+Assets assets = {};
+
 int main(int argc, char *argv[])
+{
+    (void) argc;
+    (void) argv;
+
+    sec(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO));
+
+    SDL_Window *window =
+        sec(SDL_CreateWindow(
+                "Something",
+                0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                SDL_WINDOW_RESIZABLE));
+
+    SDL_Renderer *renderer =
+        sec(SDL_CreateRenderer(
+                window, -1,
+                SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
+
+    assets.load_conf(renderer, "./assets/assets.conf");
+
+    return 0;
+}
+
+int main1(int argc, char *argv[])
 {
     (void) argc;
     (void) argv;

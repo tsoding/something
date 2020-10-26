@@ -79,6 +79,17 @@ Sample_S16 load_wav_as_sample_s16(const char *file_path)
     return sample;
 }
 
+Sample_S16 load_wav_as_sample_s16(String_View file_path)
+{
+    char *filepath_cstr = (char*) malloc(file_path.count + 1);
+    assert(filepath_cstr != NULL);
+    memcpy(filepath_cstr, file_path.data, file_path.count);
+    filepath_cstr[file_path.count] = '\0';
+    auto result = load_wav_as_sample_s16(filepath_cstr);
+    free(filepath_cstr);
+    return result;
+}
+
 void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
 {
     Sample_Mixer *mixer = (Sample_Mixer *)userdata;

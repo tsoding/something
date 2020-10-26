@@ -31,6 +31,7 @@ SDL_Texture *texture_masks[TEXTURE_COUNT] = {};
 SDL_Surface *surface_masks[TEXTURE_COUNT] = {};
 
 SDL_Surface *load_png_file_as_surface(const char *image_filename);
+SDL_Surface *load_png_file_as_surface(String_View image_filename);
 SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
                                         const char *image_filepath,
                                         SDL_Color color_key);
@@ -41,7 +42,5 @@ Texture_Index texture_index_by_name(String_View filename);
 SDL_Texture *load_texture_from_bmp_file(SDL_Renderer *renderer,
                                         const char *image_filepath,
                                         SDL_Color color_key);
-
-SDL_Surface *load_png_file_as_surface(const char *image_filename);
 
 #endif  // SOMETHING_TEXTURE_HPP_

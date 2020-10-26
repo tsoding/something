@@ -83,3 +83,14 @@ SDL_Surface *load_png_file_as_surface(const char *image_filename)
                                      0xFF000000));
     return image_surface;
 }
+
+SDL_Surface *load_png_file_as_surface(String_View image_filename)
+{
+    char *filepath_cstr = (char*) malloc(image_filename.count + 1);
+    assert(filepath_cstr != NULL);
+    memcpy(filepath_cstr, image_filename.data, image_filename.count);
+    filepath_cstr[image_filename.count] = '\0';
+    auto result = load_png_file_as_surface(filepath_cstr);
+    free(filepath_cstr);
+    return result;
+}
