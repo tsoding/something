@@ -51,12 +51,6 @@ struct Entity
     // velocity which can accidentally cancel out the whole jump.
     bool has_jumped;
 
-    // Count the number of consecutives jumps to avoid flying state. We could
-    // increase the number of max_jump's based on player level or some enimies
-    // could drop jump's, which will increase player mechanics
-    short count_jump;
-    short max_jump;
-
     Rectf texbox_local;
     Rectf hitbox_local;
     Vec2f pos;

@@ -194,11 +194,6 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
         particles.state = Particles::DISABLED;
     }
 
-    // Reset the jump counter when touchs the ground
-    if (state == Entity_State::Alive && ground(grid)) {
-      this->count_jump = 0;
-    }
-
     particles.source = feet();
     particles.update(dt, grid);
 
@@ -289,15 +284,12 @@ void Entity::point_gun_at(Vec2f target)
 
 void Entity::jump()
 {
-  if (state == Entity_State::Alive) {
-    if (this->count_jump < this->max_jump) {
-      this->count_jump++;
-      if (jump_state == Jump_State::No_Jump) {
-	prepare_for_jump_animat.reset();
-	jump_state = Jump_State::Prepare;
-      }
+    if (state == Entity_State::Alive) {
+        if (jump_state == Jump_State::No_Jump) {
+            prepare_for_jump_animat.reset();
+            jump_state = Jump_State::Prepare;
+        }
     }
-  }
 }
 
 Entity player_entity(Vec2f pos)
@@ -328,11 +320,6 @@ Entity player_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-
-    entity.count_jump = 0;
-    // We should have an entry in config file to define the start number of
-    // allowed jumps?
-    entity.max_jump = 2;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -378,11 +365,6 @@ Entity ice_golem_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
-
-    entity.count_jump = 0;
-    // We should have an entry in config file to define the start number of
-    // allowed jumps?
-    entity.max_jump = 30;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -430,13 +412,6 @@ Entity golem_entity(Vec2f pos)
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
 
-    // Each kind of golem should have different number of allowed jumps, based
-    // on player level as well.
-    entity.count_jump = 0;
-    // We should have an entry in config file to define the start number of
-    // allowed jumps?
-    entity.max_jump = 1;
-
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
     entity.prepare_for_jump_animat.duration = 0.2f;
@@ -481,13 +456,6 @@ Entity enemy_entity(Vec2f pos)
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
 
-    // Each kind of golem should have different number of allowed jumps, based
-    // on player level as well.
-    entity.count_jump = 0;
-    // We should have an entry in config file to define the start number of
-    // allowed jumps?
-    entity.max_jump = 2;
-
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
     entity.prepare_for_jump_animat.duration = 0.2f;
@@ -529,7 +497,6 @@ Vec2f Entity::feet()
     auto hitbox = hitbox_local;
     hitbox.x += pos.x;
     hitbox.y += pos.y;
-
     return vec2(hitbox.x, hitbox.y) + vec2(0.5f, 1.0f) * vec2(hitbox.w, hitbox.h);
 }
 
