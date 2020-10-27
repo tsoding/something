@@ -194,6 +194,10 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
         particles.state = Particles::DISABLED;
     }
 
+    if (state == Entity_State::Alive && ground(grid)) {
+      this->count_jumps = 0;
+    }
+
     particles.source = feet();
     particles.update(dt, grid);
 
@@ -284,7 +288,9 @@ void Entity::point_gun_at(Vec2f target)
 
 void Entity::jump()
 {
-    if (state == Entity_State::Alive) {
+    if (state == Entity_State::Alive && this->count_jumps < this->max_allowed_jumps) {
+        this->count_jumps++;
+
         if (jump_state == Jump_State::No_Jump) {
             prepare_for_jump_animat.reset();
             jump_state = Jump_State::Prepare;
@@ -320,6 +326,13 @@ Entity player_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
+
+    /*
+     * TODO: We should defined the number of max allowed jump in configuration
+     * file
+     */
+    entity.count_jumps = 0;
+    entity.max_allowed_jumps = 2;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -365,6 +378,13 @@ Entity ice_golem_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
+
+    /*
+     * Ice Golems could have more consecutives jumps then other golems.
+     * The amount of jumps could be increase by level in both players and enimies
+     */
+    entity.count_jumps = 0;
+    entity.max_allowed_jumps = 3;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -412,6 +432,12 @@ Entity golem_entity(Vec2f pos)
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
 
+    /*
+     * "Traditional" Golems could start just able to jump once.
+     */
+    entity.count_jumps = 0;
+    entity.max_allowed_jumps = 1;
+
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
     entity.prepare_for_jump_animat.duration = 0.2f;
@@ -455,6 +481,13 @@ Entity enemy_entity(Vec2f pos)
     entity.alive_state = Alive_State::Idle;
     entity.pos = pos;
     entity.gun_dir = vec2(1.0f, 0.0f);
+
+    /*
+     * For default the enemy should have the same amount of jumps 
+     * that a player
+     */
+    entity.count_jumps = 0;
+    entity.max_allowed_jumps = 2;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;

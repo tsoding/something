@@ -74,6 +74,9 @@ struct Entity
     Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16 shoot_sample;
 
+  short count_jumps;
+  short max_allowed_jumps;
+
     Particles particles;
 
     void kill();
