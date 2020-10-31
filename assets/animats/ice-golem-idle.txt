@@ -1,4 +1,4 @@
-sprite = ./assets/sprites/walking-ice-golem-48px.png
+texture = ICE_GOLEM_TEXTURE
 count = 1
 duration = 200
 

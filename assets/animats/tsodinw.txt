@@ -1,4 +1,4 @@
-sprite = ./assets/sprites/tsodinw.png
+texture = PLAYER_TEXTURE
 count = 1
 duration = 200
 

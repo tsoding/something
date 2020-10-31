@@ -1,4 +1,4 @@
-sprite = ./assets/sprites/spark1-sheet.png
+texture = PROJECTILE_IDLE_TEXTURE
 count = 5
 duration = 100
 

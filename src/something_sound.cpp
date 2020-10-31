@@ -1,59 +1,14 @@
-struct Sample_S16
+#include "./something_sound.hpp"
+
+void Sample_Mixer::play_sample(Sample_S16 sample)
 {
-    int16_t* audio_buf;
-    Uint32 audio_len;
-    Uint32 audio_cur;
-};
-
-const size_t SAMPLE_MIXER_CAPACITY = 5;
-
-struct Sample_Mixer
-{
-    float volume;
-    Sample_S16 samples[SAMPLE_MIXER_CAPACITY];
-
-    void play_sample(Sample_S16 sample)
-    {
-        for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
-            if (samples[i].audio_cur >= samples[i].audio_len) {
-                samples[i] = sample;
-                samples[i].audio_cur = 0;
-                return;
-            }
+    for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
+        if (samples[i].audio_cur >= samples[i].audio_len) {
+            samples[i] = sample;
+            samples[i].audio_cur = 0;
+            return;
         }
     }
-};
-
-const size_t SOMETHING_SOUND_FREQ = 48000;
-const size_t SOMETHING_SOUND_FORMAT = 32784;
-const size_t SOMETHING_SOUND_CHANNELS = 1;
-const size_t SOMETHING_SOUND_SAMPLES = 4096;
-
-struct Sample_S16_File
-{
-    const char *file_path;
-    Sample_S16 sample;
-};
-
-Sample_S16_File sample_s16_files[] = {
-    {"./assets/sounds/enemy_shoot-48000-decay.wav", {}},
-    {"./assets/sounds/jumppp11-48000-mono.wav", {}},
-    {"./assets/sounds/jumppp22-48000-mono.wav", {}},
-    {"./assets/sounds/pop-48000.wav", {}},
-    {"./assets/sounds/Fallbig1.wav", {}},
-    {"./assets/sounds/Hurt_Old.wav", {}},
-};
-const size_t sample_s16_files_count = sizeof(sample_s16_files) / sizeof(sample_s16_files[0]);
-
-Sample_S16 sample_s16_by_name(String_View file_path)
-{
-    for (size_t i = 0; i < sample_s16_files_count; ++i) {
-        if (file_path == cstr_as_string_view(sample_s16_files[i].file_path)) {
-            return sample_s16_files[i].sample;
-        }
-    }
-
-    return {};
 }
 
 Sample_S16 load_wav_as_sample_s16(const char *file_path)
@@ -79,6 +34,17 @@ Sample_S16 load_wav_as_sample_s16(const char *file_path)
     return sample;
 }
 
+Sample_S16 load_wav_as_sample_s16(String_View file_path)
+{
+    char *filepath_cstr = (char*) malloc(file_path.count + 1);
+    assert(filepath_cstr != NULL);
+    memcpy(filepath_cstr, file_path.data, file_path.count);
+    filepath_cstr[file_path.count] = '\0';
+    auto result = load_wav_as_sample_s16(filepath_cstr);
+    free(filepath_cstr);
+    return result;
+}
+
 void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
 {
     Sample_Mixer *mixer = (Sample_Mixer *)userdata;
@@ -102,12 +68,5 @@ void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
 
     for (size_t i = 0; i < output_len; ++i) {
         output[i] = (int16_t) (output[i] * mixer->volume);
-    }
-}
-
-void load_samples()
-{
-    for (size_t i = 0; i < sample_s16_files_count; ++i) {
-        sample_s16_files[i].sample = load_wav_as_sample_s16(sample_s16_files[i].file_path);
     }
 }

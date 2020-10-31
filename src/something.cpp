@@ -67,3 +67,4 @@ typedef SSIZE_T ssize_t;
 #include "something_background.cpp"
 #include "something_game.cpp"
 #include "something_main.cpp"
+#include "something_assets.cpp"

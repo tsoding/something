@@ -1,4 +1,5 @@
 #include "something_fmw.hpp"
+#include "something_assets.hpp"
 
 const int SIMULATION_FPS = 60;
 const float SIMULATION_DELTA_TIME = 1.0f / SIMULATION_FPS;
@@ -49,6 +50,8 @@ int main(int argc, char *argv[])
                 window, -1,
                 SDL_RENDERER_PRESENTVSYNC | SDL_RENDERER_ACCELERATED));
 
+    assets.load_conf(renderer, "./assets/assets.conf");
+
     SDL_StopTextInput();
 
     sec(SDL_RenderSetLogicalSize(renderer,
@@ -56,11 +59,7 @@ int main(int argc, char *argv[])
                            (int) SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
-    auto tileset_texture = texture_index_by_name("./assets/sprites/fantasy_tiles.png"_sv);
-
-    load_textures(renderer);
-    load_samples();
-    load_frame_animat_files();
+    auto tileset_texture = assets.get_texture_by_id_or_panic("FANTASY_TEXTURE"_sv);
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
@@ -104,43 +103,41 @@ int main(int argc, char *argv[])
 
     tile_defs[TILE_ICE_0].bottom_texture = {
         {0, 0, 64, 64},
-        texture_index_by_name("./assets/sprites/ice.png"_sv)
+        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
     };
     tile_defs[TILE_ICE_0].top_texture = tile_defs[TILE_ICE_0].bottom_texture;
 
     tile_defs[TILE_ICE_1].bottom_texture = {
         {64, 0, 64, 64},
-        texture_index_by_name("./assets/sprites/ice.png"_sv)
+        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
     };
     tile_defs[TILE_ICE_1].top_texture = tile_defs[TILE_ICE_1].bottom_texture;
 
     tile_defs[TILE_ICE_2].bottom_texture = {
         {128, 0, 64, 64},
-        texture_index_by_name("./assets/sprites/ice.png"_sv)
+        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
     };
     tile_defs[TILE_ICE_2].top_texture = tile_defs[TILE_ICE_2].bottom_texture;
 
     tile_defs[TILE_ICE_3].bottom_texture = {
         {192, 0, 64, 64},
-        texture_index_by_name("./assets/sprites/ice.png"_sv)
+        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
     };
     tile_defs[TILE_ICE_3].top_texture = tile_defs[TILE_ICE_3].bottom_texture;
 
-    game.background.layers[0] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-lights.png"_sv));
-    game.background.layers[1] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-middle-trees.png"_sv));
-    game.background.layers[2] = sprite_from_texture_index(texture_index_by_name("./assets/sprites/parallax-forest-front-trees.png"_sv));
+    game.background.layers[0] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_LIGHTS_TEXTURE"_sv));
+    game.background.layers[1] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_MIDDLE_TEXTURE"_sv));
+    game.background.layers[2] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_FRONT_TEXTURE"_sv));
 
-    game.player_shoot_sample      = sample_s16_by_name("./assets/sounds/enemy_shoot-48000-decay.wav"_sv);
-    game.entity_walking_animat    = frame_animat_by_name("./assets/animats/walking.txt"_sv);
-    game.entity_idle_animat       = frame_animat_by_name("./assets/animats/idle.txt"_sv);
-    game.entity_jump_sample1      = sample_s16_by_name("./assets/sounds/jumppp11-48000-mono.wav"_sv);
-    game.entity_jump_sample2      = sample_s16_by_name("./assets/sounds/jumppp22-48000-mono.wav"_sv);
-    game.projectile_poof_animat   = frame_animat_by_name("./assets/animats/plasma_pop.txt"_sv);
-    game.projectile_active_animat = frame_animat_by_name("./assets/animats/plasma_bolt.txt"_sv);
-    /// {"./assets/sounds/Fallbig1.wav", {}},
-    /// {"./assets/sounds/Hurt_Old.wav", {}},
-    game.damage_enemy_sample      = sample_s16_by_name("./assets/sounds/Hurt_Old.wav"_sv);
-    game.kill_enemy_sample        = sample_s16_by_name("./assets/sounds/Fallbig1.wav"_sv);
+    game.player_shoot_sample      = assets.get_sound_by_id_or_panic("PEW_SOUND"_sv);
+    game.entity_walking_animat    = assets.get_animat_by_id_or_panic("ENEMY_WALKING_ANIMAT"_sv);
+    game.entity_idle_animat       = assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv);
+    game.entity_jump_sample1      = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
+    game.entity_jump_sample2      = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
+    game.projectile_poof_animat   = assets.get_animat_by_id_or_panic("PROJECTILE_POOF_ANIMAT"_sv);
+    game.projectile_active_animat = assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv);
+    game.damage_enemy_sample      = assets.get_sound_by_id_or_panic("OOF_SOUND"_sv);
+    game.kill_enemy_sample        = assets.get_sound_by_id_or_panic("CRUNCH_SOUND"_sv);
 
 #ifndef SOMETHING_RELEASE
     {
@@ -162,14 +159,14 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.type = Tool_Type::Tile;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_TILES].tool.tile.tile = TILE_WALL;
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].icon = tile_defs[TILE_DIRT_0].top_texture;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tooltip = "Destroyable Tile"_sv;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.type = Tool_Type::Tile;
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.tile.tile = TILE_DIRT_0;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].icon = tile_defs[TILE_DIRT_0].top_texture;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tooltip = "Destroyable Tile"_sv;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.type = Tool_Type::Tile;
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.tile.tile = TILE_DIRT_0;
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
-        texture_index_by_name(
-            ITEM_HEALTH_TEXTURE));
+        assets.get_texture_by_id_or_panic(
+            "HEALTH_ITEM_TEXTURE"_sv));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.item.item = make_health_item(vec2(0.0f, 0.0f));
@@ -185,7 +182,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.item.item = make_dirt_block_item(vec2(0.0f, 0.0f));
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].icon = sprite_from_texture_index(
-        texture_index_by_name("./assets/sprites/golem.png"_sv));
+        assets.get_texture_by_id_or_panic("DIRT_GOLEM_TEXTURE"_sv));
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tooltip = "Add golem enemy"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.entity.entity = golem_entity(vec2(0.0f, 0.0f));
@@ -200,7 +197,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = frame_animat_by_name(ICE_GOLEM_WALKING).frames[0];
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv).frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tooltip = "Add ice golem enemy"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));
