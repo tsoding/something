@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
     SDL_Window *window =
         sec(SDL_CreateWindow(
                 "Something",
-                0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
+                0, 0, (int) SCREEN_WIDTH, (int) SCREEN_HEIGHT,
                 SDL_WINDOW_RESIZABLE));
 
     SDL_Renderer *renderer =
@@ -55,8 +55,8 @@ int main(int argc, char *argv[])
     SDL_StopTextInput();
 
     sec(SDL_RenderSetLogicalSize(renderer,
-                                 SCREEN_WIDTH,
-                                 SCREEN_HEIGHT));
+                           (int) SCREEN_WIDTH,
+                           (int) SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
     auto tileset_texture = assets.get_texture_by_id_or_panic("FANTASY_TEXTURE"_sv);
