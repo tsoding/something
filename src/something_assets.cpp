@@ -65,6 +65,7 @@ void Assets::load_texture(SDL_Renderer *renderer, String_View id, String_View pa
     asset.texture_mask = sec(SDL_CreateTextureFromSurface(renderer, asset.surface_mask));
 
     textures[textures_count].id = id;
+    textures[textures_count].path = path;
     textures[textures_count].unwrap = asset;
     textures_count += 1;
 }
@@ -73,11 +74,12 @@ void Assets::load_sound(String_View id, String_View path)
 {
     println(stdout, "Loading sound ", id, " from ", path, "...");
     sounds[sounds_count].id = id;
+    sounds[sounds_count].path = path;
     sounds[sounds_count].unwrap = load_wav_as_sample_s16(path);
     sounds_count += 1;
 }
 
-void Assets::load_animat(String_View id, String_View path)
+void Assets::load_animat(String_View, String_View)
 {
     assert(0 && "TODO: Assets::load_animat is not implemented");
 }
@@ -99,8 +101,8 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
             load_texture(renderer, asset_id, asset_path);
         } else if (asset_type == "sounds"_sv) {
             load_sound(asset_id, asset_path);
-        } else if (asset_type == "animat"_sv) {
-            load_animat(asset_id, asset_path);
+        } else if (asset_type == "animats"_sv) {
+            // load_animat(asset_id, asset_path);
         } else {
             println(stderr, "Unknown asset type `", asset_type, "`");
             exit(1);

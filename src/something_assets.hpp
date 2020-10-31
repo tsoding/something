@@ -9,6 +9,7 @@ template <typename T>
 struct Asset
 {
     String_View id;
+    String_View path;
     T unwrap;
 };
 

@@ -1,4 +1,4 @@
-sprite = ./assets/sprites/walking-12px-zoom.png
+texture = ENEMY_WALKING_TEXTURE
 count = 1
 duration = 200
 

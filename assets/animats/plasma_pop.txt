@@ -1,4 +1,4 @@
-sprite = ./assets/sprites/Destroy1-sheet.png
+texture = PROJECTILE_POOF_TEXTURE
 count = 4
 duration = 70
 
