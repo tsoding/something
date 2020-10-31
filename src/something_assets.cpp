@@ -79,9 +79,136 @@ void Assets::load_sound(String_View id, String_View path)
     sounds_count += 1;
 }
 
-void Assets::load_animat(String_View, String_View)
+Maybe<String_View> read_file_as_string_view(String_View filename)
 {
-    assert(0 && "TODO: Assets::load_animat is not implemented");
+    char *filename_cstr = (char*) malloc(filename.count + 1);
+    defer(free(filename_cstr));
+    memcpy(filename_cstr, filename.data, filename.count);
+    filename_cstr[filename.count] = '\0';
+    return read_file_as_string_view(filename_cstr);
+}
+
+void Assets::load_animat(String_View id, String_View path)
+{
+    println(stdout, "Loading animat ", id, " from ", path, "...");
+
+    auto source = read_file_as_string_view(path);
+    if (!source.has_value) {
+        println(stderr, "Could not load animation file: `", path, "`");
+        exit(1);
+    }
+    defer(free((void*) source.unwrap.data));
+
+    String_View input = source.unwrap;
+    Frame_Animat animat = {};
+    Maybe<Texture_Index> spritesheet_texture = {};
+
+    for (int line_number = 1; input.count != 0; ++line_number) {
+        auto value = input.chop_by_delim('\n');
+        auto key = value.chop_by_delim('=').trim();
+        if (key.count == 0 || *key.data == '#') continue;
+        value = value.trim();
+
+        auto subkey = key.chop_by_delim('.').trim();
+
+        if (subkey == "count"_sv) {
+            if (animat.frames != nullptr) {
+                println(stderr, path, ":", line_number, ": `count` provided twice");
+                exit(1);
+            }
+
+            auto count_result = value.as_integer<int>();
+            if (!count_result.has_value) {
+                println(stderr, path, ":", line_number, ": `count` is not a number");
+                exit(1);
+            }
+
+            animat.frame_count = (size_t) count_result.unwrap;
+            animat.frames = new Sprite[animat.frame_count];
+        } else if (subkey == "texture"_sv) {
+            auto maybe_texture = get_texture_by_id(value);
+            if (!maybe_texture.has_value) {
+                println(stderr, path, ":", line_number, ": could not find a texture by id `", value, "`");
+                exit(1);
+            }
+
+            spritesheet_texture = maybe_texture;
+        } else if (subkey == "duration"_sv) {
+            auto result = value.as_integer<int>();
+            if (!result.has_value) {
+                println(stderr, path, ":", line_number, ": `duration` is not a number");
+                exit(1);
+            }
+
+            animat.frame_duration = (float) result.unwrap / 1000.0f;
+        } else if (subkey == "frames"_sv) {
+            auto result = key.chop_by_delim('.').trim().as_integer<int>();
+            if (!result.has_value) {
+                println(stderr, path, ":", line_number, ": frame index is not a number");
+                exit(1);
+            }
+
+            size_t frame_index = (size_t) result.unwrap;
+            if (frame_index >= animat.frame_count) {
+                println(stderr, path, ":", line_number, ": frame index is bigger than the `count`");
+                exit(1);
+            }
+
+            if (!spritesheet_texture.has_value) {
+                println(stderr, path, ":", line_number, ": spritesheet was not loaded");
+                exit(1);
+            }
+
+            animat.frames[frame_index].texture_index = spritesheet_texture.unwrap;
+
+            while (key.count) {
+                subkey = key.chop_by_delim('.').trim();
+
+                if (key.count != 0) {
+                    println(stderr, path, ":", line_number, ": unknown subkey `", subkey, "`");
+                    exit(1);
+                }
+
+                auto result_value = value.as_integer<int>();
+                if (!result_value.has_value) {
+                    println(stderr, path, ":", line_number, ": value is not a number");
+                    exit(1);
+                }
+
+                if (subkey == "x"_sv) {
+                    animat.frames[frame_index].srcrect.x = result_value.unwrap;
+                } else if (subkey == "y"_sv) {
+                    animat.frames[frame_index].srcrect.y = result_value.unwrap;
+                } else if (subkey == "w"_sv) {
+                    animat.frames[frame_index].srcrect.w = result_value.unwrap;
+                } else if (subkey == "h"_sv) {
+                    animat.frames[frame_index].srcrect.h = result_value.unwrap;
+                } else {
+                    println(stderr, path, ":", line_number, ": unknown subkey `", subkey, "`");
+                    exit(1);
+                }
+            }
+        } else {
+            println(stderr, path, ":", line_number, ": unknown subkey `", subkey, "`");
+            exit(1);
+        }
+    }
+
+    animats[animats_count].id = id;
+    animats[animats_count].path = path;
+    animats[animats_count].unwrap = animat;
+    animats_count += 1;
+}
+
+Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
+{
+    for (size_t i = 0; i < textures_count; ++i) {
+        if (textures[i].id == id) {
+            return {true, {i}};
+        }
+    }
+
+    return {};
 }
 
 void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
@@ -102,7 +229,7 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         } else if (asset_type == "sounds"_sv) {
             load_sound(asset_id, asset_path);
         } else if (asset_type == "animats"_sv) {
-            // load_animat(asset_id, asset_path);
+            load_animat(asset_id, asset_path);
         } else {
             println(stderr, "Unknown asset type `", asset_type, "`");
             exit(1);

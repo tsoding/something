@@ -4,6 +4,7 @@
 const size_t ASSETS_CONF_BUFFER_CAPACITY = 1024 * 1024;
 const size_t ASSETS_TEXTURES_CAPACITY = 128;
 const size_t ASSETS_SOUNDS_CAPACITY = 128;
+const size_t ASSETS_ANIMATS_CAPACITY = 128;
 
 template <typename T>
 struct Asset
@@ -28,6 +29,10 @@ struct Assets
     Asset<Texture> textures[ASSETS_TEXTURES_CAPACITY];
     size_t sounds_count;
     Asset<Sample_S16> sounds[ASSETS_SOUNDS_CAPACITY];
+    size_t animats_count;
+    Asset<Frame_Animat> animats[ASSETS_ANIMATS_CAPACITY];
+
+    Maybe<Texture_Index> get_texture_by_id(String_View id);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);

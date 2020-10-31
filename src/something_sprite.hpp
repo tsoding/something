@@ -40,5 +40,4 @@ struct Frame_Animat
 };
 
 
-
 #endif  // SOMETHING_SPRITE_HPP_
