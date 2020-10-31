@@ -164,7 +164,7 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
 HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
 {
     const auto tile_sprite = tile_defs[*grid->tile_at_abs(pos + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
-    const auto surface = surfaces[tile_sprite.texture_index.unwrap];
+    const auto surface = assets.textures[tile_sprite.texture_index.unwrap].unwrap.surface;
     const auto x = rand() % tile_sprite.srcrect.w;
     sec(SDL_LockSurface(surface));
     HSLA result = {};
@@ -309,11 +309,11 @@ Entity player_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle = frame_animat_by_name(PLAYER_IDLE);
-    entity.walking = frame_animat_by_name(PLAYER_WALKING);
-    entity.jump_samples[0] = sample_s16_by_name(PLAYER_JUMP_SAMPLE_0);
-    entity.jump_samples[1] = sample_s16_by_name(PLAYER_JUMP_SAMPLE_1);
-    entity.shoot_sample = sample_s16_by_name(PLAYER_SHOOT_SAMPLE);
+    entity.idle            = assets.get_animat_by_id_or_panic("PLAYER_ANIMAT"_sv);
+    entity.walking         = assets.get_animat_by_id_or_panic("PLAYER_ANIMAT"_sv);
+    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
+    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
+    entity.shoot_sample    = assets.get_sound_by_id_or_panic("PEW_SOUND"_sv);
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -355,10 +355,10 @@ Entity ice_golem_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle = frame_animat_by_name(ICE_GOLEM_IDLE);
-    entity.walking = frame_animat_by_name(ICE_GOLEM_WALKING);
-    entity.jump_samples[0] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_0);
-    entity.jump_samples[1] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_1);
+    entity.idle = assets.get_animat_by_id_or_panic("ICE_GOLEM_IDLE_ANIMAT"_sv);
+    entity.walking = assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv);
+    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
+    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -401,10 +401,10 @@ Entity golem_entity(Vec2f pos)
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
 
-    entity.idle = frame_animat_by_name("./assets/animats/golem.txt"_sv);
-    entity.walking = frame_animat_by_name("./assets/animats/golem.txt"_sv);
-    entity.jump_samples[0] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_0);
-    entity.jump_samples[1] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_1);
+    entity.idle = assets.get_animat_by_id_or_panic("DIRT_GOLEM_ANIMAT"_sv);
+    entity.walking = assets.get_animat_by_id_or_panic("DIRT_GOLEM_ANIMAT"_sv);
+    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
+    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -444,11 +444,10 @@ Entity enemy_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-
-    entity.idle = frame_animat_by_name(ENEMY_IDLE);
-    entity.walking = frame_animat_by_name(ENEMY_WALKING);
-    entity.jump_samples[0] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_0);
-    entity.jump_samples[1] = sample_s16_by_name(ENEMY_JUMP_SAMPLE_1);
+    entity.idle            = assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv);
+    entity.walking         = assets.get_animat_by_id_or_panic("ENEMY_WALKING_ANIMAT"_sv);
+    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
+    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;

@@ -1,6 +1,8 @@
 #ifndef SOMETHING_ASSETS_HPP_
 #define SOMETHING_ASSETS_HPP_
 
+#include "./something_sound.hpp"
+
 const size_t ASSETS_CONF_BUFFER_CAPACITY = 1024 * 1024;
 const size_t ASSETS_TEXTURES_CAPACITY = 128;
 const size_t ASSETS_SOUNDS_CAPACITY = 128;
@@ -33,6 +35,13 @@ struct Assets
     Asset<Frame_Animat> animats[ASSETS_ANIMATS_CAPACITY];
 
     Maybe<Texture_Index> get_texture_by_id(String_View id);
+    Texture_Index get_texture_by_id_or_panic(String_View id);
+
+    Maybe<Sample_S16> get_sound_by_id(String_View id);
+    Sample_S16 get_sound_by_id_or_panic(String_View id);
+
+    Maybe<Frame_Animat> get_animat_by_id(String_View id);
+    Frame_Animat get_animat_by_id_or_panic(String_View id);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);
@@ -41,5 +50,7 @@ struct Assets
 
     void load_conf(SDL_Renderer *renderer, const char *filepath);
 };
+
+extern Assets assets;
 
 #endif  // SOMETHING_ASSETS_HPP_

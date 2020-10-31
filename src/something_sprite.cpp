@@ -1,10 +1,12 @@
 #include "./something_sprite.hpp"
+#include "./something_assets.hpp"
+
 
 Sprite sprite_from_texture_index(Texture_Index texture_index)
 {
     Sprite result = {};
     result.texture_index = texture_index;
-    sec(SDL_QueryTexture(textures[texture_index.unwrap],
+    sec(SDL_QueryTexture(assets.textures[texture_index.unwrap].unwrap.texture,
                          NULL,
                          NULL,
                          &result.srcrect.w,
@@ -17,13 +19,13 @@ void Sprite::render(SDL_Renderer *renderer,
                     SDL_RendererFlip flip,
                     RGBA shade) const
 {
-    if (texture_index.unwrap < TEXTURE_COUNT) {
+    if (texture_index.unwrap < assets.textures_count) {
         SDL_Rect rect = rectf_for_sdl(destrect);
         SDL_Color sdl_shade = rgba_to_sdl(shade);
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                textures[texture_index.unwrap],
+                assets.textures[texture_index.unwrap].unwrap.texture,
                 &srcrect,
                 &rect,
                 0.0,
@@ -31,13 +33,13 @@ void Sprite::render(SDL_Renderer *renderer,
                 flip));
 
         sec(SDL_SetTextureColorMod(
-                texture_masks[texture_index.unwrap],
+                assets.textures[texture_index.unwrap].unwrap.texture_mask,
                 sdl_shade.r, sdl_shade.g, sdl_shade.b));
-        sec(SDL_SetTextureAlphaMod(texture_masks[texture_index.unwrap], sdl_shade.a));
+        sec(SDL_SetTextureAlphaMod(assets.textures[texture_index.unwrap].unwrap.texture_mask, sdl_shade.a));
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                texture_masks[texture_index.unwrap],
+                assets.textures[texture_index.unwrap].unwrap.texture_mask,
                 &srcrect,
                 &rect,
                 0.0,
@@ -204,147 +206,3 @@ struct Compose_Rubber_Animat
         }
     }
 };
-
-struct Frame_Animat_File {
-    const char *file_path;
-    Frame_Animat animat;
-};
-
-Frame_Animat_File frame_animat_files[] = {
-    {"./assets/animats/idle.txt", {}},
-    {"./assets/animats/plasma_bolt.txt", {}},
-    {"./assets/animats/plasma_pop.txt", {}},
-    {"./assets/animats/walking.txt", {}},
-    {"./assets/animats/tsodinw.txt", {}},
-    {"./assets/animats/golem.txt", {}},
-    {"./assets/animats/ice-golem-idle.txt", {}},
-    {"./assets/animats/ice-golem-walking.txt", {}},
-};
-const size_t frame_animat_files_count = sizeof(frame_animat_files) / sizeof(frame_animat_files[0]);
-
-Frame_Animat frame_animat_by_name(String_View file_path)
-{
-    for (size_t i = 0; i < frame_animat_files_count; ++i) {
-        if (file_path == cstr_as_string_view(frame_animat_files[i].file_path)) {
-            return frame_animat_files[i].animat;
-        }
-    }
-
-#ifndef SOMETHING_RELEASE
-    println(stderr,
-            "Could not find animat `", file_path, "`. ",
-            "Did you forget to add it to `frame_animat_files` list?");
-    abort();
-#endif // SOMETHING_RELEASE
-
-    return {};
-}
-
-Frame_Animat load_animat_file(const char *animat_filepath)
-{
-    auto source = read_file_as_string_view(animat_filepath);
-    if (!source.has_value) {
-        println(stderr, "Could not load animation file: `", animat_filepath, "`");
-        abort();
-    }
-
-    String_View input = source.unwrap;
-    Frame_Animat animat = {};
-    Maybe<Texture_Index> spritesheet_texture = {};
-
-    while (input.count != 0) {
-        auto value = input.chop_by_delim('\n');
-        auto key = value.chop_by_delim('=').trim();
-        if (key.count == 0 || *key.data == '#') continue;
-        value = value.trim();
-
-        auto subkey = key.chop_by_delim('.').trim();
-
-        if (subkey == "count"_sv) {
-            if (animat.frames != nullptr) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "`count` provided twice");
-            }
-
-            auto count_result = value.as_integer<int>();
-            if (!count_result.has_value) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "`count` is not a number");
-            }
-
-            animat.frame_count = (size_t) count_result.unwrap;
-            animat.frames = new Sprite[animat.frame_count];
-        } else if (subkey == "sprite"_sv) {
-            spritesheet_texture = {true, texture_index_by_name(value)};
-        } else if (subkey == "duration"_sv) {
-            auto result = value.as_integer<int>();
-            if (!result.has_value) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "`duration` is not a number");
-            }
-
-            animat.frame_duration = (float) result.unwrap / 1000.0f;
-        } else if (subkey == "frames"_sv) {
-            auto result = key.chop_by_delim('.').trim().as_integer<int>();
-            if (!result.has_value) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "frame index is not a number");
-            }
-
-            size_t frame_index = (size_t) result.unwrap;
-            if (frame_index >= animat.frame_count) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "frame index is bigger than the `count`");
-            }
-
-            if (!spritesheet_texture.has_value) {
-                abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                  "spritesheet was not loaded");
-            }
-
-            animat.frames[frame_index].texture_index = spritesheet_texture.unwrap;
-
-            while (key.count) {
-                subkey = key.chop_by_delim('.').trim();
-
-                if (key.count != 0) {
-                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                      "unknown subkey");
-                }
-
-                auto result_value = value.as_integer<int>();
-                if (!result_value.has_value) {
-                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                      "value is not a number");
-                }
-
-                if (subkey == "x"_sv) {
-                    animat.frames[frame_index].srcrect.x = result_value.unwrap;
-                } else if (subkey == "y"_sv) {
-                    animat.frames[frame_index].srcrect.y = result_value.unwrap;
-                } else if (subkey == "w"_sv) {
-                    animat.frames[frame_index].srcrect.w = result_value.unwrap;
-                } else if (subkey == "h"_sv) {
-                    animat.frames[frame_index].srcrect.h = result_value.unwrap;
-                } else {
-                    abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                                      "unknown subkey");
-                }
-            }
-        } else {
-            abort_parse_error(stderr, source.unwrap, input, animat_filepath,
-                              "unknown subkey");
-        }
-    }
-
-    free((void*) source.unwrap.data);
-
-    return animat;
-}
-
-void load_frame_animat_files()
-{
-    for (size_t i = 0; i < frame_animat_files_count; ++i) {
-        frame_animat_files[i].animat = load_animat_file(frame_animat_files[i].file_path);
-    }
-}

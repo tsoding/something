@@ -1,5 +1,7 @@
 #include "./something_assets.hpp"
 
+Assets assets = {};
+
 String_View Assets::load_file_into_conf_buffer(const char *filepath)
 {
     FILE *conf_file = fopen(filepath, "rb");
@@ -200,6 +202,23 @@ void Assets::load_animat(String_View id, String_View path)
     animats_count += 1;
 }
 
+Maybe<Sample_S16> Assets::get_sound_by_id(String_View id)
+{
+    for (size_t i = 0; i < sounds_count; ++i) {
+        if (sounds[i].id == id) {
+            return {true, sounds[i].unwrap};
+        }
+    }
+    return {};
+}
+
+Sample_S16 Assets::get_sound_by_id_or_panic(String_View id)
+{
+    return unwrap_or_panic(
+        get_sound_by_id(id),
+        "Could not find sound with id `", id, "`");
+}
+
 Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
 {
     for (size_t i = 0; i < textures_count; ++i) {
@@ -209,6 +228,31 @@ Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
     }
 
     return {};
+}
+
+Texture_Index Assets::get_texture_by_id_or_panic(String_View id)
+{
+    return unwrap_or_panic(
+        get_texture_by_id(id),
+        "Could not find texture with id `", id, "`");
+}
+
+Maybe<Frame_Animat> Assets::get_animat_by_id(String_View id)
+{
+    for (size_t i = 0; i < animats_count; ++i) {
+        if (animats[i].id == id) {
+            return {true, animats[i].unwrap};
+        }
+    }
+
+    return {};
+}
+
+Frame_Animat Assets::get_animat_by_id_or_panic(String_View id)
+{
+    return unwrap_or_panic(
+        get_animat_by_id(id),
+        "Could not find animat with id `", id, "`");
 }
 
 void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)

@@ -46,7 +46,7 @@ Item make_health_item(Vec2f pos)
     Item item = {};
     item.pos = pos;
     item.type = ITEM_HEALTH;
-    item.sprite.texture_index = texture_index_by_name(ITEM_HEALTH_TEXTURE);
+    item.sprite.texture_index = assets.get_texture_by_id_or_panic("HEALTH_ITEM_TEXTURE"_sv);
     item.sprite.srcrect = {0, 0, 64, 64};
     item.hitbox_local = {
         ITEM_HITBOX_WIDTH * -0.5f,
@@ -60,7 +60,7 @@ Item make_health_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
+    item.sound = assets.get_sound_by_id_or_panic("POP_SOUND"_sv);
 
     return item;
 }
@@ -83,7 +83,7 @@ Item make_dirt_block_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
+    item.sound = assets.get_sound_by_id_or_panic("POP_SOUND"_sv);
     return item;
 }
 
@@ -105,6 +105,6 @@ Item make_ice_block_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = sample_s16_by_name("./assets/sounds/pop-48000.wav"_sv);
+    item.sound = assets.get_sound_by_id_or_panic("POP_SOUND"_sv);
     return item;
 }
