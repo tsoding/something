@@ -202,17 +202,17 @@ void Assets::load_animat(String_View id, String_View path)
     animats_count += 1;
 }
 
-Maybe<Sample_S16> Assets::get_sound_by_id(String_View id)
+Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
 {
     for (size_t i = 0; i < sounds_count; ++i) {
         if (sounds[i].id == id) {
-            return {true, sounds[i].unwrap};
+            return {true, {i}};
         }
     }
     return {};
 }
 
-Sample_S16 Assets::get_sound_by_id_or_panic(String_View id)
+Sample_S16_Index Assets::get_sound_by_id_or_panic(String_View id)
 {
     return unwrap_or_panic(
         get_sound_by_id(id),
@@ -265,12 +265,10 @@ void Assets::clean()
     }
     textures_count = 0;
 
-    if (!loaded_first_time) {
-        for (size_t i = 0; i < sounds_count; ++i) {
-            SDL_FreeWAV((Uint8*) sounds[i].unwrap.audio_buf);
-        }
-        sounds_count = 0;
+    for (size_t i = 0; i < sounds_count; ++i) {
+        SDL_FreeWAV((Uint8*) sounds[i].unwrap.audio_buf);
     }
+    sounds_count = 0;
 
     if (!loaded_first_time) {
         for (size_t i = 0; i < animats_count; ++i) {
@@ -304,9 +302,7 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         if (asset_type == "textures"_sv) {
             load_texture(renderer, asset_id, asset_path);
         } else if (asset_type == "sounds"_sv) {
-            if (!loaded_first_time) {
-                load_sound(asset_id, asset_path);
-            }
+            load_sound(asset_id, asset_path);
         } else if (asset_type == "animats"_sv) {
             if (!loaded_first_time) {
                 load_animat(asset_id, asset_path);

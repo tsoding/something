@@ -1,5 +1,12 @@
 #include "./something_sound.hpp"
 
+void Sample_Mixer::clean()
+{
+    for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
+        samples[i] = {};
+    }
+}
+
 void Sample_Mixer::play_sample(Sample_S16 sample)
 {
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {

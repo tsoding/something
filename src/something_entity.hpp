@@ -71,8 +71,8 @@ struct Entity
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;
 
-    Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
-    Sample_S16 shoot_sample;
+    Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
+    Sample_S16_Index shoot_sample;
 
     Particles particles;
 

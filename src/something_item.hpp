@@ -18,7 +18,8 @@ struct Item
     Rectf hitbox_local;
     Rectf texbox_local;
 
-    Sample_S16 sound;
+    // TODO: there is no reason to play different sounds when you pick up different items
+    Sample_S16_Index sound;
 
     void update(float delta_time);
     void render(SDL_Renderer *renderer, Camera camera,

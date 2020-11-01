@@ -1,6 +1,8 @@
 #ifndef SOMETHING_SPRITE_HPP_
 #define SOMETHING_SPRITE_HPP_
 
+#include "./something_index.hpp"
+
 struct Sprite
 {
     SDL_Rect srcrect;

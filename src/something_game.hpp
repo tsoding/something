@@ -20,25 +20,6 @@ enum Debug_Toolbar_Button
     DEBUG_TOOLBAR_COUNT
 };
 
-template <typename That>
-struct Index
-{
-    size_t unwrap;
-
-    bool operator==(const That that) const
-    {
-        return this->unwrap == that.unwrap;
-    }
-
-    bool operator!=(const That that) const
-    {
-        return !(*this == that);
-    }
-};
-
-struct Entity_Index: public Index<Entity_Index> {};
-struct Projectile_Index: public Index<Projectile_Index> {};
-
 enum class Projectile_State
 {
     Ded = 0,
@@ -93,11 +74,7 @@ struct Game
 
     Frame_Animat entity_walking_animat;
     Frame_Animat entity_idle_animat;
-    Sample_S16 entity_jump_sample1;
-    Sample_S16 entity_jump_sample2;
-    Sample_S16 player_shoot_sample;
     Sample_S16 kill_enemy_sample;
-    Sample_S16 damage_enemy_sample;
 
     Frame_Animat projectile_active_animat;
     Frame_Animat projectile_poof_animat;

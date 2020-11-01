@@ -129,15 +129,10 @@ int main(int argc, char *argv[])
     game.background.layers[1] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_MIDDLE_TEXTURE"_sv));
     game.background.layers[2] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_FRONT_TEXTURE"_sv));
 
-    game.player_shoot_sample      = assets.get_sound_by_id_or_panic("PEW_SOUND"_sv);
     game.entity_walking_animat    = assets.get_animat_by_id_or_panic("ENEMY_WALKING_ANIMAT"_sv);
     game.entity_idle_animat       = assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv);
-    game.entity_jump_sample1      = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
-    game.entity_jump_sample2      = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
     game.projectile_poof_animat   = assets.get_animat_by_id_or_panic("PROJECTILE_POOF_ANIMAT"_sv);
     game.projectile_active_animat = assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv);
-    game.damage_enemy_sample      = assets.get_sound_by_id_or_panic("OOF_SOUND"_sv);
-    game.kill_enemy_sample        = assets.get_sound_by_id_or_panic("CRUNCH_SOUND"_sv);
 
 #ifndef SOMETHING_RELEASE
     {
@@ -292,6 +287,12 @@ int main(int argc, char *argv[])
                 } break;
 
                 case SDLK_F6: {
+                    // NOTE: it is important to clean all of the
+                    // samples from the mixer before reloading the
+                    // assets, because after assets are reloaded any
+                    // pointers stored in the mixer could be
+                    // invalidated.
+                    game.mixer.clean();
                     assets.load_conf(renderer, "./assets/assets.conf");
                     game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded assets file");
                 } break;

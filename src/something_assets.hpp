@@ -39,8 +39,8 @@ struct Assets
     Maybe<Texture_Index> get_texture_by_id(String_View id);
     Texture_Index get_texture_by_id_or_panic(String_View id);
 
-    Maybe<Sample_S16> get_sound_by_id(String_View id);
-    Sample_S16 get_sound_by_id_or_panic(String_View id);
+    Maybe<Sample_S16_Index> get_sound_by_id(String_View id);
+    Sample_S16_Index get_sound_by_id_or_panic(String_View id);
 
     Maybe<Frame_Animat> get_animat_by_id(String_View id);
     Frame_Animat get_animat_by_id_or_panic(String_View id);
