@@ -15,6 +15,6 @@ cl.exe /O2 /TC /Zi /W4 /nologo -DSTBI_ONLY_PNG -DSTB_IMAGE_IMPLEMENTATION /c stb
 
 cl.exe %CXXFLAGS% %INCLUDES% /Fe"something.debug.exe" src/something.cpp ^
     /link %LIBS% stb_image.obj -SUBSYSTEM:windows
-rem TODO: No release build for MSVC
+rem TODO(#254): No release build for MSVC
 rem cl.exe %CXXFLAGS% /wd4505 %INCLUDES% /DSOMETHING_RELEASE /Fe"something.release.exe" ^
 rem     src/something.cpp /link %LIBS% baked_config.hpp -SUBSYSTEM:windows
