@@ -270,11 +270,9 @@ void Assets::clean()
     }
     sounds_count = 0;
 
-    // if (!loaded_first_time) {
-        for (size_t i = 0; i < animats_count; ++i) {
-            delete[] animats[i].unwrap.frames;
-        }
-    // }
+    for (size_t i = 0; i < animats_count; ++i) {
+        delete[] animats[i].unwrap.frames;
+    }
     animats_count = 0;
 }
 
@@ -284,8 +282,6 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 
     String_View input = load_file_into_conf_buffer(filepath);
 
-    // TODO(#251): assets.conf does not support comments
-    // TODO(#252): there is no way to reload assets at runtime
     // TODO(#253): release data pack building based on assets.conf
 
     while (input.count > 0) {
@@ -304,9 +300,7 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         } else if (asset_type == "sounds"_sv) {
             load_sound(asset_id, asset_path);
         } else if (asset_type == "animats"_sv) {
-            // if (!loaded_first_time) {
-                load_animat(asset_id, asset_path);
-            // }
+            load_animat(asset_id, asset_path);
         } else {
             println(stderr, "Unknown asset type `", asset_type, "`");
             exit(1);
