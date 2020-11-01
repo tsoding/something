@@ -26,6 +26,8 @@ struct Texture
 
 struct Assets
 {
+    bool loaded_first_time;
+
     char conf_buffer[ASSETS_CONF_BUFFER_CAPACITY];
     size_t textures_count;
     Asset<Texture> textures[ASSETS_TEXTURES_CAPACITY];
@@ -48,6 +50,7 @@ struct Assets
     void load_sound(String_View id, String_View path);
     void load_animat(String_View id, String_View path);
 
+    void clean();
     void load_conf(SDL_Renderer *renderer, const char *filepath);
 };
 

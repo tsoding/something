@@ -290,6 +290,11 @@ int main(int argc, char *argv[])
                         game.update(SIMULATION_DELTA_TIME);
                     }
                 } break;
+
+                case SDLK_F6: {
+                    assets.load_conf(renderer, "./assets/assets.conf");
+                    game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded assets file");
+                } break;
                 }
             } break;
             }

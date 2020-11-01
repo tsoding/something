@@ -255,8 +255,35 @@ Frame_Animat Assets::get_animat_by_id_or_panic(String_View id)
         "Could not find animat with id `", id, "`");
 }
 
+void Assets::clean()
+{
+    for (size_t i = 0; i < textures_count; ++i) {
+        SDL_FreeSurface(textures[i].unwrap.surface);
+        SDL_DestroyTexture(textures[i].unwrap.texture);
+        SDL_FreeSurface(textures[i].unwrap.surface_mask);
+        SDL_DestroyTexture(textures[i].unwrap.texture_mask);
+    }
+    textures_count = 0;
+
+    if (!loaded_first_time) {
+        for (size_t i = 0; i < sounds_count; ++i) {
+            SDL_FreeWAV((Uint8*) sounds[i].unwrap.audio_buf);
+        }
+        sounds_count = 0;
+    }
+
+    if (!loaded_first_time) {
+        for (size_t i = 0; i < animats_count; ++i) {
+            delete[] animats[i].unwrap.frames;
+        }
+    }
+    animats_count = 0;
+}
+
 void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 {
+    clean();
+
     String_View input = load_file_into_conf_buffer(filepath);
 
     // TODO(#251): assets.conf does not support comments
@@ -277,12 +304,18 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         if (asset_type == "textures"_sv) {
             load_texture(renderer, asset_id, asset_path);
         } else if (asset_type == "sounds"_sv) {
-            load_sound(asset_id, asset_path);
+            if (!loaded_first_time) {
+                load_sound(asset_id, asset_path);
+            }
         } else if (asset_type == "animats"_sv) {
-            load_animat(asset_id, asset_path);
+            if (!loaded_first_time) {
+                load_animat(asset_id, asset_path);
+            }
         } else {
             println(stderr, "Unknown asset type `", asset_type, "`");
             exit(1);
         }
     }
+
+    loaded_first_time = true;
 }
