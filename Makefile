@@ -23,14 +23,14 @@ something.release: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp)
 stb_image.o: src/stb_image.h
 	$(CC) $(CFLAGS) -x c -ggdb -DSTBI_ONLY_PNG -DSTB_IMAGE_IMPLEMENTATION -c -o stb_image.o src/stb_image.h
 
-baked_config.hpp: config_baker ./assets/config.vars
+baked_config.hpp: config_baker ./assets/vars.conf
 	"./config_baker" > baked_config.hpp
 
 config_baker: src/config_baker.cpp src/config_common.cpp config_types.hpp
 	$(CXX) $(CXXFLAGS_DEBUG) -o config_baker src/config_baker.cpp $(LIBS)
 
-config_types.hpp: config_typer ./assets/config.vars
-	"./config_typer" ./assets/config.vars > config_types.hpp
+config_types.hpp: config_typer ./assets/vars.conf
+	"./config_typer" ./assets/vars.conf > config_types.hpp
 
 config_typer: src/config_typer.cpp
 	$(CXX) $(CXXFLAGS_DEBUG) -o config_typer src/config_typer.cpp $(LIBS)

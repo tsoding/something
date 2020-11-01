@@ -19,7 +19,7 @@ using namespace aids;
 
 #include "config_common.cpp"
 
-const char * const CONFIG_FILE_PATH = "./assets/config.vars";
+const char * const CONFIG_FILE_PATH = "./assets/vars.conf";
 
 int main(int argc, char *argv[])
 {

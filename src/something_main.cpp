@@ -141,14 +141,14 @@ int main(int argc, char *argv[])
 
 #ifndef SOMETHING_RELEASE
     {
-        auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+        auto result = reload_config_file(VARS_CONF_FILE_PATH);
         if (result.is_error) {
-            println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+            println(stderr, VARS_CONF_FILE_PATH, ":", result.line, ": ", result.message);
+            game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", VARS_CONF_FILE_PATH, result.line, result.message);
         }
     }
 
-    auto fmw = fmw_init(CONFIG_VARS_FILE_PATH);
+    auto fmw = fmw_init(VARS_CONF_FILE_PATH);
 #endif // SOMETHING_RELEASE
 
     static_assert(DEBUG_TOOLBAR_COUNT <= TOOLBAR_BUTTONS_CAPACITY);
@@ -299,12 +299,12 @@ int main(int argc, char *argv[])
 
 #ifndef SOMETHING_RELEASE
         if (fmw_poll(fmw)) {
-            auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+            auto result = reload_config_file(VARS_CONF_FILE_PATH);
             if (result.is_error) {
-                println(stderr, CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-                game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+                println(stderr, VARS_CONF_FILE_PATH, ":", result.line, ": ", result.message);
+                game.popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", VARS_CONF_FILE_PATH, result.line, result.message);
             } else {
-                game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
+                game.popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", VARS_CONF_FILE_PATH);
             }
         }
 #endif // SOMETHING_RELEASE
