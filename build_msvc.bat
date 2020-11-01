@@ -6,10 +6,10 @@ set INCLUDES=/I SDL2\include
 set LIBS=SDL2\lib\x64\SDL2.lib SDL2\lib\x64\SDL2main.lib Shell32.lib
 
 cl.exe %CXXFLAGS% %INCLUDES% src/config_typer.cpp
-config_typer assets\config.vars > config_types.hpp
+config_typer assets\vars.conf > config_types.hpp
 
 cl.exe %CXXFLAGS% %INCLUDES% src/config_baker.cpp
-config_baker assets\config.vars > baked_config.hpp
+config_baker assets\vars.conf > baked_config.hpp
 
 cl.exe /O2 /TC /Zi /W4 /nologo -DSTBI_ONLY_PNG -DSTB_IMAGE_IMPLEMENTATION /c stb_image.o src/stb_image.h
 

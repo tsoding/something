@@ -259,6 +259,10 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 {
     String_View input = load_file_into_conf_buffer(filepath);
 
+    // TODO: assets.conf does not support comments
+    // TODO: there is no way to reload assets at runtime
+    // TODO: release data pack building based on assets.conf
+
     while (input.count > 0) {
         String_View line = input.chop_by_delim('\n').trim();
         if (line.count == 0) continue;

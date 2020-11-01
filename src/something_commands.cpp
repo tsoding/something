@@ -100,13 +100,13 @@ void command_set(Game *game, String_View args)
 
 void command_reload(Game *game, String_View)
 {
-    auto result = reload_config_file(CONFIG_VARS_FILE_PATH);
+    auto result = reload_config_file(VARS_CONF_FILE_PATH);
     if (result.is_error) {
-        game->console.println(CONFIG_VARS_FILE_PATH, ":", result.line, ": ", result.message);
-        game->popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", CONFIG_VARS_FILE_PATH, result.line, result.message);
+        game->console.println(VARS_CONF_FILE_PATH, ":", result.line, ": ", result.message);
+        game->popup.notify(FONT_FAILURE_COLOR, "%s:%d: %s", VARS_CONF_FILE_PATH, result.line, result.message);
     } else {
-        game->console.println("Reloaded config file `", CONFIG_VARS_FILE_PATH, "`");
-        game->popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", CONFIG_VARS_FILE_PATH);
+        game->console.println("Reloaded config file `", VARS_CONF_FILE_PATH, "`");
+        game->popup.notify(FONT_SUCCESS_COLOR, "Reloaded config file\n\n%s", VARS_CONF_FILE_PATH);
     }
 }
 

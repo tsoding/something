@@ -10,7 +10,7 @@ enum Config_Type
 #include "../config_types.hpp"
 #include "something_color.hpp"
 
-const char *const CONFIG_VARS_FILE_PATH = "./assets/config.vars";
+const char *const VARS_CONF_FILE_PATH = "./assets/vars.conf";
 
 Config_Type config_type_by_name(String_View type_name)
 {
@@ -110,7 +110,7 @@ Maybe<String_View> string_view_of_string_literal(String_View input)
     return {true, input};
 }
 
-// TODO(#215): In config.vars, you can currently only reference variables defined before current line. For example:
+// TODO(#215): In vars.conf, you can currently only reference variables defined before current line. For example:
 //   Works:
 //     PLAYER_SIZE   : float = 50
 //     PLAYER_WIDTH  : float = PLAYER_SIZE
