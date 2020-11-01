@@ -10,13 +10,13 @@ struct Sample_S16
 
 const size_t SAMPLE_MIXER_CAPACITY = 5;
 
-
 struct Sample_Mixer
 {
     float volume;
     Sample_S16 samples[SAMPLE_MIXER_CAPACITY];
 
     void play_sample(Sample_S16 sample);
+    void clean();
 };
 
 const size_t SOMETHING_SOUND_FREQ = 48000;

@@ -202,17 +202,17 @@ void Assets::load_animat(String_View id, String_View path)
     animats_count += 1;
 }
 
-Maybe<Sample_S16> Assets::get_sound_by_id(String_View id)
+Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
 {
     for (size_t i = 0; i < sounds_count; ++i) {
         if (sounds[i].id == id) {
-            return {true, sounds[i].unwrap};
+            return {true, {i}};
         }
     }
     return {};
 }
 
-Sample_S16 Assets::get_sound_by_id_or_panic(String_View id)
+Sample_S16_Index Assets::get_sound_by_id_or_panic(String_View id)
 {
     return unwrap_or_panic(
         get_sound_by_id(id),
@@ -237,30 +237,51 @@ Texture_Index Assets::get_texture_by_id_or_panic(String_View id)
         "Could not find texture with id `", id, "`");
 }
 
-Maybe<Frame_Animat> Assets::get_animat_by_id(String_View id)
+Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
 {
     for (size_t i = 0; i < animats_count; ++i) {
         if (animats[i].id == id) {
-            return {true, animats[i].unwrap};
+            return {true, {i}};
         }
     }
 
     return {};
 }
 
-Frame_Animat Assets::get_animat_by_id_or_panic(String_View id)
+Frame_Animat_Index Assets::get_animat_by_id_or_panic(String_View id)
 {
     return unwrap_or_panic(
         get_animat_by_id(id),
         "Could not find animat with id `", id, "`");
 }
 
+void Assets::clean()
+{
+    for (size_t i = 0; i < textures_count; ++i) {
+        SDL_FreeSurface(textures[i].unwrap.surface);
+        SDL_DestroyTexture(textures[i].unwrap.texture);
+        SDL_FreeSurface(textures[i].unwrap.surface_mask);
+        SDL_DestroyTexture(textures[i].unwrap.texture_mask);
+    }
+    textures_count = 0;
+
+    for (size_t i = 0; i < sounds_count; ++i) {
+        SDL_FreeWAV((Uint8*) sounds[i].unwrap.audio_buf);
+    }
+    sounds_count = 0;
+
+    for (size_t i = 0; i < animats_count; ++i) {
+        delete[] animats[i].unwrap.frames;
+    }
+    animats_count = 0;
+}
+
 void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 {
+    clean();
+
     String_View input = load_file_into_conf_buffer(filepath);
 
-    // TODO(#251): assets.conf does not support comments
-    // TODO(#252): there is no way to reload assets at runtime
     // TODO(#253): release data pack building based on assets.conf
 
     while (input.count > 0) {
@@ -285,4 +306,6 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
             exit(1);
         }
     }
+
+    loaded_first_time = true;
 }

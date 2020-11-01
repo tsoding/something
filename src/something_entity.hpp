@@ -65,14 +65,14 @@ struct Entity
     size_t dirt_blocks_count;
     size_t ice_blocks_count;
 
-    Frame_Animat idle;
-    Frame_Animat walking;
+    Frame_Animat_Index idle;
+    Frame_Animat_Index walking;
     Rubber_Animat poof_animat;
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;
 
-    Sample_S16 jump_samples[JUMP_SAMPLES_CAPACITY];
-    Sample_S16 shoot_sample;
+    Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
+    Sample_S16_Index shoot_sample;
 
     Particles particles;
 

@@ -1,10 +1,6 @@
 #ifndef SOMETHING_TEXTURE_HPP_
 #define SOMETHING_TEXTURE_HPP_
 
-struct Texture_Index
-{
-    size_t unwrap;
-};
 
 // TODO(#113): add support for mipmaps for the texture cache
 SDL_Surface *load_png_file_as_surface(const char *image_filename);

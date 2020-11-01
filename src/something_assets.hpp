@@ -26,6 +26,8 @@ struct Texture
 
 struct Assets
 {
+    bool loaded_first_time;
+
     char conf_buffer[ASSETS_CONF_BUFFER_CAPACITY];
     size_t textures_count;
     Asset<Texture> textures[ASSETS_TEXTURES_CAPACITY];
@@ -37,17 +39,18 @@ struct Assets
     Maybe<Texture_Index> get_texture_by_id(String_View id);
     Texture_Index get_texture_by_id_or_panic(String_View id);
 
-    Maybe<Sample_S16> get_sound_by_id(String_View id);
-    Sample_S16 get_sound_by_id_or_panic(String_View id);
+    Maybe<Sample_S16_Index> get_sound_by_id(String_View id);
+    Sample_S16_Index get_sound_by_id_or_panic(String_View id);
 
-    Maybe<Frame_Animat> get_animat_by_id(String_View id);
-    Frame_Animat get_animat_by_id_or_panic(String_View id);
+    Maybe<Frame_Animat_Index> get_animat_by_id(String_View id);
+    Frame_Animat_Index get_animat_by_id_or_panic(String_View id);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);
     void load_sound(String_View id, String_View path);
     void load_animat(String_View id, String_View path);
 
+    void clean();
     void load_conf(SDL_Renderer *renderer, const char *filepath);
 };
 
