@@ -265,12 +265,14 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 
     while (input.count > 0) {
         String_View line = input.chop_by_delim('\n').trim();
-        if (line.count == 0) continue;
+
+        if (line.count == 0) continue; // Skip empty lines
+        if (*line.data == '#') continue; // Skip single line comments
 
         String_View asset_type = line.chop_by_delim('[').trim();
         String_View asset_id = line.chop_by_delim(']').trim();
         line.chop_by_delim('=');
-        String_View asset_path = line.trim();
+        String_View asset_path = line.chop_by_delim('#').trim();
 
         if (asset_type == "textures"_sv) {
             load_texture(renderer, asset_id, asset_path);
