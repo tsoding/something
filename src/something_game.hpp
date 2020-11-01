@@ -33,8 +33,8 @@ struct Projectile
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
-    Frame_Animat active_animat;
-    Frame_Animat poof_animat;
+    Frame_Animat_Index active_animat;
+    Frame_Animat_Index poof_animat;
     float lifetime;
 
     void kill();
@@ -72,12 +72,7 @@ struct Game
     // TODO(#178): disable game console in release mode
     Console console;
 
-    Frame_Animat entity_walking_animat;
-    Frame_Animat entity_idle_animat;
     Sample_S16 kill_enemy_sample;
-
-    Frame_Animat projectile_active_animat;
-    Frame_Animat projectile_poof_animat;
 
     Bitmap_Font debug_font;
     Toolbar debug_toolbar;

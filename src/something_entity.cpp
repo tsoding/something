@@ -102,13 +102,13 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
-            idle.render(renderer, camera.to_screen(texbox), flip,
-                        mix_colors(shade, effective_flash_color));
+            assets.animats[idle.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip,
+                                                      mix_colors(shade, effective_flash_color));
         } break;
 
         case Alive_State::Walking: {
-            walking.render(renderer, camera.to_screen(texbox), flip,
-                           mix_colors(shade, effective_flash_color));
+            assets.animats[walking.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip,
+                                                         mix_colors(shade, effective_flash_color));
         } break;
         }
 
@@ -128,7 +128,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         //   Previous animation implementation was capturing texture of last alive state.
         //   So if entity was shot in running pose it was squashing in this position.
         //   So there's no sudden graphical switch to idle texture.
-        idle.render(renderer, camera.to_screen(texbox), flip, shade);
+        assets.animats[idle.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip, shade);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -244,7 +244,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
         switch (alive_state) {
         case Alive_State::Idle:
-            idle.update(dt);
+            assets.animats[idle.unwrap].unwrap.update(dt);
             break;
 
         case Alive_State::Walking:
@@ -261,7 +261,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             } break;
             }
 
-            walking.update(dt);
+            assets.animats[walking.unwrap].unwrap.update(dt);
             break;
         }
     } break;

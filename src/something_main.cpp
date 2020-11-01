@@ -129,11 +129,6 @@ int main(int argc, char *argv[])
     game.background.layers[1] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_MIDDLE_TEXTURE"_sv));
     game.background.layers[2] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_FRONT_TEXTURE"_sv));
 
-    game.entity_walking_animat    = assets.get_animat_by_id_or_panic("ENEMY_WALKING_ANIMAT"_sv);
-    game.entity_idle_animat       = assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv);
-    game.projectile_poof_animat   = assets.get_animat_by_id_or_panic("PROJECTILE_POOF_ANIMAT"_sv);
-    game.projectile_active_animat = assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv);
-
 #ifndef SOMETHING_RELEASE
     {
         auto result = reload_config_file(VARS_CONF_FILE_PATH);
@@ -166,7 +161,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.item.item = make_health_item(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = game.entity_idle_animat.frames[0];
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = assets.animats[assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv).unwrap].unwrap.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.entity.entity = enemy_entity(vec2(0.0f, 0.0f));
@@ -192,7 +187,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv).frames[0];
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = assets.animats[assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv).unwrap].unwrap.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tooltip = "Add ice golem enemy"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));

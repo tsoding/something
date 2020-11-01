@@ -33,7 +33,7 @@ void Projectile::kill()
 {
     if (state == Projectile_State::Active) {
         state = Projectile_State::Poof;
-        poof_animat.reset();
+        assets.animats[poof_animat.unwrap].unwrap.reset();
     }
 }
 
@@ -584,8 +584,8 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
             projectiles[i].vel = vel;
             projectiles[i].shooter = shooter;
             projectiles[i].lifetime = PROJECTILE_LIFETIME;
-            projectiles[i].active_animat = projectile_active_animat;
-            projectiles[i].poof_animat = projectile_poof_animat;
+            projectiles[i].active_animat = assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv);
+            projectiles[i].poof_animat = assets.get_animat_by_id_or_panic("PROJECTILE_POOF_ANIMAT"_sv);
             return;
         }
     }
@@ -755,13 +755,13 @@ void Game::render_projectiles(SDL_Renderer *renderer, Camera camera)
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
-            projectiles[i].active_animat.render(
+            assets.animats[projectiles[i].active_animat.unwrap].unwrap.render(
                 renderer,
                 camera.to_screen(projectiles[i].pos));
         } break;
 
         case Projectile_State::Poof: {
-            projectiles[i].poof_animat.render(
+            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.render(
                 renderer,
                 camera.to_screen(projectiles[i].pos));
         } break;
@@ -776,7 +776,7 @@ void Game::update_projectiles(float dt)
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         switch (projectiles[i].state) {
         case Projectile_State::Active: {
-            projectiles[i].active_animat.update(dt);
+            assets.animats[projectiles[i].active_animat.unwrap].unwrap.update(dt);
             projectiles[i].pos += projectiles[i].vel * dt;
 
             auto tile = grid.tile_at_abs(projectiles[i].pos);
@@ -798,9 +798,9 @@ void Game::update_projectiles(float dt)
         } break;
 
         case Projectile_State::Poof: {
-            projectiles[i].poof_animat.update(dt);
-            if (projectiles[i].poof_animat.frame_current ==
-                (projectiles[i].poof_animat.frame_count - 1)) {
+            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.update(dt);
+            if (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_current ==
+                (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_count - 1)) {
                 projectiles[i].state = Projectile_State::Ded;
             }
         } break;
@@ -943,8 +943,11 @@ void Game::render_player_hud(SDL_Renderer *renderer)
     Weapon_Stat stats[WEAPON_COUNT] = {};
 
     snprintf(stats[WEAPON_GUN].label, sizeof(stats[WEAPON_GUN].label), "inf");
-    assert(projectile_active_animat.frame_count > 0);
-    stats[WEAPON_GUN].icon = projectile_active_animat.frames[0];
+    {
+        auto animat = assets.animats[assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv).unwrap].unwrap;
+        assert(animat.frame_count > 0);
+        stats[WEAPON_GUN].icon = animat.frames[0];
+    }
 
     snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
     stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DIRT_0].top_texture;

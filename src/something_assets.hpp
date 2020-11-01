@@ -42,8 +42,8 @@ struct Assets
     Maybe<Sample_S16_Index> get_sound_by_id(String_View id);
     Sample_S16_Index get_sound_by_id_or_panic(String_View id);
 
-    Maybe<Frame_Animat> get_animat_by_id(String_View id);
-    Frame_Animat get_animat_by_id_or_panic(String_View id);
+    Maybe<Frame_Animat_Index> get_animat_by_id(String_View id);
+    Frame_Animat_Index get_animat_by_id_or_panic(String_View id);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);

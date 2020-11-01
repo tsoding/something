@@ -237,18 +237,18 @@ Texture_Index Assets::get_texture_by_id_or_panic(String_View id)
         "Could not find texture with id `", id, "`");
 }
 
-Maybe<Frame_Animat> Assets::get_animat_by_id(String_View id)
+Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
 {
     for (size_t i = 0; i < animats_count; ++i) {
         if (animats[i].id == id) {
-            return {true, animats[i].unwrap};
+            return {true, {i}};
         }
     }
 
     return {};
 }
 
-Frame_Animat Assets::get_animat_by_id_or_panic(String_View id)
+Frame_Animat_Index Assets::get_animat_by_id_or_panic(String_View id)
 {
     return unwrap_or_panic(
         get_animat_by_id(id),
@@ -270,11 +270,11 @@ void Assets::clean()
     }
     sounds_count = 0;
 
-    if (!loaded_first_time) {
+    // if (!loaded_first_time) {
         for (size_t i = 0; i < animats_count; ++i) {
             delete[] animats[i].unwrap.frames;
         }
-    }
+    // }
     animats_count = 0;
 }
 
@@ -304,9 +304,9 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         } else if (asset_type == "sounds"_sv) {
             load_sound(asset_id, asset_path);
         } else if (asset_type == "animats"_sv) {
-            if (!loaded_first_time) {
+            // if (!loaded_first_time) {
                 load_animat(asset_id, asset_path);
-            }
+            // }
         } else {
             println(stderr, "Unknown asset type `", asset_type, "`");
             exit(1);
