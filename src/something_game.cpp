@@ -152,6 +152,13 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_q: {
                 debug = !debug;
+                if (debug) {
+                    for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
+                        if (entities[i].state == Entity_State::Alive) {
+                            entities[i].stop();
+                        }
+                    }
+                }
             } break;
 
             case SDLK_z: {
