@@ -150,6 +150,30 @@ void Game::handle_event(SDL_Event *event)
                 }
             } break;
 
+            case SDLK_w: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y -= ENTITY_GRAVITY * 0.3f;
+                }
+            } break;
+
+            case SDLK_s: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y += ENTITY_GRAVITY * 0.3f;
+                }
+            } break;
+
+            case SDLK_f: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].fly_mode = !entities[PLAYER_ENTITY_INDEX].fly_mode;
+                    if (entities[PLAYER_ENTITY_INDEX].fly_mode) {
+                        popup.notify(FONT_SUCCESS_COLOR, "Fly mode enabled");
+                        entities[PLAYER_ENTITY_INDEX].vel.y = 0;
+                    } else {
+                        popup.notify(FONT_FAILURE_COLOR, "Fly mode disabled");
+                    }
+                }
+            } break;
+
             case SDLK_q: {
                 debug = !debug;
                 if (debug) {
@@ -158,6 +182,8 @@ void Game::handle_event(SDL_Event *event)
                             entities[i].stop();
                         }
                     }
+                } else {
+                    entities[PLAYER_ENTITY_INDEX].fly_mode = false;
                 }
             } break;
 
