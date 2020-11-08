@@ -250,7 +250,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
         switch (alive_state) {
         case Alive_State::Idle:
-            // TODO: entities should own their own copies of animats
+            // TODO(#270): entities should own their own copies of animats
             //
             // Right now we are mutating instance of animats that are inside of Assets.
             // And those could be used by other entities. And they will fight with each other.
