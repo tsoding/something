@@ -32,7 +32,7 @@ typedef SSIZE_T ssize_t;
 #include "../baked_config.hpp"
 #endif
 
-#include "./assets_types.hpp"
+#include "../assets_types.hpp"
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #ifndef SOMETHING_RELEASE
