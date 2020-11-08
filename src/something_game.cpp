@@ -477,7 +477,6 @@ void Game::entity_shoot(Entity_Index entity_index)
         } break;
 
         case WEAPON_DIRT_BLOCK: {
-            // TODO(#222): dirt blocks must not be placed on the player
             bool can_place = false;
             auto target_tile = where_entity_can_place_block(entity_index, &can_place);
             if (can_place && entity->dirt_blocks_count > 0) {
