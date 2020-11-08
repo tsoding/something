@@ -21,6 +21,9 @@ using namespace aids;
 #ifdef _MSC_VER
 #include <BaseTsd.h>
 typedef SSIZE_T ssize_t;
+
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
 #endif
 
 #ifndef SOMETHING_RELEASE
@@ -37,6 +40,8 @@ typedef SSIZE_T ssize_t;
 #  elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 	|| defined(__DragonFly__)
 #    include "something_fmw_kqueue.cpp"
+#  elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)
+#    include "something_fmw_iocp.cpp"
 #  else
 #    include "something_fmw_dummy.cpp"
 #  endif // __linux__
