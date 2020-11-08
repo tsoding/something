@@ -25,7 +25,6 @@ void Particles::push(float impact)
         velocities[j] = polar(impact, rand_float_range(PI, 2.0f * PI));
         lifetimes[j] = PARTICLE_LIFETIME;
         sizes[j] = rand_float_range(PARTICLE_SIZE_LOW, PARTICLE_SIZE_HIGH);
-        // TODO(#187): implement HSL based generation of color for particles
         HSLA hsla = current_color;
         hsla.h += rand_float_range(0.0f, 2.0f * PARTICLES_HUE_DEVIATION_DEGREE) - PARTICLES_HUE_DEVIATION_DEGREE;
         colors[j] = hsla.to_rgba();
