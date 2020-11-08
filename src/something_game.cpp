@@ -152,13 +152,13 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_w: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y -= ENTITY_GRAVITY * 0.3f;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_GRAVITY * 0.3f;
                 }
             } break;
 
             case SDLK_s: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y += ENTITY_GRAVITY * 0.3f;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_GRAVITY * 0.3f;
                 }
             } break;
 
@@ -193,6 +193,22 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_r: {
                 reset_entities();
+            } break;
+            }
+        } break;
+
+        case SDL_KEYUP: {
+            switch (event->key.keysym.sym) {
+            case SDLK_w: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
+                }
+            } break;
+
+            case SDLK_s: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
+                }
             } break;
             }
         } break;
@@ -389,12 +405,16 @@ void Game::update(float dt)
 
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
-    camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
+    if(entities[PLAYER_ENTITY_INDEX].fly_mode) {
+        camera.vel = (player_pos - camera.pos) * PLAYER_FLY_CAMERA_FORCE;
+    } else {
+        camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
 
-    for (size_t i = 0; i < camera_locks_count; ++i) {
-        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
-        if (rect_contains_vec2(lock_abs, player_pos)) {
-            camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+        for (size_t i = 0; i < camera_locks_count; ++i) {
+            Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+            if (rect_contains_vec2(lock_abs, player_pos)) {
+                camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+            }
         }
     }
 
@@ -574,6 +594,8 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
+
+    if (entity->fly_mode) return;
 
     if (entity->state == Entity_State::Alive) {
         const float step_x = entity->hitbox_local.w / (float) ENTITY_MESH_COLS;
