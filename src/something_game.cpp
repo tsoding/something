@@ -71,7 +71,6 @@ void Game::handle_event(SDL_Event *event)
     case SDL_MOUSEMOTION: {
         mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
-        original_mouse_position = vec2(event->motion.x, event->motion.y);
         collision_probe = mouse_position;
 
         if (debug) {
