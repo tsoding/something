@@ -2,7 +2,6 @@
 #include "something_console.hpp"
 
 // TODO(#181): console does not support history
-// TODO(#182): console does not support scrolling
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
