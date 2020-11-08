@@ -6,7 +6,7 @@ Sprite sprite_from_texture_index(Texture_Index texture_index)
 {
     Sprite result = {};
     result.texture_index = texture_index;
-    sec(SDL_QueryTexture(assets.textures[texture_index.unwrap].unwrap.texture,
+    sec(SDL_QueryTexture(assets.get_texture_by_index(texture_index).texture,
                          NULL,
                          NULL,
                          &result.srcrect.w,
@@ -25,7 +25,7 @@ void Sprite::render(SDL_Renderer *renderer,
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                assets.textures[texture_index.unwrap].unwrap.texture,
+                assets.get_texture_by_index(texture_index).texture,
                 &srcrect,
                 &rect,
                 0.0,
@@ -33,13 +33,15 @@ void Sprite::render(SDL_Renderer *renderer,
                 flip));
 
         sec(SDL_SetTextureColorMod(
-                assets.textures[texture_index.unwrap].unwrap.texture_mask,
+                assets.get_texture_by_index(texture_index).texture_mask,
                 sdl_shade.r, sdl_shade.g, sdl_shade.b));
-        sec(SDL_SetTextureAlphaMod(assets.textures[texture_index.unwrap].unwrap.texture_mask, sdl_shade.a));
+        sec(SDL_SetTextureAlphaMod(
+                assets.get_texture_by_index(texture_index).texture_mask,
+                sdl_shade.a));
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                assets.textures[texture_index.unwrap].unwrap.texture_mask,
+                assets.get_texture_by_index(texture_index).texture_mask,
                 &srcrect,
                 &rect,
                 0.0,

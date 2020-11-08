@@ -33,7 +33,7 @@ void Projectile::kill()
 {
     if (state == Projectile_State::Active) {
         state = Projectile_State::Poof;
-        assets.animats[poof_animat.unwrap].unwrap.reset();
+        assets.get_animat_by_index(poof_animat).reset();
     }
 }
 

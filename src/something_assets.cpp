@@ -212,6 +212,11 @@ Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
     return {};
 }
 
+Sample_S16 Assets::get_sound_by_index(Sample_S16_Index index)
+{
+    return sounds[index.unwrap].unwrap;
+}
+
 Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
 {
     for (size_t i = 0; i < textures_count; ++i) {
@@ -223,6 +228,11 @@ Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
     return {};
 }
 
+Texture Assets::get_texture_by_index(Texture_Index index)
+{
+    return textures[index.unwrap].unwrap;
+}
+
 Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
 {
     for (size_t i = 0; i < animats_count; ++i) {
@@ -232,6 +242,11 @@ Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
     }
 
     return {};
+}
+
+Frame_Animat Assets::get_animat_by_index(Frame_Animat_Index index)
+{
+    return animats[index.unwrap].unwrap;
 }
 
 void Assets::clean()
