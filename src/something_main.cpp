@@ -61,6 +61,9 @@ int main(int argc, char *argv[])
     // TODO(#8): replace fantasy_tiles.png with our own assets
     auto tileset_texture = FANTASY_TEXTURE_INDEX;
 
+    game.window = window;
+    game.renderer = renderer;
+
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
 

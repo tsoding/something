@@ -61,6 +61,10 @@ struct Game
     float frame_delays[FPS_BARS_COUNT];
     size_t frame_delays_begin;
 
+
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+
     Vec2f collision_probe;
     Vec2f mouse_position;
     Maybe<Projectile_Index> tracking_projectile;

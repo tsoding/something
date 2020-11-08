@@ -69,8 +69,8 @@ void Game::handle_event(SDL_Event *event)
     } break;
 
     case SDL_MOUSEMOTION: {
-        mouse_position =
-            camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
+        /* mouse_position = */
+        /*     camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y))); */
         collision_probe = mouse_position;
 
         if (debug) {
@@ -190,6 +190,18 @@ void Game::update(float dt)
     // Update Player's gun direction //////////////////////////////
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
+
+    int windowWidth, windowHeight;
+    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+    int renderWidth, renderHeight;
+    SDL_RenderGetLogicalSize(renderer, &renderWidth, &renderHeight);
+
+    float fx = float(mouse_x) / float(windowWidth) * float(renderWidth);
+    float fy = float(mouse_y) / float(windowHeight) * float(renderHeight);
+
+    mouse_position =
+        camera.to_world(vec_cast<float>(vec2(fx, fy)));
+
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
@@ -602,7 +614,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
 
     const float COLLISION_PROBE_SIZE = 10.0f;
     const auto collision_probe_rect = rect(
-        camera.to_screen(collision_probe - COLLISION_PROBE_SIZE),
+        camera.to_screen(mouse_position - COLLISION_PROBE_SIZE),
         COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2);
     {
         auto rect = rectf_for_sdl(collision_probe_rect);
