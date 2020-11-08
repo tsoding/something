@@ -1,7 +1,6 @@
 #include "something_game.hpp"
 #include "something_console.hpp"
 
-// TODO(#181): console does not support history
 
 void Console::render(SDL_Renderer *renderer, Bitmap_Font *font)
 {
