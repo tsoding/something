@@ -196,7 +196,6 @@ int main(int argc, char *argv[])
     // TODO(#233): Player should be able to place ice blocks (introduce another kind of "weapon")
     // TODO(#234): Separate kind of fire projectiles that can destroy ice blocks
     // TODO(#235): Separate kind of water projectiles that can destroy dirt blocks
-    // TODO(#236): Ice golems that can drop ice items
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};
