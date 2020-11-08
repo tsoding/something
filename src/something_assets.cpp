@@ -212,13 +212,6 @@ Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
     return {};
 }
 
-Sample_S16_Index Assets::get_sound_by_id_or_panic(String_View id)
-{
-    return unwrap_or_panic(
-        get_sound_by_id(id),
-        "Could not find sound with id `", id, "`");
-}
-
 Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
 {
     for (size_t i = 0; i < textures_count; ++i) {
@@ -230,13 +223,6 @@ Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
     return {};
 }
 
-Texture_Index Assets::get_texture_by_id_or_panic(String_View id)
-{
-    return unwrap_or_panic(
-        get_texture_by_id(id),
-        "Could not find texture with id `", id, "`");
-}
-
 Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
 {
     for (size_t i = 0; i < animats_count; ++i) {
@@ -246,13 +232,6 @@ Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
     }
 
     return {};
-}
-
-Frame_Animat_Index Assets::get_animat_by_id_or_panic(String_View id)
-{
-    return unwrap_or_panic(
-        get_animat_by_id(id),
-        "Could not find animat with id `", id, "`");
 }
 
 void Assets::clean()

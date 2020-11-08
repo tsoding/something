@@ -32,6 +32,8 @@ typedef SSIZE_T ssize_t;
 #include "../baked_config.hpp"
 #endif
 
+#include "./assets_types.hpp"
+
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #ifndef SOMETHING_RELEASE
 // TODO(#173): config autoreloading does not work on Windows
@@ -47,9 +49,9 @@ typedef SSIZE_T ssize_t;
 #  endif // __linux__
 #endif // SOMETHING_RELEASE
 #ifdef _WIN32
-#include "something_dirent.cpp"
+#  include "something_dirent.cpp"
 #else
-#include <dirent.h>
+#  include <dirent.h>
 #endif // _WIN32
 #include "something_error.cpp"
 #include "something_color.cpp"

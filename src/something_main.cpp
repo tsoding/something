@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
                            (int) SCREEN_HEIGHT));
 
     // TODO(#8): replace fantasy_tiles.png with our own assets
-    auto tileset_texture = assets.get_texture_by_id_or_panic("FANTASY_TEXTURE"_sv);
+    auto tileset_texture = FANTASY_TEXTURE_INDEX;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
@@ -103,31 +103,31 @@ int main(int argc, char *argv[])
 
     tile_defs[TILE_ICE_0].bottom_texture = {
         {0, 0, 64, 64},
-        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
+        ICE_BLOCK_TEXTURE_INDEX
     };
     tile_defs[TILE_ICE_0].top_texture = tile_defs[TILE_ICE_0].bottom_texture;
 
     tile_defs[TILE_ICE_1].bottom_texture = {
         {64, 0, 64, 64},
-        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
+        ICE_BLOCK_TEXTURE_INDEX
     };
     tile_defs[TILE_ICE_1].top_texture = tile_defs[TILE_ICE_1].bottom_texture;
 
     tile_defs[TILE_ICE_2].bottom_texture = {
         {128, 0, 64, 64},
-        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
+        ICE_BLOCK_TEXTURE_INDEX
     };
     tile_defs[TILE_ICE_2].top_texture = tile_defs[TILE_ICE_2].bottom_texture;
 
     tile_defs[TILE_ICE_3].bottom_texture = {
         {192, 0, 64, 64},
-        assets.get_texture_by_id_or_panic("ICE_BLOCK_TEXTURE"_sv)
+        ICE_BLOCK_TEXTURE_INDEX
     };
     tile_defs[TILE_ICE_3].top_texture = tile_defs[TILE_ICE_3].bottom_texture;
 
-    game.background.layers[0] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_LIGHTS_TEXTURE"_sv));
-    game.background.layers[1] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_MIDDLE_TEXTURE"_sv));
-    game.background.layers[2] = sprite_from_texture_index(assets.get_texture_by_id_or_panic("BACKGROUND_FRONT_TEXTURE"_sv));
+    game.background.layers[0] = sprite_from_texture_index(BACKGROUND_LIGHTS_TEXTURE_INDEX);
+    game.background.layers[1] = sprite_from_texture_index(BACKGROUND_MIDDLE_TEXTURE_INDEX);
+    game.background.layers[2] = sprite_from_texture_index(BACKGROUND_FRONT_TEXTURE_INDEX);
 
 #ifndef SOMETHING_RELEASE
     {
@@ -155,13 +155,13 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DESTROYABLE].tool.tile.tile = TILE_DIRT_0;
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].icon = sprite_from_texture_index(
-        assets.get_texture_by_id_or_panic(
-            "HEALTH_ITEM_TEXTURE"_sv));
+        HEALTH_ITEM_TEXTURE_INDEX);
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tooltip = "Add health items"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.item.item = make_health_item(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = assets.animats[assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv).unwrap].unwrap.frames[0];
+    assert(ENEMY_IDLE_ANIMAT.frame_count > 0);
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = ENEMY_IDLE_ANIMAT.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.entity.entity = enemy_entity(vec2(0.0f, 0.0f));
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_DIRT].tool.item.item = make_dirt_block_item(vec2(0.0f, 0.0f));
 
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].icon = sprite_from_texture_index(
-        assets.get_texture_by_id_or_panic("DIRT_GOLEM_TEXTURE"_sv));
+        DIRT_GOLEM_TEXTURE_INDEX);
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tooltip = "Add golem enemy"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_GOLEM].tool.entity.entity = golem_entity(vec2(0.0f, 0.0f));
@@ -187,7 +187,8 @@ int main(int argc, char *argv[])
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
-    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = assets.animats[assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv).unwrap].unwrap.frames[0];
+    assert(ICE_GOLEM_WALKING_ANIMAT.frame_count > 0);
+    game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = ICE_GOLEM_WALKING_ANIMAT.frames[0];
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tooltip = "Add ice golem enemy"_sv;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
     game.debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));

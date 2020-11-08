@@ -278,7 +278,7 @@ void Game::update(float dt)
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
 
-                mixer.play_sample(assets.sounds[assets.get_sound_by_id_or_panic("OOF_SOUND"_sv).unwrap].unwrap);
+                mixer.play_sample(OOF_SOUND);
                 if (entity->lives <= 0) {
                     for (size_t i = 0; i < entity->dirt_blocks_count; ++i) {
                         const float ITEMS_DROP_PROXIMITY = 50.0f;
@@ -298,7 +298,7 @@ void Game::update(float dt)
                     }
 
                     entity->kill();
-                    mixer.play_sample(assets.sounds[assets.get_sound_by_id_or_panic("CRUNCH_SOUND"_sv).unwrap].unwrap);
+                    mixer.play_sample(CRUNCH_SOUND);
                 } else {
                     entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
                     entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
@@ -590,8 +590,8 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
             projectiles[i].vel = vel;
             projectiles[i].shooter = shooter;
             projectiles[i].lifetime = PROJECTILE_LIFETIME;
-            projectiles[i].active_animat = assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv);
-            projectiles[i].poof_animat = assets.get_animat_by_id_or_panic("PROJECTILE_POOF_ANIMAT"_sv);
+            projectiles[i].active_animat = PROJECTILE_IDLE_ANIMAT_INDEX;
+            projectiles[i].poof_animat = PROJECTILE_POOF_ANIMAT_INDEX;
             return;
         }
     }
@@ -949,9 +949,8 @@ void Game::render_player_hud(SDL_Renderer *renderer)
 
     snprintf(stats[WEAPON_GUN].label, sizeof(stats[WEAPON_GUN].label), "inf");
     {
-        auto animat = assets.animats[assets.get_animat_by_id_or_panic("PROJECTILE_IDLE_ANIMAT"_sv).unwrap].unwrap;
-        assert(animat.frame_count > 0);
-        stats[WEAPON_GUN].icon = animat.frames[0];
+        assert(PROJECTILE_IDLE_ANIMAT.frame_count > 0);
+        stats[WEAPON_GUN].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
     }
 
     snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
