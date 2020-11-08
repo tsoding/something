@@ -328,8 +328,7 @@ Entity player_entity(Vec2f pos)
     entity.gun_dir = vec2(1.0f, 0.0f);
 
     /*
-     * TODO: We should defined the number of max allowed jump in configuration
-     * file
+     * TODO(#265): We should defined the number of max allowed jump in configuration file
      */
     entity.count_jumps = 0;
     entity.max_allowed_jumps = 2;
@@ -482,7 +481,7 @@ Entity enemy_entity(Vec2f pos)
     entity.gun_dir = vec2(1.0f, 0.0f);
 
     /*
-     * For default the enemy should have the same amount of jumps 
+     * For default the enemy should have the same amount of jumps
      * that a player
      */
     entity.count_jumps = 0;
