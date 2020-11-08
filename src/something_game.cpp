@@ -145,8 +145,12 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_SPACE: {
-                if (!event->key.repeat && !entities[PLAYER_ENTITY_INDEX].noclip) {
-                    entity_jump({PLAYER_ENTITY_INDEX});
+                if (!event->key.repeat) {
+                    if(entities[PLAYER_ENTITY_INDEX].noclip) {
+                        entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                    } else {
+                        entity_jump({PLAYER_ENTITY_INDEX});
+                    }
                 }
             } break;
 
@@ -198,18 +202,16 @@ void Game::handle_event(SDL_Event *event)
         } break;
 
         case SDL_KEYUP: {
-            switch (event->key.keysym.sym) {
-            case SDLK_w: {
-                if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
+            if (entities[PLAYER_ENTITY_INDEX].noclip) {
+                switch (event->key.keysym.sym) {
+                case SDLK_SPACE:
+                case SDLK_w:
+                case SDLK_s: {
+                    if (debug) {
+                        entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
+                    }
+                } break;
                 }
-            } break;
-
-            case SDLK_s: {
-                if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
-                }
-            } break;
             }
         } break;
 
