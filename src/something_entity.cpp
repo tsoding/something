@@ -102,13 +102,15 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
-            assets.animats[idle.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip,
-                                                      mix_colors(shade, effective_flash_color));
+            assets.get_animat_by_index(idle).render(
+                renderer, camera.to_screen(texbox), flip,
+                mix_colors(shade, effective_flash_color));
         } break;
 
         case Alive_State::Walking: {
-            assets.animats[walking.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip,
-                                                         mix_colors(shade, effective_flash_color));
+            assets.get_animat_by_index(walking).render(
+                renderer, camera.to_screen(texbox), flip,
+                mix_colors(shade, effective_flash_color));
         } break;
         }
 
@@ -128,7 +130,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         //   Previous animation implementation was capturing texture of last alive state.
         //   So if entity was shot in running pose it was squashing in this position.
         //   So there's no sudden graphical switch to idle texture.
-        assets.animats[idle.unwrap].unwrap.render(renderer, camera.to_screen(texbox), flip, shade);
+        assets.get_animat_by_index(idle).render(renderer, camera.to_screen(texbox), flip, shade);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -164,7 +166,7 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
 HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
 {
     const auto tile_sprite = tile_defs[*grid->tile_at_abs(pos + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
-    const auto surface = assets.textures[tile_sprite.texture_index.unwrap].unwrap.surface;
+    const auto surface = assets.get_texture_by_index(tile_sprite.texture_index).surface;
     const auto x = rand() % tile_sprite.srcrect.w;
     sec(SDL_LockSurface(surface));
     HSLA result = {};
@@ -229,7 +231,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 jump_state = Jump_State::Jump;
                 has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
-                mixer->play_sample(assets.sounds[jump_samples[rand() % 2].unwrap].unwrap);
+                mixer->play_sample(assets.get_sound_by_index(jump_samples[rand() % 2]));
                 if (ground(grid)) {
                     for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
                         particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, PARTICLE_JUMP_VEL_HIGH));
@@ -248,7 +250,11 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
         switch (alive_state) {
         case Alive_State::Idle:
-            assets.animats[idle.unwrap].unwrap.update(dt);
+            // TODO(#270): entities should own their own copies of animats
+            //
+            // Right now we are mutating instance of animats that are inside of Assets.
+            // And those could be used by other entities. And they will fight with each other.
+            assets.get_animat_by_index(idle).update(dt);
             break;
 
         case Alive_State::Walking:
@@ -265,7 +271,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             } break;
             }
 
-            assets.animats[walking.unwrap].unwrap.update(dt);
+            assets.get_animat_by_index(walking).update(dt);
             break;
         }
     } break;
@@ -315,11 +321,11 @@ Entity player_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle            = assets.get_animat_by_id_or_panic("PLAYER_ANIMAT"_sv);
-    entity.walking         = assets.get_animat_by_id_or_panic("PLAYER_ANIMAT"_sv);
-    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
-    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
-    entity.shoot_sample    = assets.get_sound_by_id_or_panic("PEW_SOUND"_sv);
+    entity.idle            = PLAYER_ANIMAT_INDEX;
+    entity.walking         = PLAYER_ANIMAT_INDEX;
+    entity.jump_samples[0] = JUMP1_SOUND_INDEX;
+    entity.jump_samples[1] = JUMP2_SOUND_INDEX;
+    entity.shoot_sample    = PEW_SOUND_INDEX;
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -367,10 +373,10 @@ Entity ice_golem_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle = assets.get_animat_by_id_or_panic("ICE_GOLEM_IDLE_ANIMAT"_sv);
-    entity.walking = assets.get_animat_by_id_or_panic("ICE_GOLEM_WALKING_ANIMAT"_sv);
-    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
-    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
+    entity.idle = ICE_GOLEM_IDLE_ANIMAT_INDEX;
+    entity.walking = ICE_GOLEM_WALKING_ANIMAT_INDEX;
+    entity.jump_samples[0] = JUMP1_SOUND_INDEX;
+    entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -420,10 +426,10 @@ Entity golem_entity(Vec2f pos)
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
 
-    entity.idle = assets.get_animat_by_id_or_panic("DIRT_GOLEM_ANIMAT"_sv);
-    entity.walking = assets.get_animat_by_id_or_panic("DIRT_GOLEM_ANIMAT"_sv);
-    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
-    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
+    entity.idle = DIRT_GOLEM_ANIMAT_INDEX;
+    entity.walking = DIRT_GOLEM_ANIMAT_INDEX;
+    entity.jump_samples[0] = JUMP1_SOUND_INDEX;
+    entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;
@@ -469,10 +475,10 @@ Entity enemy_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle            = assets.get_animat_by_id_or_panic("ENEMY_IDLE_ANIMAT"_sv);
-    entity.walking         = assets.get_animat_by_id_or_panic("ENEMY_WALKING_ANIMAT"_sv);
-    entity.jump_samples[0] = assets.get_sound_by_id_or_panic("JUMP1_SOUND"_sv);
-    entity.jump_samples[1] = assets.get_sound_by_id_or_panic("JUMP2_SOUND"_sv);
+    entity.idle            = ENEMY_IDLE_ANIMAT_INDEX;
+    entity.walking         = ENEMY_WALKING_ANIMAT_INDEX;
+    entity.jump_samples[0] = JUMP1_SOUND_INDEX;
+    entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;

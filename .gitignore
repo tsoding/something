@@ -3,9 +3,11 @@ something.debug
 something.release
 config_baker
 config_typer
+assets_typer
 TAGS
 baked_config.hpp
 config_types.hpp
+assets_types.hpp
 *.o
 *.obj
 *.pdb

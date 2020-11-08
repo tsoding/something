@@ -11,6 +11,9 @@ config_typer assets\vars.conf > config_types.hpp
 cl.exe %CXXFLAGS% %INCLUDES% src/config_baker.cpp
 config_baker assets\vars.conf > baked_config.hpp
 
+cl.exe %CXXFLAGS% %INCLUDES% src/assets_typer.cpp
+assets_typer assets\assets.conf > assets_types.hpp
+
 cl.exe /O2 /TC /Zi /W4 /nologo -DSTBI_ONLY_PNG -DSTB_IMAGE_IMPLEMENTATION /c stb_image.o src/stb_image.h
 
 cl.exe %CXXFLAGS% %INCLUDES% /Fe"something.debug.exe" src/something.cpp ^

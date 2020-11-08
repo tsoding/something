@@ -14,10 +14,10 @@ CXXFLAGS_RELEASE=$(CXXFLAGS) -DSOMETHING_RELEASE -O3 -ggdb
 .PHONY: all
 all: something.debug something.release
 
-something.debug: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp) stb_image.o config_types.hpp
+something.debug: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp) stb_image.o config_types.hpp assets_types.hpp
 	$(CXX) $(CXXFLAGS_DEBUG) -o something.debug src/something.cpp stb_image.o $(LIBS)
 
-something.release: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp) baked_config.hpp
+something.release: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp) baked_config.hpp assets_types.hpp
 	$(CXX) $(CXXFLAGS_RELEASE) -o something.release src/something.cpp $(LIBS)
 
 stb_image.o: src/stb_image.h
@@ -34,3 +34,9 @@ config_types.hpp: config_typer ./assets/vars.conf
 
 config_typer: src/config_typer.cpp
 	$(CXX) $(CXXFLAGS_DEBUG) -o config_typer src/config_typer.cpp $(LIBS)
+
+assets_types.hpp: assets_typer ./assets/assets.conf
+	./assets_typer ./assets/assets.conf > assets_types.hpp
+
+assets_typer: src/assets_typer.cpp
+	$(CXX) $(CXXFLAGS_DEBUG) -o assets_typer src/assets_typer.cpp $(LIBS)

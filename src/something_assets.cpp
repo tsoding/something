@@ -212,11 +212,9 @@ Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
     return {};
 }
 
-Sample_S16_Index Assets::get_sound_by_id_or_panic(String_View id)
+Sample_S16 Assets::get_sound_by_index(Sample_S16_Index index)
 {
-    return unwrap_or_panic(
-        get_sound_by_id(id),
-        "Could not find sound with id `", id, "`");
+    return sounds[index.unwrap].unwrap;
 }
 
 Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
@@ -230,11 +228,9 @@ Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
     return {};
 }
 
-Texture_Index Assets::get_texture_by_id_or_panic(String_View id)
+Texture Assets::get_texture_by_index(Texture_Index index)
 {
-    return unwrap_or_panic(
-        get_texture_by_id(id),
-        "Could not find texture with id `", id, "`");
+    return textures[index.unwrap].unwrap;
 }
 
 Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
@@ -248,11 +244,9 @@ Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
     return {};
 }
 
-Frame_Animat_Index Assets::get_animat_by_id_or_panic(String_View id)
+Frame_Animat Assets::get_animat_by_index(Frame_Animat_Index index)
 {
-    return unwrap_or_panic(
-        get_animat_by_id(id),
-        "Could not find animat with id `", id, "`");
+    return animats[index.unwrap].unwrap;
 }
 
 void Assets::clean()
