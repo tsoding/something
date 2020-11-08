@@ -145,20 +145,20 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_SPACE: {
-                if (!event->key.repeat) {
+                if (!event->key.repeat && !entities[PLAYER_ENTITY_INDEX].fly_mode) {
                     entity_jump({PLAYER_ENTITY_INDEX});
                 }
             } break;
 
             case SDLK_w: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_GRAVITY * 0.3f;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
                 }
             } break;
 
             case SDLK_s: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_GRAVITY * 0.3f;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_SPEED;
                 }
             } break;
 
