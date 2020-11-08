@@ -127,31 +127,50 @@ void Tile_Tool::handle_event(Game *game, SDL_Event *event)
 {
     switch (event->type) {
     case SDL_MOUSEBUTTONDOWN: {
-        Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
+        coord_down = vec_cast<int>(game->mouse_position / TILE_SIZE);
 
-        if (game->grid.get_tile(coord) == TILE_EMPTY) {
+        if (game->grid.get_tile(coord_down) == TILE_EMPTY) {
             state = Drawing;
-            game->grid.set_tile(coord, tile);
+            game->grid.set_tile(coord_down, tile);
         } else {
             state = Erasing;
-            game->grid.set_tile(coord, TILE_EMPTY);
+            game->grid.set_tile(coord_down, TILE_EMPTY);
         }
     } break;
 
     case SDL_MOUSEBUTTONUP: {
+        if (SDL_GetModState() & KMOD_LSHIFT) {
+            Vec2i coord_up = vec_cast<int>(game->mouse_position / TILE_SIZE);
+            int x = min(coord_down.x, coord_up.x);
+            int y = min(coord_down.y, coord_up.y);
+            for(int width = abs(coord_down.x - coord_up.x); width > -1; --width) {
+                for(int height = abs(coord_down.y - coord_up.y); height > -1; --height) {
+                    if(state == Drawing) {
+                        game->grid.set_tile(vec2(x + width, y + height), tile);
+                    } else if (state == Erasing) {
+                        game->grid.set_tile(vec2(x + width, y + height), TILE_EMPTY);
+                    }
+                }
+            }
+        }
         state = Inactive;
     } break;
 
+    // TODO(#264): No visual indication of an area to be edited while holding shift
     case SDL_MOUSEMOTION: {
         switch (state) {
         case Drawing: {
-            Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
-            game->grid.set_tile(coord, tile);
+            if (!(SDL_GetModState() & KMOD_LSHIFT)) {
+                Vec2i coord_move = vec_cast<int>(game->mouse_position / TILE_SIZE);
+                game->grid.set_tile(coord_move, tile);
+            }
         } break;
 
         case Erasing: {
-            Vec2i coord = vec_cast<int>(game->mouse_position / TILE_SIZE);
-            game->grid.set_tile(coord, TILE_EMPTY);
+            if (!(SDL_GetModState() & KMOD_LSHIFT)) {
+                Vec2i coord_move = vec_cast<int>(game->mouse_position / TILE_SIZE);
+                game->grid.set_tile(coord_move, TILE_EMPTY);
+            }
         } break;
 
         case Inactive:

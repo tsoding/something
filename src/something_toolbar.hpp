@@ -20,6 +20,7 @@ struct Item_Tool
 struct Tile_Tool
 {
     Tile tile;
+    Vec2i coord_down;
 
     enum State
     {
