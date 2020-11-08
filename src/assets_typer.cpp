@@ -7,7 +7,7 @@ void usage(FILE *stream)
     println(stream, "Usage: ./assets_typer <assets.conf>");
 }
 
-// TODO: reuse parse_assets_conf in the Assets::load_conf implementation
+// TODO(#269): reuse parse_assets_conf in the Assets::load_conf implementation
 template <typename F>
 void parse_assets_conf(String_View input, F f)
 {
