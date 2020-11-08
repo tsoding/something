@@ -156,7 +156,7 @@ void Tile_Tool::handle_event(Game *game, SDL_Event *event)
         state = Inactive;
     } break;
 
-    // TODO: No visual indication of an area to be edited while holding shift
+    // TODO(#264): No visual indication of an area to be edited while holding shift
     case SDL_MOUSEMOTION: {
         switch (state) {
         case Drawing: {
