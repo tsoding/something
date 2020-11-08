@@ -145,7 +145,7 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_SPACE: {
-                if (!event->key.repeat && !entities[PLAYER_ENTITY_INDEX].fly_mode) {
+                if (!event->key.repeat && !entities[PLAYER_ENTITY_INDEX].noclip) {
                     entity_jump({PLAYER_ENTITY_INDEX});
                 }
             } break;
@@ -162,14 +162,14 @@ void Game::handle_event(SDL_Event *event)
                 }
             } break;
 
-            case SDLK_f: {
+            case SDLK_n: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].fly_mode = !entities[PLAYER_ENTITY_INDEX].fly_mode;
-                    if (entities[PLAYER_ENTITY_INDEX].fly_mode) {
-                        popup.notify(FONT_SUCCESS_COLOR, "Fly mode enabled");
+                    entities[PLAYER_ENTITY_INDEX].noclip = !entities[PLAYER_ENTITY_INDEX].noclip;
+                    if (entities[PLAYER_ENTITY_INDEX].noclip) {
+                        popup.notify(FONT_SUCCESS_COLOR, "Noclip enabled");
                         entities[PLAYER_ENTITY_INDEX].vel.y = 0;
                     } else {
-                        popup.notify(FONT_FAILURE_COLOR, "Fly mode disabled");
+                        popup.notify(FONT_FAILURE_COLOR, "Noclip disabled");
                     }
                 }
             } break;
@@ -183,7 +183,7 @@ void Game::handle_event(SDL_Event *event)
                         }
                     }
                 } else {
-                    entities[PLAYER_ENTITY_INDEX].fly_mode = false;
+                    entities[PLAYER_ENTITY_INDEX].noclip = false;
                 }
             } break;
 
@@ -290,7 +290,7 @@ void Game::update(float dt)
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(dt, &mixer, &grid);
-        entity_resolve_collision({i});
+        if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
 
@@ -405,8 +405,8 @@ void Game::update(float dt)
 
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
-    if(entities[PLAYER_ENTITY_INDEX].fly_mode) {
-        camera.vel = (player_pos - camera.pos) * PLAYER_FLY_CAMERA_FORCE;
+    if(entities[PLAYER_ENTITY_INDEX].noclip) {
+        camera.vel = (player_pos - camera.pos) * NOCLIP_CAMERA_FORCE;
     } else {
         camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
 
@@ -594,8 +594,6 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
-
-    if (entity->fly_mode) return;
 
     if (entity->state == Entity_State::Alive) {
         const float step_x = entity->hitbox_local.w / (float) ENTITY_MESH_COLS;

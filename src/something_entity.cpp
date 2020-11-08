@@ -205,7 +205,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
     case Entity_State::Alive: {
         flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
 
-        if (!fly_mode) {
+        if (!noclip) {
             vel.y += ENTITY_GRAVITY * dt;
         }
 
