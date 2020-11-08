@@ -18,7 +18,7 @@ struct Item
     Rectf hitbox_local;
     Rectf texbox_local;
 
-    // TODO: there is no reason to play different sounds when you pick up different items
+    // TODO(#266): there is no reason to play different sounds when you pick up different items
     Sample_S16_Index sound;
 
     void update(float delta_time);
