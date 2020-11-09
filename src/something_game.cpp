@@ -193,11 +193,9 @@ void Game::update(float dt)
 
     int windowWidth, windowHeight;
     SDL_GetWindowSize(window, &windowWidth, &windowHeight);
-    int renderWidth, renderHeight;
-    SDL_RenderGetLogicalSize(renderer, &renderWidth, &renderHeight);
 
-    float fx = float(mouse_x) / float(windowWidth) * float(renderWidth);
-    float fy = float(mouse_y) / float(windowHeight) * float(renderHeight);
+    float fx = float(mouse_x) / float(windowWidth) * SCREEN_WIDTH; 
+    float fy = float(mouse_y) / float(windowHeight) * SCREEN_HEIGHT; 
 
     mouse_position =
         camera.to_world(vec_cast<float>(vec2(fx, fy)));
