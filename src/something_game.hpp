@@ -63,7 +63,6 @@ struct Game
 
 
     SDL_Window *window;
-    SDL_Renderer *renderer;
 
     Vec2f collision_probe;
     Vec2f mouse_position;

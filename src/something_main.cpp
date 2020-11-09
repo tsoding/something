@@ -62,7 +62,6 @@ int main(int argc, char *argv[])
     auto tileset_texture = FANTASY_TEXTURE_INDEX;
 
     game.window = window;
-    game.renderer = renderer;
 
     game.mixer.volume = 0.2f;
     game.keyboard = SDL_GetKeyboardState(NULL);
