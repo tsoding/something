@@ -612,7 +612,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
 
     const float COLLISION_PROBE_SIZE = 10.0f;
     const auto collision_probe_rect = rect(
-        camera.to_screen(mouse_position - COLLISION_PROBE_SIZE),
+        camera.to_screen(collision_probe - COLLISION_PROBE_SIZE),
         COLLISION_PROBE_SIZE * 2, COLLISION_PROBE_SIZE * 2);
     {
         auto rect = rectf_for_sdl(collision_probe_rect);
