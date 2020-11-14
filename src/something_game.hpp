@@ -91,7 +91,7 @@ struct Game
     bool does_tile_contain_entity(Vec2i tile_coord);
 
     // Projectiles of the Game
-    void spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
+    void spawn_projectile(Projectile projectile);
     int count_alive_projectiles(void);
     void render_projectiles(SDL_Renderer *renderer, Camera camera);
     void update_projectiles(float dt);

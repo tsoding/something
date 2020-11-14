@@ -1,0 +1,28 @@
+texture = PROJECTILE_FIRE_TEXTURE
+count = 5
+duration = 100
+
+frames.0.x = 0
+frames.0.y = 0
+frames.0.w = 40
+frames.0.h = 69
+
+frames.1.x = 0
+frames.1.y = 69
+frames.1.w = 40
+frames.1.h = 69
+
+frames.2.x = 0
+frames.2.y = 138
+frames.2.w = 40
+frames.2.h = 69
+
+frames.3.x = 0
+frames.3.y = 207
+frames.3.w = 40
+frames.3.h = 69
+
+frames.4.x = 0
+frames.4.y = 276
+frames.4.w = 40
+frames.4.h = 69

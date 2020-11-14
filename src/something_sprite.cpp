@@ -17,7 +17,8 @@ Sprite sprite_from_texture_index(Texture_Index texture_index)
 void Sprite::render(SDL_Renderer *renderer,
                     Rectf destrect,
                     SDL_RendererFlip flip,
-                    RGBA shade) const
+                    RGBA shade,
+                    double angle) const
 {
     if (texture_index.unwrap < assets.textures_count) {
         SDL_Rect rect = rectf_for_sdl(destrect);
@@ -28,7 +29,7 @@ void Sprite::render(SDL_Renderer *renderer,
                 assets.get_texture_by_index(texture_index).texture,
                 &srcrect,
                 &rect,
-                0.0,
+                angle,
                 nullptr,
                 flip));
 
@@ -53,7 +54,8 @@ void Sprite::render(SDL_Renderer *renderer,
 void Sprite::render(SDL_Renderer *renderer,
                     Vec2f pos,
                     SDL_RendererFlip flip,
-                    RGBA shade) const
+                    RGBA shade,
+                    double angle) const
 {
     const Rectf destrect = {
         pos.x - (float) srcrect.w * 0.5f,
@@ -62,7 +64,7 @@ void Sprite::render(SDL_Renderer *renderer,
         (float) srcrect.h
     };
 
-    render(renderer, destrect, flip, shade);
+    render(renderer, destrect, flip, shade, angle);
 }
 
 void Frame_Animat::reset()
@@ -73,20 +75,22 @@ void Frame_Animat::reset()
 void Frame_Animat::render(SDL_Renderer *renderer,
                           Rectf dstrect,
                           SDL_RendererFlip flip,
-                          RGBA shade) const
+                          RGBA shade,
+                          double angle) const
 {
     if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, dstrect, flip, shade);
+        frames[frame_current % frame_count].render(renderer, dstrect, flip, shade, angle);
     }
 }
 
 void Frame_Animat::render(SDL_Renderer *renderer,
                           Vec2f pos,
                           SDL_RendererFlip flip,
-                          RGBA shade) const
+                          RGBA shade,
+                          double angle) const
 {
     if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, pos, flip, shade);
+        frames[frame_current % frame_count].render(renderer, pos, flip, shade, angle);
     }
 }
 

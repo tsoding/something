@@ -20,19 +20,28 @@ void Projectile::kill()
     }
 }
 
+const float PROJECTILE_WIDTH  = 40.0f;
+const float PROJECTILE_HEIGHT = 40.0f;
+
 void Projectile::render(SDL_Renderer *renderer, Camera *camera)
 {
     switch (state) {
     case Projectile_State::Active: {
         assets.get_animat_by_index(active_animat).render(
             renderer,
-            camera->to_screen(pos));
+            camera->to_screen(pos),
+            SDL_FLIP_NONE,
+            {0, 0, 0, 0},
+            (atan2(vel.y, vel.x) + PI * 0.5) * 180.0 / PI);
     } break;
 
     case Projectile_State::Poof: {
         assets.get_animat_by_index(poof_animat).render(
             renderer,
-            camera->to_screen(pos));
+            camera->to_screen(pos),
+            SDL_FLIP_NONE,
+            {0, 0, 0, 0},
+            (atan2(vel.y, vel.x) + PI * 0.5) * 180.0 / PI);
     } break;
 
     case Projectile_State::Ded: {} break;
@@ -102,5 +111,19 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.lifetime      = PROJECTILE_LIFETIME;
     result.active_animat = PROJECTILE_IDLE_ANIMAT_INDEX;
     result.poof_animat   = PROJECTILE_POOF_ANIMAT_INDEX;
+    return result;
+}
+
+Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+{
+    Projectile result = {};
+    result.type          = Projectile_Type::Fire;
+    result.state         = Projectile_State::Active;
+    result.pos           = pos;
+    result.vel           = vel;
+    result.shooter       = shooter;
+    result.lifetime      = PROJECTILE_LIFETIME;
+    result.active_animat = PROJECTILE_FIRE_ANIMAT_INDEX;
+    result.poof_animat   = PROJECTILE_FIRE_ANIMAT_INDEX;
     return result;
 }

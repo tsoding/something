@@ -113,14 +113,18 @@ void Game::handle_event(SDL_Event *event)
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
             case SDLK_1: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_GUN;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_WATER;
             } break;
 
             case SDLK_2: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_FIRE;
             } break;
 
             case SDLK_3: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
+            } break;
+
+            case SDLK_4: {
                 entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
             } break;
 
@@ -411,7 +415,8 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
-    case WEAPON_GUN: {
+    case WEAPON_FIRE:
+    case WEAPON_WATER: {
     } break;
 
     case WEAPON_COUNT: {
@@ -444,12 +449,26 @@ void Game::entity_shoot(Entity_Index entity_index)
 
     if (entity->state == Entity_State::Alive) {
         switch (entity->current_weapon) {
-        case WEAPON_GUN: {
+        case WEAPON_WATER: {
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
-                    entity->pos,
-                    normalize(entity->gun_dir) * PROJECTILE_SPEED,
-                    entity_index);
+                    water_projectile(
+                        entity->pos,
+                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                        entity_index));
+                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+
+                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+            }
+        } break;
+
+        case WEAPON_FIRE: {
+            if (entity->cooldown_weapon <= 0) {
+                spawn_projectile(
+                    fire_projectile(
+                        entity->pos,
+                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                        entity_index));
                 entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
 
                 mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
@@ -561,11 +580,11 @@ void Game::entity_resolve_collision(Entity_Index entity_index)
     }
 }
 
-void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+void Game::spawn_projectile(Projectile projectile)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
-            projectiles[i] = water_projectile(pos, vel, shooter);
+            projectiles[i] = projectile;
             return;
         }
     }
@@ -876,10 +895,10 @@ void Game::render_player_hud(SDL_Renderer *renderer)
 
     Weapon_Stat stats[WEAPON_COUNT] = {};
 
-    snprintf(stats[WEAPON_GUN].label, sizeof(stats[WEAPON_GUN].label), "inf");
+    snprintf(stats[WEAPON_WATER].label, sizeof(stats[WEAPON_WATER].label), "inf");
     {
         assert(PROJECTILE_IDLE_ANIMAT.frame_count > 0);
-        stats[WEAPON_GUN].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
+        stats[WEAPON_WATER].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
     }
 
     snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
@@ -887,6 +906,12 @@ void Game::render_player_hud(SDL_Renderer *renderer)
 
     snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
     stats[WEAPON_ICE_BLOCK].icon = tile_defs[TILE_ICE_0].top_texture;
+
+    snprintf(stats[WEAPON_FIRE].label, sizeof(stats[WEAPON_FIRE].label), "inf");
+    {
+        assert(PROJECTILE_FIRE_ANIMAT.frame_count > 0);
+        stats[WEAPON_FIRE].icon = PROJECTILE_FIRE_ANIMAT.frames[0];
+    }
 
     auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
     auto text_height = BITMAP_FONT_CHAR_HEIGHT * PLAYER_HUD_FONT_SIZE;
