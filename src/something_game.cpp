@@ -565,7 +565,7 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
-            projectiles[i] = default_projectile(pos, vel, shooter);
+            projectiles[i] = water_projectile(pos, vel, shooter);
             return;
         }
     }

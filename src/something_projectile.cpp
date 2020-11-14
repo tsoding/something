@@ -39,6 +39,26 @@ void Projectile::render(SDL_Renderer *renderer, Camera *camera)
     }
 }
 
+void Projectile::damage_tile(Tile *tile)
+{
+    switch (type) {
+    case Projectile_Type::Water:
+        if (TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) {
+            *tile += 1;
+        } else if (*tile == TILE_DIRT_3) {
+            *tile = TILE_EMPTY;
+        }
+        break;
+    case Projectile_Type::Fire:
+        if (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3) {
+            *tile += 1;
+        } else if (*tile == TILE_ICE_3) {
+            *tile = TILE_EMPTY;
+        }
+        break;
+    }
+}
+
 void Projectile::update(float dt, Tile_Grid *grid)
 {
     switch (state) {
@@ -48,13 +68,8 @@ void Projectile::update(float dt, Tile_Grid *grid)
 
         auto tile = grid->tile_at_abs(pos);
         if (tile && tile_defs[*tile].is_collidable) {
+            damage_tile(tile);
             kill();
-            if ((TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) ||
-                (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3)) {
-                *tile += 1;
-            } else if (*tile == TILE_DIRT_3 || *tile == TILE_ICE_3) {
-                *tile = TILE_EMPTY;
-            }
         }
 
         lifetime -= dt;
@@ -76,9 +91,10 @@ void Projectile::update(float dt, Tile_Grid *grid)
     }
 }
 
-Projectile default_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
+    result.type          = Projectile_Type::Water;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
     result.vel           = vel;
