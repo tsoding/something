@@ -25,24 +25,17 @@ const float PROJECTILE_HEIGHT = 40.0f;
 
 void Projectile::render(SDL_Renderer *renderer, Camera *camera)
 {
-    const Rectf dstrect = {
-        pos.x - PROJECTILE_WIDTH * 0.5f,
-        pos.y - PROJECTILE_HEIGHT * 0.5f,
-        PROJECTILE_WIDTH,
-        PROJECTILE_HEIGHT,
-    };
-
     switch (state) {
     case Projectile_State::Active: {
         assets.get_animat_by_index(active_animat).render(
             renderer,
-            camera->to_screen(dstrect));
+            camera->to_screen(pos));
     } break;
 
     case Projectile_State::Poof: {
         assets.get_animat_by_index(poof_animat).render(
             renderer,
-            camera->to_screen(dstrect));
+            camera->to_screen(pos));
     } break;
 
     case Projectile_State::Ded: {} break;
