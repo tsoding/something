@@ -51,7 +51,6 @@ void Game::handle_event(SDL_Event *event)
     case SDL_MOUSEMOTION: {
         mouse_position =
             camera.to_world(vec_cast<float>(vec2(event->motion.x, event->motion.y)));
-        original_mouse_position = vec2(event->motion.x, event->motion.y);
         collision_probe = mouse_position;
 
         if (debug) {
@@ -172,9 +171,6 @@ void Game::handle_event(SDL_Event *event)
 
 void Game::update(float dt)
 {
-    // Update Player's gun direction //////////////////////////////
-    int mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////

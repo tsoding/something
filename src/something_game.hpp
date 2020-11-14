@@ -44,7 +44,6 @@ struct Game
 
     Vec2f collision_probe;
     Vec2f mouse_position;
-    Vec2i original_mouse_position;
     Maybe<Projectile_Index> tracking_projectile;
     Camera camera;
     Sample_Mixer mixer;
