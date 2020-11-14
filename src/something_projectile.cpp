@@ -104,3 +104,17 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.poof_animat   = PROJECTILE_POOF_ANIMAT_INDEX;
     return result;
 }
+
+Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+{
+    Projectile result = {};
+    result.type          = Projectile_Type::Fire;
+    result.state         = Projectile_State::Active;
+    result.pos           = pos;
+    result.vel           = vel;
+    result.shooter       = shooter;
+    result.lifetime      = PROJECTILE_LIFETIME;
+    result.active_animat = PROJECTILE_FIRE_ANIMAT_INDEX;
+    result.poof_animat   = PROJECTILE_FIRE_ANIMAT_INDEX;
+    return result;
+}
