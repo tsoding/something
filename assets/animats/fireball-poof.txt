@@ -1,0 +1,20 @@
+texture = PROJECTILE_FIRE_POOF_TEX
+count = 4
+duration = 70
+
+frames.0.x = 0
+frames.0.y = 0
+frames.0.w = 63
+frames.0.h = 65
+frames.1.x = 63
+frames.1.y = 0
+frames.1.w = 63
+frames.1.h = 65
+frames.2.x = 126
+frames.2.y = 0
+frames.2.w = 63
+frames.2.h = 65
+frames.3.x = 189
+frames.3.y = 0
+frames.3.w = 63
+frames.3.h = 65
