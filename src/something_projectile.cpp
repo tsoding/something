@@ -19,3 +19,59 @@ void Projectile::kill()
         assets.get_animat_by_index(poof_animat).reset();
     }
 }
+
+void Projectile::render(SDL_Renderer *renderer, Camera *camera)
+{
+    switch (state) {
+    case Projectile_State::Active: {
+        assets.get_animat_by_index(active_animat).render(
+            renderer,
+            camera->to_screen(pos));
+    } break;
+
+    case Projectile_State::Poof: {
+        assets.get_animat_by_index(poof_animat).render(
+            renderer,
+            camera->to_screen(pos));
+    } break;
+
+    case Projectile_State::Ded: {} break;
+    }
+}
+
+void Projectile::update(float dt, Tile_Grid *grid)
+{
+    switch (state) {
+    case Projectile_State::Active: {
+        assets.animats[active_animat.unwrap].unwrap.update(dt);
+        pos += vel * dt;
+
+        auto tile = grid->tile_at_abs(pos);
+        if (tile && tile_defs[*tile].is_collidable) {
+            kill();
+            if ((TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) ||
+                (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3)) {
+                *tile += 1;
+            } else if (*tile == TILE_DIRT_3 || *tile == TILE_ICE_3) {
+                *tile = TILE_EMPTY;
+            }
+        }
+
+        lifetime -= dt;
+
+        if (lifetime <= 0.0f) {
+            kill();
+        }
+    } break;
+
+    case Projectile_State::Poof: {
+        assets.animats[poof_animat.unwrap].unwrap.update(dt);
+        if (assets.animats[poof_animat.unwrap].unwrap.frame_current ==
+            (assets.animats[poof_animat.unwrap].unwrap.frame_count - 1)) {
+            state = Projectile_State::Ded;
+        }
+    } break;
+
+    case Projectile_State::Ded: {} break;
+    }
+}

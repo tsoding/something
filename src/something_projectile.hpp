@@ -18,6 +18,8 @@ struct Projectile
     Frame_Animat_Index poof_animat;
     float lifetime;
 
+    void render(SDL_Renderer *renderer, Camera *camera);
+    void update(float dt, Tile_Grid *grid);
     void kill();
 };
 

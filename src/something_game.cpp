@@ -738,60 +738,14 @@ int Game::count_alive_projectiles(void)
 void Game::render_projectiles(SDL_Renderer *renderer, Camera camera)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
-        switch (projectiles[i].state) {
-        case Projectile_State::Active: {
-            assets.animats[projectiles[i].active_animat.unwrap].unwrap.render(
-                renderer,
-                camera.to_screen(projectiles[i].pos));
-        } break;
-
-        case Projectile_State::Poof: {
-            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.render(
-                renderer,
-                camera.to_screen(projectiles[i].pos));
-        } break;
-
-        case Projectile_State::Ded: {} break;
-        }
+        projectiles[i].render(renderer, &camera);
     }
 }
 
 void Game::update_projectiles(float dt)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
-        switch (projectiles[i].state) {
-        case Projectile_State::Active: {
-            assets.animats[projectiles[i].active_animat.unwrap].unwrap.update(dt);
-            projectiles[i].pos += projectiles[i].vel * dt;
-
-            auto tile = grid.tile_at_abs(projectiles[i].pos);
-            if (tile && tile_defs[*tile].is_collidable) {
-                projectiles[i].kill();
-                if ((TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) ||
-                    (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3)) {
-                    *tile += 1;
-                } else if (*tile == TILE_DIRT_3 || *tile == TILE_ICE_3) {
-                    *tile = TILE_EMPTY;
-                }
-            }
-
-            projectiles[i].lifetime -= dt;
-
-            if (projectiles[i].lifetime <= 0.0f) {
-                projectiles[i].kill();
-            }
-        } break;
-
-        case Projectile_State::Poof: {
-            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.update(dt);
-            if (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_current ==
-                (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_count - 1)) {
-                projectiles[i].state = Projectile_State::Ded;
-            }
-        } break;
-
-        case Projectile_State::Ded: {} break;
-        }
+        projectiles[i].update(dt, &grid);
     }
 }
 
@@ -800,6 +754,7 @@ const float PROJECTILE_TRACKING_PADDING = 50.0f;
 Rectf Game::hitbox_of_projectile(Projectile_Index index)
 {
     assert(index.unwrap < PROJECTILES_COUNT);
+
     return Rectf {
         projectiles[index.unwrap].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
             projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
