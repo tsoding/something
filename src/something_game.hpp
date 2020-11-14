@@ -5,6 +5,7 @@
 #include "something_particles.hpp"
 #include "something_texture.hpp"
 #include "something_background.hpp"
+#include "something_projectile.hpp"
 
 enum Debug_Toolbar_Button
 {
@@ -18,26 +19,6 @@ enum Debug_Toolbar_Button
     DEBUG_TOOLBAR_ICE_ITEM,
     DEBUG_TOOLBAR_ICE_GOLEM,
     DEBUG_TOOLBAR_COUNT
-};
-
-enum class Projectile_State
-{
-    Ded = 0,
-    Active,
-    Poof
-};
-
-struct Projectile
-{
-    Entity_Index shooter;
-    Projectile_State state;
-    Vec2f pos;
-    Vec2f vel;
-    Frame_Animat_Index active_animat;
-    Frame_Animat_Index poof_animat;
-    float lifetime;
-
-    void kill();
 };
 
 const size_t ENEMY_ENTITY_INDEX_OFFSET = 1;

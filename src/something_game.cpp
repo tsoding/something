@@ -1,17 +1,5 @@
 #include "something_game.hpp"
 
-const char *projectile_state_as_cstr(Projectile_State state)
-{
-    switch (state) {
-    case Projectile_State::Ded: return "Ded";
-    case Projectile_State::Active: return "Active";
-    case Projectile_State::Poof: return "Poof";
-    }
-
-    assert(0 && "Incorrect Projectile_State");
-    return "";
-}
-
 template <typename ... Types>
 void displayf(SDL_Renderer *renderer,
               Bitmap_Font *font,
@@ -27,14 +15,6 @@ void displayf(SDL_Renderer *renderer,
     auto font_size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
     font->render(renderer, p - vec2(2.0f, 2.0f), font_size, shadow_color, text);
     font->render(renderer, p, font_size, color, text);
-}
-
-void Projectile::kill()
-{
-    if (state == Projectile_State::Active) {
-        state = Projectile_State::Poof;
-        assets.get_animat_by_index(poof_animat).reset();
-    }
 }
 
 void Game::handle_event(SDL_Event *event)
@@ -585,13 +565,7 @@ void Game::spawn_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) {
-            projectiles[i].state = Projectile_State::Active;
-            projectiles[i].pos = pos;
-            projectiles[i].vel = vel;
-            projectiles[i].shooter = shooter;
-            projectiles[i].lifetime = PROJECTILE_LIFETIME;
-            projectiles[i].active_animat = PROJECTILE_IDLE_ANIMAT_INDEX;
-            projectiles[i].poof_animat = PROJECTILE_POOF_ANIMAT_INDEX;
+            projectiles[i] = water_projectile(pos, vel, shooter);
             return;
         }
     }
@@ -758,60 +732,14 @@ int Game::count_alive_projectiles(void)
 void Game::render_projectiles(SDL_Renderer *renderer, Camera camera)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
-        switch (projectiles[i].state) {
-        case Projectile_State::Active: {
-            assets.animats[projectiles[i].active_animat.unwrap].unwrap.render(
-                renderer,
-                camera.to_screen(projectiles[i].pos));
-        } break;
-
-        case Projectile_State::Poof: {
-            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.render(
-                renderer,
-                camera.to_screen(projectiles[i].pos));
-        } break;
-
-        case Projectile_State::Ded: {} break;
-        }
+        projectiles[i].render(renderer, &camera);
     }
 }
 
 void Game::update_projectiles(float dt)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
-        switch (projectiles[i].state) {
-        case Projectile_State::Active: {
-            assets.animats[projectiles[i].active_animat.unwrap].unwrap.update(dt);
-            projectiles[i].pos += projectiles[i].vel * dt;
-
-            auto tile = grid.tile_at_abs(projectiles[i].pos);
-            if (tile && tile_defs[*tile].is_collidable) {
-                projectiles[i].kill();
-                if ((TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) ||
-                    (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3)) {
-                    *tile += 1;
-                } else if (*tile == TILE_DIRT_3 || *tile == TILE_ICE_3) {
-                    *tile = TILE_EMPTY;
-                }
-            }
-
-            projectiles[i].lifetime -= dt;
-
-            if (projectiles[i].lifetime <= 0.0f) {
-                projectiles[i].kill();
-            }
-        } break;
-
-        case Projectile_State::Poof: {
-            assets.animats[projectiles[i].poof_animat.unwrap].unwrap.update(dt);
-            if (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_current ==
-                (assets.animats[projectiles[i].poof_animat.unwrap].unwrap.frame_count - 1)) {
-                projectiles[i].state = Projectile_State::Ded;
-            }
-        } break;
-
-        case Projectile_State::Ded: {} break;
-        }
+        projectiles[i].update(dt, &grid);
     }
 }
 
@@ -820,6 +748,7 @@ const float PROJECTILE_TRACKING_PADDING = 50.0f;
 Rectf Game::hitbox_of_projectile(Projectile_Index index)
 {
     assert(index.unwrap < PROJECTILES_COUNT);
+
     return Rectf {
         projectiles[index.unwrap].pos.x - PROJECTILE_TRACKING_PADDING * 0.5f,
             projectiles[index.unwrap].pos.y - PROJECTILE_TRACKING_PADDING * 0.5f,
