@@ -40,8 +40,8 @@ void update_mouse_position(SDL_Window *window, Game *game)
     int window_width, window_height;
     SDL_GetWindowSize(window, &window_width, &window_height);
 
-    float height = (float)window_height;
-    float width = (float)window_width;
+    float height = (float) window_height;
+    float width = (float) window_width;
 
     const float ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
     bool fit_height = (width / ASPECT_RATIO) >= height;
@@ -51,20 +51,20 @@ void update_mouse_position(SDL_Window *window, Game *game)
 
     if (fit_height) {
         // We don't need to scale height in this situation because it has no padding
-        motion_y = float(mouse_y) / height * SCREEN_HEIGHT; 
+        motion_y = (float) mouse_y / height * SCREEN_HEIGHT; 
 
         float padding = width - height * ASPECT_RATIO;
         float new_screen = width - padding;
-        float new_mouse_x = (float)mouse_x - padding / 2;
-        motion_x = (int)floorf(new_mouse_x / new_screen * SCREEN_WIDTH);
+        float new_mouse_x = (float) mouse_x - padding / 2;
+        motion_x = (int) floorf(new_mouse_x / new_screen * SCREEN_WIDTH);
     } else {
         // We don't need to scale width in this situation because it has no padding
-        motion_x = (float)mouse_x / width * SCREEN_WIDTH; 
+        motion_x = (float) mouse_x / width * SCREEN_WIDTH; 
 
         float padding = height - width / ASPECT_RATIO;
         float new_screen = height - padding;
-        float new_mouse_y = (float)mouse_y - (padding / 2);
-        motion_y = (int)floorf(new_mouse_y / new_screen * SCREEN_HEIGHT);
+        float new_mouse_y = (float) mouse_y - padding / 2;
+        motion_y = (int) floorf(new_mouse_y / new_screen * SCREEN_HEIGHT);
     }
     game->mouse_position =
         game->camera.to_world(vec_cast<float>(vec2(motion_x, motion_y)));
