@@ -117,15 +117,15 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_2: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_FIRE;
             } break;
 
             case SDLK_3: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
             } break;
 
             case SDLK_4: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_FIRE;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
             } break;
 
             case SDLK_SPACE: {
