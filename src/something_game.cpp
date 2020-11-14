@@ -187,9 +187,6 @@ void Game::handle_event(SDL_Event *event)
 
 void Game::update(float dt)
 {
-    // Update Player's gun direction //////////////////////////////
-    int mouse_x, mouse_y;
-    SDL_GetMouseState(&mouse_x, &mouse_y);
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
