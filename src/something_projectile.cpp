@@ -75,3 +75,16 @@ void Projectile::update(float dt, Tile_Grid *grid)
     case Projectile_State::Ded: {} break;
     }
 }
+
+Projectile default_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+{
+    Projectile result = {};
+    result.state         = Projectile_State::Active;
+    result.pos           = pos;
+    result.vel           = vel;
+    result.shooter       = shooter;
+    result.lifetime      = PROJECTILE_LIFETIME;
+    result.active_animat = PROJECTILE_IDLE_ANIMAT_INDEX;
+    result.poof_animat   = PROJECTILE_POOF_ANIMAT_INDEX;
+    return result;
+}

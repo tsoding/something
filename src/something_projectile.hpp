@@ -23,4 +23,6 @@ struct Projectile
     void kill();
 };
 
+Projectile default_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
+
 #endif  // SOMETHING_PROJECTILE_HPP_
