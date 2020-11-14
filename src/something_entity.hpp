@@ -27,7 +27,7 @@ const size_t JUMP_SAMPLES_CAPACITY = 2;
 
 enum Weapon
 {
-    WEAPON_GUN = 0,
+    WEAPON_WATER = 0,
     WEAPON_DIRT_BLOCK,
     WEAPON_ICE_BLOCK,
     WEAPON_COUNT,

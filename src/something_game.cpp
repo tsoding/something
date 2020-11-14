@@ -113,7 +113,7 @@ void Game::handle_event(SDL_Event *event)
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
             case SDLK_1: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_GUN;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_WATER;
             } break;
 
             case SDLK_2: {
@@ -411,7 +411,7 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
-    case WEAPON_GUN: {
+    case WEAPON_WATER: {
     } break;
 
     case WEAPON_COUNT: {
@@ -444,7 +444,7 @@ void Game::entity_shoot(Entity_Index entity_index)
 
     if (entity->state == Entity_State::Alive) {
         switch (entity->current_weapon) {
-        case WEAPON_GUN: {
+        case WEAPON_WATER: {
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
                     entity->pos,
@@ -876,10 +876,10 @@ void Game::render_player_hud(SDL_Renderer *renderer)
 
     Weapon_Stat stats[WEAPON_COUNT] = {};
 
-    snprintf(stats[WEAPON_GUN].label, sizeof(stats[WEAPON_GUN].label), "inf");
+    snprintf(stats[WEAPON_WATER].label, sizeof(stats[WEAPON_WATER].label), "inf");
     {
         assert(PROJECTILE_IDLE_ANIMAT.frame_count > 0);
-        stats[WEAPON_GUN].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
+        stats[WEAPON_WATER].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
     }
 
     snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
