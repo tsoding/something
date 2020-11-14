@@ -1,17 +1,5 @@
 #include "something_game.hpp"
 
-const char *projectile_state_as_cstr(Projectile_State state)
-{
-    switch (state) {
-    case Projectile_State::Ded: return "Ded";
-    case Projectile_State::Active: return "Active";
-    case Projectile_State::Poof: return "Poof";
-    }
-
-    assert(0 && "Incorrect Projectile_State");
-    return "";
-}
-
 template <typename ... Types>
 void displayf(SDL_Renderer *renderer,
               Bitmap_Font *font,
@@ -27,14 +15,6 @@ void displayf(SDL_Renderer *renderer,
     auto font_size = vec2(FONT_DEBUG_SIZE, FONT_DEBUG_SIZE);
     font->render(renderer, p - vec2(2.0f, 2.0f), font_size, shadow_color, text);
     font->render(renderer, p, font_size, color, text);
-}
-
-void Projectile::kill()
-{
-    if (state == Projectile_State::Active) {
-        state = Projectile_State::Poof;
-        assets.get_animat_by_index(poof_animat).reset();
-    }
 }
 
 void Game::handle_event(SDL_Event *event)
