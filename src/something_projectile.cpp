@@ -29,13 +29,19 @@ void Projectile::render(SDL_Renderer *renderer, Camera *camera)
     case Projectile_State::Active: {
         assets.get_animat_by_index(active_animat).render(
             renderer,
-            camera->to_screen(pos));
+            camera->to_screen(pos),
+            SDL_FLIP_NONE,
+            {0, 0, 0, 0},
+            (atan2(vel.y, vel.x) + PI * 0.5) * 180.0 / PI);
     } break;
 
     case Projectile_State::Poof: {
         assets.get_animat_by_index(poof_animat).render(
             renderer,
-            camera->to_screen(pos));
+            camera->to_screen(pos),
+            SDL_FLIP_NONE,
+            {0, 0, 0, 0},
+            (atan2(vel.y, vel.x) + PI * 0.5) * 180.0 / PI);
     } break;
 
     case Projectile_State::Ded: {} break;

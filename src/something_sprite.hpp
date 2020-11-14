@@ -11,11 +11,13 @@ struct Sprite
     void render(SDL_Renderer *renderer,
                 Rectf destrect,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                RGBA shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0},
+                double angle = 0.0) const;
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                RGBA shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0},
+                double angle = 0.0) const;
 };
 
 struct Frame_Animat
@@ -31,12 +33,14 @@ struct Frame_Animat
     void render(SDL_Renderer *renderer,
                 Rectf dstrect,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                RGBA shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0},
+                double angle = 0.0) const;
 
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
-                RGBA shade = {0, 0, 0, 0}) const;
+                RGBA shade = {0, 0, 0, 0},
+                double angle = 0.0) const;
 
     void update(float dt);
 };
