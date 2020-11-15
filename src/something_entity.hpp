@@ -25,6 +25,7 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
+// TODO: More complex weapon system
 enum Weapon
 {
     WEAPON_WATER = 0,
