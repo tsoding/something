@@ -26,18 +26,6 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
-// TODO(#284): More complex weapon system
-enum Weapon
-{
-    WEAPON_WATER = 0,
-    WEAPON_FIRE,
-    WEAPON_ROCK,
-    WEAPON_ICE,
-    WEAPON_DIRT_BLOCK,
-    WEAPON_ICE_BLOCK,
-    WEAPON_COUNT,
-};
-
 const size_t WEAPON_SLOTS_CAPACITY = 10;
 
 struct Entity

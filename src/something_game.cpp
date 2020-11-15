@@ -140,12 +140,12 @@ void Game::handle_event(SDL_Event *event)
         case SDL_MOUSEWHEEL: {
             if (event->wheel.y < 0) {
                 entities[PLAYER_ENTITY_INDEX].weapon_current =
-                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current + 1,
-                                 (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
+                    mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current + 1,
+                        (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
             } else if (event->wheel.y > 0) {
                 entities[PLAYER_ENTITY_INDEX].weapon_current =
-                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current - 1,
-                                 (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
+                    mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current - 1,
+                        (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
             }
         } break;
         }
