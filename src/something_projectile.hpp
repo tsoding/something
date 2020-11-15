@@ -31,6 +31,7 @@ struct Projectile
     void kill();
 };
 
+Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 

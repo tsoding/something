@@ -448,7 +448,7 @@ void Game::entity_shoot(Entity_Index entity_index)
         case WEAPON_WATER: {
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
-                    water_projectile(
+                    rock_projectile(
                         entity->pos,
                         normalize(entity->gun_dir) * PROJECTILE_SPEED,
                         entity_index));
