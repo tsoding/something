@@ -1,7 +1,8 @@
 #ifndef SOMETHING_ENTITY_H_
 #define SOMETHING_ENTITY_H_
 
-#include "something_particles.hpp"
+#include "./something_particles.hpp"
+#include "./something_weapon.hpp"
 
 enum class Jump_State
 {
@@ -37,6 +38,8 @@ enum Weapon
     WEAPON_COUNT,
 };
 
+const size_t WEAPON_SLOTS_CAPACITY = 10;
+
 struct Entity
 {
     enum Direction
@@ -65,7 +68,11 @@ struct Entity
     RGBA flash_color;
     float flash_alpha;
     Direction walking_direction;
-    Weapon current_weapon;
+
+    Weapon2 weapon_slots[WEAPON_SLOTS_CAPACITY];
+    size_t weapon_slots_count;
+    size_t weapon_current;
+
     size_t dirt_blocks_count;
     size_t ice_blocks_count;
 
@@ -116,6 +123,7 @@ struct Entity
     void stop();
     Vec2f feet();
     bool ground(Tile_Grid *grid);
+    Weapon2 get_current_weapon() const;
 };
 
 Entity player_entity(Vec2f pos);

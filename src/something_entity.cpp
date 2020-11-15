@@ -312,7 +312,11 @@ Entity player_entity(Vec2f pos)
 {
     Entity entity = {};
 
-    entity.current_weapon = WEAPON_WATER;
+    entity.weapon_slots_count = 2;
+    static_assert(WEAPON_SLOTS_CAPACITY > 0);
+    entity.weapon_slots[0] = water_gun();
+    entity.weapon_slots[1] = fire_gun();
+
     entity.dirt_blocks_count = 69;
     entity.ice_blocks_count = 69;
 
@@ -367,7 +371,10 @@ Entity ice_golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.ice_blocks_count = 1;
-    entity.current_weapon = WEAPON_ICE;
+
+    entity.weapon_slots_count = 1;
+    static_assert(WEAPON_SLOTS_CAPACITY > 0);
+    entity.weapon_slots[0] = ice_gun();
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -420,7 +427,10 @@ Entity golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.dirt_blocks_count = 1;
-    entity.current_weapon = WEAPON_ROCK;
+
+    entity.weapon_slots_count = 1;
+    static_assert(WEAPON_SLOTS_CAPACITY > 0);
+    entity.weapon_slots[0] = rock_gun();
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -546,4 +556,10 @@ Vec2f Entity::feet()
 bool Entity::ground(Tile_Grid *grid)
 {
     return !grid->is_tile_empty_abs(feet() + vec2(0.0f, TILE_SIZE * 0.5f));
+}
+
+Weapon2 Entity::get_current_weapon() const
+{
+    assert(weapon_current < weapon_slots_count);
+    return weapon_slots[weapon_current];
 }
