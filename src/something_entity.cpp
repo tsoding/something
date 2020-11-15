@@ -189,9 +189,13 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
 
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
-    if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
-        particles.state = Particles::EMITTING;
+    if (state == Entity_State::Alive && ground(grid)) {
         particles.current_color = get_particle_color_for_tile(grid, feet());
+        if (alive_state == Alive_State::Walking) {
+            particles.state = Particles::EMITTING;
+        } else {
+            particles.state = Particles::DISABLED;
+        }
     } else {
         particles.state = Particles::DISABLED;
     }
