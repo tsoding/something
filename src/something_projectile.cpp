@@ -161,4 +161,4 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     return result;
 }
 
-// TODO: different kinds of projectiles should have different sounds when they are shot
+// TODO(#287): different kinds of projectiles should have different sounds when they are shot
