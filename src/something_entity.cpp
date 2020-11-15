@@ -367,6 +367,7 @@ Entity ice_golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.ice_blocks_count = 1;
+    entity.current_weapon = WEAPON_ICE;
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -419,6 +420,7 @@ Entity golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.dirt_blocks_count = 1;
+    entity.current_weapon = WEAPON_ROCK;
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;

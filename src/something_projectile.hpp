@@ -8,15 +8,16 @@ enum class Projectile_State
     Poof
 };
 
-enum class Projectile_Type
+enum class Tile_Damage
 {
-    Water,
-    Fire,
+    None,
+    Dirt,
+    Ice,
 };
 
 struct Projectile
 {
-    Projectile_Type type;
+    Tile_Damage tile_damage;
     Entity_Index shooter;
     Projectile_State state;
     Vec2f pos;
@@ -31,7 +32,9 @@ struct Projectile
     void kill();
 };
 
+Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
+Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
 
 #endif  // SOMETHING_PROJECTILE_HPP_

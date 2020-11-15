@@ -25,10 +25,13 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
+// TODO(#284): More complex weapon system
 enum Weapon
 {
     WEAPON_WATER = 0,
     WEAPON_FIRE,
+    WEAPON_ROCK,
+    WEAPON_ICE,
     WEAPON_DIRT_BLOCK,
     WEAPON_ICE_BLOCK,
     WEAPON_COUNT,
@@ -75,8 +78,8 @@ struct Entity
     Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16_Index shoot_sample;
 
-  short count_jumps;
-  short max_allowed_jumps;
+    short count_jumps;
+    short max_allowed_jumps;
 
     Particles particles;
 
