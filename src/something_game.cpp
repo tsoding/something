@@ -398,7 +398,7 @@ void Game::entity_shoot(Entity_Index entity_index)
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state == Entity_State::Alive) {
-        Weapon2 weapon = entity->get_current_weapon();
+        Weapon weapon = entity->get_current_weapon();
 
         switch (weapon.type) {
         case Weapon_Type::Gun: {

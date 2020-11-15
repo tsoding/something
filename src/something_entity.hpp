@@ -57,7 +57,7 @@ struct Entity
     float flash_alpha;
     Direction walking_direction;
 
-    Weapon2 weapon_slots[WEAPON_SLOTS_CAPACITY];
+    Weapon weapon_slots[WEAPON_SLOTS_CAPACITY];
     size_t weapon_slots_count;
     size_t weapon_current;
 
@@ -111,7 +111,7 @@ struct Entity
     void stop();
     Vec2f feet();
     bool ground(Tile_Grid *grid);
-    Weapon2 get_current_weapon() const;
+    Weapon get_current_weapon() const;
 };
 
 Entity player_entity(Vec2f pos);

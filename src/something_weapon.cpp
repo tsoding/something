@@ -1,7 +1,7 @@
 #include "./something_game.hpp"
 #include "./something_weapon.hpp"
 
-void Weapon2::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
+void Weapon::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
 {
     switch (type) {
     case Weapon_Type::Gun: {} break;
@@ -21,7 +21,7 @@ void Weapon2::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
     }
 }
 
-void Weapon2::shoot(Game *game, Entity_Index shooter)
+void Weapon::shoot(Game *game, Entity_Index shooter)
 {
     switch (type) {
     case Weapon_Type::Gun: {
@@ -43,7 +43,7 @@ void Weapon2::shoot(Game *game, Entity_Index shooter)
     }
 }
 
-Sprite Weapon2::icon() const
+Sprite Weapon::icon() const
 {
     switch (type) {
     case Weapon_Type::Gun:
@@ -58,49 +58,49 @@ Sprite Weapon2::icon() const
     return {};
 }
 
-Weapon2 water_gun()
+Weapon water_gun()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = water_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
 }
 
-Weapon2 fire_gun()
+Weapon fire_gun()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = fire_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
 }
 
-Weapon2 rock_gun()
+Weapon rock_gun()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = rock_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
 }
 
-Weapon2 ice_gun()
+Weapon ice_gun()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = ice_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
 }
 
-Weapon2 dirt_block_placer()
+Weapon dirt_block_placer()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_DIRT_0;
     return result;
 }
 
-Weapon2 ice_block_placer()
+Weapon ice_block_placer()
 {
-    Weapon2 result = {};
+    Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_ICE_0;
     return result;

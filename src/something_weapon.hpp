@@ -22,7 +22,7 @@ enum class Weapon_Type
     Placer,
 };
 
-struct Weapon2
+struct Weapon
 {
     Weapon_Type type;
     Gun gun;
@@ -33,11 +33,11 @@ struct Weapon2
     Sprite icon() const;
 };
 
-Weapon2 water_gun();
-Weapon2 fire_gun();
-Weapon2 rock_gun();
-Weapon2 ice_gun();
-Weapon2 dirt_block_placer();
-Weapon2 ice_block_placer();
+Weapon water_gun();
+Weapon fire_gun();
+Weapon rock_gun();
+Weapon ice_gun();
+Weapon dirt_block_placer();
+Weapon ice_block_placer();
 
 #endif  // SOMETHING_WEAPON_HPP_
