@@ -134,6 +134,7 @@ Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
+    // TODO: there is nothing rock projectiles can damage for now
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
@@ -142,6 +143,21 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.lifetime      = PROJECTILE_LIFETIME;
     result.active_animat = PROJECTILE_ROCK_IDLE_ANIMAT_INDEX;
     result.poof_animat   = PROJECTILE_ROCK_POOF_ANIMAT_INDEX;
+    return result;
+}
+
+Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+{
+    Projectile result = {};
+    // TODO: there is nothing ice projectiles can damage for now
+    result.tile_damage   = Tile_Damage::None;
+    result.state         = Projectile_State::Active;
+    result.pos           = pos;
+    result.vel           = vel;
+    result.shooter       = shooter;
+    result.lifetime      = PROJECTILE_LIFETIME;
+    result.active_animat = PROJECTILE_ICE_ANIMAT_INDEX;
+    result.poof_animat   = PROJECTILE_ICE_ANIMAT_INDEX;
     return result;
 }
 

@@ -120,10 +120,18 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_3: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ROCK;
             } break;
 
             case SDLK_4: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE;
+            } break;
+
+            case SDLK_5: {
+                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
+            } break;
+
+            case SDLK_6: {
                 entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
             } break;
 
@@ -411,6 +419,7 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
+    case WEAPON_ICE:
     case WEAPON_ROCK:
     case WEAPON_FIRE:
     case WEAPON_WATER: {
@@ -476,6 +485,19 @@ void Game::entity_shoot(Entity_Index entity_index)
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
                     rock_projectile(
+                        entity->pos,
+                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                        entity_index));
+                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+
+                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+            }
+        } break;
+
+        case WEAPON_ICE: {
+            if (entity->cooldown_weapon <= 0) {
+                spawn_projectile(
+                    ice_projectile(
                         entity->pos,
                         normalize(entity->gun_dir) * PROJECTILE_SPEED,
                         entity_index));
@@ -925,8 +947,14 @@ void Game::render_player_hud(SDL_Renderer *renderer)
 
     snprintf(stats[WEAPON_ROCK].label, sizeof(stats[WEAPON_ROCK].label), "inf");
     {
-        assert(PROJECTILE_FIRE_ANIMAT.frame_count > 0);
+        assert(PROJECTILE_ROCK_IDLE_ANIMAT.frame_count > 0);
         stats[WEAPON_ROCK].icon = PROJECTILE_ROCK_IDLE_ANIMAT.frames[0];
+    }
+
+    snprintf(stats[WEAPON_ICE].label, sizeof(stats[WEAPON_ICE].label), "inf");
+    {
+        assert(PROJECTILE_ICE_ANIMAT.frame_count > 0);
+        stats[WEAPON_ICE].icon = PROJECTILE_ICE_ANIMAT.frames[0];
     }
 
     auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
