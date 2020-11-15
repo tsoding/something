@@ -8,15 +8,16 @@ enum class Projectile_State
     Poof
 };
 
-enum class Projectile_Type
+enum class Tile_Damage
 {
-    Water,
-    Fire,
+    None,
+    Dirt,
+    Ice,
 };
 
 struct Projectile
 {
-    Projectile_Type type;
+    Tile_Damage tile_damage;
     Entity_Index shooter;
     Projectile_State state;
     Vec2f pos;

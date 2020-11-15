@@ -50,21 +50,24 @@ void Projectile::render(SDL_Renderer *renderer, Camera *camera)
 
 void Projectile::damage_tile(Tile *tile)
 {
-    switch (type) {
-    case Projectile_Type::Water:
+    switch (tile_damage) {
+    case Tile_Damage::Dirt:
         if (TILE_DIRT_0 <= *tile && *tile < TILE_DIRT_3) {
             *tile += 1;
         } else if (*tile == TILE_DIRT_3) {
             *tile = TILE_EMPTY;
         }
         break;
-    case Projectile_Type::Fire:
+
+    case Tile_Damage::Ice:
         if (TILE_ICE_0 <= *tile && *tile < TILE_ICE_3) {
             *tile += 1;
         } else if (*tile == TILE_ICE_3) {
             *tile = TILE_EMPTY;
         }
         break;
+
+    case Tile_Damage::None: {} break;
     }
 }
 
@@ -103,7 +106,7 @@ void Projectile::update(float dt, Tile_Grid *grid)
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    result.type          = Projectile_Type::Water;
+    result.tile_damage   = Tile_Damage::Dirt;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
     result.vel           = vel;
@@ -117,7 +120,7 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    result.type          = Projectile_Type::Fire;
+    result.tile_damage   = Tile_Damage::Ice;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
     result.vel           = vel;
@@ -131,7 +134,7 @@ Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    result.type          = Projectile_Type::Fire;
+    result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
     result.vel           = vel;
@@ -141,3 +144,5 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.poof_animat   = PROJECTILE_ROCK_POOF_ANIMAT_INDEX;
     return result;
 }
+
+// TODO: different kinds of projectiles should have different sounds when they are shot
