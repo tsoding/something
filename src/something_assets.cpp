@@ -270,15 +270,11 @@ void Assets::clean()
     animats_count = 0;
 }
 
-void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
+// TODO: Function parse_assets_conf is copypasted from assets_typer.cpp
+template <typename F>
+void parse_assets_conf(String_View input, F f)
 {
-    clean();
-
-    String_View input = load_file_into_conf_buffer(filepath);
-
-    // TODO(#253): release data pack building based on assets.conf
-
-    while (input.count > 0) {
+    for (int line_number = 1; input.count > 0; ++line_number) {
         String_View line = input.chop_by_delim('\n').trim();
 
         if (line.count == 0) continue; // Skip empty lines
@@ -289,17 +285,31 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         line.chop_by_delim('=');
         String_View asset_path = line.chop_by_delim('#').trim();
 
-        if (asset_type == "textures"_sv) {
-            load_texture(renderer, asset_id, asset_path);
-        } else if (asset_type == "sounds"_sv) {
-            load_sound(asset_id, asset_path);
-        } else if (asset_type == "animats"_sv) {
-            load_animat(asset_id, asset_path);
+        f(line_number, asset_type, asset_id, asset_path);
+    }
+}
+
+void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
+{
+    clean();
+
+    String_View input = load_file_into_conf_buffer(filepath);
+
+    // TODO(#253): release data pack building based on assets.conf
+
+    parse_assets_conf(input, [&](auto line_number, auto type, auto id, auto asset_path) {
+        if (type == "textures"_sv) {
+            load_texture(renderer, id, asset_path);
+        } else if (type == "sounds"_sv) {
+            load_sound(id, asset_path);
+        } else if (type == "animats"_sv) {
+            load_animat(id, asset_path);
         } else {
-            println(stderr, "Unknown asset type `", asset_type, "`");
+            println(stderr, asset_path, ":", line_number, ": ",
+                    "Unknown type of asset `", type, "`");
             exit(1);
         }
-    }
+    });
 
     loaded_first_time = true;
 }
