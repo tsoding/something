@@ -29,6 +29,7 @@ enum Weapon
 {
     WEAPON_WATER = 0,
     WEAPON_FIRE,
+    WEAPON_ROCK,
     WEAPON_DIRT_BLOCK,
     WEAPON_ICE_BLOCK,
     WEAPON_COUNT,

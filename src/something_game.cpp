@@ -411,6 +411,7 @@ void Game::render(SDL_Renderer *renderer)
             can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
     } break;
 
+    case WEAPON_ROCK:
     case WEAPON_FIRE:
     case WEAPON_WATER: {
     } break;
@@ -448,7 +449,7 @@ void Game::entity_shoot(Entity_Index entity_index)
         case WEAPON_WATER: {
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
-                    rock_projectile(
+                    water_projectile(
                         entity->pos,
                         normalize(entity->gun_dir) * PROJECTILE_SPEED,
                         entity_index));
@@ -462,6 +463,19 @@ void Game::entity_shoot(Entity_Index entity_index)
             if (entity->cooldown_weapon <= 0) {
                 spawn_projectile(
                     fire_projectile(
+                        entity->pos,
+                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
+                        entity_index));
+                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+
+                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+            }
+        } break;
+
+        case WEAPON_ROCK: {
+            if (entity->cooldown_weapon <= 0) {
+                spawn_projectile(
+                    rock_projectile(
                         entity->pos,
                         normalize(entity->gun_dir) * PROJECTILE_SPEED,
                         entity_index));
@@ -907,6 +921,12 @@ void Game::render_player_hud(SDL_Renderer *renderer)
     {
         assert(PROJECTILE_FIRE_ANIMAT.frame_count > 0);
         stats[WEAPON_FIRE].icon = PROJECTILE_FIRE_ANIMAT.frames[0];
+    }
+
+    snprintf(stats[WEAPON_ROCK].label, sizeof(stats[WEAPON_ROCK].label), "inf");
+    {
+        assert(PROJECTILE_FIRE_ANIMAT.frame_count > 0);
+        stats[WEAPON_ROCK].icon = PROJECTILE_ROCK_IDLE_ANIMAT.frames[0];
     }
 
     auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
