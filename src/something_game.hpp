@@ -97,6 +97,7 @@ struct Game
     void handle_event(SDL_Event *event);
     void render_debug_overlay(SDL_Renderer *renderer, size_t fps);
     void render_fps_overlay(SDL_Renderer *renderer);
+    void noclip(bool on);
 
     // Entities of the Game
     void reset_entities();

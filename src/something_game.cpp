@@ -167,15 +167,7 @@ void Game::handle_event(SDL_Event *event)
             } break;
 
             case SDLK_n: {
-                if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].noclip = !entities[PLAYER_ENTITY_INDEX].noclip;
-                    if (entities[PLAYER_ENTITY_INDEX].noclip) {
-                        popup.notify(FONT_SUCCESS_COLOR, "Noclip enabled");
-                        entities[PLAYER_ENTITY_INDEX].vel.y = 0;
-                    } else {
-                        popup.notify(FONT_FAILURE_COLOR, "Noclip disabled");
-                    }
-                }
+                noclip(!entities[PLAYER_ENTITY_INDEX].noclip);
             } break;
 
             case SDLK_q: {
@@ -1030,5 +1022,18 @@ void Game::render_player_hud(SDL_Renderer *renderer)
             vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE),
             PLAYER_HUD_FONT_COLOR,
             stats[i].label);
+    }
+}
+
+void Game::noclip(bool on)
+{
+    if (debug) {
+        entities[PLAYER_ENTITY_INDEX].noclip = on;
+        if (entities[PLAYER_ENTITY_INDEX].noclip) {
+            popup.notify(FONT_SUCCESS_COLOR, "Noclip enabled");
+            entities[PLAYER_ENTITY_INDEX].vel.y = 0;
+        } else {
+            popup.notify(FONT_FAILURE_COLOR, "Noclip disabled");
+        }
     }
 }
