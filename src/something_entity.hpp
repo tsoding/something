@@ -54,6 +54,7 @@ struct Entity
     // collision system to know when to not cancel out the vertical
     // velocity which can accidentally cancel out the whole jump.
     bool has_jumped;
+    bool noclip;
 
     Rectf texbox_local;
     Rectf hitbox_local;

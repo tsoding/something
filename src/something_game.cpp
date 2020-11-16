@@ -137,8 +137,28 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
-                    entity_jump({PLAYER_ENTITY_INDEX});
+                    if(entities[PLAYER_ENTITY_INDEX].noclip) {
+                        entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                    } else {
+                        entity_jump({PLAYER_ENTITY_INDEX});
+                    }
                 }
+            } break;
+
+            case SDLK_w: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                }
+            } break;
+
+            case SDLK_s: {
+                if (debug) {
+                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_SPEED;
+                }
+            } break;
+
+            case SDLK_n: {
+                noclip(!entities[PLAYER_ENTITY_INDEX].noclip);
             } break;
 
             case SDLK_q: {
@@ -149,6 +169,8 @@ void Game::handle_event(SDL_Event *event)
                             entities[i].stop();
                         }
                     }
+                } else {
+                    entities[PLAYER_ENTITY_INDEX].noclip = false;
                 }
             } break;
 
@@ -159,6 +181,20 @@ void Game::handle_event(SDL_Event *event)
             case SDLK_r: {
                 reset_entities();
             } break;
+            }
+        } break;
+
+        case SDL_KEYUP: {
+            if (entities[PLAYER_ENTITY_INDEX].noclip) {
+                switch (event->key.keysym.sym) {
+                case SDLK_SPACE:
+                case SDLK_w:
+                case SDLK_s: {
+                    if (debug) {
+                        entities[PLAYER_ENTITY_INDEX].vel.y = 0.0f;
+                    }
+                } break;
+                }
             }
         } break;
 
@@ -236,7 +272,7 @@ void Game::update(float dt)
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         entities[i].update(dt, &mixer, &grid);
-        entity_resolve_collision({i});
+        if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
 
@@ -351,12 +387,16 @@ void Game::update(float dt)
 
     // Camera "Physics" //////////////////////////////
     const auto player_pos = entities[PLAYER_ENTITY_INDEX].pos;
-    camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
+    if(entities[PLAYER_ENTITY_INDEX].noclip) {
+        camera.vel = (player_pos - camera.pos) * NOCLIP_CAMERA_FORCE;
+    } else {
+        camera.vel = (player_pos - camera.pos) * PLAYER_CAMERA_FORCE;
 
-    for (size_t i = 0; i < camera_locks_count; ++i) {
-        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
-        if (rect_contains_vec2(lock_abs, player_pos)) {
-            camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+        for (size_t i = 0; i < camera_locks_count; ++i) {
+            Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+            if (rect_contains_vec2(lock_abs, player_pos)) {
+                camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
+            }
         }
     }
 
@@ -977,5 +1017,18 @@ void Game::render_player_hud(SDL_Renderer *renderer)
             vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE),
             PLAYER_HUD_FONT_COLOR,
             stats[i].label);
+    }
+}
+
+void Game::noclip(bool on)
+{
+    if (debug) {
+        entities[PLAYER_ENTITY_INDEX].noclip = on;
+        if (entities[PLAYER_ENTITY_INDEX].noclip) {
+            popup.notify(FONT_SUCCESS_COLOR, "Noclip enabled");
+            entities[PLAYER_ENTITY_INDEX].vel.y = 0;
+        } else {
+            popup.notify(FONT_FAILURE_COLOR, "Noclip disabled");
+        }
     }
 }
