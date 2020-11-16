@@ -20,6 +20,6 @@ void parse_assets_conf(String_View input, F f)
 }
 
 // TODO(#289): add vars.conf parser to something_parsers.hpp
-// TODO: add animat files parser to something_parsers.hpp
+// TODO(#290): add animat files parser to something_parsers.hpp
 
 #endif  // SEPARATE_FILE_HPP_
