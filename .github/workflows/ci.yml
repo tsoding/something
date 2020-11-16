@@ -54,5 +54,6 @@ jobs:
           tar -xf SDL2-devel-2.0.12-VC.zip
           mv SDL2-2.0.12 SDL2
       - name: build the game
+        shell: cmd
         run: |
           ./build_msvc.bat
