@@ -2,28 +2,11 @@
 
 using namespace aids;
 
+#include "./something_parsers.hpp"
+
 void usage(FILE *stream)
 {
     println(stream, "Usage: ./assets_typer <assets.conf>");
-}
-
-// TODO(#269): reuse parse_assets_conf in the Assets::load_conf implementation
-template <typename F>
-void parse_assets_conf(String_View input, F f)
-{
-    for (int line_number = 1; input.count > 0; ++line_number) {
-        String_View line = input.chop_by_delim('\n').trim();
-
-        if (line.count == 0) continue; // Skip empty lines
-        if (*line.data == '#') continue; // Skip single line comments
-
-        String_View asset_type = line.chop_by_delim('[').trim();
-        String_View asset_id = line.chop_by_delim(']').trim();
-        line.chop_by_delim('=');
-        String_View asset_path = line.chop_by_delim('#').trim();
-
-        f(line_number, asset_type, asset_id, asset_path);
-    }
 }
 
 int main(int argc, char *argv[])
