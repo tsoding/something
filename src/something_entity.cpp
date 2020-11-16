@@ -189,9 +189,13 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
 
 void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 {
-    if (state == Entity_State::Alive && alive_state == Alive_State::Walking && ground(grid)) {
-        particles.state = Particles::EMITTING;
+    if (state == Entity_State::Alive && ground(grid)) {
         particles.current_color = get_particle_color_for_tile(grid, feet());
+        if (alive_state == Alive_State::Walking) {
+            particles.state = Particles::EMITTING;
+        } else {
+            particles.state = Particles::DISABLED;
+        }
     } else {
         particles.state = Particles::DISABLED;
     }
@@ -207,7 +211,9 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
     case Entity_State::Alive: {
         flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
 
-        vel.y += ENTITY_GRAVITY * dt;
+        if (!noclip) {
+            vel.y += ENTITY_GRAVITY * dt;
+        }
 
         const float ENTITY_DECEL = ENTITY_SPEED * ENTITY_DECEL_FACTOR;
         const float ENTITY_STOP_THRESHOLD = 100.0f;
@@ -363,6 +369,7 @@ Entity ice_golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.ice_blocks_count = 1;
+    entity.current_weapon = WEAPON_ICE;
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -415,6 +422,7 @@ Entity golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.dirt_blocks_count = 1;
+    entity.current_weapon = WEAPON_ROCK;
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;

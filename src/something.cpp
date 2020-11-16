@@ -42,7 +42,7 @@ typedef SSIZE_T ssize_t;
 #  elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
 	|| defined(__DragonFly__)
 #    include "something_fmw_kqueue.cpp"
-#  elif defined(_WIN32) || defined(_WIN64) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__MINGW64__)
+#  elif defined(_MSC_VER)
 #    include "something_fmw_iocp.cpp"
 #  else
 #    include "something_fmw_dummy.cpp"

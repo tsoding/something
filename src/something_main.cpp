@@ -32,42 +32,43 @@ Dynamic_Array<Dynamic_Array<char>> load_room_files_from_dir(const char *room_dir
     return room_files;
 }
 
-void map_mouse_position_and_push_event(SDL_Window *window) 
+void update_mouse_position(SDL_Window *window, Game *game) 
 {
-    SDL_Event sdlevent;
-    sdlevent.type = SDL_MOUSEMOTION;
-
     int mouse_x, mouse_y;
     SDL_GetMouseState(&mouse_x, &mouse_y);
 
-    int windowWidth, windowHeight;
-    SDL_GetWindowSize(window, &windowWidth, &windowHeight);
+    int window_width, window_height;
+    SDL_GetWindowSize(window, &window_width, &window_height);
 
-    float height = float(windowHeight);
-    float width = float(windowWidth);
+    float height = (float) window_height;
+    float width = (float) window_width;
 
     const float ASPECT_RATIO = SCREEN_WIDTH / SCREEN_HEIGHT;
     bool fit_height = (width / ASPECT_RATIO) >= height;
 
+    int motion_y;
+    int motion_x;
+
     if (fit_height) {
         // We don't need to scale height in this situation because it has no padding
-        sdlevent.motion.y = float(mouse_y) / height * SCREEN_HEIGHT; 
+        motion_y = (float) mouse_y / height * SCREEN_HEIGHT; 
 
-        float padding = width - (height * ASPECT_RATIO);
+        float padding = width - height * ASPECT_RATIO;
         float new_screen = width - padding;
-        float new_mouse_x = float(mouse_x) - (padding / 2);
-        sdlevent.motion.x = new_mouse_x / new_screen * SCREEN_WIDTH;
+        float new_mouse_x = (float) mouse_x - padding / 2;
+        motion_x = (int) floorf(new_mouse_x / new_screen * SCREEN_WIDTH);
     } else {
         // We don't need to scale width in this situation because it has no padding
-        sdlevent.motion.x = float(mouse_x) / width * SCREEN_WIDTH; 
+        motion_x = (float) mouse_x / width * SCREEN_WIDTH; 
 
-        float padding = height - (width / ASPECT_RATIO);
+        float padding = height - width / ASPECT_RATIO;
         float new_screen = height - padding;
-        float new_mouse_y = float(mouse_y) - (padding / 2);
-        sdlevent.motion.y = new_mouse_y / new_screen * SCREEN_HEIGHT;
+        float new_mouse_y = (float) mouse_y - padding / 2;
+        motion_y = (int) floorf(new_mouse_y / new_screen * SCREEN_HEIGHT);
     }
-
-    SDL_PushEvent(&sdlevent);
+    game->mouse_position =
+        game->camera.to_world(vec_cast<float>(vec2(motion_x, motion_y)));
+    game->collision_probe = game->mouse_position;
 }
 
 int main(int argc, char *argv[])
@@ -306,7 +307,7 @@ int main(int argc, char *argv[])
         lag_sec += elapsed_sec;
 
         //// HANDLE INPUT //////////////////////////////
-        map_mouse_position_and_push_event(window);
+        update_mouse_position(window, &game);
 
         SDL_Event event;
         while (SDL_PollEvent(&event)) {

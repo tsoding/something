@@ -15,6 +15,7 @@ void command_reload(Game *game, String_View args);
 void command_save_room(Game *game, String_View args);
 Tile room_to_save[ROOM_WIDTH * ROOM_HEIGHT];
 void command_history(Game *game, String_View args);
+void command_noclip(Game *game, String_View args);
 
 struct Command
 {
@@ -35,6 +36,7 @@ const Command commands[] = {
 #endif // SOMETHING_RELEASE
     {"save_room"_sv,   "Save current room as new file"_sv,    command_save_room},
     {"history"_sv,     "Print the history of the Console"_sv, command_history},
+    {"noclip"_sv,      "Turn on/off noclip mode"_sv,          command_noclip},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 
