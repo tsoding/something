@@ -278,28 +278,19 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 
     // TODO(#253): release data pack building based on assets.conf
 
-    while (input.count > 0) {
-        String_View line = input.chop_by_delim('\n').trim();
-
-        if (line.count == 0) continue; // Skip empty lines
-        if (*line.data == '#') continue; // Skip single line comments
-
-        String_View asset_type = line.chop_by_delim('[').trim();
-        String_View asset_id = line.chop_by_delim(']').trim();
-        line.chop_by_delim('=');
-        String_View asset_path = line.chop_by_delim('#').trim();
-
-        if (asset_type == "textures"_sv) {
-            load_texture(renderer, asset_id, asset_path);
-        } else if (asset_type == "sounds"_sv) {
-            load_sound(asset_id, asset_path);
-        } else if (asset_type == "animats"_sv) {
-            load_animat(asset_id, asset_path);
+    parse_assets_conf(input, [&](auto line_number, auto type, auto id, auto asset_path) {
+        if (type == "textures"_sv) {
+            load_texture(renderer, id, asset_path);
+        } else if (type == "sounds"_sv) {
+            load_sound(id, asset_path);
+        } else if (type == "animats"_sv) {
+            load_animat(id, asset_path);
         } else {
-            println(stderr, "Unknown asset type `", asset_type, "`");
+            println(stderr, asset_path, ":", line_number, ": ",
+                    "Unknown type of asset `", type, "`");
             exit(1);
         }
-    }
+    });
 
     loaded_first_time = true;
 }

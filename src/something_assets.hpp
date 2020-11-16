@@ -2,6 +2,7 @@
 #define SOMETHING_ASSETS_HPP_
 
 #include "./something_sound.hpp"
+#include "./something_parsers.hpp"
 
 const size_t ASSETS_CONF_BUFFER_CAPACITY = 1024 * 1024;
 const size_t ASSETS_TEXTURES_CAPACITY = 128;
