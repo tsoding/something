@@ -81,6 +81,11 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     assert(varindex >= 0);
                     assert(config_types[varindex] == CONFIG_TYPE_FLOAT);
                     config_values[varindex].float_value += CONSOLE_FONT_SIZE_STEP;
+
+                    const auto varindex2 = config_index_by_name("SELECT_POPUP_FONT_SIZE"_sv);
+                    assert(varindex2 >= 0);
+                    assert(config_types[varindex2] == CONFIG_TYPE_FLOAT);
+                    config_values[varindex2].float_value += CONSOLE_FONT_SIZE_STEP;
                 }
             } break;
 
@@ -90,6 +95,11 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     assert(varindex >= 0);
                     assert(config_types[varindex] == CONFIG_TYPE_FLOAT);
                     config_values[varindex].float_value -= CONSOLE_FONT_SIZE_STEP;
+
+                    const auto varindex2 = config_index_by_name("SELECT_POPUP_FONT_SIZE"_sv);
+                    assert(varindex2 >= 0);
+                    assert(config_types[varindex2] == CONFIG_TYPE_FLOAT);
+                    config_values[varindex2].float_value -= CONSOLE_FONT_SIZE_STEP;
                 }
             } break;
             }
