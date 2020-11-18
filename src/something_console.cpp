@@ -75,6 +75,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
+            case SDLK_KP_PLUS:
             case SDLK_EQUALS: {
                 if (event->key.keysym.mod & KMOD_LCTRL) {
                     const auto varindex = config_index_by_name("CONSOLE_FONT_SIZE"_sv);
@@ -89,6 +90,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 }
             } break;
 
+            case SDLK_KP_MINUS:
             case SDLK_MINUS: {
                 if (event->key.keysym.mod & KMOD_LCTRL) {
                     const auto varindex = config_index_by_name("CONSOLE_FONT_SIZE"_sv);
@@ -111,6 +113,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             switch (event->type) {
             case SDL_KEYDOWN: {
                 switch (event->key.keysym.sym) {
+                case SDLK_BACKSPACE:
                 case SDLK_ESCAPE: {
                     completion_popup_enabled = false;
                 } break;
@@ -120,6 +123,8 @@ void Console::handle_event(SDL_Event *event, Game *game)
                 case SDLK_DOWN: {
                     completion_popup.flipped ? completion_popup.up() : completion_popup.down();
                 } break;
+                case SDLK_SPACE:
+                case SDLK_KP_ENTER:
                 case SDLK_RETURN: {
                     auto s = completion_popup.items[completion_popup.items_cursor];
                     s.chop(edit_field.edit_field_cursor);
@@ -130,7 +135,7 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } break;
             }
         } else {
-            if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_RETURN) {
+            if (event->type == SDL_KEYDOWN && (event->key.keysym.sym == SDLK_RETURN || event->key.keysym.sym == SDLK_KP_ENTER)) {
                 scroll = 0;
                 String_View command_expr = edit_field.as_string_view().trim();
 
