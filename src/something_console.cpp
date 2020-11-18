@@ -105,10 +105,10 @@ void Console::handle_event(SDL_Event *event, Game *game)
                     completion_popup_enabled = false;
                 } break;
                 case SDLK_UP: {
-                    completion_popup.up();
+                    completion_popup.flipped ? completion_popup.down() : completion_popup.up();
                 } break;
                 case SDLK_DOWN: {
-                    completion_popup.down();
+                    completion_popup.flipped ? completion_popup.up() : completion_popup.down();
                 } break;
                 case SDLK_RETURN: {
                     auto s = completion_popup.items[completion_popup.items_cursor];
