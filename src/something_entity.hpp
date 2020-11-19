@@ -79,8 +79,8 @@ struct Entity
     Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16_Index shoot_sample;
 
-    short count_jumps;
-    short max_allowed_jumps;
+    int count_jumps;
+    int max_allowed_jumps;
 
     Particles particles;
 
