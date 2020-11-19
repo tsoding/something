@@ -27,6 +27,7 @@ void Game::handle_event(SDL_Event *event)
 
     case SDL_KEYDOWN: {
         switch (event->key.keysym.sym) {
+        case SDLK_BACKSLASH: 
         case SDLK_BACKQUOTE: {
             console.toggle();
         } break;
