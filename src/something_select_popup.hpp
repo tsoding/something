@@ -8,6 +8,7 @@ struct Select_Popup
     String_View items[SELECT_POPUP_CAPACITY];
     size_t items_size;
     size_t items_cursor;
+    bool flipped;
 
     void render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f pos);
     void update(float dt);
