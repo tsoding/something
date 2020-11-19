@@ -343,7 +343,7 @@ Entity player_entity(Vec2f pos)
      * TODO(#265): We should defined the number of max allowed jump in configuration file
      */
     entity.count_jumps = 0;
-    entity.max_allowed_jumps = 2;
+    entity.max_allowed_jumps = PLAYER_ENTITY_MAX_JUMPS;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -396,7 +396,7 @@ Entity ice_golem_entity(Vec2f pos)
      * The amount of jumps could be increase by level in both players and enimies
      */
     entity.count_jumps = 0;
-    entity.max_allowed_jumps = 3;
+    entity.max_allowed_jumps = ICE_GOLEM_ENTITY_MAX_JUMPS;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -449,7 +449,7 @@ Entity golem_entity(Vec2f pos)
      * "Traditional" Golems could start just able to jump once.
      */
     entity.count_jumps = 0;
-    entity.max_allowed_jumps = 1;
+    entity.max_allowed_jumps = GOLEM_ENTITY_MAX_JUMPS;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
@@ -499,7 +499,7 @@ Entity enemy_entity(Vec2f pos)
      * that a player
      */
     entity.count_jumps = 0;
-    entity.max_allowed_jumps = 2;
+    entity.max_allowed_jumps = ENEMY_ENTITY_MAX_JUMPS;
 
     entity.prepare_for_jump_animat.begin = 0.0f;
     entity.prepare_for_jump_animat.end = 0.2f;
