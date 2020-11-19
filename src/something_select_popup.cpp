@@ -15,7 +15,9 @@ void Select_Popup::render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f pos)
 
     flipped = pos.y + popup_height > SCREEN_HEIGHT;
     if(flipped) {
-        pos.y -= popup_height - BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE - SELECT_POPUP_PAD * 2;
+        pos.y -= popup_height - BITMAP_FONT_CHAR_HEIGHT * CONSOLE_FONT_SIZE - SELECT_POPUP_PAD * 2 - items_cursor * item_height;
+    } else {
+        pos.y -= items_cursor * item_height;
     }
 
     fill_rect(renderer, rect(pos, popup_width, popup_height), SELECT_POPUP_BACKGROUND_COLOR);
