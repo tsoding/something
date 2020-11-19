@@ -63,9 +63,9 @@ void Console::start_autocompletion()
     for (size_t i = 0; i < commands_count && !completion_popup.full(); ++i) {
         if (commands[i].name.has_prefix(prefix)) {
             completion_popup.push(commands[i].name);
+            completion_popup_enabled = true;
         }
     }
-    completion_popup_enabled = true;
 }
 
 void Console::handle_event(SDL_Event *event, Game *game)
