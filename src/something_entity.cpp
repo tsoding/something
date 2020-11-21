@@ -102,13 +102,13 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         // Render the character
         switch (alive_state) {
         case Alive_State::Idle: {
-            assets.get_animat_by_index(idle).render(
+            idle.render(
                 renderer, camera.to_screen(texbox), flip,
                 mix_colors(shade, effective_flash_color));
         } break;
 
         case Alive_State::Walking: {
-            assets.get_animat_by_index(walking).render(
+            walking.render(
                 renderer, camera.to_screen(texbox), flip,
                 mix_colors(shade, effective_flash_color));
         } break;
@@ -130,7 +130,7 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         //   Previous animation implementation was capturing texture of last alive state.
         //   So if entity was shot in running pose it was squashing in this position.
         //   So there's no sudden graphical switch to idle texture.
-        assets.get_animat_by_index(idle).render(renderer, camera.to_screen(texbox), flip, shade);
+        idle.render(renderer, camera.to_screen(texbox), flip, shade);
     } break;
 
     case Entity_State::Ded: {} break;
@@ -237,7 +237,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 jump_state = Jump_State::Jump;
                 has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
-                mixer->play_sample(assets.get_sound_by_index(jump_samples[rand() % 2]));
+                mixer->play_sample(jump_samples[rand() % 2]);
                 if (ground(grid)) {
                     for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
                         particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, PARTICLE_JUMP_VEL_HIGH));
@@ -260,7 +260,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             //
             // Right now we are mutating instance of animats that are inside of Assets.
             // And those could be used by other entities. And they will fight with each other.
-            assets.get_animat_by_index(idle).update(dt);
+            idle.update(dt);
             break;
 
         case Alive_State::Walking:
@@ -277,7 +277,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             } break;
             }
 
-            assets.get_animat_by_index(walking).update(dt);
+            walking.update(dt);
             break;
         }
     } break;
@@ -331,8 +331,8 @@ Entity player_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle            = PLAYER_ANIMAT_INDEX;
-    entity.walking         = PLAYER_ANIMAT_INDEX;
+    entity.idle            = frames_animat(PLAYER_ANIMAT_INDEX);
+    entity.walking         = frames_animat(PLAYER_ANIMAT_INDEX);
     entity.jump_samples[0] = JUMP1_SOUND_INDEX;
     entity.jump_samples[1] = JUMP2_SOUND_INDEX;
     entity.shoot_sample    = PEW_SOUND_INDEX;
@@ -385,8 +385,8 @@ Entity ice_golem_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle = ICE_GOLEM_IDLE_ANIMAT_INDEX;
-    entity.walking = ICE_GOLEM_WALKING_ANIMAT_INDEX;
+    entity.idle    = frames_animat(ICE_GOLEM_IDLE_ANIMAT_INDEX);
+    entity.walking = frames_animat(ICE_GOLEM_WALKING_ANIMAT_INDEX);
     entity.jump_samples[0] = JUMP1_SOUND_INDEX;
     entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 
@@ -440,8 +440,8 @@ Entity golem_entity(Vec2f pos)
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
 
-    entity.idle = DIRT_GOLEM_ANIMAT_INDEX;
-    entity.walking = DIRT_GOLEM_ANIMAT_INDEX;
+    entity.idle    = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
+    entity.walking = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
     entity.jump_samples[0] = JUMP1_SOUND_INDEX;
     entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 
@@ -491,8 +491,8 @@ Entity enemy_entity(Vec2f pos)
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
 
-    entity.idle            = ENEMY_IDLE_ANIMAT_INDEX;
-    entity.walking         = ENEMY_WALKING_ANIMAT_INDEX;
+    entity.idle            = frames_animat(ENEMY_IDLE_ANIMAT_INDEX);
+    entity.walking         = frames_animat(ENEMY_WALKING_ANIMAT_INDEX);
     entity.jump_samples[0] = JUMP1_SOUND_INDEX;
     entity.jump_samples[1] = JUMP2_SOUND_INDEX;
 

@@ -3,16 +3,17 @@
 void Sample_Mixer::clean()
 {
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
-        samples[i] = {};
+        slots[i].playing = false;
     }
 }
 
-void Sample_Mixer::play_sample(Sample_S16 sample)
+void Sample_Mixer::play_sample(Sample_S16_Index index)
 {
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
-        if (samples[i].audio_cur >= samples[i].audio_len) {
-            samples[i] = sample;
-            samples[i].audio_cur = 0;
+        if (!slots[i].playing) {
+            slots[i].cursor = 0;
+            slots[i].index = index;
+            slots[i].playing = true;
             return;
         }
     }
@@ -61,15 +62,23 @@ void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
 
     memset(stream, 0, (size_t) len);
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
-        for (size_t j = 0; j < output_len; ++j) {
-            int16_t x = 0;
+        if (mixer->slots[i].playing) {
+            auto sample = assets.get_sound_by_index(mixer->slots[i].index);
 
-            if (mixer->samples[i].audio_cur < mixer->samples[i].audio_len) {
-                x = mixer->samples[i].audio_buf[mixer->samples[i].audio_cur];
-                mixer->samples[i].audio_cur += 1;
+            for (size_t j = 0; j < output_len; ++j) {
+                int16_t x = 0;
+
+                if (mixer->slots[i].cursor < sample.audio_len) {
+                    x = sample.audio_buf[mixer->slots[i].cursor];
+                    mixer->slots[i].cursor += 1;
+                }
+
+                output[j] = (int16_t) clamp(output[j] + x, (int) INT16_MIN, (int) INT16_MAX);
             }
 
-            output[j] = (int16_t) clamp(output[j] + x, (int) INT16_MIN, (int) INT16_MAX);
+            if (mixer->slots[i].cursor >= sample.audio_len) {
+                mixer->slots[i].playing = false;
+            }
         }
     }
 

@@ -52,7 +52,7 @@ struct Game
     // TODO(#178): disable game console in release mode
     Console console;
 
-    Sample_S16 kill_enemy_sample;
+    Sample_S16_Index kill_enemy_sample;
 
     Bitmap_Font debug_font;
     Toolbar debug_toolbar;

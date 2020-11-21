@@ -20,12 +20,18 @@ struct Sprite
                 double angle = 0.0) const;
 };
 
-struct Frame_Animat
+struct Frames
 {
-    Sprite *frames;
-    size_t  frame_count;
-    size_t  frame_current;
-    float frame_duration;
+    Sprite *sprites;
+    size_t count;
+    float duration;
+};
+
+struct Frames_Animat
+{
+    Frames_Index frames_index;
+
+    size_t frame_current;
     float frame_cooldown;
 
     void reset();
@@ -43,7 +49,15 @@ struct Frame_Animat
                 double angle = 0.0) const;
 
     void update(float dt);
+
+    bool has_finished() const;
 };
 
+Frames_Animat frames_animat(Frames_Index frames_index)
+{
+    Frames_Animat result = {};
+    result.frames_index = frames_index;
+    return result;
+}
 
 #endif  // SOMETHING_SPRITE_HPP_

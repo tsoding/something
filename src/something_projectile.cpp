@@ -16,7 +16,7 @@ void Projectile::kill()
 {
     if (state == Projectile_State::Active) {
         state = Projectile_State::Poof;
-        assets.get_animat_by_index(poof_animat).reset();
+        poof_animat.reset();
     }
 }
 
@@ -27,7 +27,7 @@ void Projectile::render(SDL_Renderer *renderer, Camera *camera)
 {
     switch (state) {
     case Projectile_State::Active: {
-        assets.get_animat_by_index(active_animat).render(
+        active_animat.render(
             renderer,
             camera->to_screen(pos),
             SDL_FLIP_NONE,
@@ -36,7 +36,7 @@ void Projectile::render(SDL_Renderer *renderer, Camera *camera)
     } break;
 
     case Projectile_State::Poof: {
-        assets.get_animat_by_index(poof_animat).render(
+        poof_animat.render(
             renderer,
             camera->to_screen(pos),
             SDL_FLIP_NONE,
@@ -75,7 +75,7 @@ void Projectile::update(float dt, Tile_Grid *grid)
 {
     switch (state) {
     case Projectile_State::Active: {
-        assets.animats[active_animat.unwrap].unwrap.update(dt);
+        active_animat.update(dt);
         pos += vel * dt;
 
         auto tile = grid->tile_at_abs(pos);
@@ -92,9 +92,8 @@ void Projectile::update(float dt, Tile_Grid *grid)
     } break;
 
     case Projectile_State::Poof: {
-        assets.animats[poof_animat.unwrap].unwrap.update(dt);
-        if (assets.animats[poof_animat.unwrap].unwrap.frame_current ==
-            (assets.animats[poof_animat.unwrap].unwrap.frame_count - 1)) {
+        poof_animat.update(dt);
+        if (poof_animat.has_finished()) {
             state = Projectile_State::Ded;
         }
     } break;
@@ -112,8 +111,8 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = PROJECTILE_IDLE_ANIMAT_INDEX;
-    result.poof_animat   = PROJECTILE_POOF_ANIMAT_INDEX;
+    result.active_animat = frames_animat(PROJECTILE_IDLE_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_POOF_ANIMAT_INDEX);
     return result;
 }
 
@@ -126,8 +125,8 @@ Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = PROJECTILE_FIRE_ANIMAT_INDEX;
-    result.poof_animat   = PROJECTILE_FIRE_POOF_ANIMAT_INDEX;
+    result.active_animat = frames_animat(PROJECTILE_FIRE_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_FIRE_POOF_ANIMAT_INDEX);
     return result;
 }
 
@@ -141,8 +140,8 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = PROJECTILE_ROCK_IDLE_ANIMAT_INDEX;
-    result.poof_animat   = PROJECTILE_ROCK_POOF_ANIMAT_INDEX;
+    result.active_animat = frames_animat(PROJECTILE_ROCK_IDLE_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_ROCK_POOF_ANIMAT_INDEX);
     return result;
 }
 
@@ -156,8 +155,8 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = PROJECTILE_ICE_ANIMAT_INDEX;
-    result.poof_animat   = PROJECTILE_ICE_ANIMAT_INDEX;
+    result.active_animat = frames_animat(PROJECTILE_ICE_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_ICE_ANIMAT_INDEX);
     return result;
 }
 

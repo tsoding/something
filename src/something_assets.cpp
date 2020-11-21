@@ -90,7 +90,7 @@ Maybe<String_View> read_file_as_string_view(String_View filename)
     return read_file_as_string_view(filename_cstr);
 }
 
-void Assets::load_animat(String_View id, String_View path)
+void Assets::load_frames(String_View id, String_View path)
 {
     println(stdout, "Loading animat ", id, " from ", path, "...");
 
@@ -102,7 +102,7 @@ void Assets::load_animat(String_View id, String_View path)
     defer(free((void*) source.unwrap.data));
 
     String_View input = source.unwrap;
-    Frame_Animat animat = {};
+    Frames frames = {};
     Maybe<Texture_Index> spritesheet_texture = {};
 
     for (int line_number = 1; input.count != 0; ++line_number) {
@@ -114,7 +114,7 @@ void Assets::load_animat(String_View id, String_View path)
         auto subkey = key.chop_by_delim('.').trim();
 
         if (subkey == "count"_sv) {
-            if (animat.frames != nullptr) {
+            if (frames.sprites != nullptr) {
                 println(stderr, path, ":", line_number, ": `count` provided twice");
                 exit(1);
             }
@@ -125,8 +125,8 @@ void Assets::load_animat(String_View id, String_View path)
                 exit(1);
             }
 
-            animat.frame_count = (size_t) count_result.unwrap;
-            animat.frames = new Sprite[animat.frame_count];
+            frames.count = (size_t) count_result.unwrap;
+            frames.sprites = new Sprite[frames.count];
         } else if (subkey == "texture"_sv) {
             auto maybe_texture = get_texture_by_id(value);
             if (!maybe_texture.has_value) {
@@ -142,7 +142,7 @@ void Assets::load_animat(String_View id, String_View path)
                 exit(1);
             }
 
-            animat.frame_duration = (float) result.unwrap / 1000.0f;
+            frames.duration = (float) result.unwrap / 1000.0f;
         } else if (subkey == "frames"_sv) {
             auto result = key.chop_by_delim('.').trim().as_integer<int>();
             if (!result.has_value) {
@@ -151,7 +151,7 @@ void Assets::load_animat(String_View id, String_View path)
             }
 
             size_t frame_index = (size_t) result.unwrap;
-            if (frame_index >= animat.frame_count) {
+            if (frame_index >= frames.count) {
                 println(stderr, path, ":", line_number, ": frame index is bigger than the `count`");
                 exit(1);
             }
@@ -161,7 +161,7 @@ void Assets::load_animat(String_View id, String_View path)
                 exit(1);
             }
 
-            animat.frames[frame_index].texture_index = spritesheet_texture.unwrap;
+            frames.sprites[frame_index].texture_index = spritesheet_texture.unwrap;
 
             while (key.count) {
                 subkey = key.chop_by_delim('.').trim();
@@ -178,13 +178,13 @@ void Assets::load_animat(String_View id, String_View path)
                 }
 
                 if (subkey == "x"_sv) {
-                    animat.frames[frame_index].srcrect.x = result_value.unwrap;
+                    frames.sprites[frame_index].srcrect.x = result_value.unwrap;
                 } else if (subkey == "y"_sv) {
-                    animat.frames[frame_index].srcrect.y = result_value.unwrap;
+                    frames.sprites[frame_index].srcrect.y = result_value.unwrap;
                 } else if (subkey == "w"_sv) {
-                    animat.frames[frame_index].srcrect.w = result_value.unwrap;
+                    frames.sprites[frame_index].srcrect.w = result_value.unwrap;
                 } else if (subkey == "h"_sv) {
-                    animat.frames[frame_index].srcrect.h = result_value.unwrap;
+                    frames.sprites[frame_index].srcrect.h = result_value.unwrap;
                 } else {
                     println(stderr, path, ":", line_number, ": unknown subkey `", subkey, "`");
                     exit(1);
@@ -196,10 +196,10 @@ void Assets::load_animat(String_View id, String_View path)
         }
     }
 
-    animats[animats_count].id = id;
-    animats[animats_count].path = path;
-    animats[animats_count].unwrap = animat;
-    animats_count += 1;
+    framesen[framesen_count].id = id;
+    framesen[framesen_count].path = path;
+    framesen[framesen_count].unwrap = frames;
+    framesen_count += 1;
 }
 
 Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
@@ -233,10 +233,10 @@ Texture Assets::get_texture_by_index(Texture_Index index)
     return textures[index.unwrap].unwrap;
 }
 
-Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
+Maybe<Frames_Index> Assets::get_frames_by_id(String_View id)
 {
-    for (size_t i = 0; i < animats_count; ++i) {
-        if (animats[i].id == id) {
+    for (size_t i = 0; i < framesen_count; ++i) {
+        if (framesen[i].id == id) {
             return {true, {i}};
         }
     }
@@ -244,9 +244,9 @@ Maybe<Frame_Animat_Index> Assets::get_animat_by_id(String_View id)
     return {};
 }
 
-Frame_Animat Assets::get_animat_by_index(Frame_Animat_Index index)
+Frames Assets::get_frames_by_index(Frames_Index index)
 {
-    return animats[index.unwrap].unwrap;
+    return framesen[index.unwrap].unwrap;
 }
 
 void Assets::clean()
@@ -264,10 +264,10 @@ void Assets::clean()
     }
     sounds_count = 0;
 
-    for (size_t i = 0; i < animats_count; ++i) {
-        delete[] animats[i].unwrap.frames;
+    for (size_t i = 0; i < framesen_count; ++i) {
+        delete[] framesen[i].unwrap.sprites;
     }
-    animats_count = 0;
+    framesen_count = 0;
 }
 
 void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
@@ -284,7 +284,7 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
         } else if (type == "sounds"_sv) {
             load_sound(id, asset_path);
         } else if (type == "animats"_sv) {
-            load_animat(id, asset_path);
+            load_frames(id, asset_path);
         } else {
             println(stderr, asset_path, ":", line_number, ": ",
                     "Unknown type of asset `", type, "`");
