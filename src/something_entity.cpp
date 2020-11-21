@@ -372,9 +372,7 @@ Entity ice_golem_entity(Vec2f pos)
 
     entity.ice_blocks_count = 1;
 
-    entity.weapon_slots_count = 1;
-    static_assert(WEAPON_SLOTS_CAPACITY > 0);
-    entity.weapon_slots[0] = ice_gun();
+    entity.push_weapon(ice_gun());
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -428,9 +426,7 @@ Entity golem_entity(Vec2f pos)
 
     entity.dirt_blocks_count = 1;
 
-    entity.weapon_slots_count = 1;
-    static_assert(WEAPON_SLOTS_CAPACITY > 0);
-    entity.weapon_slots[0] = rock_gun();
+    entity.push_weapon(rock_gun());
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -481,6 +477,8 @@ Entity golem_entity(Vec2f pos)
 Entity enemy_entity(Vec2f pos)
 {
     Entity entity = {};
+
+    entity.push_weapon(water_gun());
 
     entity.texbox_local.w = ENEMY_TEXBOX_W;
     entity.texbox_local.h = ENEMY_TEXBOX_H;
@@ -560,8 +558,11 @@ bool Entity::ground(Tile_Grid *grid)
 
 Weapon *Entity::get_current_weapon()
 {
-    assert(weapon_current < weapon_slots_count);
-    return &weapon_slots[weapon_current];
+    if (weapon_current < weapon_slots_count) {
+        return &weapon_slots[weapon_current];
+    } else {
+        return NULL;
+    }
 }
 
 void Entity::push_weapon(Weapon weapon)

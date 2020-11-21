@@ -61,7 +61,9 @@ void Game::handle_event(SDL_Event *event)
 
         grid.resolve_point_collision(&collision_probe);
 
-        if (entities[PLAYER_ENTITY_INDEX].get_current_weapon()->type == Weapon_Type::Placer &&
+        auto weapon = entities[PLAYER_ENTITY_INDEX].get_current_weapon();
+        if (weapon != NULL &&
+            weapon->type == Weapon_Type::Placer &&
             holding_down_mouse)
         {
             entity_shoot({PLAYER_ENTITY_INDEX});
@@ -370,8 +372,12 @@ void Game::render(SDL_Renderer *renderer)
         entities[i].render(renderer, camera);
     }
 
-    entities[PLAYER_ENTITY_INDEX]
-        .get_current_weapon()->render(renderer, this, {PLAYER_ENTITY_INDEX});
+    {
+        auto weapon = entities[PLAYER_ENTITY_INDEX].get_current_weapon();
+        if (weapon != NULL) {
+            weapon->render(renderer, this, {PLAYER_ENTITY_INDEX});
+        }
+    }
 
     render_projectiles(renderer, camera);
 
@@ -397,21 +403,23 @@ void Game::entity_shoot(Entity_Index entity_index)
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state == Entity_State::Alive) {
-        Weapon *weapon = entity->get_current_weapon();
+        auto weapon = entity->get_current_weapon();
 
-        switch (weapon->type) {
-        case Weapon_Type::Gun: {
-            // TODO: can we move cooldown_weapon to the Weapon struct
-            if (entity->cooldown_weapon <= 0) {
+        if (weapon != NULL) {
+            switch (weapon->type) {
+            case Weapon_Type::Gun: {
+                // TODO: can we move cooldown_weapon to the Weapon struct
+                if (entity->cooldown_weapon <= 0) {
+                    weapon->shoot(this, entity_index);
+                    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+                    mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+                }
+            } break;
+
+            case Weapon_Type::Placer: {
                 weapon->shoot(this, entity_index);
-                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+            } break;
             }
-        } break;
-
-        case Weapon_Type::Placer: {
-            weapon->shoot(this, entity_index);
-        } break;
         }
     }
 }
