@@ -46,9 +46,12 @@ void Weapon::shoot(Game *game, Entity_Index shooter)
 Sprite Weapon::icon() const
 {
     switch (type) {
-    case Weapon_Type::Gun:
-        assert(assets.get_animat_by_index(gun.projectile.active_animat).frame_count > 0);
-        return assets.get_animat_by_index(gun.projectile.active_animat).frames[0];
+    case Weapon_Type::Gun: {
+        auto frames = assets.get_frames_by_index(gun.projectile.active_animat.frames_index);
+        assert(frames.count > 0);
+        return frames.sprites[0];
+    }
+
     case Weapon_Type::Placer:
         return tile_defs[placer.tile].top_texture;
     }

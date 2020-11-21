@@ -22,5 +22,6 @@ struct Projectile_Index: public Index<Projectile_Index> {};
 struct Texture_Index: public Index<Texture_Index> {};
 struct Sample_S16_Index: public Index<Sample_S16_Index> {};
 struct Frame_Animat_Index: public Index<Frame_Animat_Index> {};
+struct Frames_Index: public Index<Frames_Index> {};
 
 #endif  // SOMETHING_INDEX_HPP_

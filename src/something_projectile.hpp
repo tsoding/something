@@ -22,8 +22,8 @@ struct Projectile
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
-    Frame_Animat_Index active_animat;
-    Frame_Animat_Index poof_animat;
+    Frames_Animat active_animat;
+    Frames_Animat poof_animat;
     float lifetime;
 
     void damage_tile(Tile *tile);

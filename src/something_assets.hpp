@@ -7,7 +7,7 @@
 const size_t ASSETS_CONF_BUFFER_CAPACITY = 1024 * 1024;
 const size_t ASSETS_TEXTURES_CAPACITY = 128;
 const size_t ASSETS_SOUNDS_CAPACITY = 128;
-const size_t ASSETS_ANIMATS_CAPACITY = 128;
+const size_t ASSETS_FRAMESEN_CAPACITY = 128;
 
 template <typename T>
 struct Asset
@@ -34,8 +34,10 @@ struct Assets
     Asset<Texture> textures[ASSETS_TEXTURES_CAPACITY];
     size_t sounds_count;
     Asset<Sample_S16> sounds[ASSETS_SOUNDS_CAPACITY];
-    size_t animats_count;
-    Asset<Frame_Animat> animats[ASSETS_ANIMATS_CAPACITY];
+    // NOTE: `framesen` is the plural of `frames` (and `frames` is the
+    // plural of `frame`, yes).
+    size_t framesen_count;
+    Asset<Frames> framesen[ASSETS_FRAMESEN_CAPACITY];
 
     Maybe<Texture_Index> get_texture_by_id(String_View id);
     Texture get_texture_by_index(Texture_Index index);
@@ -43,13 +45,13 @@ struct Assets
     Maybe<Sample_S16_Index> get_sound_by_id(String_View id);
     Sample_S16 get_sound_by_index(Sample_S16_Index index);
 
-    Maybe<Frame_Animat_Index> get_animat_by_id(String_View id);
-    Frame_Animat get_animat_by_index(Frame_Animat_Index index);
+    Maybe<Frames_Index> get_frames_by_id(String_View id);
+    Frames get_frames_by_index(Frames_Index index);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);
     void load_sound(String_View id, String_View path);
-    void load_animat(String_View id, String_View path);
+    void load_frames(String_View id, String_View path);
 
     void clean();
     void load_conf(SDL_Renderer *renderer, const char *filepath);

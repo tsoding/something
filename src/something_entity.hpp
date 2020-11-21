@@ -65,8 +65,8 @@ struct Entity
     size_t dirt_blocks_count;
     size_t ice_blocks_count;
 
-    Frame_Animat_Index idle;
-    Frame_Animat_Index walking;
+    Frames_Animat idle;
+    Frames_Animat walking;
     Rubber_Animat poof_animat;
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;

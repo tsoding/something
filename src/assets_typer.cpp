@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
             println(stdout, "#define ", id, " assets.sounds[", sounds_count, "].unwrap");
             sounds_count++;
         } else if (type == "animats"_sv) {
-            println(stdout, "#define ", id, "_INDEX (Frame_Animat_Index {", animats_count, "})");
-            println(stdout, "#define ", id, " assets.animats[", animats_count, "].unwrap");
+            println(stdout, "#define ", id, "_INDEX (Frames_Index {", animats_count, "})");
+            println(stdout, "#define ", id, " assets.framesen[", animats_count, "].unwrap");
             animats_count++;
         } else {
             println(stderr, assets_filepath, ":", line_number, ": ",

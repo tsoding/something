@@ -200,8 +200,8 @@ int main(int argc, char *argv[])
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.type = Tool_Type::Item;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_HEALS].tool.item.item = make_health_item(vec2(0.0f, 0.0f));
 
-    assert(ENEMY_IDLE_ANIMAT.frame_count > 0);
-    game->debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = ENEMY_IDLE_ANIMAT.frames[0];
+    assert(ENEMY_IDLE_ANIMAT.count > 0);
+    game->debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].icon = ENEMY_IDLE_ANIMAT.sprites[0];
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tooltip = "Add enemies"_sv;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.type = Tool_Type::Entity;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ENEMIES].tool.entity.entity = enemy_entity(vec2(0.0f, 0.0f));
@@ -227,8 +227,8 @@ int main(int argc, char *argv[])
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.type = Tool_Type::Item;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_ITEM].tool.item.item = make_ice_block_item(vec2(0.0f, 0.0f));
 
-    assert(ICE_GOLEM_WALKING_ANIMAT.frame_count > 0);
-    game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = ICE_GOLEM_WALKING_ANIMAT.frames[0];
+    assert(ICE_GOLEM_WALKING_ANIMAT.count > 0);
+    game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].icon = ICE_GOLEM_WALKING_ANIMAT.sprites[0];
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tooltip = "Add ice golem enemy"_sv;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));

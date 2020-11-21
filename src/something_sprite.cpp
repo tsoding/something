@@ -67,54 +67,43 @@ void Sprite::render(SDL_Renderer *renderer,
     render(renderer, destrect, flip, shade, angle);
 }
 
-void Frame_Animat::reset()
+void Frames_Animat::reset()
 {
     frame_current = 0;
 }
 
-void Frame_Animat::render(SDL_Renderer *renderer,
-                          Rectf dstrect,
-                          SDL_RendererFlip flip,
-                          RGBA shade,
-                          double angle) const
+void Frames_Animat::render(SDL_Renderer *renderer,
+                           Rectf dstrect,
+                           SDL_RendererFlip flip,
+                           RGBA shade,
+                           double angle) const
 {
-    if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, dstrect, flip, shade, angle);
+    auto frames = assets.get_frames_by_index(frames_index);
+    if (frames.count > 0) {
+        frames.sprites[frame_current % frames.count].render(renderer, dstrect, flip, shade, angle);
     }
 }
 
-void Frame_Animat::render(SDL_Renderer *renderer,
-                          Vec2f pos,
-                          SDL_RendererFlip flip,
-                          RGBA shade,
-                          double angle) const
+void Frames_Animat::render(SDL_Renderer *renderer,
+                           Vec2f pos,
+                           SDL_RendererFlip flip,
+                           RGBA shade,
+                           double angle) const
 {
-    if (frame_count > 0) {
-        frames[frame_current % frame_count].render(renderer, pos, flip, shade, angle);
+    auto frames = assets.get_frames_by_index(frames_index);
+    if (frames.count > 0) {
+        frames.sprites[frame_current % frames.count].render(renderer, pos, flip, shade, angle);
     }
 }
 
-void Frame_Animat::update(float dt)
+void Frames_Animat::update(float dt)
 {
+    auto frames = assets.get_frames_by_index(frames_index);
     if (dt < frame_cooldown) {
         frame_cooldown -= dt;
-    } else if (frame_count > 0) {
-        frame_current = (frame_current + 1) % frame_count;
-        frame_cooldown = frame_duration;
-    }
-}
-
-void dump_animat(Frame_Animat animat, const char *sprite_filename, FILE *output)
-{
-    println(output, "sprite = ", sprite_filename);
-    println(output, "count = ", animat.frame_count);
-    println(output, "duration = ", animat.frame_duration);
-    println(output);
-    for (size_t i = 0; i < animat.frame_count; ++i) {
-        println(output, "frames.", i, ".x = ", animat.frames[i].srcrect.x);
-        println(output, "frames.", i, ".y = ", animat.frames[i].srcrect.y);
-        println(output, "frames.", i, ".w = ", animat.frames[i].srcrect.w);
-        println(output, "frames.", i, ".h = ", animat.frames[i].srcrect.h);
+    } else if (frames.count > 0) {
+        frame_current = (frame_current + 1) % frames.count;
+        frame_cooldown = frames.duration;
     }
 }
 
@@ -212,3 +201,8 @@ struct Compose_Rubber_Animat
         }
     }
 };
+
+bool Frames_Animat::has_finished() const
+{
+    return frame_current >= assets.get_frames_by_index(frames_index).count - 1;
+}
