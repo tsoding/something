@@ -58,8 +58,9 @@ void Game::handle_event(SDL_Event *event)
 
         grid.resolve_point_collision(&collision_probe);
 
-        if ((entities[PLAYER_ENTITY_INDEX].current_weapon == WEAPON_DIRT_BLOCK ||
-             entities[PLAYER_ENTITY_INDEX].current_weapon == WEAPON_ICE_BLOCK) &&
+        auto weapon = entities[PLAYER_ENTITY_INDEX].get_current_weapon();
+        if (weapon != NULL &&
+            weapon->type == Weapon_Type::Placer &&
             holding_down_mouse)
         {
             entity_shoot({PLAYER_ENTITY_INDEX});
@@ -108,30 +109,6 @@ void Game::handle_event(SDL_Event *event)
         switch (event->type) {
         case SDL_KEYDOWN: {
             switch (event->key.keysym.sym) {
-            case SDLK_1: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_WATER;
-            } break;
-
-            case SDLK_2: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_FIRE;
-            } break;
-
-            case SDLK_3: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ROCK;
-            } break;
-
-            case SDLK_4: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE;
-            } break;
-
-            case SDLK_5: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_DIRT_BLOCK;
-            } break;
-
-            case SDLK_6: {
-                entities[PLAYER_ENTITY_INDEX].current_weapon = WEAPON_ICE_BLOCK;
-            } break;
-
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
                     if(entities[PLAYER_ENTITY_INDEX].noclip) {
@@ -197,13 +174,13 @@ void Game::handle_event(SDL_Event *event)
 
         case SDL_MOUSEWHEEL: {
             if (event->wheel.y < 0) {
-                entities[PLAYER_ENTITY_INDEX].current_weapon =
-                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].current_weapon + 1,
-                                 (int) WEAPON_COUNT);
+                entities[PLAYER_ENTITY_INDEX].weapon_current =
+                    mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current + 1,
+                        (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
             } else if (event->wheel.y > 0) {
-                entities[PLAYER_ENTITY_INDEX].current_weapon =
-                    (Weapon) mod((int) entities[PLAYER_ENTITY_INDEX].current_weapon - 1,
-                                 (int) WEAPON_COUNT);
+                entities[PLAYER_ENTITY_INDEX].weapon_current =
+                    mod((int) entities[PLAYER_ENTITY_INDEX].weapon_current - 1,
+                        (int) entities[PLAYER_ENTITY_INDEX].weapon_slots_count);
             }
         } break;
         }
@@ -432,39 +409,11 @@ void Game::render(SDL_Renderer *renderer)
         entities[i].render(renderer, camera);
     }
 
-    switch (entities[PLAYER_ENTITY_INDEX].current_weapon) {
-    case WEAPON_ICE_BLOCK: {
-        bool can_place = false;
-        auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
-        can_place = can_place && entities[PLAYER_ENTITY_INDEX].ice_blocks_count > 0;
-        tile_defs[TILE_ICE_0].top_texture.render(
-            renderer,
-            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
-            SDL_FLIP_NONE,
-            can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
-    } break;
-
-    case WEAPON_DIRT_BLOCK: {
-        bool can_place = false;
-        auto target_tile = where_entity_can_place_block({PLAYER_ENTITY_INDEX}, &can_place);
-        can_place = can_place && entities[PLAYER_ENTITY_INDEX].dirt_blocks_count > 0;
-
-        tile_defs[TILE_DIRT_0].top_texture.render(
-            renderer,
-            rect(camera.to_screen(vec2((float) target_tile.x, (float) target_tile.y) * TILE_SIZE), TILE_SIZE, TILE_SIZE),
-            SDL_FLIP_NONE,
-            can_place ? CAN_PLACE_BLOCK_COLOR : CANNOT_PLACE_BLOCK_COLOR);
-    } break;
-
-    case WEAPON_ICE:
-    case WEAPON_ROCK:
-    case WEAPON_FIRE:
-    case WEAPON_WATER: {
-    } break;
-
-    case WEAPON_COUNT: {
-        assert(0 && "Unreachable");
-    } break;
+    {
+        auto weapon = entities[PLAYER_ENTITY_INDEX].get_current_weapon();
+        if (weapon != NULL) {
+            weapon->render(renderer, this, {PLAYER_ENTITY_INDEX});
+        }
     }
 
     render_projectiles(renderer, camera);
@@ -491,80 +440,23 @@ void Game::entity_shoot(Entity_Index entity_index)
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state == Entity_State::Alive) {
-        switch (entity->current_weapon) {
-        case WEAPON_WATER: {
-            if (entity->cooldown_weapon <= 0) {
-                spawn_projectile(
-                    water_projectile(
-                        entity->pos,
-                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
-                        entity_index));
-                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+        auto weapon = entity->get_current_weapon();
 
-                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+        if (weapon != NULL) {
+            switch (weapon->type) {
+            case Weapon_Type::Gun: {
+                // TODO: can we move cooldown_weapon to the Weapon struct
+                if (entity->cooldown_weapon <= 0) {
+                    weapon->shoot(this, entity_index);
+                    entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
+                    mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+                }
+            } break;
+
+            case Weapon_Type::Placer: {
+                weapon->shoot(this, entity_index);
+            } break;
             }
-        } break;
-
-        case WEAPON_FIRE: {
-            if (entity->cooldown_weapon <= 0) {
-                spawn_projectile(
-                    fire_projectile(
-                        entity->pos,
-                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
-                        entity_index));
-                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-
-                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
-            }
-        } break;
-
-        case WEAPON_ROCK: {
-            if (entity->cooldown_weapon <= 0) {
-                spawn_projectile(
-                    rock_projectile(
-                        entity->pos,
-                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
-                        entity_index));
-                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-
-                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
-            }
-        } break;
-
-        case WEAPON_ICE: {
-            if (entity->cooldown_weapon <= 0) {
-                spawn_projectile(
-                    ice_projectile(
-                        entity->pos,
-                        normalize(entity->gun_dir) * PROJECTILE_SPEED,
-                        entity_index));
-                entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-
-                mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
-            }
-        } break;
-
-        case WEAPON_DIRT_BLOCK: {
-            bool can_place = false;
-            auto target_tile = where_entity_can_place_block(entity_index, &can_place);
-            if (can_place && entity->dirt_blocks_count > 0) {
-                grid.set_tile(target_tile, TILE_DIRT_0);
-                entity->dirt_blocks_count -= 1;
-            }
-        } break;
-
-        case WEAPON_ICE_BLOCK: {
-            bool can_place = false;
-            auto target_tile = where_entity_can_place_block(entity_index, &can_place);
-            if (can_place && entity->ice_blocks_count > 0) {
-                grid.set_tile(target_tile, TILE_ICE_0);
-                entity->ice_blocks_count -= 1;
-            }
-        } break;
-
-        case WEAPON_COUNT: {
-            assert(0 && "Unreachable");
-        } break;
         }
     }
 }
@@ -954,45 +846,10 @@ int Game::get_rooms_count(void)
 
 void Game::render_player_hud(SDL_Renderer *renderer)
 {
+    Entity *player = &entities[PLAYER_ENTITY_INDEX];
+
     const size_t MAXIMUM_LENGTH = 3;
-
-    struct Weapon_Stat
-    {
-        Sprite icon;
-        char label[MAXIMUM_LENGTH + 1];
-    };
-
-    Weapon_Stat stats[WEAPON_COUNT] = {};
-
-    snprintf(stats[WEAPON_WATER].label, sizeof(stats[WEAPON_WATER].label), "inf");
-    {
-        assert(PROJECTILE_IDLE_ANIMAT.frame_count > 0);
-        stats[WEAPON_WATER].icon = PROJECTILE_IDLE_ANIMAT.frames[0];
-    }
-
-    snprintf(stats[WEAPON_DIRT_BLOCK].label, sizeof(stats[WEAPON_DIRT_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].dirt_blocks_count);
-    stats[WEAPON_DIRT_BLOCK].icon = tile_defs[TILE_DIRT_0].top_texture;
-
-    snprintf(stats[WEAPON_ICE_BLOCK].label, sizeof(stats[WEAPON_ICE_BLOCK].label), "%d", (unsigned) entities[PLAYER_ENTITY_INDEX].ice_blocks_count);
-    stats[WEAPON_ICE_BLOCK].icon = tile_defs[TILE_ICE_0].top_texture;
-
-    snprintf(stats[WEAPON_FIRE].label, sizeof(stats[WEAPON_FIRE].label), "inf");
-    {
-        assert(PROJECTILE_FIRE_ANIMAT.frame_count > 0);
-        stats[WEAPON_FIRE].icon = PROJECTILE_FIRE_ANIMAT.frames[0];
-    }
-
-    snprintf(stats[WEAPON_ROCK].label, sizeof(stats[WEAPON_ROCK].label), "inf");
-    {
-        assert(PROJECTILE_ROCK_IDLE_ANIMAT.frame_count > 0);
-        stats[WEAPON_ROCK].icon = PROJECTILE_ROCK_IDLE_ANIMAT.frames[0];
-    }
-
-    snprintf(stats[WEAPON_ICE].label, sizeof(stats[WEAPON_ICE].label), "inf");
-    {
-        assert(PROJECTILE_ICE_ANIMAT.frame_count > 0);
-        stats[WEAPON_ICE].icon = PROJECTILE_ICE_ANIMAT.frames[0];
-    }
+    char label[MAXIMUM_LENGTH + 1];
 
     auto text_width = MAXIMUM_LENGTH * BITMAP_FONT_CHAR_WIDTH * PLAYER_HUD_FONT_SIZE;
     auto text_height = BITMAP_FONT_CHAR_HEIGHT * PLAYER_HUD_FONT_SIZE;
@@ -1001,19 +858,30 @@ void Game::render_player_hud(SDL_Renderer *renderer)
         PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON + text_width + PLAYER_HUD_PADDING * 2,
         max(PLAYER_HUD_ICON_HEIGHT, text_height) + PLAYER_HUD_PADDING * 2);
 
-    for (size_t i = 0; i < WEAPON_COUNT; ++i) {
+    for (size_t i = 0; i < player->weapon_slots_count; ++i) {
         const auto position = vec2(PLAYER_HUD_MARGIN, PLAYER_HUD_MARGIN + (border_size.y + PLAYER_HUD_MARGIN) * i);
-        fill_rect(renderer, rect(position, border_size), i == entities[PLAYER_ENTITY_INDEX].current_weapon ? PLAYER_HUD_SELECTED_COLOR : PLAYER_HUD_BACKGROUND_COLOR);
+        fill_rect(renderer, rect(position, border_size), i == player->weapon_current ? PLAYER_HUD_SELECTED_COLOR : PLAYER_HUD_BACKGROUND_COLOR);
         Rectf destrect = rect(position + vec2(PLAYER_HUD_PADDING, PLAYER_HUD_PADDING),
                               vec2(PLAYER_HUD_ICON_WIDTH, PLAYER_HUD_ICON_HEIGHT));
-        stats[i].icon.render(renderer, destrect);
+
+        player->weapon_slots[i].icon().render(renderer, destrect);
+
+        switch (player->weapon_slots[i].type) {
+        case Weapon_Type::Gun:
+            snprintf(label, sizeof(label), "inf");
+            break;
+
+        case Weapon_Type::Placer:
+            snprintf(label, sizeof(label), "%d", (unsigned) player->weapon_slots[i].placer.amount);
+            break;
+        }
 
         debug_font.render(
             renderer,
             position + vec2(PLAYER_HUD_PADDING + PLAYER_HUD_ICON_WIDTH + PADDING_BETWEEN_TEXT_AND_ICON, PLAYER_HUD_PADDING),
             vec2(PLAYER_HUD_FONT_SIZE, PLAYER_HUD_FONT_SIZE),
             PLAYER_HUD_FONT_COLOR,
-            stats[i].label);
+            label);
     }
 }
 

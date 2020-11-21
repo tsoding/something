@@ -1,7 +1,8 @@
 #ifndef SOMETHING_ENTITY_H_
 #define SOMETHING_ENTITY_H_
 
-#include "something_particles.hpp"
+#include "./something_particles.hpp"
+#include "./something_weapon.hpp"
 
 enum class Jump_State
 {
@@ -25,17 +26,7 @@ enum class Alive_State
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
-// TODO(#284): More complex weapon system
-enum Weapon
-{
-    WEAPON_WATER = 0,
-    WEAPON_FIRE,
-    WEAPON_ROCK,
-    WEAPON_ICE,
-    WEAPON_DIRT_BLOCK,
-    WEAPON_ICE_BLOCK,
-    WEAPON_COUNT,
-};
+const size_t WEAPON_SLOTS_CAPACITY = 10;
 
 struct Entity
 {
@@ -66,7 +57,11 @@ struct Entity
     RGBA flash_color;
     float flash_alpha;
     Direction walking_direction;
-    Weapon current_weapon;
+
+    Weapon weapon_slots[WEAPON_SLOTS_CAPACITY];
+    size_t weapon_slots_count;
+    size_t weapon_current;
+
     size_t dirt_blocks_count;
     size_t ice_blocks_count;
 
@@ -117,6 +112,8 @@ struct Entity
     void stop();
     Vec2f feet();
     bool ground(Tile_Grid *grid);
+    Weapon *get_current_weapon();
+    void push_weapon(Weapon weapon);
 };
 
 Entity player_entity(Vec2f pos);
