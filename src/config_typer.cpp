@@ -7,8 +7,6 @@
 #include <cctype>
 #include <cstring>
 
-#define SDL_MAIN_HANDLED
-#include <SDL.h>
 #include "./aids.hpp"
 
 using namespace aids;

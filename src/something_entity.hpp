@@ -45,6 +45,7 @@ struct Entity
     // collision system to know when to not cancel out the vertical
     // velocity which can accidentally cancel out the whole jump.
     bool has_jumped;
+    bool noclip;
 
     Rectf texbox_local;
     Rectf hitbox_local;
@@ -73,8 +74,8 @@ struct Entity
     Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
     Sample_S16_Index shoot_sample;
 
-    short count_jumps;
-    short max_allowed_jumps;
+    int count_jumps;
+    int max_allowed_jumps;
 
     Particles particles;
 

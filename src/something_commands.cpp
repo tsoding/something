@@ -163,3 +163,16 @@ void command_history(Game *game, String_View)
     }
     game->console.println("--------------------");
 }
+
+void command_noclip(Game *game, String_View args)
+{
+    args = args.trim();
+
+    if (args == "on"_sv) {
+        game->noclip(true);
+    } else if (args == "off"_sv) {
+        game->noclip(false);
+    } else {
+        game->console.println("Unknown parameter `", args, "`. Expected 'on' or 'off'");
+    }
+}
