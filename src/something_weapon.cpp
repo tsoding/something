@@ -90,18 +90,20 @@ Weapon ice_gun()
     return result;
 }
 
-Weapon dirt_block_placer()
+Weapon dirt_block_placer(int amount)
 {
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_DIRT_0;
+    result.placer.amount = amount;
     return result;
 }
 
-Weapon ice_block_placer()
+Weapon ice_block_placer(int amount)
 {
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_ICE_0;
+    result.placer.amount = amount;
     return result;
 }

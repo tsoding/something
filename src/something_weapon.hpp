@@ -37,7 +37,7 @@ Weapon water_gun();
 Weapon fire_gun();
 Weapon rock_gun();
 Weapon ice_gun();
-Weapon dirt_block_placer();
-Weapon ice_block_placer();
+Weapon dirt_block_placer(int amount = 0);
+Weapon ice_block_placer(int amount = 0);
 
 #endif  // SOMETHING_WEAPON_HPP_
