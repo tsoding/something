@@ -558,10 +558,10 @@ bool Entity::ground(Tile_Grid *grid)
     return !grid->is_tile_empty_abs(feet() + vec2(0.0f, TILE_SIZE * 0.5f));
 }
 
-Weapon Entity::get_current_weapon() const
+Weapon *Entity::get_current_weapon()
 {
     assert(weapon_current < weapon_slots_count);
-    return weapon_slots[weapon_current];
+    return &weapon_slots[weapon_current];
 }
 
 void Entity::push_weapon(Weapon weapon)

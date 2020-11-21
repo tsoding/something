@@ -111,7 +111,7 @@ struct Entity
     void stop();
     Vec2f feet();
     bool ground(Tile_Grid *grid);
-    Weapon get_current_weapon() const;
+    Weapon *get_current_weapon();
     void push_weapon(Weapon weapon);
 };
 
