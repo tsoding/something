@@ -237,7 +237,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 jump_state = Jump_State::Jump;
                 has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
-                mixer->play_sample(assets.get_sound_by_index(jump_samples[rand() % 2]));
+                mixer->play_sample(jump_samples[rand() % 2]);
                 if (ground(grid)) {
                     for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
                         particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, PARTICLE_JUMP_VEL_HIGH));

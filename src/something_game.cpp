@@ -27,7 +27,7 @@ void Game::handle_event(SDL_Event *event)
 
     case SDL_KEYDOWN: {
         switch (event->key.keysym.sym) {
-        case SDLK_BACKSLASH: 
+        case SDLK_BACKSLASH:
         case SDLK_BACKQUOTE: {
             console.toggle();
         } break;
@@ -276,7 +276,7 @@ void Game::update(float dt)
                 projectile->kill();
                 entity->lives -= ENTITY_PROJECTILE_DAMAGE;
 
-                mixer.play_sample(OOF_SOUND);
+                mixer.play_sample(OOF_SOUND_INDEX);
                 if (entity->lives <= 0) {
                     for (size_t i = 0; i < entity->dirt_blocks_count; ++i) {
                         const float ITEMS_DROP_PROXIMITY = 50.0f;
@@ -296,7 +296,7 @@ void Game::update(float dt)
                     }
 
                     entity->kill();
-                    mixer.play_sample(CRUNCH_SOUND);
+                    mixer.play_sample(CRUNCH_SOUND_INDEX);
                 } else {
                     entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
                     entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
@@ -325,19 +325,19 @@ void Game::update(float dt)
                         case ITEM_HEALTH: {
                             entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
                             entity->flash(ENTITY_HEAL_FLASH_COLOR);
-                            mixer.play_sample(assets.sounds[item->sound.unwrap].unwrap);
+                            mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
 
                         case ITEM_DIRT_BLOCK: {
                             entity->dirt_blocks_count += 1;
-                            mixer.play_sample(assets.sounds[item->sound.unwrap].unwrap);
+                            mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
 
                         case ITEM_ICE_BLOCK: {
                             entity->ice_blocks_count += 1;
-                            mixer.play_sample(assets.sounds[item->sound.unwrap].unwrap);
+                            mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
                         }
@@ -449,7 +449,7 @@ void Game::entity_shoot(Entity_Index entity_index)
                 if (entity->cooldown_weapon <= 0) {
                     weapon->shoot(this, entity_index);
                     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-                    mixer.play_sample(assets.sounds[entity->shoot_sample.unwrap].unwrap);
+                    mixer.play_sample(entity->shoot_sample);
                 }
             } break;
 
