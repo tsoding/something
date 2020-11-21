@@ -9,7 +9,7 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
         bool can_place = false;
         auto target_tile = game->where_entity_can_place_block(entity, &can_place);
         can_place = can_place && placer.amount > 0;
-        tile_defs[placer.amount].top_texture.render(
+        tile_defs[placer.tile].top_texture.render(
             renderer,
             rect(game->camera.to_screen(
                      vec2((float) target_tile.x,
