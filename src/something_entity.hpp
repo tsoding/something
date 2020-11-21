@@ -112,6 +112,7 @@ struct Entity
     Vec2f feet();
     bool ground(Tile_Grid *grid);
     Weapon get_current_weapon() const;
+    void push_weapon(Weapon weapon);
 };
 
 Entity player_entity(Vec2f pos);

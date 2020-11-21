@@ -312,10 +312,10 @@ Entity player_entity(Vec2f pos)
 {
     Entity entity = {};
 
-    entity.weapon_slots_count = 2;
-    static_assert(WEAPON_SLOTS_CAPACITY > 0);
-    entity.weapon_slots[0] = water_gun();
-    entity.weapon_slots[1] = fire_gun();
+    entity.push_weapon(water_gun());
+    entity.push_weapon(fire_gun());
+    entity.push_weapon(ice_block_placer(20));
+    entity.push_weapon(dirt_block_placer(20));
 
     entity.dirt_blocks_count = 69;
     entity.ice_blocks_count = 69;
@@ -562,4 +562,10 @@ Weapon Entity::get_current_weapon() const
 {
     assert(weapon_current < weapon_slots_count);
     return weapon_slots[weapon_current];
+}
+
+void Entity::push_weapon(Weapon weapon)
+{
+    assert(weapon_slots_count < WEAPON_SLOTS_CAPACITY);
+    weapon_slots[weapon_slots_count++] = weapon;
 }
