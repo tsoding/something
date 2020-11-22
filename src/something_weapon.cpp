@@ -90,7 +90,7 @@ Weapon rock_gun()
 
 Weapon ice_gun()
 {
-    // TODO: no sound for the ice gun
+    // TODO(#307): no sound for the ice gun
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = ice_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
