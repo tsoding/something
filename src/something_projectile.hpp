@@ -22,6 +22,8 @@ enum class Projectile_Kind
     None,
     Fire,
     Ice,
+    Rock,
+    Water,
 };
 
 struct Projectile
