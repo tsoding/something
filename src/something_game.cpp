@@ -278,23 +278,7 @@ void Game::update(float dt)
 
                 mixer.play_sample(OOF_SOUND_INDEX);
                 if (entity->lives <= 0) {
-                    for (size_t i = 0; i < entity->dirt_blocks_count; ++i) {
-                        const float ITEMS_DROP_PROXIMITY = 50.0f;
-                        auto random_vector = polar(
-                            ITEMS_DROP_PROXIMITY,
-                            rand_float_range(0, 2.0f * PI));
-                        spawn_dirt_block_item_at(entity->pos + random_vector);
-                    }
-
-                    for (size_t i = 0; i < entity->ice_blocks_count; ++i) {
-                        const float ITEMS_DROP_PROXIMITY = 50.0f;
-                        auto random_vector = polar(
-                            ITEMS_DROP_PROXIMITY,
-                            rand_float_range(0, 2.0f * PI));
-                        spawn_item_at(make_ice_block_item(vec2(0.0f, 0.0f)),
-                                      entity->pos + random_vector);
-                    }
-
+                    // TODO: Enemies don't drop any items anymore
                     entity->kill();
                     mixer.play_sample(CRUNCH_SOUND_INDEX);
                 } else {
@@ -330,13 +314,27 @@ void Game::update(float dt)
                         } break;
 
                         case ITEM_DIRT_BLOCK: {
-                            entity->dirt_blocks_count += 1;
+                            for (size_t i = 0; i < entity->weapon_slots_count; ++i) {
+                                if (entity->weapon_slots[i].type == Weapon_Type::Placer &&
+                                    entity->weapon_slots[i].placer.tile == TILE_DIRT_0)
+                                {
+                                    entity->weapon_slots[i].placer.amount += 1;
+                                    break;
+                                }
+                            }
                             mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;
 
                         case ITEM_ICE_BLOCK: {
-                            entity->ice_blocks_count += 1;
+                            for (size_t i = 0; i < entity->weapon_slots_count; ++i) {
+                                if (entity->weapon_slots[i].type == Weapon_Type::Placer &&
+                                    entity->weapon_slots[i].placer.tile == TILE_ICE_0)
+                                {
+                                    entity->weapon_slots[i].placer.amount += 1;
+                                    break;
+                                }
+                            }
                             mixer.play_sample(item->sound);
                             item->type = ITEM_NONE;
                         } break;

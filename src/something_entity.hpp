@@ -62,9 +62,6 @@ struct Entity
     size_t weapon_slots_count;
     size_t weapon_current;
 
-    size_t dirt_blocks_count;
-    size_t ice_blocks_count;
-
     Frames_Animat idle;
     Frames_Animat walking;
     Rubber_Animat poof_animat;
