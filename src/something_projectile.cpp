@@ -111,8 +111,8 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = frames_animat(PROJECTILE_IDLE_ANIMAT_INDEX);
-    result.poof_animat   = frames_animat(PROJECTILE_POOF_ANIMAT_INDEX);
+    result.active_animat = frames_animat(PROJECTILE_WATER_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_WATER_ANIMAT_INDEX);
     return result;
 }
 
