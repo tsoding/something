@@ -99,7 +99,7 @@ Weapon ice_gun()
 
 Weapon dirt_block_placer(int amount)
 {
-    // TODO: no sound for the dirt block placer
+    // TODO(#308): no sound for the dirt block placer
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_DIRT_0;
