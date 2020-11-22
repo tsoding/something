@@ -1,0 +1,8 @@
+texture = PROJECTILE_WATER_TEXTURE
+count = 1
+duration = 100
+
+frames.0.x = 0
+frames.0.y = 0
+frames.0.w = 64
+frames.0.h = 64

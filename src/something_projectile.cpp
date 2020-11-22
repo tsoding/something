@@ -102,6 +102,16 @@ void Projectile::update(float dt, Tile_Grid *grid)
     }
 }
 
+Rectf Projectile::hitbox()
+{
+    return Rectf {
+        this->pos.x - PROJECTILE_HITBOX_WIDTH * 0.5f,
+        this->pos.y - PROJECTILE_HITBOX_HEIGHT * 0.5f,
+        PROJECTILE_HITBOX_WIDTH,
+        PROJECTILE_HITBOX_HEIGHT
+    };
+}
+
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
@@ -111,14 +121,15 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.vel           = vel;
     result.shooter       = shooter;
     result.lifetime      = PROJECTILE_LIFETIME;
-    result.active_animat = frames_animat(PROJECTILE_IDLE_ANIMAT_INDEX);
-    result.poof_animat   = frames_animat(PROJECTILE_POOF_ANIMAT_INDEX);
+    result.active_animat = frames_animat(PROJECTILE_WATER_ANIMAT_INDEX);
+    result.poof_animat   = frames_animat(PROJECTILE_WATER_ANIMAT_INDEX);
     return result;
 }
 
 Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
+    result.kind          = Projectile_Kind::Fire;
     result.tile_damage   = Tile_Damage::Ice;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
@@ -149,6 +160,7 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
     // TODO(#286): there is nothing ice projectiles can damage for now
+    result.kind          = Projectile_Kind::Ice;
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
     result.pos           = pos;

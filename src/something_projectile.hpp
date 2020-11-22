@@ -1,6 +1,8 @@
 #ifndef SOMETHING_PROJECTILE_HPP_
 #define SOMETHING_PROJECTILE_HPP_
 
+struct Game;
+
 enum class Projectile_State
 {
     Ded = 0,
@@ -15,8 +17,16 @@ enum class Tile_Damage
     Ice,
 };
 
+enum class Projectile_Kind
+{
+    None,
+    Fire,
+    Ice,
+};
+
 struct Projectile
 {
+    Projectile_Kind kind;
     Tile_Damage tile_damage;
     Entity_Index shooter;
     Projectile_State state;
@@ -30,6 +40,7 @@ struct Projectile
     void render(SDL_Renderer *renderer, Camera *camera);
     void update(float dt, Tile_Grid *grid);
     void kill();
+    Rectf hitbox();
 };
 
 Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
