@@ -278,7 +278,7 @@ void Game::update(float dt)
 
                 mixer.play_sample(OOF_SOUND_INDEX);
                 if (entity->lives <= 0) {
-                    // TODO: Enemies don't drop any items anymore
+                    // TODO(#304): Enemies don't drop any items anymore
                     entity->kill();
                     mixer.play_sample(CRUNCH_SOUND_INDEX);
                 } else {
