@@ -318,9 +318,7 @@ Entity player_entity(Vec2f pos)
     entity.push_weapon(fire_gun());
     entity.push_weapon(ice_block_placer(20));
     entity.push_weapon(dirt_block_placer(20));
-
-    entity.dirt_blocks_count = 69;
-    entity.ice_blocks_count = 69;
+    entity.push_weapon(ice_block_placer(20));
 
     entity.texbox_local.w = PLAYER_TEXBOX_W;
     entity.texbox_local.h = PLAYER_TEXBOX_H;
@@ -371,8 +369,6 @@ Entity player_entity(Vec2f pos)
 Entity ice_golem_entity(Vec2f pos)
 {
     Entity entity = {};
-
-    entity.ice_blocks_count = 1;
 
     entity.push_weapon(ice_gun());
 
@@ -425,8 +421,6 @@ Entity ice_golem_entity(Vec2f pos)
 Entity golem_entity(Vec2f pos)
 {
     Entity entity = {};
-
-    entity.dirt_blocks_count = 1;
 
     entity.push_weapon(rock_gun());
 
