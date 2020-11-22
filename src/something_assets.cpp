@@ -278,18 +278,20 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
 
     // TODO(#253): release data pack building based on assets.conf
 
-    parse_assets_conf(input, [&](auto line_number, auto type, auto id, auto asset_path) {
-        if (type == "textures"_sv) {
+    parse_vars_conf(input, [&](auto line_number, auto id, auto type, auto asset_path) {
+        if (type == "texture"_sv) {
             load_texture(renderer, id, asset_path);
-        } else if (type == "sounds"_sv) {
+        } else if (type == "sound"_sv) {
             load_sound(id, asset_path);
-        } else if (type == "animats"_sv) {
+        } else if (type == "animat"_sv) {
             load_frames(id, asset_path);
         } else {
             println(stderr, asset_path, ":", line_number, ": ",
                     "Unknown type of asset `", type, "`");
             exit(1);
         }
+
+        return parse_success();
     });
 
     loaded_first_time = true;
