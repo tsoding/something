@@ -1,3 +1,5 @@
+#include "./something_parsers.hpp"
+
 enum Config_Type
 {
     CONFIG_TYPE_UNKNOWN = 0,
@@ -51,29 +53,6 @@ size_t config_file_buffer_size = 0;
 const size_t CONFIG_ERROR_CAPACITY = 1024;
 char config_error_buffer[CONFIG_ERROR_CAPACITY];
 
-struct Config_Parse_Result
-{
-    bool is_error;
-    const char *message;
-    size_t line;
-};
-
-inline
-Config_Parse_Result parse_success()
-{
-    Config_Parse_Result result = {};
-    return result;
-}
-
-inline
-Config_Parse_Result parse_failure(const char *message, size_t line)
-{
-    Config_Parse_Result result = {};
-    result.is_error = true;
-    result.message = message;
-    result.line = line;
-    return result;
-}
 // Can't link original function sdl_to_rgba from something_color.cpp
 RGBA sdl_to_rgba2(SDL_Color sdl_color)
 {
@@ -151,18 +130,7 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
 // current `config.var`.
 Config_Parse_Result parse_config_text(String_View input)
 {
-    for (size_t line_number = 1; input.count > 0; ++line_number) {
-        String_View line = input.chop_by_delim('\n').trim();
-
-        if (line.count == 0) continue;   // Empty line
-        if (*line.data == '#') continue; // Comment
-
-        // NOTE: Format of Line:
-        // VAR_NAME : TYPE = VALUE # COMMENT
-        String_View name  = line.chop_by_delim(':').trim();
-        String_View type  = line.chop_by_delim('=').trim();
-        String_View value = line.chop_by_delim('#').trim();
-
+    return parse_vars_conf(input, [](auto line_number, auto name, auto type, String_View value) {
         auto index = config_index_by_name(name);
         if (index < 0) {
             snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
@@ -192,9 +160,9 @@ Config_Parse_Result parse_config_text(String_View input)
 
                 if (other_variable_index < 0) {
                     snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                            "`%.*s` is not a color (variable `%.*s`)",
-                            (int) value.count, value.data,
-                            (int) name.count, name.data);
+                             "`%.*s` is not a color (variable `%.*s`)",
+                             (int) value.count, value.data,
+                             (int) name.count, name.data);
                     return parse_failure(config_error_buffer, line_number);
                 }
 
@@ -204,9 +172,9 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].color_value = config_values[other_variable_index].color_value;
-                continue;
+            } else {
+                config_values[index].color_value = x.unwrap;
             }
-            config_values[index].color_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_INT: {
@@ -216,9 +184,9 @@ Config_Parse_Result parse_config_text(String_View input)
 
                 if (other_variable_index < 0) {
                     snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                            "`%.*s` is not an int (variable `%.*s`)",
-                            (int) value.count, value.data,
-                            (int) name.count, name.data);
+                             "`%.*s` is not an int (variable `%.*s`)",
+                             (int) value.count, value.data,
+                             (int) name.count, name.data);
                     return parse_failure(config_error_buffer, line_number);
                 }
 
@@ -228,9 +196,9 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].int_value = config_values[other_variable_index].int_value;
-                continue;
+            } else {
+                config_values[index].int_value = x.unwrap;
             }
-            config_values[index].int_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_FLOAT: {
@@ -240,9 +208,9 @@ Config_Parse_Result parse_config_text(String_View input)
 
                 if (other_variable_index < 0) {
                     snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                            "`%.*s` is not a float (variable `%.*s`)",
-                            (int) value.count, value.data,
-                            (int) name.count, name.data);
+                             "`%.*s` is not a float (variable `%.*s`)",
+                             (int) value.count, value.data,
+                             (int) name.count, name.data);
                     return parse_failure(config_error_buffer, line_number);
                 }
 
@@ -252,9 +220,9 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].float_value = config_values[other_variable_index].float_value;
-                continue;
+            } else {
+                config_values[index].float_value = x.unwrap;
             }
-            config_values[index].float_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_STRING: {
@@ -264,9 +232,9 @@ Config_Parse_Result parse_config_text(String_View input)
 
                 if (other_variable_index < 0) {
                     snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
-                            "`%.*s` is not a string (variable `%.*s`)",
-                            (int) value.count, value.data,
-                            (int) name.count, name.data);
+                             "`%.*s` is not a string (variable `%.*s`)",
+                             (int) value.count, value.data,
+                             (int) name.count, name.data);
                     return parse_failure(config_error_buffer, line_number);
                 }
 
@@ -276,9 +244,9 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].string_value = config_values[other_variable_index].string_value;
-                continue;
+            } else {
+                config_values[index].string_value = x.unwrap;
             }
-            config_values[index].string_value = x.unwrap;
         } break;
 
         case CONFIG_TYPE_UNKNOWN: {
@@ -286,9 +254,9 @@ Config_Parse_Result parse_config_text(String_View input)
             abort();
         } break;
         }
-    }
 
-    return parse_success();
+        return parse_success();
+    });
 }
 
 Config_Parse_Result reload_config_file(const char *file_path)
