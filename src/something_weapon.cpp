@@ -109,7 +109,7 @@ Weapon dirt_block_placer(int amount)
 
 Weapon ice_block_placer(int amount)
 {
-    // TODO: no sound for the ice block placer
+    // TODO(#309): no sound for the ice block placer
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_ICE_0;
