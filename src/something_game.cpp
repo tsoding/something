@@ -456,7 +456,7 @@ void Game::entity_shoot(Entity_Index entity_index)
                         mixer.play_sample(weapon->shoot_sample.unwrap);
                     }
 
-                    // TODO: can we move cooldown_weapon to the Weapon struct
+                    // TODO(#305): can we move cooldown_weapon to the Weapon struct
                     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
                 }
             } break;
