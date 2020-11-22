@@ -81,7 +81,7 @@ Weapon fire_gun()
 
 Weapon rock_gun()
 {
-    // TODO: no sound for the rock gun
+    // TODO(#306): no sound for the rock gun
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = rock_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
