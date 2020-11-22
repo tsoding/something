@@ -348,6 +348,13 @@ void Game::update(float dt)
         }
     }
 
+    //  Projectiles/Projectiles Interaction /////////
+    for (size_t i = 0; i < PROJECTILES_COUNT - 1; ++i) {
+        for (size_t j = i + 1; j < PROJECTILES_COUNT; ++j) {
+            projectiles[i].collide_with(&projectiles[j]);
+        }
+    }
+
     // Player Movement //////////////////////////////
     if (!console.enabled) {
         if (keyboard[SDL_SCANCODE_D]) {
@@ -646,6 +653,12 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
         sec(SDL_RenderDrawRect(renderer, &hitbox));
 
         entities[i].render_debug(renderer, camera);
+    }
+
+    for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
+        if (projectiles[i].state == Projectile_State::Active) {
+            draw_rect(renderer, camera.to_screen(projectiles[i].hitbox()), RGBA_RED);
+        }
     }
 
     if (tracking_projectile.has_value) {

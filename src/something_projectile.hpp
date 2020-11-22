@@ -30,6 +30,8 @@ struct Projectile
     void render(SDL_Renderer *renderer, Camera *camera);
     void update(float dt, Tile_Grid *grid);
     void kill();
+    void collide_with(Projectile *other);
+    Rectf hitbox();
 };
 
 Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);

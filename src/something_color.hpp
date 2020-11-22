@@ -18,6 +18,8 @@ struct RGBA
     HSLA to_hsla() const;
 };
 
+const RGBA RGBA_RED = {1.0f, 0.0f, 0.0f, 1.0f};
+
 RGBA sdl_to_rgba(SDL_Color sdl_color);
 SDL_Color rgba_to_sdl(RGBA rgba);
 

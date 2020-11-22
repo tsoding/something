@@ -102,6 +102,29 @@ void Projectile::update(float dt, Tile_Grid *grid)
     }
 }
 
+Rectf Projectile::hitbox()
+{
+    return Rectf {
+        this->pos.x - PROJECTILE_HITBOX_WIDTH * 0.5f,
+        this->pos.y - PROJECTILE_HITBOX_HEIGHT * 0.5f,
+        PROJECTILE_HITBOX_WIDTH,
+        PROJECTILE_HITBOX_HEIGHT
+    };
+}
+
+void Projectile::collide_with(Projectile *other)
+{
+    if (this != other &&
+        this->state == Projectile_State::Active &&
+        other->state == Projectile_State::Active)
+    {
+        if (rects_overlap(this->hitbox(), other->hitbox())) {
+            this->kill();
+            other->kill();
+        }
+    }
+}
+
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
