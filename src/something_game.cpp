@@ -916,7 +916,9 @@ void Game::projectile_collision(Projectile *a, Projectile *b)
         b->state == Projectile_State::Active)
     {
         if (rects_overlap(a->hitbox(), b->hitbox())) {
-            if (a->kind == Projectile_Kind::Ice && b->kind == Projectile_Kind::Fire) {
+            if ((a->kind == Projectile_Kind::Ice && b->kind == Projectile_Kind::Fire) ||
+                (a->kind == Projectile_Kind::Rock && b->kind == Projectile_Kind::Water))
+            {
                 swap(&a, &b);
             }
 
@@ -926,6 +928,11 @@ void Game::projectile_collision(Projectile *a, Projectile *b)
                         b->pos,
                         normalize(a->vel + b->vel) * PROJECTILE_SPEED,
                         b->shooter));
+                a->kill();
+                b->kill();
+            }
+
+            if (a->kind == Projectile_Kind::Water && b->kind == Projectile_Kind::Rock) {
                 a->kill();
                 b->kill();
             }
