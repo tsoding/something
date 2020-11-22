@@ -69,7 +69,6 @@ struct Entity
     Compose_Rubber_Animat<2> jump_animat;
 
     Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
-    Sample_S16_Index shoot_sample;
 
     int count_jumps;
     int max_allowed_jumps;

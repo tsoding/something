@@ -333,7 +333,6 @@ Entity player_entity(Vec2f pos)
     entity.walking         = frames_animat(PLAYER_ANIMAT_INDEX);
     entity.jump_samples[0] = JUMP1_SOUND_INDEX;
     entity.jump_samples[1] = JUMP2_SOUND_INDEX;
-    entity.shoot_sample    = PEW_SOUND_INDEX;
 
     entity.lives = ENTITY_INITIAL_LIVES;
     entity.state = Entity_State::Alive;

@@ -450,11 +450,14 @@ void Game::entity_shoot(Entity_Index entity_index)
         if (weapon != NULL) {
             switch (weapon->type) {
             case Weapon_Type::Gun: {
-                // TODO: can we move cooldown_weapon to the Weapon struct
                 if (entity->cooldown_weapon <= 0) {
                     weapon->shoot(this, entity_index);
+                    if (weapon->shoot_sample.has_value) {
+                        mixer.play_sample(weapon->shoot_sample.unwrap);
+                    }
+
+                    // TODO: can we move cooldown_weapon to the Weapon struct
                     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-                    mixer.play_sample(entity->shoot_sample);
                 }
             } break;
 

@@ -64,6 +64,7 @@ Sprite Weapon::icon() const
 Weapon water_gun()
 {
     Weapon result = {};
+    result.shoot_sample = {true, SPLASH_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = water_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
