@@ -73,6 +73,7 @@ Weapon water_gun()
 Weapon fire_gun()
 {
     Weapon result = {};
+    result.shoot_sample = {true, FIREBALL_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = fire_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
