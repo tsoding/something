@@ -112,19 +112,6 @@ Rectf Projectile::hitbox()
     };
 }
 
-void Projectile::collide_with(Projectile *other)
-{
-    if (this != other &&
-        this->state == Projectile_State::Active &&
-        other->state == Projectile_State::Active)
-    {
-        if (rects_overlap(this->hitbox(), other->hitbox())) {
-            this->kill();
-            other->kill();
-        }
-    }
-}
-
 Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
@@ -142,6 +129,7 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
+    result.kind          = Projectile_Kind::Fire;
     result.tile_damage   = Tile_Damage::Ice;
     result.state         = Projectile_State::Active;
     result.pos           = pos;
@@ -172,6 +160,7 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
     // TODO(#286): there is nothing ice projectiles can damage for now
+    result.kind          = Projectile_Kind::Ice;
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
     result.pos           = pos;

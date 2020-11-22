@@ -351,7 +351,7 @@ void Game::update(float dt)
     //  Projectiles/Projectiles Interaction /////////
     for (size_t i = 0; i < PROJECTILES_COUNT - 1; ++i) {
         for (size_t j = i + 1; j < PROJECTILES_COUNT; ++j) {
-            projectiles[i].collide_with(&projectiles[j]);
+            projectile_collision(&projectiles[i], &projectiles[j]);
         }
     }
 
@@ -907,6 +907,30 @@ void Game::noclip(bool on)
             entities[PLAYER_ENTITY_INDEX].vel.y = 0;
         } else {
             popup.notify(FONT_FAILURE_COLOR, "Noclip disabled");
+        }
+    }
+}
+
+void Game::projectile_collision(Projectile *a, Projectile *b)
+{
+    if (a != b &&
+        a->state == Projectile_State::Active &&
+        b->state == Projectile_State::Active)
+    {
+        if (rects_overlap(a->hitbox(), b->hitbox())) {
+            if (a->kind == Projectile_Kind::Ice && b->kind == Projectile_Kind::Fire) {
+                swap(&a, &b);
+            }
+
+            if (a->kind == Projectile_Kind::Fire && b->kind == Projectile_Kind::Ice) {
+                spawn_projectile(
+                    water_projectile(
+                        b->pos,
+                        normalize(a->vel + b->vel) * PROJECTILE_SPEED,
+                        b->shooter));
+                a->kill();
+                b->kill();
+            }
         }
     }
 }

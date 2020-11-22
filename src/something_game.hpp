@@ -97,6 +97,7 @@ struct Game
     void update_projectiles(float dt);
     Rectf hitbox_of_projectile(Projectile_Index index);
     Maybe<Projectile_Index> projectile_at_position(Vec2f position);
+    void projectile_collision(Projectile *a, Projectile *b);
 
     // Items of the Game
     void spawn_item_at(Item item, Vec2f pos);
