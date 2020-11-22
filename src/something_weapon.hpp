@@ -28,6 +28,8 @@ struct Weapon
     Gun gun;
     Placer placer;
 
+    Maybe<Sample_S16_Index> shoot_sample;
+
     void render(SDL_Renderer *renderer, Game *game, Entity_Index entity);
     void shoot(Game *game, Entity_Index shooter);
     Sprite icon() const;

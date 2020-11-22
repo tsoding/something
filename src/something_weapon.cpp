@@ -64,6 +64,7 @@ Sprite Weapon::icon() const
 Weapon water_gun()
 {
     Weapon result = {};
+    result.shoot_sample = {true, SPLASH_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = water_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
@@ -72,6 +73,7 @@ Weapon water_gun()
 Weapon fire_gun()
 {
     Weapon result = {};
+    result.shoot_sample = {true, FIREBALL_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = fire_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
     return result;
@@ -79,6 +81,7 @@ Weapon fire_gun()
 
 Weapon rock_gun()
 {
+    // TODO(#306): no sound for the rock gun
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = rock_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
@@ -87,6 +90,7 @@ Weapon rock_gun()
 
 Weapon ice_gun()
 {
+    // TODO(#307): no sound for the ice gun
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = ice_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
@@ -95,6 +99,7 @@ Weapon ice_gun()
 
 Weapon dirt_block_placer(int amount)
 {
+    // TODO(#308): no sound for the dirt block placer
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_DIRT_0;
@@ -104,6 +109,7 @@ Weapon dirt_block_placer(int amount)
 
 Weapon ice_block_placer(int amount)
 {
+    // TODO(#309): no sound for the ice block placer
     Weapon result = {};
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_ICE_0;

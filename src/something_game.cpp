@@ -278,7 +278,7 @@ void Game::update(float dt)
 
                 mixer.play_sample(OOF_SOUND_INDEX);
                 if (entity->lives <= 0) {
-                    // TODO: Enemies don't drop any items anymore
+                    // TODO(#304): Enemies don't drop any items anymore
                     entity->kill();
                     mixer.play_sample(CRUNCH_SOUND_INDEX);
                 } else {
@@ -450,11 +450,14 @@ void Game::entity_shoot(Entity_Index entity_index)
         if (weapon != NULL) {
             switch (weapon->type) {
             case Weapon_Type::Gun: {
-                // TODO: can we move cooldown_weapon to the Weapon struct
                 if (entity->cooldown_weapon <= 0) {
                     weapon->shoot(this, entity_index);
+                    if (weapon->shoot_sample.has_value) {
+                        mixer.play_sample(weapon->shoot_sample.unwrap);
+                    }
+
+                    // TODO(#305): can we move cooldown_weapon to the Weapon struct
                     entity->cooldown_weapon = ENTITY_COOLDOWN_WEAPON;
-                    mixer.play_sample(entity->shoot_sample);
                 }
             } break;
 
@@ -917,7 +920,8 @@ void Game::projectile_collision(Projectile *a, Projectile *b)
     {
         if (rects_overlap(a->hitbox(), b->hitbox())) {
             if ((a->kind == Projectile_Kind::Ice && b->kind == Projectile_Kind::Fire) ||
-                (a->kind == Projectile_Kind::Rock && b->kind == Projectile_Kind::Water))
+                (a->kind == Projectile_Kind::Rock && b->kind == Projectile_Kind::Water) ||
+                (a->kind == Projectile_Kind::Fire && b->kind == Projectile_Kind::Water))
             {
                 swap(&a, &b);
             }
@@ -934,6 +938,10 @@ void Game::projectile_collision(Projectile *a, Projectile *b)
 
             if (a->kind == Projectile_Kind::Water && b->kind == Projectile_Kind::Rock) {
                 a->kill();
+                b->kill();
+            }
+
+            if (a->kind == Projectile_Kind::Water && b->kind == Projectile_Kind::Fire) {
                 b->kill();
             }
         }

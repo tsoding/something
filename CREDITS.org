@@ -16,3 +16,5 @@
 - https://opengameart.org/content/walking-ice-golem
 - https://opengameart.org/content/fireball-projectile
 - https://opengameart.org/content/rock-projectile-0
+- https://opengameart.org/content/water-splash-yo-frankie
+- https://opengameart.org/content/fireball-1
