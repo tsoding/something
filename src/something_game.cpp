@@ -409,9 +409,10 @@ void Game::render(SDL_Renderer *renderer)
 
     grid.render(renderer, camera, lock);
 
+    entities[PLAYER_ENTITY_INDEX].render(renderer, camera);
     if (lock) {
         Rectf lock_abs = rect_cast<float>(*lock) * TILE_SIZE;
-        for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
             if (rect_contains_vec2(lock_abs, entities[i].pos)) {
                 entities[i].render(renderer, camera);
             } else {
@@ -419,7 +420,7 @@ void Game::render(SDL_Renderer *renderer)
             }
         }
     } else {
-        for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+        for (size_t i = ENEMY_ENTITY_INDEX_OFFSET; i < ENTITIES_COUNT; ++i) {
             entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
         }
     }
