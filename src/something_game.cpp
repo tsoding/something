@@ -391,12 +391,10 @@ void Game::update(float dt)
 void Game::render(SDL_Renderer *renderer)
 {
     Recti *lock = NULL;
-    Rectf lock_abs;
     for (size_t i = 0; i < camera_locks_count; ++i) {
-        lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
+        Rectf lock_abs = rect_cast<float>(camera_locks[i]) * TILE_SIZE;
         if (rect_contains_vec2(lock_abs, entities[PLAYER_ENTITY_INDEX].pos)) {
             lock = &camera_locks[i];
-            break;
         }
     }
 
@@ -411,11 +409,17 @@ void Game::render(SDL_Renderer *renderer)
 
     grid.render(renderer, camera, lock);
 
-    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        // TODO(#106): display health bar differently for enemies in a different room
-        if (lock && rect_contains_vec2(lock_abs, entities[i].pos)) {
-            entities[i].render(renderer, camera);
-        } else {
+    if (lock) {
+        Rectf lock_abs = rect_cast<float>(*lock) * TILE_SIZE;
+        for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+            if (rect_contains_vec2(lock_abs, entities[i].pos)) {
+                entities[i].render(renderer, camera);
+            } else {
+                entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
+            }
+        }
+    } else {
+        for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
             entities[i].render(renderer, camera, ROOM_NEIGHBOR_DIM_COLOR);
         }
     }
