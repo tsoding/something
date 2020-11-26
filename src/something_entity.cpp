@@ -65,31 +65,21 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 ENTITY_LIVEBAR_WIDTH * percent,
                 ENTITY_LIVEBAR_HEIGHT
             };
+            RGBA entity_livebar_color;
             if (percent > 0.75f) {
-                const SDL_Color entity_livebar_full_color = rgba_to_sdl(ENTITY_LIVEBAR_FULL_COLOR);
-                sec(SDL_SetRenderDrawColor(
-                        renderer,
-                        entity_livebar_full_color.r,
-                        entity_livebar_full_color.g,
-                        entity_livebar_full_color.b,
-                        entity_livebar_full_color.a));
+                entity_livebar_color = ENTITY_LIVEBAR_FULL_COLOR;
             } else if (0.25f < percent && percent < 0.75f) {
-                const SDL_Color entity_livebar_half_color = rgba_to_sdl(ENTITY_LIVEBAR_HALF_COLOR);
-                sec(SDL_SetRenderDrawColor(
-                        renderer,
-                        entity_livebar_half_color.r,
-                        entity_livebar_half_color.g,
-                        entity_livebar_half_color.b,
-                        entity_livebar_half_color.a));
+                entity_livebar_color = ENTITY_LIVEBAR_HALF_COLOR;
             } else {
-                const SDL_Color entity_livebar_low_color = rgba_to_sdl(ENTITY_LIVEBAR_LOW_COLOR);
-                sec(SDL_SetRenderDrawColor(
-                        renderer,
-                        entity_livebar_low_color.r,
-                        entity_livebar_low_color.g,
-                        entity_livebar_low_color.b,
-                        entity_livebar_low_color.a));
+                entity_livebar_color = ENTITY_LIVEBAR_LOW_COLOR;
             }
+            SDL_Color sdl_entity_livebar_color = rgba_to_sdl(mix_colors(entity_livebar_color, shade));
+            sec(SDL_SetRenderDrawColor(
+                        renderer,
+                        sdl_entity_livebar_color.r,
+                        sdl_entity_livebar_color.g,
+                        sdl_entity_livebar_color.b,
+                        sdl_entity_livebar_color.a));
             const auto rect_border = rectf_for_sdl(camera.to_screen(livebar_border));
             sec(SDL_RenderDrawRect(renderer, &rect_border));
             const auto rect_remain = rectf_for_sdl(camera.to_screen(livebar_remain));
