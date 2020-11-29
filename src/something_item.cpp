@@ -60,7 +60,6 @@ Item make_health_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = POP_SOUND_INDEX;
 
     return item;
 }
@@ -83,7 +82,6 @@ Item make_dirt_block_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = POP_SOUND_INDEX;
     return item;
 }
 
@@ -105,6 +103,5 @@ Item make_ice_block_item(Vec2f pos)
         ITEM_TEXBOX_WIDTH,
         ITEM_TEXBOX_HEIGHT
     };
-    item.sound = POP_SOUND_INDEX;
     return item;
 }
