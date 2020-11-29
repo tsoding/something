@@ -309,7 +309,7 @@ void Game::update(float dt)
                         case ITEM_HEALTH: {
                             entity->lives = min(entity->lives + ITEM_HEALTH_POINTS, ENTITY_MAX_LIVES);
                             entity->flash(ENTITY_HEAL_FLASH_COLOR);
-                            mixer.play_sample(item->sound);
+                            mixer.play_sample(POP_SOUND_INDEX);
                             item->type = ITEM_NONE;
                         } break;
 
@@ -322,7 +322,7 @@ void Game::update(float dt)
                                     break;
                                 }
                             }
-                            mixer.play_sample(item->sound);
+                            mixer.play_sample(POP_SOUND_INDEX);
                             item->type = ITEM_NONE;
                         } break;
 
@@ -335,7 +335,7 @@ void Game::update(float dt)
                                     break;
                                 }
                             }
-                            mixer.play_sample(item->sound);
+                            mixer.play_sample(POP_SOUND_INDEX);
                             item->type = ITEM_NONE;
                         } break;
                         }
