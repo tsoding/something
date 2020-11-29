@@ -89,6 +89,8 @@ struct Game
     void spawn_golem_at(Vec2f pos);
     Vec2i where_entity_can_place_block(Entity_Index index, bool *can_place = nullptr);
     bool does_tile_contain_entity(Vec2i tile_coord);
+    void kill_entity(Entity *entity);
+    void drop_all_items_of_entity(Entity *entity);
 
     // Projectiles of the Game
     void spawn_projectile(Projectile projectile);

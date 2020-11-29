@@ -3,6 +3,7 @@
 
 #include "./something_particles.hpp"
 #include "./something_weapon.hpp"
+#include "./something_item.hpp"
 
 enum class Jump_State
 {
@@ -27,6 +28,7 @@ enum class Alive_State
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
 const size_t WEAPON_SLOTS_CAPACITY = 10;
+const size_t ITEMS_CAPACITY = 10;
 
 struct Entity
 {
@@ -62,6 +64,15 @@ struct Entity
     size_t weapon_slots_count;
     size_t weapon_current;
 
+    struct Item_Slot
+    {
+        Item item;
+        size_t count;
+    };
+
+    Item_Slot items[ITEMS_CAPACITY];
+    size_t items_count;
+
     Frames_Animat idle;
     Frames_Animat walking;
     Rubber_Animat poof_animat;
@@ -74,8 +85,6 @@ struct Entity
     int max_allowed_jumps;
 
     Particles particles;
-
-    void kill();
 
     inline Rectf texbox_world() const
     {
@@ -110,6 +119,8 @@ struct Entity
     bool ground(Tile_Grid *grid);
     Weapon *get_current_weapon();
     void push_weapon(Weapon weapon);
+    void push_item(Item item, size_t count = 1);
+    void drop_all_items(Game *game);
 };
 
 Entity player_entity(Vec2f pos);
