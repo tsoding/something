@@ -1,11 +1,10 @@
 #include "./something_print.hpp"
 #include "./something_entity.hpp"
 
-void Entity::kill()
+void Entity::push_item(Item item, size_t count)
 {
-    if (state == Entity_State::Alive) {
-        state = Entity_State::Poof;
-    }
+    assert(items_count < ITEMS_CAPACITY);
+    items[items_count++] = {item, count};
 }
 
 RGBA mix_colors(RGBA b32, RGBA a32)
@@ -370,6 +369,7 @@ Entity ice_golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.push_weapon(ice_gun());
+    entity.push_item(make_ice_block_item());
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -422,6 +422,7 @@ Entity golem_entity(Vec2f pos)
     Entity entity = {};
 
     entity.push_weapon(rock_gun());
+    entity.push_item(make_dirt_block_item());
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;

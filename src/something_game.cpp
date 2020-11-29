@@ -278,8 +278,7 @@ void Game::update(float dt)
 
                 mixer.play_sample(OOF_SOUND_INDEX);
                 if (entity->lives <= 0) {
-                    // TODO(#304): Enemies don't drop any items anymore
-                    entity->kill();
+                    kill_entity(entity);
                     mixer.play_sample(CRUNCH_SOUND_INDEX);
                 } else {
                     entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
@@ -945,5 +944,24 @@ void Game::projectile_collision(Projectile *a, Projectile *b)
                 b->kill();
             }
         }
+    }
+}
+
+void Game::drop_all_items_of_entity(Entity *entity)
+{
+    for (size_t i = 0; i < entity->items_count; ++i) {
+        for (size_t j = 0; j < entity->items[i].count; ++j) {
+            spawn_item_at(entity->items[i].item, entity->pos);
+        }
+    }
+
+    entity->items_count = 0;
+}
+
+void Game::kill_entity(Entity *entity)
+{
+    if (entity->state == Entity_State::Alive) {
+        entity->state = Entity_State::Poof;
+        drop_all_items_of_entity(entity);
     }
 }
