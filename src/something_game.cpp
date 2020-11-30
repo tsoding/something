@@ -247,7 +247,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, this);
+        entities[i].update(dt, this, {i});
         if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
@@ -991,10 +991,10 @@ void Game::damage_entity(Entity *entity, int amount, Vec2f knockback)
     }
 }
 
-void Game::damage_radius(Vec2f center, float radius)
+void Game::damage_radius(Vec2f center, float radius, Entity_Index stomper)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        if (entities[i].state == Entity_State::Alive) {
+        if (i != stomper.unwrap && entities[i].state == Entity_State::Alive) {
             Vec2f dir = entities[i].pos - center;
             if (sqr_len(dir) <= radius * radius) {
                 damage_entity(

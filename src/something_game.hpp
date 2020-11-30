@@ -92,7 +92,7 @@ struct Game
     void kill_entity(Entity *entity);
     void drop_all_items_of_entity(Entity *entity);
     void damage_entity(Entity *entity, int amount, Vec2f knockback);
-    void damage_radius(Vec2f pos, float radius);
+    void damage_radius(Vec2f center, float radius, Entity_Index stomper);
 
     // Projectiles of the Game
     void spawn_projectile(Projectile projectile);

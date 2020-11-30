@@ -212,7 +212,7 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
     return result;
 }
 
-void Entity::update(float dt, Game *game)
+void Entity::update(float dt, Game *game, Entity_Index me)
 {
     if (state == Entity_State::Alive && ground(&game->grid)) {
         particles.current_color = get_particle_color_for_tile(&game->grid, feet());
@@ -290,7 +290,7 @@ void Entity::update(float dt, Game *game)
             vel.y += ENTITY_STOMP_ACCEL * dt;
             if (ground(&game->grid)) {
                 // TODO(#316): the entity that is stomping should not be damaged
-                game->damage_radius(pos, ENTITY_STOMP_RADIUS);
+                game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
                 unstomp_animat.reset();
                 alive_state = Alive_State::Unstomping;
             }
