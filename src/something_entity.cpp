@@ -358,6 +358,7 @@ Entity player_entity(Vec2f pos)
     entity.push_weapon(ice_block_placer(20));
     entity.push_weapon(dirt_block_placer(20));
     entity.push_weapon(ice_block_placer(20));
+    entity.push_weapon(stomp_move());
 
     entity.texbox_local.w = PLAYER_TEXBOX_W;
     entity.texbox_local.h = PLAYER_TEXBOX_H;
