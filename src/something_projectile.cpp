@@ -161,7 +161,6 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    // TODO(#286): there is nothing ice projectiles can damage for now
     result.kind          = Projectile_Kind::Ice;
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
