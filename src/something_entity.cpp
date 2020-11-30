@@ -9,6 +9,7 @@ const char *alive_state_as_cstr(Alive_State state)
     case Alive_State::Stomping: return "Stomping";
     }
     assert(0 && "unreachable");
+    return NULL;
 }
 
 void Entity::push_item(Item item, size_t count)
