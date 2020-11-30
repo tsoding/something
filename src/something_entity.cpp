@@ -4,9 +4,10 @@
 const char *alive_state_as_cstr(Alive_State state)
 {
     switch (state) {
-    case Alive_State::Idle:     return "Idle";
-    case Alive_State::Walking:  return "Walking";
-    case Alive_State::Stomping: return "Stomping";
+    case Alive_State::Idle:       return "Idle";
+    case Alive_State::Walking:    return "Walking";
+    case Alive_State::Stomping:   return "Stomping";
+    case Alive_State::Unstomping: return "Unstomping";
     }
     assert(0 && "unreachable");
     return NULL;
@@ -114,6 +115,13 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
         } break;
 
         case Alive_State::Stomping: {
+            idle.render(
+                renderer, camera.to_screen(texbox), flip,
+                mix_colors(shade, effective_flash_color));
+        } break;
+
+        case Alive_State::Unstomping: {
+            texbox = unstomp_animat.transform_rect(texbox_local, pos);
             idle.render(
                 renderer, camera.to_screen(texbox), flip,
                 mix_colors(shade, effective_flash_color));
@@ -283,6 +291,14 @@ void Entity::update(float dt, Game *game)
             if (ground(&game->grid)) {
                 // TODO(#316): the entity that is stomping should not be damaged
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS);
+                unstomp_animat.reset();
+                alive_state = Alive_State::Unstomping;
+            }
+        } break;
+
+        case Alive_State::Unstomping: {
+            unstomp_animat.update(dt);
+            if (unstomp_animat.finished()) {
                 alive_state = Alive_State::Idle;
             }
         } break;
@@ -339,6 +355,7 @@ void Entity::jump()
             }
         } break;
 
+        case Alive_State::Unstomping:
         case Alive_State::Stomping: {} break;
         }
     } break;
@@ -402,6 +419,10 @@ Entity player_entity(Vec2f pos)
     entity.poof_animat.begin = 0.0f;
     entity.poof_animat.end = 1.0f;
     entity.poof_animat.duration = 0.1f;
+
+    entity.unstomp_animat.begin = 0.5f;
+    entity.unstomp_animat.end = 0.0f;
+    entity.unstomp_animat.duration = 0.2f;
 
     return entity;
 }
@@ -574,7 +595,7 @@ void Entity::flash(RGBA color)
 
 void Entity::move(Direction direction)
 {
-    if (alive_state != Alive_State::Stomping) {
+    if (alive_state != Alive_State::Stomping && alive_state != Alive_State::Unstomping) {
         alive_state = Alive_State::Walking;
         walking_direction = direction;
     }
@@ -582,7 +603,7 @@ void Entity::move(Direction direction)
 
 void Entity::stop()
 {
-    if (alive_state != Alive_State::Stomping) {
+    if (alive_state != Alive_State::Stomping && alive_state != Alive_State::Unstomping) {
         alive_state = Alive_State::Idle;
     }
 }
@@ -618,7 +639,8 @@ void Entity::push_weapon(Weapon weapon)
 void Entity::stomp(Tile_Grid *grid)
 {
     if (state == Entity_State::Alive &&
-        alive_state != Alive_State::Stomping && // can't stomp is you are alreading stomping
+        alive_state != Alive_State::Stomping &&   // can't stomp is you are alreading stomping
+        alive_state != Alive_State::Unstomping && // can't stomp is you are alreading stomping
         jump_state == Jump_State::No_Jump &&
         !ground(grid))
     {

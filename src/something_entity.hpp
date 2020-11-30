@@ -24,6 +24,7 @@ enum class Alive_State
     Idle = 0,
     Walking,
     Stomping,
+    Unstomping,
 };
 
 const char *alive_state_as_cstr(Alive_State state);
@@ -82,6 +83,7 @@ struct Entity
     Rubber_Animat poof_animat;
     Rubber_Animat prepare_for_jump_animat;
     Compose_Rubber_Animat<2> jump_animat;
+    Rubber_Animat unstomp_animat;
 
     Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
 
