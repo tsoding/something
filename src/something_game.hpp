@@ -91,6 +91,8 @@ struct Game
     bool does_tile_contain_entity(Vec2i tile_coord);
     void kill_entity(Entity *entity);
     void drop_all_items_of_entity(Entity *entity);
+    void damage_entity(Entity *entity, int amount, Vec2f knockback);
+    void damage_radius(Vec2f pos, float radius);
 
     // Projectiles of the Game
     void spawn_projectile(Projectile projectile);

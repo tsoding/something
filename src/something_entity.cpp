@@ -203,10 +203,10 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
     return result;
 }
 
-void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
+void Entity::update(float dt, Game *game)
 {
-    if (state == Entity_State::Alive && ground(grid)) {
-        particles.current_color = get_particle_color_for_tile(grid, feet());
+    if (state == Entity_State::Alive && ground(&game->grid)) {
+        particles.current_color = get_particle_color_for_tile(&game->grid, feet());
         if (alive_state == Alive_State::Walking) {
             particles.state = Particles::EMITTING;
         } else {
@@ -216,12 +216,12 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
         particles.state = Particles::DISABLED;
     }
 
-    if (state == Entity_State::Alive && ground(grid)) {
+    if (state == Entity_State::Alive && ground(&game->grid)) {
         this->count_jumps = 0;
     }
 
     particles.source = feet();
-    particles.update(dt, grid);
+    particles.update(dt, &game->grid);
 
     switch (state) {
     case Entity_State::Alive: {
@@ -236,8 +236,8 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
                 jump_state = Jump_State::Jump;
                 has_jumped = true;
                 vel.y = ENTITY_GRAVITY * -0.6f;
-                mixer->play_sample(jump_samples[rand() % 2]);
-                if (ground(grid)) {
+                game->mixer.play_sample(jump_samples[rand() % 2]);
+                if (ground(&game->grid)) {
                     for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
                         particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, PARTICLE_JUMP_VEL_HIGH));
                     }
@@ -279,8 +279,8 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
         case Alive_State::Stomping: {
             vel.y += ENTITY_STOMP_ACCEL * dt;
-            if (ground(grid)) {
-                // assert(0 && "TODO: impact");
+            if (ground(&game->grid)) {
+                game->damage_radius(pos, ENTITY_STOMP_RADIUS);
                 alive_state = Alive_State::Idle;
             }
         } break;

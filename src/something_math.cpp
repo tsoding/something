@@ -200,7 +200,8 @@ float length(Vec2<float> a)
 
 Vec2<float> normalize(Vec2<float> a)
 {
-    return a / length(a);
+    const float l = length(a);
+    return l < 1e-6 ? vec2(0.0f, 0.0f) : a / length(a);
 }
 
 template <typename T> T sgn(T val) {

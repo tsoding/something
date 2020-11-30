@@ -250,7 +250,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, &mixer, &grid);
+        entities[i].update(dt, this);
         if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
@@ -274,20 +274,15 @@ void Game::update(float dt)
         {
             auto entity = entities + entity_index;
 
-            if (entity->state != Entity_State::Alive) continue;
-            if (entity_index == projectile->shooter.unwrap) continue;
-
-            if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
-                projectile->kill();
-                entity->lives -= ENTITY_PROJECTILE_DAMAGE;
-
-                mixer.play_sample(OOF_SOUND_INDEX);
-                if (entity->lives <= 0) {
-                    kill_entity(entity);
-                    mixer.play_sample(CRUNCH_SOUND_INDEX);
-                } else {
-                    entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
-                    entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
+            if (entity->state == Entity_State::Alive) {
+                if (entity_index != projectile->shooter.unwrap) {
+                    if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
+                        projectile->kill();
+                        damage_entity(
+                            entity,
+                            ENTITY_PROJECTILE_DAMAGE,
+                            normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK);
+                    }
                 }
             }
         }
@@ -979,5 +974,34 @@ void Game::kill_entity(Entity *entity)
     if (entity->state == Entity_State::Alive) {
         entity->state = Entity_State::Poof;
         drop_all_items_of_entity(entity);
+    }
+}
+
+void Game::damage_entity(Entity *entity, int amount, Vec2f knockback)
+{
+    entity->lives -= amount;
+
+    mixer.play_sample(OOF_SOUND_INDEX);
+    if (entity->lives <= 0) {
+        kill_entity(entity);
+        mixer.play_sample(CRUNCH_SOUND_INDEX);
+    } else {
+        entity->vel += knockback;
+        entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
+    }
+}
+
+void Game::damage_radius(Vec2f center, float radius)
+{
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Alive) {
+            Vec2f dir = entities[i].pos - center;
+            if (sqr_len(dir) <= radius * radius) {
+                damage_entity(
+                    &entities[i],
+                    ENTITY_STOMP_DAMAGE,
+                    normalize(dir) * ENTITY_STOMP_KNOCKBACK);
+            }
+        }
     }
 }
