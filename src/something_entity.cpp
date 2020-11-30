@@ -624,4 +624,4 @@ void Entity::stomp(Tile_Grid *grid)
     }
 }
 
-// TODO: no stomping rubber animation
+// TODO(#318): no stomping rubber animation
