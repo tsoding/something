@@ -120,7 +120,7 @@ struct Entity
     void render(SDL_Renderer *renderer, Camera camera,
                 RGBA shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *font) const;
-    void update(float dt, Game *game);
+    void update(float dt, Game *game, Entity_Index me);
     void point_gun_at(Vec2f target);
     void flash(RGBA color);
     Vec2f feet();

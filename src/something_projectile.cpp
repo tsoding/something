@@ -145,7 +145,6 @@ Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    // TODO(#285): there is nothing rock projectiles can damage for now
     result.kind          = Projectile_Kind::Rock;
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
@@ -161,7 +160,6 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
 {
     Projectile result = {};
-    // TODO(#286): there is nothing ice projectiles can damage for now
     result.kind          = Projectile_Kind::Ice;
     result.tile_damage   = Tile_Damage::None;
     result.state         = Projectile_State::Active;
@@ -174,4 +172,3 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     return result;
 }
 
-// TODO(#287): different kinds of projectiles should have different sounds when they are shot

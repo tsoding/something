@@ -212,7 +212,7 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
     return result;
 }
 
-void Entity::update(float dt, Game *game)
+void Entity::update(float dt, Game *game, Entity_Index me)
 {
     if (state == Entity_State::Alive && ground(&game->grid)) {
         particles.current_color = get_particle_color_for_tile(&game->grid, feet());
@@ -264,7 +264,6 @@ void Entity::update(float dt, Game *game)
 
         switch (alive_state) {
         case Alive_State::Idle: {
-            // TODO(#270): entities should own their own copies of animats
             //
             // Right now we are mutating instance of animats that are inside of Assets.
             // And those could be used by other entities. And they will fight with each other.
@@ -289,8 +288,7 @@ void Entity::update(float dt, Game *game)
         case Alive_State::Stomping: {
             vel.y += ENTITY_STOMP_ACCEL * dt;
             if (ground(&game->grid)) {
-                // TODO(#316): the entity that is stomping should not be damaged
-                game->damage_radius(pos, ENTITY_STOMP_RADIUS);
+                game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
                 unstomp_animat.reset();
                 alive_state = Alive_State::Unstomping;
             }
@@ -399,7 +397,6 @@ Entity player_entity(Vec2f pos)
     entity.gun_dir = vec2(1.0f, 0.0f);
 
     /*
-     * TODO(#265): We should defined the number of max allowed jump in configuration file
      */
     entity.count_jumps = 0;
     entity.max_allowed_jumps = PLAYER_ENTITY_MAX_JUMPS;
@@ -648,4 +645,3 @@ void Entity::stomp(Tile_Grid *grid)
     }
 }
 
-// TODO(#318): no stomping rubber animation

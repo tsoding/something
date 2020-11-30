@@ -233,8 +233,6 @@ int main(int argc, char *argv[])
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.type = Tool_Type::Entity;
     game->debug_toolbar.buttons[DEBUG_TOOLBAR_ICE_GOLEM].tool.entity.entity = ice_golem_entity(vec2(0.0f, 0.0f));
 
-    // TODO(#234): Separate kind of fire projectiles that can destroy ice blocks
-    // TODO(#235): Separate kind of water projectiles that can destroy dirt blocks
 
     // SOUND //////////////////////////////
     SDL_AudioSpec want = {};

@@ -1,6 +1,5 @@
 #include "something_select_popup.hpp"
 
-// TODO(#169): Select_Popup does not handle well out of the screen rendering
 void Select_Popup::render(SDL_Renderer *renderer, Bitmap_Font *font, Vec2f pos)
 {
     pos.y -= SELECT_POPUP_PAD; // To align baseline of first item in Select_Popup to already typed text in console
