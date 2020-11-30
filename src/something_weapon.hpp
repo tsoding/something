@@ -42,4 +42,6 @@ Weapon ice_gun();
 Weapon dirt_block_placer(int amount = 0);
 Weapon ice_block_placer(int amount = 0);
 
+// TODO(#319): no stomping weapon
+
 #endif  // SOMETHING_WEAPON_HPP_

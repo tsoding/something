@@ -1,6 +1,8 @@
 #ifndef SOMETHING_TOOLBAR_HPP_
 #define SOMETHING_TOOLBAR_HPP_
 
+#include "./something_entity.hpp"
+
 enum class Tool_Type
 {
     Item,

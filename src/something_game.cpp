@@ -112,22 +112,27 @@ void Game::handle_event(SDL_Event *event)
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
                     if(entities[PLAYER_ENTITY_INDEX].noclip) {
-                        entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                        entities[PLAYER_ENTITY_INDEX].vel.y =
+                            -entities[PLAYER_ENTITY_INDEX].speed;
                     } else {
                         entity_jump({PLAYER_ENTITY_INDEX});
                     }
                 }
             } break;
 
+            case SDLK_e: {
+                entities[PLAYER_ENTITY_INDEX].stomp(&grid);
+            } break;
+
             case SDLK_w: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = -entities[PLAYER_ENTITY_INDEX].speed;
                 }
             } break;
 
             case SDLK_s: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_SPEED;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = entities[PLAYER_ENTITY_INDEX].speed;
                 }
             } break;
 
@@ -192,6 +197,7 @@ void Game::update(float dt)
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
+    // TODO(#317): enemy AI can't work with stomp move
     auto &player = entities[PLAYER_ENTITY_INDEX];
     Recti *lock = NULL;
     for (size_t i = 0; i < camera_locks_count; ++i) {
@@ -245,7 +251,7 @@ void Game::update(float dt)
 
     // Update All Entities //////////////////////////////
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
-        entities[i].update(dt, &mixer, &grid);
+        entities[i].update(dt, this);
         if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
     }
@@ -269,20 +275,15 @@ void Game::update(float dt)
         {
             auto entity = entities + entity_index;
 
-            if (entity->state != Entity_State::Alive) continue;
-            if (entity_index == projectile->shooter.unwrap) continue;
-
-            if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
-                projectile->kill();
-                entity->lives -= ENTITY_PROJECTILE_DAMAGE;
-
-                mixer.play_sample(OOF_SOUND_INDEX);
-                if (entity->lives <= 0) {
-                    kill_entity(entity);
-                    mixer.play_sample(CRUNCH_SOUND_INDEX);
-                } else {
-                    entity->vel += normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK;
-                    entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
+            if (entity->state == Entity_State::Alive) {
+                if (entity_index != projectile->shooter.unwrap) {
+                    if (rect_contains_vec2(entity->hitbox_world(), projectile->pos)) {
+                        projectile->kill();
+                        damage_entity(
+                            entity,
+                            ENTITY_PROJECTILE_DAMAGE,
+                            normalize(projectile->vel) * ENTITY_PROJECTILE_KNOCKBACK);
+                    }
                 }
             }
         }
@@ -663,13 +664,14 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
         auto hitbox = rectf_for_sdl(camera.to_screen(entities[i].hitbox_world()));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
 
-        entities[i].render_debug(renderer, camera);
+        entities[i].render_debug(renderer, camera, &debug_font);
     }
 
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Active) {
             draw_rect(renderer, camera.to_screen(projectiles[i].hitbox()), RGBA_RED);
         }
+
     }
 
     if (tracking_projectile.has_value) {
@@ -974,5 +976,34 @@ void Game::kill_entity(Entity *entity)
     if (entity->state == Entity_State::Alive) {
         entity->state = Entity_State::Poof;
         drop_all_items_of_entity(entity);
+    }
+}
+
+void Game::damage_entity(Entity *entity, int amount, Vec2f knockback)
+{
+    entity->lives -= amount;
+
+    mixer.play_sample(OOF_SOUND_INDEX);
+    if (entity->lives <= 0) {
+        kill_entity(entity);
+        mixer.play_sample(CRUNCH_SOUND_INDEX);
+    } else {
+        entity->vel += knockback;
+        entity->flash(ENTITY_DAMAGE_FLASH_COLOR);
+    }
+}
+
+void Game::damage_radius(Vec2f center, float radius)
+{
+    for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+        if (entities[i].state == Entity_State::Alive) {
+            Vec2f dir = entities[i].pos - center;
+            if (sqr_len(dir) <= radius * radius) {
+                damage_entity(
+                    &entities[i],
+                    ENTITY_STOMP_DAMAGE,
+                    normalize(dir) * ENTITY_STOMP_KNOCKBACK);
+            }
+        }
     }
 }
