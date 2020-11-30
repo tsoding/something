@@ -36,7 +36,6 @@ typedef SSIZE_T ssize_t;
 
 // READ THIS FIRST ---> https://en.wikipedia.org/wiki/Single_Compilation_Unit
 #ifndef SOMETHING_RELEASE
-// TODO(#173): config autoreloading does not work on Windows
 #  if defined(__linux__)
 #    include "something_fmw_inotify.cpp"
 #  elif defined(__APPLE__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) \
