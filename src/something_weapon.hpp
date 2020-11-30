@@ -20,6 +20,7 @@ enum class Weapon_Type
 {
     Gun,
     Placer,
+    Stomp,
 };
 
 struct Weapon
@@ -41,6 +42,7 @@ Weapon rock_gun();
 Weapon ice_gun();
 Weapon dirt_block_placer(int amount = 0);
 Weapon ice_block_placer(int amount = 0);
+Weapon stomp_move();
 
 // TODO(#319): no stomping weapon
 

@@ -4,6 +4,7 @@
 void Weapon::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
 {
     switch (type) {
+    case Weapon_Type::Stomp:
     case Weapon_Type::Gun: {} break;
     case Weapon_Type::Placer: {
         bool can_place = false;
@@ -40,6 +41,10 @@ void Weapon::shoot(Game *game, Entity_Index shooter)
             placer.amount -= 1;
         }
     } break;
+
+    case Weapon_Type::Stomp: {
+        game->entities[shooter.unwrap].stomp(&game->grid);
+    } break;
     }
 }
 
@@ -54,6 +59,10 @@ Sprite Weapon::icon() const
 
     case Weapon_Type::Placer:
         return tile_defs[placer.tile].top_texture;
+
+    case Weapon_Type::Stomp:
+        assert(DIRT_GOLEM_ANIMAT.count > 0);
+        return DIRT_GOLEM_ANIMAT.sprites[0];
     }
 
     assert(0 && "Unreachable");
@@ -114,5 +123,12 @@ Weapon ice_block_placer(int amount)
     result.type = Weapon_Type::Placer;
     result.placer.tile = TILE_ICE_0;
     result.placer.amount = amount;
+    return result;
+}
+
+Weapon stomp_move()
+{
+    Weapon result = {};
+    result.type = Weapon_Type::Stomp;
     return result;
 }
