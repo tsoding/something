@@ -112,7 +112,8 @@ void Game::handle_event(SDL_Event *event)
             case SDLK_SPACE: {
                 if (!event->key.repeat) {
                     if(entities[PLAYER_ENTITY_INDEX].noclip) {
-                        entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                        entities[PLAYER_ENTITY_INDEX].vel.y =
+                            -entities[PLAYER_ENTITY_INDEX].speed;
                     } else {
                         entity_jump({PLAYER_ENTITY_INDEX});
                     }
@@ -121,13 +122,13 @@ void Game::handle_event(SDL_Event *event)
 
             case SDLK_w: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = -ENTITY_SPEED;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = -entities[PLAYER_ENTITY_INDEX].speed;
                 }
             } break;
 
             case SDLK_s: {
                 if (debug) {
-                    entities[PLAYER_ENTITY_INDEX].vel.y = ENTITY_SPEED;
+                    entities[PLAYER_ENTITY_INDEX].vel.y = entities[PLAYER_ENTITY_INDEX].speed;
                 }
             } break;
 

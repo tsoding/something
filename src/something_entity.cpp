@@ -204,8 +204,8 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             vel.y += ENTITY_GRAVITY * dt;
         }
 
-        const float ENTITY_DECEL = ENTITY_SPEED * ENTITY_DECEL_FACTOR;
-        const float ENTITY_STOP_THRESHOLD = 100.0f;
+        const float ENTITY_DECEL = speed * ENTITY_DECEL_FACTOR;
+        const float ENTITY_STOP_THRESHOLD = speed / 8.0f; //100.0f;
         if (fabs(vel.x) > ENTITY_STOP_THRESHOLD) {
             vel.x -= sgn(vel.x) * ENTITY_DECEL * dt;
         } else {
@@ -253,16 +253,14 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             break;
 
         case Alive_State::Walking:
-            const float ENTITY_ACCEL = ENTITY_SPEED * ENTITY_ACCEL_FACTOR;
+            const float ENTITY_ACCEL = speed * ENTITY_ACCEL_FACTOR;
             switch (walking_direction) {
             case Left: {
-                vel.x = fmax(vel.x - ENTITY_ACCEL * dt,
-                             -ENTITY_SPEED);
+                vel.x = -fmax(vel.x + ENTITY_ACCEL * dt, speed);
             } break;
 
             case Right: {
-                vel.x = fminf(vel.x + ENTITY_ACCEL * dt,
-                              ENTITY_SPEED);
+                vel.x = fminf(vel.x + ENTITY_ACCEL * dt, speed);
             } break;
             }
 
@@ -317,6 +315,7 @@ Entity player_entity(Vec2f pos)
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+    entity.speed = 800.0f;
 
     entity.idle            = frames_animat(PLAYER_ANIMAT_INDEX);
     entity.walking         = frames_animat(PLAYER_ANIMAT_INDEX);
@@ -369,6 +368,7 @@ Entity ice_golem_entity(Vec2f pos)
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+    entity.speed = 800.0f;
 
     entity.idle    = frames_animat(ICE_GOLEM_IDLE_ANIMAT_INDEX);
     entity.walking = frames_animat(ICE_GOLEM_WALKING_ANIMAT_INDEX);
@@ -422,7 +422,7 @@ Entity golem_entity(Vec2f pos)
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
-
+    entity.speed = 400.0f;
 
     entity.idle    = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
     entity.walking = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
@@ -474,6 +474,7 @@ Entity enemy_entity(Vec2f pos)
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
+    entity.speed = 800.0f;
 
     entity.idle            = frames_animat(ENEMY_IDLE_ANIMAT_INDEX);
     entity.walking         = frames_animat(ENEMY_WALKING_ANIMAT_INDEX);

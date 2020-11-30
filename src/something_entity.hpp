@@ -53,6 +53,7 @@ struct Entity
     Rectf hitbox_local;
     Vec2f pos;
     Vec2f vel;
+    float speed;
     float cooldown_weapon;
     Vec2f gun_dir;
     int lives;
