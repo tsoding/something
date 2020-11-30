@@ -197,7 +197,7 @@ void Game::update(float dt)
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
-    // TODO: enemy AI can't work with stomp move
+    // TODO(#317): enemy AI can't work with stomp move
     auto &player = entities[PLAYER_ENTITY_INDEX];
     Recti *lock = NULL;
     for (size_t i = 0; i < camera_locks_count; ++i) {
