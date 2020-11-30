@@ -120,10 +120,6 @@ void Game::handle_event(SDL_Event *event)
                 }
             } break;
 
-            case SDLK_e: {
-                entities[PLAYER_ENTITY_INDEX].stomp(&grid);
-            } break;
-
             case SDLK_w: {
                 if (debug) {
                     entities[PLAYER_ENTITY_INDEX].vel.y = -entities[PLAYER_ENTITY_INDEX].speed;
@@ -472,6 +468,7 @@ void Game::entity_shoot(Entity_Index entity_index)
                 }
             } break;
 
+            case Weapon_Type::Stomp:
             case Weapon_Type::Placer: {
                 weapon->shoot(this, entity_index);
             } break;
@@ -893,6 +890,7 @@ void Game::render_player_hud(SDL_Renderer *renderer)
         player->weapon_slots[i].icon().render(renderer, destrect);
 
         switch (player->weapon_slots[i].type) {
+        case Weapon_Type::Stomp:
         case Weapon_Type::Gun:
             snprintf(label, sizeof(label), "inf");
             break;
