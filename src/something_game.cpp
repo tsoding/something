@@ -197,6 +197,7 @@ void Game::update(float dt)
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
+    // TODO: enemy AI can't work with stomp move
     auto &player = entities[PLAYER_ENTITY_INDEX];
     Recti *lock = NULL;
     for (size_t i = 0; i < camera_locks_count; ++i) {
@@ -670,6 +671,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
         if (projectiles[i].state == Projectile_State::Active) {
             draw_rect(renderer, camera.to_screen(projectiles[i].hitbox()), RGBA_RED);
         }
+
     }
 
     if (tracking_projectile.has_value) {

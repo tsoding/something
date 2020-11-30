@@ -280,6 +280,7 @@ void Entity::update(float dt, Game *game)
         case Alive_State::Stomping: {
             vel.y += ENTITY_STOMP_ACCEL * dt;
             if (ground(&game->grid)) {
+                // TODO: the entity that is stomping should not be damaged
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS);
                 alive_state = Alive_State::Idle;
             }
@@ -622,3 +623,5 @@ void Entity::stomp(Tile_Grid *grid)
         alive_state = Alive_State::Stomping;
     }
 }
+
+// TODO: no stomping rubber animation
