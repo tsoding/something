@@ -22,8 +22,11 @@ enum class Entity_State
 enum class Alive_State
 {
     Idle = 0,
-    Walking
+    Walking,
+    Stomping,
 };
+
+const char *alive_state_as_cstr(Alive_State state);
 
 const size_t JUMP_SAMPLES_CAPACITY = 2;
 
@@ -107,15 +110,17 @@ struct Entity
         return hitbox;
     }
 
-    void render(SDL_Renderer *renderer, Camera camera,
-                RGBA shade = {0, 0, 0, 0}) const;
-    void render_debug(SDL_Renderer *renderer, Camera camera) const;
-    void update(float dt, Sample_Mixer *mixer, Tile_Grid *grid);
-    void point_gun_at(Vec2f target);
     void jump();
-    void flash(RGBA color);
     void move(Direction direction);
     void stop();
+    void stomp(Tile_Grid *grid);
+
+    void render(SDL_Renderer *renderer, Camera camera,
+                RGBA shade = {0, 0, 0, 0}) const;
+    void render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *font) const;
+    void update(float dt, Sample_Mixer *mixer, Tile_Grid *grid);
+    void point_gun_at(Vec2f target);
+    void flash(RGBA color);
     Vec2f feet();
     bool ground(Tile_Grid *grid);
     Weapon *get_current_weapon();

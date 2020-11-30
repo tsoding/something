@@ -120,6 +120,10 @@ void Game::handle_event(SDL_Event *event)
                 }
             } break;
 
+            case SDLK_e: {
+                entities[PLAYER_ENTITY_INDEX].stomp(&grid);
+            } break;
+
             case SDLK_w: {
                 if (debug) {
                     entities[PLAYER_ENTITY_INDEX].vel.y = -entities[PLAYER_ENTITY_INDEX].speed;
@@ -664,7 +668,7 @@ void Game::render_debug_overlay(SDL_Renderer *renderer, size_t fps)
         auto hitbox = rectf_for_sdl(camera.to_screen(entities[i].hitbox_world()));
         sec(SDL_RenderDrawRect(renderer, &hitbox));
 
-        entities[i].render_debug(renderer, camera);
+        entities[i].render_debug(renderer, camera, &debug_font);
     }
 
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {

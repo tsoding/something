@@ -1,6 +1,16 @@
 #include "./something_print.hpp"
 #include "./something_entity.hpp"
 
+const char *alive_state_as_cstr(Alive_State state)
+{
+    switch (state) {
+    case Alive_State::Idle:     return "Idle";
+    case Alive_State::Walking:  return "Walking";
+    case Alive_State::Stomping: return "Stomping";
+    }
+    assert(0 && "unreachable");
+}
+
 void Entity::push_item(Item item, size_t count)
 {
     assert(items_count < ITEMS_CAPACITY);
@@ -101,6 +111,12 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 renderer, camera.to_screen(texbox), flip,
                 mix_colors(shade, effective_flash_color));
         } break;
+
+        case Alive_State::Stomping: {
+            idle.render(
+                renderer, camera.to_screen(texbox), flip,
+                mix_colors(shade, effective_flash_color));
+        } break;
         }
 
         // Render the gun
@@ -126,9 +142,10 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
     }
 }
 
-void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
+void Entity::render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *font) const
 {
     if (state == Entity_State::Alive) {
+        // Collision mesh
         const float step_x = hitbox_local.w / (float) ENTITY_MESH_COLS;
         const float step_y = hitbox_local.h / (float) ENTITY_MESH_ROWS;
 
@@ -149,6 +166,16 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera) const
                 sec(SDL_RenderFillRect(renderer, &rect));
             }
         }
+
+        // Alive state
+        auto tbw = texbox_world();
+
+        font->render(
+            renderer,
+            camera.to_screen(vec2(tbw.x, tbw.y + tbw.h)),
+            {FONT_DEBUG_SIZE, FONT_DEBUG_SIZE},
+            FONT_DEBUG_COLOR,
+            alive_state_as_cstr(alive_state));
     }
 }
 
@@ -190,7 +217,7 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
     }
 
     if (state == Entity_State::Alive && ground(grid)) {
-      this->count_jumps = 0;
+        this->count_jumps = 0;
     }
 
     particles.source = feet();
@@ -198,23 +225,6 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
 
     switch (state) {
     case Entity_State::Alive: {
-        flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
-
-        if (!noclip) {
-            vel.y += ENTITY_GRAVITY * dt;
-        }
-
-        const float ENTITY_DECEL = speed * ENTITY_DECEL_FACTOR;
-        const float ENTITY_STOP_THRESHOLD = speed / 8.0f; //100.0f;
-        if (fabs(vel.x) > ENTITY_STOP_THRESHOLD) {
-            vel.x -= sgn(vel.x) * ENTITY_DECEL * dt;
-        } else {
-            vel.x = 0.0f;
-        }
-
-        pos += vel * dt;
-        cooldown_weapon -= dt;
-
         switch (jump_state) {
         case Jump_State::No_Jump:
             break;
@@ -244,15 +254,15 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
         }
 
         switch (alive_state) {
-        case Alive_State::Idle:
+        case Alive_State::Idle: {
             // TODO(#270): entities should own their own copies of animats
             //
             // Right now we are mutating instance of animats that are inside of Assets.
             // And those could be used by other entities. And they will fight with each other.
             idle.update(dt);
-            break;
+        } break;
 
-        case Alive_State::Walking:
+        case Alive_State::Walking: {
             const float ENTITY_ACCEL = speed * ENTITY_ACCEL_FACTOR;
             switch (walking_direction) {
             case Left: {
@@ -265,8 +275,33 @@ void Entity::update(float dt, Sample_Mixer *mixer, Tile_Grid *grid)
             }
 
             walking.update(dt);
-            break;
+        } break;
+
+        case Alive_State::Stomping: {
+            vel.y += ENTITY_STOMP_ACCEL * dt;
+            if (ground(grid)) {
+                // assert(0 && "TODO: impact");
+                alive_state = Alive_State::Idle;
+            }
+        } break;
         }
+
+        flash_alpha = fmax(0.0f, flash_alpha - ENTITY_FLASH_ALPHA_DECAY * dt);
+
+        if (!noclip) {
+            vel.y += ENTITY_GRAVITY * dt;
+        }
+
+        const float ENTITY_DECEL = speed * ENTITY_DECEL_FACTOR;
+        const float ENTITY_STOP_THRESHOLD = speed / 8.0f;
+        if (fabs(vel.x) > ENTITY_STOP_THRESHOLD) {
+            vel.x -= sgn(vel.x) * ENTITY_DECEL * dt;
+        } else {
+            vel.x = 0.0f;
+        }
+
+        pos += vel * dt;
+        cooldown_weapon -= dt;
     } break;
 
     case Entity_State::Poof: {
@@ -287,14 +322,29 @@ void Entity::point_gun_at(Vec2f target)
 
 void Entity::jump()
 {
-    if (state == Entity_State::Alive && this->count_jumps < this->max_allowed_jumps) {
-        this->count_jumps++;
+    switch (state) {
+    case Entity_State::Alive: {
+        switch (alive_state) {
+        case Alive_State::Idle:
+        case Alive_State::Walking: {
+            if (this->count_jumps < this->max_allowed_jumps) {
+                this->count_jumps++;
 
-        if (jump_state == Jump_State::No_Jump) {
-            prepare_for_jump_animat.reset();
-            jump_state = Jump_State::Prepare;
+                if (jump_state == Jump_State::No_Jump) {
+                    prepare_for_jump_animat.reset();
+                    jump_state = Jump_State::Prepare;
+                }
+            }
+        } break;
+
+        case Alive_State::Stomping: {} break;
         }
+    } break;
+
+    case Entity_State::Poof:
+    case Entity_State::Ded: {} break;
     }
+
 }
 
 Entity player_entity(Vec2f pos)
@@ -521,13 +571,17 @@ void Entity::flash(RGBA color)
 
 void Entity::move(Direction direction)
 {
-    alive_state = Alive_State::Walking;
-    walking_direction = direction;
+    if (alive_state != Alive_State::Stomping) {
+        alive_state = Alive_State::Walking;
+        walking_direction = direction;
+    }
 }
 
 void Entity::stop()
 {
-    alive_state = Alive_State::Idle;
+    if (alive_state != Alive_State::Stomping) {
+        alive_state = Alive_State::Idle;
+    }
 }
 
 Vec2f Entity::feet()
@@ -556,4 +610,15 @@ void Entity::push_weapon(Weapon weapon)
 {
     assert(weapon_slots_count < WEAPON_SLOTS_CAPACITY);
     weapon_slots[weapon_slots_count++] = weapon;
+}
+
+void Entity::stomp(Tile_Grid *grid)
+{
+    if (state == Entity_State::Alive &&
+        alive_state != Alive_State::Stomping && // can't stomp is you are alreading stomping
+        jump_state == Jump_State::No_Jump &&
+        !ground(grid))
+    {
+        alive_state = Alive_State::Stomping;
+    }
 }
