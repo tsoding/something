@@ -289,7 +289,6 @@ void Entity::update(float dt, Game *game, Entity_Index me)
         case Alive_State::Stomping: {
             vel.y += ENTITY_STOMP_ACCEL * dt;
             if (ground(&game->grid)) {
-                // TODO(#316): the entity that is stomping should not be damaged
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
                 unstomp_animat.reset();
                 alive_state = Alive_State::Unstomping;
