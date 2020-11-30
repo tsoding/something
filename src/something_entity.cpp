@@ -264,7 +264,6 @@ void Entity::update(float dt, Game *game, Entity_Index me)
 
         switch (alive_state) {
         case Alive_State::Idle: {
-            // TODO(#270): entities should own their own copies of animats
             //
             // Right now we are mutating instance of animats that are inside of Assets.
             // And those could be used by other entities. And they will fight with each other.
