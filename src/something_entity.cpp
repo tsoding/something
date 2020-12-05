@@ -428,6 +428,8 @@ Entity player_entity(Vec2f pos)
 
 Entity ice_golem_entity(Vec2f pos)
 {
+    // TODO: ice golem don't have any brain
+
     Entity entity = {};
 
     entity.push_weapon(ice_gun());
@@ -487,6 +489,8 @@ Entity golem_entity(Vec2f pos)
     entity.push_weapon(rock_gun());
     entity.push_item(make_dirt_block_item());
 
+    entity.brain = stomper_brain();
+
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
     entity.hitbox_local.w = ENEMY_HITBOX_W + 32.0f;
@@ -495,7 +499,7 @@ Entity golem_entity(Vec2f pos)
     entity.texbox_local.y = entity.texbox_local.h * -0.5f;
     entity.hitbox_local.x = entity.hitbox_local.w * -0.5f;
     entity.hitbox_local.y = entity.hitbox_local.h * -0.5f;
-    entity.speed = 400.0f;
+    entity.speed = 800.0f;
 
     entity.idle    = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
     entity.walking = frames_animat(DIRT_GOLEM_ANIMAT_INDEX);
