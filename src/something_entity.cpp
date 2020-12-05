@@ -539,6 +539,8 @@ Entity enemy_entity(Vec2f pos)
 
     entity.push_weapon(water_gun());
 
+    entity.brain = shooter_brain();
+
     entity.texbox_local.w = ENEMY_TEXBOX_W;
     entity.texbox_local.h = ENEMY_TEXBOX_H;
     entity.hitbox_local.w = ENEMY_HITBOX_W;

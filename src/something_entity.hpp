@@ -4,6 +4,7 @@
 #include "./something_particles.hpp"
 #include "./something_weapon.hpp"
 #include "./something_item.hpp"
+#include "./something_brain.hpp"
 
 enum class Jump_State
 {
@@ -91,6 +92,8 @@ struct Entity
     int max_allowed_jumps;
 
     Particles particles;
+
+    Brain brain;
 
     inline Rectf texbox_world() const
     {
