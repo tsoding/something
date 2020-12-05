@@ -193,7 +193,6 @@ void Game::update(float dt)
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
     // Enemy AI //////////////////////////////
-    // TODO(#317): enemy AI can't work with stomp move
     auto &player = entities[PLAYER_ENTITY_INDEX];
     Recti *lock = NULL;
     for (size_t i = 0; i < camera_locks_count; ++i) {
@@ -214,31 +213,8 @@ void Game::update(float dt)
             auto &enemy =  entities[i];
             if (enemy.state == Entity_State::Alive) {
                 if (rect_contains_vec2(lock_abs, enemy.pos)) {
-                    if (grid.a_sees_b(enemy.pos, player.pos)) {
-                        enemy.stop();
-                        enemy.point_gun_at(player.pos);
-                        entity_shoot({i});
-                    } else {
-                        auto enemy_tile = grid.abs_to_tile_coord(enemy.pos);
-                        auto next = grid.next_in_bfs(enemy_tile, lock);
-                        if (next.has_value) {
-                            auto d = next.unwrap - enemy_tile;
-
-                            if (d.y < 0) {
-                                enemy.jump();
-                            }
-                            if (d.x > 0) {
-                                enemy.move(Entity::Right);
-                            }
-                            if (d.x < 0) {
-                                enemy.move(Entity::Left);
-                            }
-                            if (d.x == 0) {
-                                enemy.stop();
-                            }
-                        } else {
-                            enemy.stop();
-                        }
+                    if (enemy.brain.think) {
+                        enemy.brain.think(this, {i}, lock);
                     }
                 }
             }
