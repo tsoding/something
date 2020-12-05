@@ -373,6 +373,12 @@ void Game::update(float dt)
                 camera.vel += (rect_center(lock_abs) - camera.pos) * CENTER_CAMERA_FORCE;
             }
         }
+
+        if (camera_shaking_timeout > 0.0f) {
+            auto random_shaking_vector = polar(CAMERA_SHAKING_INTENSITY, rand_float_range(0.0f, 2.0f * PI));
+            camera.vel += random_shaking_vector;
+            camera_shaking_timeout -= dt;
+        }
     }
 
     camera.update(dt);
@@ -1004,4 +1010,9 @@ void Game::damage_radius(Vec2f center, float radius, Entity_Index stomper)
             }
         }
     }
+}
+
+void Game::shake_camera(float duration)
+{
+    camera_shaking_timeout = duration;
 }

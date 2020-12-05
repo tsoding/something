@@ -289,6 +289,8 @@ void Entity::update(float dt, Game *game, Entity_Index me)
             vel.y += ENTITY_STOMP_ACCEL * dt;
             if (ground(&game->grid)) {
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
+                game->shake_camera(CAMERA_SHAKING_DURATION);
+                game->mixer.play_sample(STOMP_SOUND_INDEX);
                 unstomp_animat.reset();
                 alive_state = Alive_State::Unstomping;
             }
@@ -644,4 +646,3 @@ void Entity::stomp(Tile_Grid *grid)
         alive_state = Alive_State::Stomping;
     }
 }
-

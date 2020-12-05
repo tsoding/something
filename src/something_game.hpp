@@ -66,10 +66,13 @@ struct Game
 
     Recti camera_locks[CAMERA_LOCKS_CAPACITY];
     size_t camera_locks_count;
+    float camera_shaking_timeout;
 
     Background background;
 
+    // Camera utilities
     void add_camera_lock(Recti rect);
+    void shake_camera(float duration);
 
     // Whole Game State
     void update(float dt);
