@@ -60,3 +60,17 @@ void stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
         }
     }
 }
+
+void shooter_stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
+{
+    const float STOMPER_DISTANCE_THRESHOLD = 600.0;
+    auto &entity = game->entities[entity_index.unwrap];
+    auto &player = game->entities[PLAYER_ENTITY_INDEX];
+    if (entity.state == Entity_State::Alive) {
+        if (sqr_dist(entity.pos, player.pos) <= STOMPER_DISTANCE_THRESHOLD * STOMPER_DISTANCE_THRESHOLD) {
+            stomper_think(game, entity_index, lock);
+        } else {
+            shooter_think(game, entity_index, lock);
+        }
+    }
+}

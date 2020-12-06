@@ -434,7 +434,7 @@ Entity ice_golem_entity(Vec2f pos)
 
     entity.push_weapon(ice_gun());
     entity.push_item(make_ice_block_item());
-    entity.brain = follower_brain();
+    entity.brain = shooter_stomper_brain();
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
@@ -490,7 +490,7 @@ Entity golem_entity(Vec2f pos)
     entity.push_weapon(rock_gun());
     entity.push_item(make_dirt_block_item());
 
-    entity.brain = stomper_brain();
+    entity.brain = shooter_stomper_brain();
 
     entity.texbox_local.w = ENEMY_TEXBOX_W + 32.0f;
     entity.texbox_local.h = ENEMY_TEXBOX_H + 32.0f;
