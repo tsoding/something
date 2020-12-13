@@ -24,7 +24,7 @@ void Spike::render(SDL_Renderer *renderer, Camera camera)
             rectf_for_sdl(rect(vec2(0.0f, 0.0f), (float) texture_w, effective_h));
         const auto dest_rect =
             rectf_for_sdl(rect(camera.to_screen(pos - vec2((float) texture_w * 0.5f, effective_h * scale)), (float) texture_w * scale, effective_h * scale));
-        sec(SDL_SetTextureAlphaMod(texture, (int) floorf(a * 255.0f)));
+        sec(SDL_SetTextureAlphaMod(texture, (Uint8) floorf(a * 255.0f)));
         sec(SDL_RenderCopy(renderer, texture, &src_rect, &dest_rect));
     } break;
 
