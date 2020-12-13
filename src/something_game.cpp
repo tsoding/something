@@ -192,6 +192,10 @@ void Game::update(float dt)
 {
     entities[PLAYER_ENTITY_INDEX].point_gun_at(mouse_position);
 
+    for (size_t i = 0; i < SPIKES_COUNT; ++i) {
+        spikes[i].update(dt);
+    }
+
     // Enemy AI //////////////////////////////
     auto &player = entities[PLAYER_ENTITY_INDEX];
     Recti *lock = NULL;
@@ -377,6 +381,10 @@ void Game::render(SDL_Renderer *renderer)
     }
 
     background.render(renderer, camera);
+
+    for (size_t i = 0; i < SPIKES_COUNT; ++i) {
+        spikes[i].render(renderer, camera);
+    }
 
     if (bfs_debug && lock) {
         grid.render_debug_bfs_overlay(
@@ -991,4 +999,15 @@ void Game::damage_radius(Vec2f center, float radius, Entity_Index stomper)
 void Game::shake_camera(float duration)
 {
     camera_shaking_timeout = duration;
+}
+
+void Game::spawn_spike(Spike spike)
+{
+    for (size_t i = 0; i < SPIKES_COUNT; ++i) {
+        if (spikes[i].state == Spike_State::Ded) {
+            spikes[i] = spike;
+            spikes[i].activate();
+            return;
+        }
+    }
 }
