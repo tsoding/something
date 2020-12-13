@@ -2,6 +2,31 @@
 #include "./something_brain.hpp"
 #include "./something_entity.hpp"
 
+void follower_think(Game *game, Entity_Index entity_index, Recti *lock)
+{
+    auto &entity = game->entities[entity_index.unwrap];
+    auto entity_tile = game->grid.abs_to_tile_coord(entity.pos);
+    auto next = game->grid.next_in_bfs(entity_tile, lock);
+    if (next.has_value) {
+        auto d = next.unwrap - entity_tile;
+
+        if (d.y < 0) {
+            entity.jump();
+        }
+        if (d.x > 0) {
+            entity.move(Entity::Right);
+        }
+        if (d.x < 0) {
+            entity.move(Entity::Left);
+        }
+        if (d.x == 0) {
+            entity.stop();
+        }
+    } else {
+        entity.stop();
+    }
+}
+
 void shooter_think(Game *game, Entity_Index entity_index, Recti *lock)
 {
     auto &entity = game->entities[entity_index.unwrap];
@@ -13,26 +38,7 @@ void shooter_think(Game *game, Entity_Index entity_index, Recti *lock)
             entity.point_gun_at(player.pos);
             game->entity_shoot(entity_index);
         } else {
-            auto entity_tile = game->grid.abs_to_tile_coord(entity.pos);
-            auto next = game->grid.next_in_bfs(entity_tile, lock);
-            if (next.has_value) {
-                auto d = next.unwrap - entity_tile;
-
-                if (d.y < 0) {
-                    entity.jump();
-                }
-                if (d.x > 0) {
-                    entity.move(Entity::Right);
-                }
-                if (d.x < 0) {
-                    entity.move(Entity::Left);
-                }
-                if (d.x == 0) {
-                    entity.stop();
-                }
-            } else {
-                entity.stop();
-            }
+            follower_think(game, entity_index, lock);
         }
     }
 }
@@ -50,26 +56,21 @@ void stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
                 entity.jump();
             }
         } else {
-            auto entity_tile = game->grid.abs_to_tile_coord(entity.pos);
-            auto next = game->grid.next_in_bfs(entity_tile, lock);
-            if (next.has_value) {
-                auto d = next.unwrap - entity_tile;
+            follower_think(game, entity_index, lock);
+        }
+    }
+}
 
-                if (d.y < 0) {
-                    entity.jump();
-                }
-                if (d.x > 0) {
-                    entity.move(Entity::Right);
-                }
-                if (d.x < 0) {
-                    entity.move(Entity::Left);
-                }
-                if (d.x == 0) {
-                    entity.stop();
-                }
-            } else {
-                entity.stop();
-            }
+void shooter_stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
+{
+    const float STOMPER_DISTANCE_THRESHOLD = 600.0;
+    auto &entity = game->entities[entity_index.unwrap];
+    auto &player = game->entities[PLAYER_ENTITY_INDEX];
+    if (entity.state == Entity_State::Alive) {
+        if (sqr_dist(entity.pos, player.pos) <= STOMPER_DISTANCE_THRESHOLD * STOMPER_DISTANCE_THRESHOLD) {
+            stomper_think(game, entity_index, lock);
+        } else {
+            shooter_think(game, entity_index, lock);
         }
     }
 }
