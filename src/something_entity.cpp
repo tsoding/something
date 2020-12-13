@@ -429,7 +429,7 @@ Entity player_entity(Vec2f pos)
 
 Entity ice_golem_entity(Vec2f pos)
 {
-    // TODO: ice golem don't have any brain
+    // TODO(#328): ice golem don't have any brain
 
     Entity entity = {};
 
