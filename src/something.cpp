@@ -77,3 +77,4 @@ typedef SSIZE_T ssize_t;
 #include "something_weapon.cpp"
 #include "something_assets.cpp"
 #include "something_brain.cpp"
+#include "something_spike.cpp"

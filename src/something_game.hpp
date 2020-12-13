@@ -6,6 +6,7 @@
 #include "something_texture.hpp"
 #include "something_background.hpp"
 #include "something_projectile.hpp"
+#include "something_spike.hpp"
 
 enum Debug_Toolbar_Button
 {
@@ -27,6 +28,7 @@ const size_t PLAYER_ENTITY_INDEX = 0;
 const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
+const size_t SPIKES_COUNT = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
 const size_t FPS_BARS_COUNT = 256;
@@ -59,6 +61,7 @@ struct Game
 
     Entity entities[ENTITIES_COUNT];
     Projectile projectiles[PROJECTILES_COUNT];
+    Spike spikes[SPIKES_COUNT];
 
     Item items[ITEMS_COUNT];
 
@@ -96,6 +99,9 @@ struct Game
     void drop_all_items_of_entity(Entity *entity);
     void damage_entity(Entity *entity, int amount, Vec2f knockback);
     void damage_radius(Vec2f center, float radius, Entity_Index stomper);
+
+    // Spike
+    void spawn_spike(Spike spike);
 
     // Projectiles of the Game
     void spawn_projectile(Projectile projectile);
