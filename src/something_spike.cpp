@@ -72,3 +72,5 @@ Spike ice_spike(Vec2f pos)
     spike.scale = 2.0f;
     return spike;
 }
+
+// TODO: there is no weapon that uses the spikes mechanics
