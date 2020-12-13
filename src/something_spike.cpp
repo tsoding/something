@@ -73,4 +73,4 @@ Spike ice_spike(Vec2f pos)
     return spike;
 }
 
-// TODO: there is no weapon that uses the spikes mechanics
+// TODO(#329): there is no weapon that uses the spikes mechanics
