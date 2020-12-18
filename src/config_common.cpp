@@ -42,6 +42,7 @@ union Config_Value
     int int_value;
     RGBA color_value;
     String_View string_value;
+    bool initialized{};
 };
 
 Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
@@ -107,6 +108,11 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
     }
 
     auto other_var_type = config_types[other_index];
+    if (!config_values[other_index].initialized) {
+        //TODO: replace with `aids::panic()`, when aids is upgraded to >=0.22.0
+        println(stderr, "Trying to access value, which is not yet parsed. Aborting...");
+        exit(1);
+    }
     auto other_var_type_name = config_name_by_type(other_var_type);
 
     if (expected_type != other_var_type) {
@@ -172,8 +178,10 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].color_value = config_values[other_variable_index].color_value;
+                config_values[index].initialized = true;
             } else {
                 config_values[index].color_value = x.unwrap;
+                config_values[index].initialized = true;
             }
         } break;
 
@@ -196,8 +204,10 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].int_value = config_values[other_variable_index].int_value;
+                config_values[index].initialized = true;
             } else {
                 config_values[index].int_value = x.unwrap;
+                config_values[index].initialized = true;
             }
         } break;
 
@@ -220,8 +230,10 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].float_value = config_values[other_variable_index].float_value;
+                config_values[index].initialized = true;
             } else {
                 config_values[index].float_value = x.unwrap;
+                config_values[index].initialized = true;
             }
         } break;
 
@@ -244,8 +256,10 @@ Config_Parse_Result parse_config_text(String_View input)
                 }
 
                 config_values[index].string_value = config_values[other_variable_index].string_value;
+                config_values[index].initialized = true;
             } else {
                 config_values[index].string_value = x.unwrap;
+                config_values[index].initialized = true;
             }
         } break;
 
