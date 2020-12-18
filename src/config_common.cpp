@@ -42,7 +42,6 @@ union Config_Value
     int int_value;
     RGBA color_value;
     String_View string_value;
-    bool initialized{};
 };
 
 Config_Value config_values[CONFIG_VAR_CAPACITY] = {};
@@ -108,11 +107,6 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
     }
 
     auto other_var_type = config_types[other_index];
-    if (!config_values[other_index].initialized) {
-        //TODO: replace with `aids::panic()`, when aids is upgraded to >=0.22.0
-        println(stderr, "Trying to access value, which is not yet parsed. Aborting...");
-        exit(1);
-    }
     auto other_var_type_name = config_name_by_type(other_var_type);
 
     if (expected_type != other_var_type) {
@@ -129,6 +123,13 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
     return parse_success();
 }
 
+struct Dependency {
+    ssize_t index{};
+    ssize_t other_variable_index{};
+};
+
+Dynamic_Array<Dependency> deps{};
+
 // TODO(#216): get rid of duplicate code in parse_config_text by trying to parse the value as the variable first
 // That will require somehow distinguishing the variable names and the color values.
 // The easiest way to do that is to introduce a prefix for color values. Usually it is `#`. For example `#69696969`.
@@ -136,7 +137,20 @@ Config_Parse_Result parse_other_variable_compatibility(String_View name, ssize_t
 // current `config.var`.
 Config_Parse_Result parse_config_text(String_View input)
 {
-    return parse_vars_conf(input, [](auto line_number, auto name, auto type, String_View value) {
+    auto make_dependency = [](Dependency dep) {
+        deps.push(dep);
+    };
+
+    // TODO: `resolve_dependency` resolves only one level
+    auto resolve_dependency = [](const ssize_t index) {
+        for (size_t i{}; i<deps.size; ++i) {
+            if (index == deps.data[i].other_variable_index) {
+                config_values[deps.data[i].index] = config_values[index];
+            }
+        }
+    };
+
+    return parse_vars_conf(input, [&](auto line_number, auto name, auto type, String_View value) {
         auto index = config_index_by_name(name);
         if (index < 0) {
             snprintf(config_error_buffer, CONFIG_ERROR_CAPACITY,
@@ -177,12 +191,15 @@ Config_Parse_Result parse_config_text(String_View input)
                     return other_variable_result;
                 }
 
-                config_values[index].color_value = config_values[other_variable_index].color_value;
-                config_values[index].initialized = true;
+                if (other_variable_index > index) {
+                    make_dependency(Dependency{index, other_variable_index});
+                } else {
+                    config_values[index].color_value = config_values[other_variable_index].color_value;
+                }
             } else {
                 config_values[index].color_value = x.unwrap;
-                config_values[index].initialized = true;
             }
+            resolve_dependency(index);
         } break;
 
         case CONFIG_TYPE_INT: {
@@ -203,12 +220,15 @@ Config_Parse_Result parse_config_text(String_View input)
                     return other_variable_result;
                 }
 
-                config_values[index].int_value = config_values[other_variable_index].int_value;
-                config_values[index].initialized = true;
+                if (other_variable_index > index) {
+                    make_dependency(Dependency{index, other_variable_index});
+                } else {
+                    config_values[index].int_value = config_values[other_variable_index].int_value;
+                }
             } else {
                 config_values[index].int_value = x.unwrap;
-                config_values[index].initialized = true;
             }
+            resolve_dependency(index);
         } break;
 
         case CONFIG_TYPE_FLOAT: {
@@ -229,12 +249,15 @@ Config_Parse_Result parse_config_text(String_View input)
                     return other_variable_result;
                 }
 
-                config_values[index].float_value = config_values[other_variable_index].float_value;
-                config_values[index].initialized = true;
+                if (other_variable_index > index) {
+                    make_dependency(Dependency{index, other_variable_index});
+                } else {
+                    config_values[index].float_value = config_values[other_variable_index].float_value;
+                }
             } else {
                 config_values[index].float_value = x.unwrap;
-                config_values[index].initialized = true;
             }
+            resolve_dependency(index);
         } break;
 
         case CONFIG_TYPE_STRING: {
@@ -255,12 +278,15 @@ Config_Parse_Result parse_config_text(String_View input)
                     return other_variable_result;
                 }
 
-                config_values[index].string_value = config_values[other_variable_index].string_value;
-                config_values[index].initialized = true;
+                if (other_variable_index > index) {
+                    make_dependency(Dependency{index, other_variable_index});
+                } else {
+                    config_values[index].string_value = config_values[other_variable_index].string_value;
+                }
             } else {
                 config_values[index].string_value = x.unwrap;
-                config_values[index].initialized = true;
             }
+            resolve_dependency(index);
         } break;
 
         case CONFIG_TYPE_UNKNOWN: {
