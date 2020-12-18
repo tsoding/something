@@ -142,6 +142,7 @@ Config_Parse_Result parse_config_text(String_View input)
     };
 
     // TODO: `resolve_dependency` resolves only one level
+    // grep for @only_one_dependency_level_is_resolved is `assets/vars.conf` to see example
     auto resolve_dependency = [](const ssize_t index) {
         for (size_t i{}; i<deps.size; ++i) {
             if (index == deps.data[i].other_variable_index) {
