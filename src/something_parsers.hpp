@@ -1,5 +1,5 @@
-#ifndef SEPARATE_FILE_HPP_
-#define SEPARATE_FILE_HPP_
+#ifndef SOMETHING_PARSERS_HPP_
+#define SOMETHING_PARSERS_HPP_
 
 struct Config_Parse_Result
 {
@@ -51,4 +51,4 @@ Config_Parse_Result parse_vars_conf(String_View input, F f)
 
 // TODO(#290): add animat files parser to something_parsers.hpp
 
-#endif  // SEPARATE_FILE_HPP_
+#endif  // SOMETHING_PARSERS_HPP_
