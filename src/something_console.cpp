@@ -190,17 +190,16 @@ void Console::History::push(String_View entry)
         entry.count = CONSOLE_COLUMNS;
     }
 
-    const size_t j = (begin + count) % CONSOLE_HISTORY_CAPACITY;
+    const size_t j = end % CONSOLE_HISTORY_CAPACITY;
     memcpy(&entries[j], entry.data, entry.count);
     entry_sizes[j] = entry.count;
 
+    end += 1;
     if (count < CONSOLE_HISTORY_CAPACITY) {
         count += 1;
-    } else {
-        begin = (begin + 1) % CONSOLE_HISTORY_CAPACITY;
     }
 
-    cursor = begin;
+    cursor = 0;
 }
 
 void Console::History::up()
@@ -220,7 +219,7 @@ void Console::History::down()
 int Console::History::current()
 {
     if ((count - cursor) > 0) {
-        return mod(begin + count - 1 - cursor, CONSOLE_HISTORY_CAPACITY);
+        return mod(end - 1 - cursor, CONSOLE_HISTORY_CAPACITY);
     } else {
         return -1;
     }
