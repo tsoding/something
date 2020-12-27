@@ -35,5 +35,4 @@ $ something.debug
 ## Mininum System Requirements / Dependencies
 
 - libsdl2-dev (>= 2.0.5)
-- libpng16-dev
 - g++ (>= 7.5)
