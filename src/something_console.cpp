@@ -160,17 +160,11 @@ void Console::handle_event(SDL_Event *event, Game *game)
             } else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_SPACE && event->key.keysym.mod & KMOD_LCTRL) {
                 start_autocompletion();
             } else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_UP) {
-                const auto j = history.current();
-                if (j >= 0) {
-                    edit_field.copy_from_string_view(String_View {history.entry_sizes[j], history.entries[j]});
-                }
                 history.up();
+                edit_field.copy_from_string_view(history.current());
             } else if (event->type == SDL_KEYDOWN && event->key.keysym.sym == SDLK_DOWN) {
-                const auto j = history.current();
-                if (j >= 0) {
-                    edit_field.copy_from_string_view(String_View {history.entry_sizes[j], history.entries[j]});
-                }
                 history.down();
+                edit_field.copy_from_string_view(history.current());
             } else if (event->type == SDL_MOUSEWHEEL ) {
                 if (event->wheel.y > 0) {
                     scroll += 1;
@@ -216,11 +210,12 @@ void Console::History::down()
     }
 }
 
-int Console::History::current()
+String_View Console::History::current()
 {
-    if ((count - cursor) > 0) {
-        return mod(end - 1 - cursor, CONSOLE_HISTORY_CAPACITY);
+    if (cursor == 0) {
+        return ""_sv;
     } else {
-        return -1;
+        auto index = mod(end - cursor, CONSOLE_HISTORY_CAPACITY);
+        return String_View {entry_sizes[index], entries[index]};
     }
 }
