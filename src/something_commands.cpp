@@ -186,9 +186,12 @@ void sprint1(String_Buffer *buffer, Vec2<T> v)
 void command_inspect_entity(Game *game, String_View args)
 {
     auto arg = args.chop_word();
-    auto entity_index = arg.as_integer<size_t>();
+    auto entity_index = arg.as_integer<long int>();
 
-    if (entity_index.has_value && entity_index.unwrap < ENTITIES_COUNT) {
+    if (entity_index.has_value &&
+        0 <= entity_index.unwrap &&
+        entity_index.unwrap < static_cast<long int>(ENTITIES_COUNT))
+    {
         auto &entity = game->entities[entity_index.unwrap];
         game->console.println("Entity #", entity_index.unwrap);
         game->console.println("  State:    ", entity.state);
