@@ -291,7 +291,9 @@ void Entity::update(float dt, Game *game, Entity_Index me)
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
                 game->shake_camera(CAMERA_SHAKING_DURATION);
                 game->mixer.play_sample(STOMP_SOUND_INDEX);
-                game->spawn_spike(ice_spike(feet()));
+                game->spike_wave.activate(
+                    feet(),
+                    normalize(gun_dir * vec2(1.0f, 0.0f)) * SPIKE_WAVE_STEP);
                 unstomp_animat.reset();
                 alive_state = Alive_State::Unstomping;
             }

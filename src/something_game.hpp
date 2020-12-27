@@ -73,6 +73,10 @@ struct Game
 
     Background background;
 
+    // TODO: game supports only one spike wave
+    //   We should implement a pool of them like entities, projectiles, spikes, etc.
+    Spike_Wave spike_wave;
+
     // Camera utilities
     void add_camera_lock(Recti rect);
     void shake_camera(float duration);

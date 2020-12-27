@@ -195,6 +195,7 @@ void Game::update(float dt)
     for (size_t i = 0; i < SPIKES_COUNT; ++i) {
         spikes[i].update(dt);
     }
+    spike_wave.update(dt, this);
 
     // Enemy AI //////////////////////////////
     auto &player = entities[PLAYER_ENTITY_INDEX];

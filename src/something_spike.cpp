@@ -73,4 +73,29 @@ Spike ice_spike(Vec2f pos)
     return spike;
 }
 
+// TODO: Spike Waves to deal any damage
+// TODO: Spike Wave goes through the tiles
+//   It should follow the tile surface
+
+void Spike_Wave::update(float dt, Game *game)
+{
+    if (count > 0) {
+        cooldown -= dt;
+        if (cooldown <= 0.0f) {
+            game->spawn_spike(ice_spike(pos));
+            pos += dir;
+            cooldown = SPIKE_WAVE_COOLDOWN;
+            count -= 1;
+        }
+    }
+}
+
+void Spike_Wave::activate(Vec2f pos, Vec2f dir)
+{
+    this->pos = pos;
+    this->dir = dir;
+    this->count = SPIKE_WAVE_MAX_COUNT;
+    this->cooldown = 0.0f;
+}
+
 // TODO(#329): there is no weapon that uses the spikes mechanics
