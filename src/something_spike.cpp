@@ -74,7 +74,7 @@ Spike ice_spike(Vec2f pos)
 }
 
 // TODO(#340): Spike Waves don't deal any damage
-// TODO: Spike Wave goes through the tiles
+// TODO(#341): Spike Wave goes through the tiles
 //   It should follow the tile surface
 
 void Spike_Wave::update(float dt, Game *game)
