@@ -73,7 +73,7 @@ struct Game
 
     Background background;
 
-    // TODO: game supports only one spike wave
+    // TODO(#339): game supports only one spike wave
     //   We should implement a pool of them like entities, projectiles, spikes, etc.
     Spike_Wave spike_wave;
 
