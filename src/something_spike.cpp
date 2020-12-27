@@ -73,7 +73,7 @@ Spike ice_spike(Vec2f pos)
     return spike;
 }
 
-// TODO: Spike Waves to deal any damage
+// TODO(#340): Spike Waves don't deal any damage
 // TODO: Spike Wave goes through the tiles
 //   It should follow the tile surface
 
