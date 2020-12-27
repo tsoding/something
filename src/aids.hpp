@@ -21,7 +21,7 @@
 //
 // ============================================================
 //
-// aids — 0.21.0 — std replacement for C++. Designed to aid developers
+// aids — 0.35.1 — std replacement for C++. Designed to aid developers
 // to a better programming experience.
 //
 // https://github.com/rexim/aids
@@ -30,6 +30,32 @@
 //
 // ChangeLog (https://semver.org/ is implied)
 //
+//   0.35.1 Fix compilation when using todo() and unreachable()
+//   0.35.0 [[noreturn]] void unreachable(Args... args)
+//          [[noreturn]] void todo(Args... args)
+//   0.34.1 Fix -Wtype-limits warning in utf8_get_code()
+//   0.34.0 Hash_Map::contains(Key key)
+//   0.33.0 Maybe::value_or(T t)
+//   0.32.0 Hash_Map::operator[](Key key)
+//   0.31.0 String_View::has_suffix(String_View suffix)
+//   0.30.0 String_View String_View::chop_while(Predicate_Char predicate)
+//   0.29.0 void destroy(Dynamic_Array<T> dynamic_array)
+//   0.28.0 struct Hash_Map
+//   0.27.0 NEVER HAPPENED
+//   0.26.0 panic() is marked with [[noreturn]] attribute
+//          code_to_utf8() implementation is refactored in a backward compatible way
+//   0.25.0 void print1(FILE *stream, Hex<char> hex)
+//          void print1(FILE *stream, HEX<char> hex)
+//          struct Hex_Bytes
+//          void print1(FILE *stream, Hex_Bytes hex_bytes)
+//   0.24.0 String_View Utf8_Char::view()
+//          struct Hex
+//          void print1(FILE *stream, Hex<uint32_t> hex)
+//          struct HEX
+//          void print1(FILE *stream, HEX<uint32_t> hex)
+//   0.23.0 code_to_utf8()
+//          struct Utf8_Char
+//   0.22.0 panic()
 //   0.21.0 void sprint1(String_Buffer *buffer, unsigned int x)
 //   0.20.0 Escape
 //   0.19.0 unwrap_or_panic()
@@ -189,6 +215,10 @@ namespace aids
 
             return !this->has_value && !that.has_value;
         }
+
+        T value_or(T t) const {
+            return (has_value ? unwrap : t);
+        }
     };
 
 #define unwrap_into(lvalue, maybe)              \
@@ -255,6 +285,20 @@ namespace aids
         void grow(size_t n)
         {
             count += n;
+        }
+
+        using Predicate_Char = bool (*)(char);
+
+        String_View chop_while(Predicate_Char predicate)
+        {
+            size_t size = 0;
+            while (size < count && predicate(data[size])) {
+                size += 1;
+            }
+
+            auto result = subview(0, size);
+            chop(size);
+            return result;
         }
 
         String_View chop_by_delim(char delim)
@@ -388,6 +432,12 @@ namespace aids
                 && this->subview(0, prefix.count) == prefix;
         }
 
+        bool has_suffix(String_View suffix) const
+        {
+            return suffix.count <= this->count
+                && this->subview(this->count - suffix.count, suffix.count) == suffix;
+        }
+
         size_t count_chars(char x) const
         {
             size_t result = 0;
@@ -487,6 +537,14 @@ namespace aids
             return false;
         }
     };
+
+    template <typename T>
+    void destroy(Dynamic_Array<T> dynamic_array)
+    {
+        if (dynamic_array.data) {
+            free(dynamic_array.data);
+        }
+    }
 
     ////////////////////////////////////////////////////////////
     // STRETCHY BUFFER
@@ -792,12 +850,30 @@ namespace aids
         print1(stream, '\n');
     }
 
+    template <typename... Args>
+    [[noreturn]] void panic(Args... args)
+    {
+        println(stderr, args...);
+        exit(1);
+    }
+
+    template <typename... Args>
+    [[noreturn]] void unreachable(Args... args)
+    {
+        panic("Unreachable: ", args...);
+    }
+
+    template <typename... Args>
+    [[noreturn]] void todo(Args... args)
+    {
+        panic("TODO: ", args...);
+    }
+
     template <typename T, typename... Args>
     T unwrap_or_panic(Maybe<T> maybe, Args... args)
     {
         if (!maybe.has_value) {
-            println(stderr, args...);
-            exit(1);
+            panic(args...);
         }
 
         return maybe.unwrap;
@@ -841,6 +917,76 @@ namespace aids
     ////////////////////////////////////////////////////////////
     // UTF-8
     ////////////////////////////////////////////////////////////
+
+    struct Utf8_Char {
+        uint8_t bytes[4];
+        size_t count;
+
+        String_View view()
+        {
+            String_View result = {
+                count,
+                reinterpret_cast<const char *>(bytes)
+            };
+
+            return result;
+        }
+    };
+
+    void print1(FILE *stream, Utf8_Char uchar)
+    {
+        print(stream, String_View {uchar.count, reinterpret_cast<const char*>(uchar.bytes)});
+    }
+
+    Utf8_Char code_to_utf8(uint32_t code)
+    {
+        if (/*0x0000 <= code && */code <= 0x007F) {
+            // 0xxxxxxx
+            // 1 byte
+            return Utf8_Char {
+                {(uint8_t) code, 0, 0, 0},
+                1,
+            };
+        } else if (0x0080 <= code && code <= 0x07FF) {
+            // 110xxxxx 10xxxxxx
+            // 2 bytes
+            return Utf8_Char {
+                {
+                    (uint8_t) (((code & 0b00111111000000) >> 6) | 0b11000000),
+                    (uint8_t) (((code & 0b00000000111111) >> 0) | 0b10000000),
+                    0,
+                    0
+                },
+                2
+            };
+        } else if (0x0800 <= code && code <= 0xFFFF) {
+            // 3 bytes
+            // 1110xxxx 10xxxxxx 10xxxxxx
+            return Utf8_Char {
+                {
+                    (uint8_t) (((code & 0b1111000000000000) >> 12) | 0b11100000),
+                    (uint8_t) (((code & 0b0000111111000000) >> 6)  | 0b10000000),
+                    (uint8_t) (((code & 0b0000000000111111) >> 0)  | 0b10000000),
+                    0
+                },
+                3
+            };
+        } else if (0x10000 <= code && code <= 0x10FFFF) {
+            // 4 bytes
+            // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+            return Utf8_Char {
+                {
+                    (uint8_t) (((code & 0b111000000000000000000) >> 18) | 0b11110000),
+                    (uint8_t) (((code & 0b000111111000000000000) >> 12) | 0b10000000),
+                    (uint8_t) (((code & 0b000000000111111000000) >> 6)  | 0b10000000),
+                    (uint8_t) (((code & 0b000000000000000111111) >> 0)  | 0b10000000),
+                },
+                4
+            };
+        }
+
+        panic("The code ", code, " point is too big");
+    }
 
     Maybe<uint32_t> utf8_get_code(String_View view, size_t *size)
     {
@@ -894,6 +1040,173 @@ namespace aids
         }
 
         return {};
+    }
+
+    template <typename T>
+    struct Hex
+    {
+        T unwrap;
+    };
+
+    void print1(FILE *stream, Hex<uint32_t> hex)
+    {
+        fprintf(stream, "%x", hex.unwrap);
+    }
+
+    void print1(FILE *stream, Hex<char> hex)
+    {
+        fprintf(stream, "%hhx", hex.unwrap);
+    }
+
+    template <typename T>
+    struct HEX
+    {
+        T unwrap;
+    };
+
+    void print1(FILE *stream, HEX<uint32_t> hex)
+    {
+        fprintf(stream, "%X", hex.unwrap);
+    }
+
+    void print1(FILE *stream, HEX<char> hex)
+    {
+        fprintf(stream, "%hhX", hex.unwrap);
+    }
+
+    struct Hex_Bytes
+    {
+        String_View unwrap;
+    };
+
+    void print1(FILE *stream, Hex_Bytes hex_bytes)
+    {
+        print(stream, "[");
+        for (size_t i = 0; i < hex_bytes.unwrap.count; ++i) {
+            print(stream, i == 0 ? "" : ", ", Hex<char> { hex_bytes.unwrap.data[i] });
+        }
+        print(stream, "]");
+    }
+
+    ////////////////////////////////////////////////////////////
+    // Hash_Map
+    ////////////////////////////////////////////////////////////
+
+    // NOTE: stolen from http://www.cse.yorku.ca/~oz/hash.html
+    unsigned long hash(String_View str)
+    {
+        unsigned long hash = 5381;
+        for (size_t i = 0; i < str.count; ++i) {
+            hash = ((hash << 5) + hash) + str.data[i];
+        }
+        return hash;
+    }
+
+    template <typename Key, typename Value>
+    struct Hash_Map
+    {
+        struct Bucket
+        {
+            Key key;
+            Value value;
+        };
+
+        Maybe<Bucket> *buckets;
+        size_t capacity;
+        size_t size;
+
+        void extend_capacity()
+        {
+            const size_t HASH_MAP_INITIAL_CAPACITY = 256;
+
+            if (buckets == nullptr) {
+                assert(capacity == 0);
+                assert(size == 0);
+
+                buckets = (Maybe<Bucket>*) calloc(HASH_MAP_INITIAL_CAPACITY, sizeof(*buckets));
+                capacity = HASH_MAP_INITIAL_CAPACITY;
+                size = 0;
+            } else {
+                Hash_Map<Key, Value> new_hash_map = {
+                    (Maybe<Bucket>*) calloc(capacity * 2, sizeof(*buckets)),
+                    capacity * 2,
+                    0
+                };
+
+                for (size_t i = 0; i < capacity; ++i) {
+                    if (buckets[i].has_value) {
+                        new_hash_map.insert(
+                            buckets[i].unwrap.key,
+                            buckets[i].unwrap.value);
+                    }
+                }
+
+                free(buckets);
+
+                *this = new_hash_map;
+            }
+        }
+
+        void insert(Key key, Value value)
+        {
+            if (size >= capacity) {
+                extend_capacity();
+            }
+
+            auto hk = hash(key) & (capacity - 1);
+            while (buckets[hk].has_value && buckets[hk].unwrap.key != key) {
+                hk = (hk + 1) & (capacity - 1);
+            }
+            buckets[hk].has_value = true;
+            buckets[hk].unwrap.key = key;
+            buckets[hk].unwrap.value = value;
+            size += 1;
+        }
+
+        Maybe<Value*> get(Key key)
+        {
+            auto hk = hash(key) & (capacity - 1);
+            for (size_t i = 0;
+                 i < capacity
+                     && buckets[hk].has_value
+                     && buckets[hk].unwrap.key != key;
+                 ++i) {
+                hk = (hk + 1) & (capacity - 1);
+            }
+
+            if (buckets && buckets[hk].has_value && buckets[hk].unwrap.key == key) {
+                return {true, &buckets[hk].unwrap.value};
+            } else {
+                return {};
+            }
+        }
+
+        bool contains(Key key) {
+            return get(key).has_value;
+        }
+
+        Value *operator[](Key key)
+        {
+            {
+                Maybe<Value*> maybe_value = get(key);
+                if (!maybe_value.has_value) {
+                    insert(key, {});
+                } else {
+                    return maybe_value.unwrap;
+                }
+            }
+            Maybe<Value*> maybe_value = get(key);
+            assert(maybe_value.has_value);
+            return maybe_value.unwrap;
+        }
+    };
+
+    template <typename Key, typename Value>
+    void destroy(Hash_Map<Key, Value> hash_map)
+    {
+        if (hash_map.buckets) {
+            free(hash_map.buckets);
+        }
     }
 }
 

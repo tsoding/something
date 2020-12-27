@@ -176,3 +176,44 @@ void command_noclip(Game *game, String_View args)
         game->console.println("Unknown parameter `", args, "`. Expected 'on' or 'off'");
     }
 }
+
+template <typename T>
+void sprint1(String_Buffer *buffer, Vec2<T> v)
+{
+    sprint(buffer, "(", v.x, ", ", v.y, ")");
+}
+
+void command_inspect_entity(Game *game, String_View args)
+{
+    auto arg = args.chop_word();
+    auto entity_index = arg.as_integer<long int>();
+
+    if (entity_index.has_value &&
+        0 <= entity_index.unwrap &&
+        entity_index.unwrap < static_cast<long int>(ENTITIES_COUNT))
+    {
+        auto &entity = game->entities[entity_index.unwrap];
+        game->console.println("Entity #", entity_index.unwrap);
+        game->console.println("  State:    ", entity.state);
+        game->console.println("  Position: ", entity.pos);
+    } else {
+        game->console.println(
+            "ERROR: expected a number (entity index) from ",
+            "0..", ENTITIES_COUNT - 1," but got `", arg, "`");
+    }
+}
+
+void command_ls(Game *game, String_View args)
+{
+    auto arg = args.chop_word();
+
+    if (arg == "entities"_sv) {
+        for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
+            if (game->entities[i].state != Entity_State::Ded) {
+                game->console.println("Entity #", i);
+            }
+        }
+    } else {
+        game->console.println("ERROR: expected `entities` but got `", arg, "`");
+    }
+}

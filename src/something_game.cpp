@@ -230,6 +230,10 @@ void Game::update(float dt)
         entities[i].update(dt, this, {i});
         if (!entities[i].noclip) entity_resolve_collision({i});
         entities[i].has_jumped = false;
+
+        if (entities[i].pos.y > WORLD_DEATH_LIMIT) {
+            kill_entity(&entities[i]);
+        }
     }
 
     // Update All Projectiles //////////////////////////////

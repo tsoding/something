@@ -16,6 +16,8 @@ void command_save_room(Game *game, String_View args);
 Tile room_to_save[ROOM_WIDTH * ROOM_HEIGHT];
 void command_history(Game *game, String_View args);
 void command_noclip(Game *game, String_View args);
+void command_inspect_entity(Game *game, String_View args);
+void command_ls(Game *game, String_View args);
 
 struct Command
 {
@@ -38,7 +40,9 @@ const Command commands[] = {
 #ifndef SOMETHING_RELEASE
     {"set"_sv,         "Set the value of a variable"_sv,      command_set},
 #endif // SOMETHING_RELEASE
-    {"spawn_enemy"_sv, "Spawn an enemy"_sv,                   command_spawn_enemy},
+    {"spawn_enemy"_sv,    "Spawn an enemy"_sv,                command_spawn_enemy},
+    {"inspect_entity"_sv, "Inspect an entity"_sv,             command_inspect_entity},
+    {"ls"_sv,             "List objects"_sv,                  command_ls},
 };
 const size_t commands_count = sizeof(commands) / sizeof(commands[0]);
 

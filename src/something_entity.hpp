@@ -20,6 +20,23 @@ enum class Entity_State
     Poof
 };
 
+void sprint1(String_Buffer *buffer, Entity_State state)
+{
+    switch (state) {
+    case Entity_State::Ded:
+        sprint(buffer, "Ded");
+        break;
+    case Entity_State::Alive:
+        sprint(buffer, "Alive");
+        break;
+    case Entity_State::Poof:
+        sprint(buffer, "Poof");
+        break;
+    default:
+        unreachable("sprint1() for Entity_State");
+    }
+}
+
 enum class Alive_State
 {
     Idle = 0,
