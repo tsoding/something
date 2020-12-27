@@ -19,7 +19,7 @@ struct Console
         void push(String_View entry);
         void up();
         void down();
-        int current();
+        String_View current();
     };
 
     bool enabled;
