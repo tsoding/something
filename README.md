@@ -29,8 +29,8 @@ $ ## UNIX-like system
 $ make -B
 $ ./something.debug
 $ ## Windows
-$ set __MINGW32__=1 && mingw32-make -B
-$ something.debug
+$ mingw32-make -B
+$ something.debug.exe
 ```
 ## Mininum System Requirements / Dependencies
 
