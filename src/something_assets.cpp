@@ -212,7 +212,7 @@ Maybe<Index<Sample_S16>> Assets::get_sound_by_id(String_View id)
     return {};
 }
 
-Sample_S16 Assets::get_sound_by_index(Index<Sample_S16> index)
+Sample_S16 Assets::get_by_index(Index<Sample_S16> index)
 {
     return sounds[index.unwrap].unwrap;
 }
@@ -228,7 +228,7 @@ Maybe<Index<Texture>> Assets::get_texture_by_id(String_View id)
     return {};
 }
 
-Texture Assets::get_texture_by_index(Index<Texture> index)
+Texture Assets::get_by_index(Index<Texture> index)
 {
     return textures[index.unwrap].unwrap;
 }
@@ -244,7 +244,7 @@ Maybe<Index<Frames>> Assets::get_frames_by_id(String_View id)
     return {};
 }
 
-Frames Assets::get_frames_by_index(Index<Frames> index)
+Frames Assets::get_by_index(Index<Frames> index)
 {
     return framesen[index.unwrap].unwrap;
 }

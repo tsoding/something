@@ -63,7 +63,7 @@ void sample_mixer_audio_callback(void *userdata, Uint8 *stream, int len)
     memset(stream, 0, (size_t) len);
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
         if (mixer->slots[i].playing) {
-            auto sample = assets.get_sound_by_index(mixer->slots[i].index);
+            auto sample = assets.get_by_index(mixer->slots[i].index);
 
             for (size_t j = 0; j < output_len; ++j) {
                 int16_t x = 0;

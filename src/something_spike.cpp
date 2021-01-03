@@ -2,7 +2,7 @@
 
 void Spike::render(SDL_Renderer *renderer, Camera camera)
 {
-    auto texture = assets.get_texture_by_index(texture_index).texture;
+    auto texture = assets.get_by_index(texture_index).texture;
 
     int texture_w = 0, texture_h = 0;
     sec(SDL_QueryTexture(texture, NULL, NULL, &texture_w, &texture_h));

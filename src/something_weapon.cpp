@@ -52,7 +52,7 @@ Sprite Weapon::icon() const
 {
     switch (type) {
     case Weapon_Type::Gun: {
-        auto frames = assets.get_frames_by_index(gun.projectile.active_animat.frames_index);
+        auto frames = assets.get_by_index(gun.projectile.active_animat.frames_index);
         assert(frames.count > 0);
         return frames.sprites[0];
     }

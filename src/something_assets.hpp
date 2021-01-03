@@ -35,16 +35,14 @@ struct Assets
     Asset<Sprite> sprites[ASSETS_SPRITES_CAPACITY];
 
     Maybe<Index<Texture>> get_texture_by_id(String_View id);
-    Texture get_texture_by_index(Index<Texture> index);
-
     Maybe<Index<Sample_S16>> get_sound_by_id(String_View id);
-    Sample_S16 get_sound_by_index(Index<Sample_S16> index);
-
     Maybe<Index<Frames>> get_frames_by_id(String_View id);
-    Frames get_frames_by_index(Index<Frames> index);
-
     Maybe<Index<Sprite>> get_sprite_by_id(String_View id);
-    Sprite get_sprite_by_index(Index<Sprite>);
+
+    Texture get_by_index(Index<Texture> index);
+    Sample_S16 get_by_index(Index<Sample_S16> index);
+    Frames get_by_index(Index<Frames> index);
+    Sprite get_by_index(Index<Sprite> index);
 
     String_View load_file_into_conf_buffer(const char *filepath);
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);
