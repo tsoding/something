@@ -29,10 +29,10 @@ struct Weapon
     Gun gun;
     Placer placer;
 
-    Maybe<Sample_S16_Index> shoot_sample;
+    Maybe<Index<Sample_S16>> shoot_sample;
 
-    void render(SDL_Renderer *renderer, Game *game, Entity_Index entity);
-    void shoot(Game *game, Entity_Index shooter);
+    void render(SDL_Renderer *renderer, Game *game, Index<Entity> entity);
+    void shoot(Game *game, Index<Entity> shooter);
     Sprite icon() const;
 };
 

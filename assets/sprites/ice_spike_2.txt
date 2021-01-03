@@ -1,0 +1,6 @@
+texture = ICE_SPIKE_TEXTURE
+
+x = 64
+y = 0
+w = 64
+h = 128

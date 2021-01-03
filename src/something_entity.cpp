@@ -191,7 +191,7 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *fo
 HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
 {
     const auto tile_sprite = tile_defs[*grid->tile_at_abs(pos + vec2(0.0f, TILE_SIZE * 0.5f))].top_texture;
-    const auto surface = assets.get_texture_by_index(tile_sprite.texture_index).surface;
+    const auto surface = assets.get_by_index(tile_sprite.texture_index).surface;
     const auto x = rand() % tile_sprite.srcrect.w;
     sec(SDL_LockSurface(surface));
     HSLA result = {};
@@ -212,7 +212,7 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
     return result;
 }
 
-void Entity::update(float dt, Game *game, Entity_Index me)
+void Entity::update(float dt, Game *game, Index<Entity> me)
 {
     if (state == Entity_State::Alive && ground(&game->grid)) {
         particles.current_color = get_particle_color_for_tile(&game->grid, feet());

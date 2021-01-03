@@ -112,7 +112,7 @@ Rectf Projectile::hitbox()
     };
 }
 
-Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+Projectile water_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter)
 {
     Projectile result = {};
     result.kind          = Projectile_Kind::Water;
@@ -127,7 +127,7 @@ Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     return result;
 }
 
-Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+Projectile fire_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter)
 {
     Projectile result = {};
     result.kind          = Projectile_Kind::Fire;
@@ -142,7 +142,7 @@ Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     return result;
 }
 
-Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+Projectile rock_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter)
 {
     Projectile result = {};
     result.kind          = Projectile_Kind::Rock;
@@ -157,7 +157,7 @@ Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     return result;
 }
 
-Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
+Projectile ice_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter)
 {
     Projectile result = {};
     result.kind          = Projectile_Kind::Ice;
@@ -171,4 +171,3 @@ Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter)
     result.poof_animat   = frames_animat(PROJECTILE_ICE_ANIMAT_INDEX);
     return result;
 }
-

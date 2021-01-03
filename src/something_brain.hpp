@@ -3,14 +3,14 @@
 
 struct Brain
 {
-    void (*think)(Game *game, Entity_Index entity, Recti *lock);
+    void (*think)(Game *game, Index<Entity> entity, Recti *lock);
 };
 
 
-void shooter_think(Game *game, Entity_Index entity, Recti *lock);
-void stomper_think(Game *game, Entity_Index entity, Recti *lock);
-void follower_think(Game *game, Entity_Index entity_index, Recti *lock);
-void shooter_stomper_think(Game *game, Entity_Index entity_index, Recti *lock);
+void shooter_think(Game *game, Index<Entity> entity, Recti *lock);
+void stomper_think(Game *game, Index<Entity> entity, Recti *lock);
+void follower_think(Game *game, Index<Entity> entity_index, Recti *lock);
+void shooter_stomper_think(Game *game, Index<Entity> entity_index, Recti *lock);
 
 Brain shooter_brain()
 {

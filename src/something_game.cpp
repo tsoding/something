@@ -441,7 +441,7 @@ void Game::render(SDL_Renderer *renderer)
     console.render(renderer, &debug_font);
 }
 
-void Game::entity_shoot(Entity_Index entity_index)
+void Game::entity_shoot(Index<Entity> entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
@@ -485,7 +485,7 @@ bool Game::does_tile_contain_entity(Vec2i tile_coord)
     return false;
 }
 
-Vec2i Game::where_entity_can_place_block(Entity_Index index, bool *can_place)
+Vec2i Game::where_entity_can_place_block(Index<Entity> index, bool *can_place)
 {
     Entity *entity = &entities[index.unwrap];
     const auto allowed_length = min(length(entity->gun_dir), DIRT_BLOCK_PLACEMENT_PROXIMITY);
@@ -502,7 +502,7 @@ Vec2i Game::where_entity_can_place_block(Entity_Index index, bool *can_place)
 }
 
 
-void Game::entity_jump(Entity_Index entity_index)
+void Game::entity_jump(Index<Entity> entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     entities[entity_index.unwrap].jump();
@@ -514,7 +514,7 @@ void Game::reset_entities()
     entities[PLAYER_ENTITY_INDEX] = player_entity(vec2(200.0f, 200.0f));
 }
 
-void Game::entity_resolve_collision(Entity_Index entity_index)
+void Game::entity_resolve_collision(Index<Entity> entity_index)
 {
     assert(entity_index.unwrap < ENTITIES_COUNT);
     Entity *entity = &entities[entity_index.unwrap];
@@ -743,7 +743,7 @@ void Game::update_projectiles(float dt)
 
 const float PROJECTILE_TRACKING_PADDING = 50.0f;
 
-Rectf Game::hitbox_of_projectile(Projectile_Index index)
+Rectf Game::hitbox_of_projectile(Index<Projectile> index)
 {
     assert(index.unwrap < PROJECTILES_COUNT);
 
@@ -755,7 +755,7 @@ Rectf Game::hitbox_of_projectile(Projectile_Index index)
     };
 }
 
-Maybe<Projectile_Index> Game::projectile_at_position(Vec2f position)
+Maybe<Index<Projectile>> Game::projectile_at_position(Vec2f position)
 {
     for (size_t i = 0; i < PROJECTILES_COUNT; ++i) {
         if (projectiles[i].state == Projectile_State::Ded) continue;
@@ -986,7 +986,7 @@ void Game::damage_entity(Entity *entity, int amount, Vec2f knockback)
     }
 }
 
-void Game::damage_radius(Vec2f center, float radius, Entity_Index stomper)
+void Game::damage_radius(Vec2f center, float radius, Index<Entity> stomper)
 {
     for (size_t i = 0; i < ENTITIES_COUNT; ++i) {
         if (i != stomper.unwrap && entities[i].state == Entity_State::Alive) {

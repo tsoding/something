@@ -103,7 +103,7 @@ struct Entity
     Compose_Rubber_Animat<2> jump_animat;
     Rubber_Animat unstomp_animat;
 
-    Sample_S16_Index jump_samples[JUMP_SAMPLES_CAPACITY];
+    Index<Sample_S16> jump_samples[JUMP_SAMPLES_CAPACITY];
 
     int count_jumps;
     int max_allowed_jumps;
@@ -140,7 +140,7 @@ struct Entity
     void render(SDL_Renderer *renderer, Camera camera,
                 RGBA shade = {0, 0, 0, 0}) const;
     void render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *font) const;
-    void update(float dt, Game *game, Entity_Index me);
+    void update(float dt, Game *game, Index<Entity> me);
     void point_gun_at(Vec2f target);
     void flash(RGBA color);
     Vec2f feet();

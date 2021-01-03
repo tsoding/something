@@ -3,10 +3,18 @@
 
 #include "./something_index.hpp"
 
+struct Texture
+{
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    SDL_Surface *surface_mask;
+    SDL_Texture *texture_mask;
+};
+
 struct Sprite
 {
     SDL_Rect srcrect;
-    Texture_Index texture_index;
+    Index<Texture> texture_index;
 
     void render(SDL_Renderer *renderer,
                 Rectf destrect,
@@ -29,7 +37,7 @@ struct Frames
 
 struct Frames_Animat
 {
-    Frames_Index frames_index;
+    Index<Frames> frames_index;
 
     size_t frame_current;
     float frame_cooldown;
@@ -53,7 +61,7 @@ struct Frames_Animat
     bool has_finished() const;
 };
 
-Frames_Animat frames_animat(Frames_Index frames_index)
+Frames_Animat frames_animat(Index<Frames> frames_index)
 {
     Frames_Animat result = {};
     result.frames_index = frames_index;

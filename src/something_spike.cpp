@@ -2,30 +2,23 @@
 
 void Spike::render(SDL_Renderer *renderer, Camera camera)
 {
-    auto texture = assets.get_texture_by_index(texture_index).texture;
-
-    int texture_w = 0, texture_h = 0;
-    sec(SDL_QueryTexture(texture, NULL, NULL, &texture_w, &texture_h));
+    auto sprite  = assets.get_by_index(sprite_index);
+    auto texture = assets.get_by_index(sprite.texture_index).texture;
 
     switch (state) {
     case Spike_State::Active: {
         sec(SDL_SetTextureAlphaMod(texture, 255));
-        const float effective_h = (float) texture_h * a;
-        const auto src_rect =
-            rectf_for_sdl(rect(vec2(0.0f, 0.0f), (float) texture_w, effective_h));
-        const auto dest_rect =
-            rectf_for_sdl(rect(camera.to_screen(pos - vec2((float) texture_w * 0.5f, effective_h * scale)), (float) texture_w * scale, effective_h * scale));
-        sec(SDL_RenderCopy(renderer, texture, &src_rect, &dest_rect));
+        const float effective_h = (float) sprite.srcrect.h * a;
+        sprite.srcrect.h = (int) floorf(effective_h);
+        const auto dest_rect = rect(camera.to_screen(pos - vec2((float) sprite.srcrect.w * 0.5f, effective_h * scale)), (float) sprite.srcrect.w * scale, effective_h * scale);
+        sprite.render(renderer, dest_rect);
     } break;
 
     case Spike_State::Poof: {
-        const float effective_h = (float) texture_h;
-        const auto src_rect =
-            rectf_for_sdl(rect(vec2(0.0f, 0.0f), (float) texture_w, effective_h));
-        const auto dest_rect =
-            rectf_for_sdl(rect(camera.to_screen(pos - vec2((float) texture_w * 0.5f, effective_h * scale)), (float) texture_w * scale, effective_h * scale));
+        const float effective_h = (float) sprite.srcrect.h;
+        const auto dest_rect = rect(camera.to_screen(pos - vec2((float) sprite.srcrect.w * 0.5f, effective_h * scale)), (float) sprite.srcrect.w * scale, effective_h * scale);
         sec(SDL_SetTextureAlphaMod(texture, (Uint8) floorf(a * 255.0f)));
-        sec(SDL_RenderCopy(renderer, texture, &src_rect, &dest_rect));
+        sprite.render(renderer, dest_rect);
     } break;
 
     case Spike_State::Ded: {
@@ -63,13 +56,15 @@ void Spike::activate()
     a = 0.0f;
 }
 
-Spike ice_spike(Vec2f pos)
+Spike ice_spike(Vec2f pos,
+                Index<Sprite> sprite_index,
+                float scale)
 {
     Spike spike = {};
     spike.pos = pos;
     spike.a = 0.0f;
-    spike.texture_index = ICE_SPIKE_INDEX;
-    spike.scale = 2.0f;
+    spike.sprite_index = sprite_index;
+    spike.scale = scale;
     return spike;
 }
 
@@ -82,7 +77,12 @@ void Spike_Wave::update(float dt, Game *game)
     if (count > 0) {
         cooldown -= dt;
         if (cooldown <= 0.0f) {
-            game->spawn_spike(ice_spike(pos));
+            const auto scale_step = (SPIKE_WAVE_SCALE_HIGH - SPIKE_WAVE_SCALE_LOW) / SPIKE_WAVE_MAX_COUNT;
+            game->spawn_spike(
+                ice_spike(pos,
+                          rand() % 2 == 0 ? ICE_SPIKE_1_SPRITE_INDEX : ICE_SPIKE_2_SPRITE_INDEX,
+                          scale));
+            scale += scale_step;
             pos += dir;
             cooldown = SPIKE_WAVE_COOLDOWN;
             count -= 1;
@@ -92,10 +92,12 @@ void Spike_Wave::update(float dt, Game *game)
 
 void Spike_Wave::activate(Vec2f pos, Vec2f dir)
 {
+
     this->pos = pos;
     this->dir = dir;
     this->count = SPIKE_WAVE_MAX_COUNT;
     this->cooldown = 0.0f;
+    this->scale = SPIKE_WAVE_SCALE_LOW;
 }
 
 // TODO(#329): there is no weapon that uses the spikes mechanics

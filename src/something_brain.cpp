@@ -2,7 +2,7 @@
 #include "./something_brain.hpp"
 #include "./something_entity.hpp"
 
-void follower_think(Game *game, Entity_Index entity_index, Recti *lock)
+void follower_think(Game *game, Index<Entity> entity_index, Recti *lock)
 {
     auto &entity = game->entities[entity_index.unwrap];
     auto entity_tile = game->grid.abs_to_tile_coord(entity.pos);
@@ -27,7 +27,7 @@ void follower_think(Game *game, Entity_Index entity_index, Recti *lock)
     }
 }
 
-void shooter_think(Game *game, Entity_Index entity_index, Recti *lock)
+void shooter_think(Game *game, Index<Entity> entity_index, Recti *lock)
 {
     auto &entity = game->entities[entity_index.unwrap];
     auto &player = game->entities[PLAYER_ENTITY_INDEX];
@@ -43,7 +43,7 @@ void shooter_think(Game *game, Entity_Index entity_index, Recti *lock)
     }
 }
 
-void stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
+void stomper_think(Game *game, Index<Entity> entity_index, Recti *lock)
 {
     auto &entity = game->entities[entity_index.unwrap];
     auto &player = game->entities[PLAYER_ENTITY_INDEX];
@@ -61,7 +61,7 @@ void stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
     }
 }
 
-void shooter_stomper_think(Game *game, Entity_Index entity_index, Recti *lock)
+void shooter_stomper_think(Game *game, Index<Entity> entity_index, Recti *lock)
 {
     const float STOMPER_DISTANCE_THRESHOLD = 600.0;
     auto &entity = game->entities[entity_index.unwrap];

@@ -13,6 +13,16 @@ void print1(FILE *stream, SDL_Color color)
     print(stream, "{", color.r, ",", color.g, ",", color.b, ",", color.a, "}");
 }
 
+void sprint1(String_Buffer *sbuffer, SDL_Rect rect)
+{
+    sprint(sbuffer, "{",
+           ".x = ", rect.x, ",",
+           ".y = ", rect.y, ",",
+           ".w = ", rect.w, ",",
+           ".h = ", rect.h, ",",
+           "}");
+}
+
 template <typename T>
 void print1(FILE *stream, Vec2<T> v)
 {

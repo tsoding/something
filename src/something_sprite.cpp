@@ -2,11 +2,11 @@
 #include "./something_assets.hpp"
 
 
-Sprite sprite_from_texture_index(Texture_Index texture_index)
+Sprite sprite_from_texture_index(Index<Texture> texture_index)
 {
     Sprite result = {};
     result.texture_index = texture_index;
-    sec(SDL_QueryTexture(assets.get_texture_by_index(texture_index).texture,
+    sec(SDL_QueryTexture(assets.get_by_index(texture_index).texture,
                          NULL,
                          NULL,
                          &result.srcrect.w,
@@ -26,7 +26,7 @@ void Sprite::render(SDL_Renderer *renderer,
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                assets.get_texture_by_index(texture_index).texture,
+                assets.get_by_index(texture_index).texture,
                 &srcrect,
                 &rect,
                 angle,
@@ -34,15 +34,15 @@ void Sprite::render(SDL_Renderer *renderer,
                 flip));
 
         sec(SDL_SetTextureColorMod(
-                assets.get_texture_by_index(texture_index).texture_mask,
+                assets.get_by_index(texture_index).texture_mask,
                 sdl_shade.r, sdl_shade.g, sdl_shade.b));
         sec(SDL_SetTextureAlphaMod(
-                assets.get_texture_by_index(texture_index).texture_mask,
+                assets.get_by_index(texture_index).texture_mask,
                 sdl_shade.a));
 
         sec(SDL_RenderCopyEx(
                 renderer,
-                assets.get_texture_by_index(texture_index).texture_mask,
+                assets.get_by_index(texture_index).texture_mask,
                 &srcrect,
                 &rect,
                 0.0,
@@ -78,7 +78,7 @@ void Frames_Animat::render(SDL_Renderer *renderer,
                            RGBA shade,
                            double angle) const
 {
-    auto frames = assets.get_frames_by_index(frames_index);
+    auto frames = assets.get_by_index(frames_index);
     if (frames.count > 0) {
         frames.sprites[frame_current % frames.count].render(renderer, dstrect, flip, shade, angle);
     }
@@ -90,7 +90,7 @@ void Frames_Animat::render(SDL_Renderer *renderer,
                            RGBA shade,
                            double angle) const
 {
-    auto frames = assets.get_frames_by_index(frames_index);
+    auto frames = assets.get_by_index(frames_index);
     if (frames.count > 0) {
         frames.sprites[frame_current % frames.count].render(renderer, pos, flip, shade, angle);
     }
@@ -98,7 +98,7 @@ void Frames_Animat::render(SDL_Renderer *renderer,
 
 void Frames_Animat::update(float dt)
 {
-    auto frames = assets.get_frames_by_index(frames_index);
+    auto frames = assets.get_by_index(frames_index);
     if (dt < frame_cooldown) {
         frame_cooldown -= dt;
     } else if (frames.count > 0) {
@@ -204,5 +204,5 @@ struct Compose_Rubber_Animat
 
 bool Frames_Animat::has_finished() const
 {
-    return frame_current >= assets.get_frames_by_index(frames_index).count - 1;
+    return frame_current >= assets.get_by_index(frames_index).count - 1;
 }
