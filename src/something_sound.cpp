@@ -7,7 +7,7 @@ void Sample_Mixer::clean()
     }
 }
 
-void Sample_Mixer::play_sample(Sample_S16_Index index)
+void Sample_Mixer::play_sample(Index<Sample_S16> index)
 {
     for (size_t i = 0; i < SAMPLE_MIXER_CAPACITY; ++i) {
         if (!slots[i].playing) {

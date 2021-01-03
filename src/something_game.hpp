@@ -46,7 +46,7 @@ struct Game
 
     Vec2f collision_probe;
     Vec2f mouse_position;
-    Maybe<Projectile_Index> tracking_projectile;
+    Maybe<Index<Projectile>> tracking_projectile;
     Camera camera;
     Sample_Mixer mixer;
     const Uint8 *keyboard;
@@ -54,7 +54,7 @@ struct Game
     // TODO(#178): disable game console in release mode
     Console console;
 
-    Sample_S16_Index kill_enemy_sample;
+    Index<Sample_S16> kill_enemy_sample;
 
     Bitmap_Font debug_font;
     Toolbar debug_toolbar;
@@ -91,18 +91,18 @@ struct Game
 
     // Entities of the Game
     void reset_entities();
-    void entity_shoot(Entity_Index entity_index);
-    void entity_jump(Entity_Index entity_index);
-    void entity_resolve_collision(Entity_Index entity_index);
+    void entity_shoot(Index<Entity> entity_index);
+    void entity_jump(Index<Entity> entity_index);
+    void entity_resolve_collision(Index<Entity> entity_index);
     void spawn_entity_at(Entity entity, Vec2f pos);
     void spawn_enemy_at(Vec2f pos);
     void spawn_golem_at(Vec2f pos);
-    Vec2i where_entity_can_place_block(Entity_Index index, bool *can_place = nullptr);
+    Vec2i where_entity_can_place_block(Index<Entity> index, bool *can_place = nullptr);
     bool does_tile_contain_entity(Vec2i tile_coord);
     void kill_entity(Entity *entity);
     void drop_all_items_of_entity(Entity *entity);
     void damage_entity(Entity *entity, int amount, Vec2f knockback);
-    void damage_radius(Vec2f center, float radius, Entity_Index stomper);
+    void damage_radius(Vec2f center, float radius, Index<Entity> stomper);
 
     // Spike
     void spawn_spike(Spike spike);
@@ -112,8 +112,8 @@ struct Game
     int count_alive_projectiles(void);
     void render_projectiles(SDL_Renderer *renderer, Camera camera);
     void update_projectiles(float dt);
-    Rectf hitbox_of_projectile(Projectile_Index index);
-    Maybe<Projectile_Index> projectile_at_position(Vec2f position);
+    Rectf hitbox_of_projectile(Index<Projectile> index);
+    Maybe<Index<Projectile>> projectile_at_position(Vec2f position);
     void projectile_collision(Projectile *a, Projectile *b);
 
     // Items of the Game

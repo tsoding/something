@@ -212,7 +212,7 @@ HSLA get_particle_color_for_tile(Tile_Grid *grid, Vec2f pos)
     return result;
 }
 
-void Entity::update(float dt, Game *game, Entity_Index me)
+void Entity::update(float dt, Game *game, Index<Entity> me)
 {
     if (state == Entity_State::Alive && ground(&game->grid)) {
         particles.current_color = get_particle_color_for_tile(&game->grid, feet());

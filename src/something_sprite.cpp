@@ -2,7 +2,7 @@
 #include "./something_assets.hpp"
 
 
-Sprite sprite_from_texture_index(Texture_Index texture_index)
+Sprite sprite_from_texture_index(Index<Texture> texture_index)
 {
     Sprite result = {};
     result.texture_index = texture_index;

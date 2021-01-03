@@ -14,7 +14,7 @@ struct Sample_Mixer
 {
     struct Slot
     {
-        Sample_S16_Index index;
+        Index<Sample_S16> index;
         Uint32 cursor;
         bool playing;
     };
@@ -22,7 +22,7 @@ struct Sample_Mixer
     float volume;
     Slot slots[SAMPLE_MIXER_CAPACITY];
 
-    void play_sample(Sample_S16_Index sample);
+    void play_sample(Index<Sample_S16> sample);
     void clean();
 };
 

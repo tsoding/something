@@ -13,7 +13,7 @@ struct Spike
     Spike_State state;
     Vec2f pos;
     float scale;
-    Texture_Index texture_index;
+    Index<Texture> texture_index;
     float a;                     // 0.0..1.0
 
     void render(SDL_Renderer *renderer, Camera camera);

@@ -1,7 +1,7 @@
 #include "./something_game.hpp"
 #include "./something_weapon.hpp"
 
-void Weapon::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
+void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity)
 {
     switch (type) {
     case Weapon_Type::Stomp:
@@ -22,7 +22,7 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Entity_Index entity)
     }
 }
 
-void Weapon::shoot(Game *game, Entity_Index shooter)
+void Weapon::shoot(Game *game, Index<Entity> shooter)
 {
     switch (type) {
     case Weapon_Type::Gun: {

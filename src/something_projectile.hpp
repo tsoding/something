@@ -2,6 +2,7 @@
 #define SOMETHING_PROJECTILE_HPP_
 
 struct Game;
+struct Entity;
 
 enum class Projectile_State
 {
@@ -30,7 +31,7 @@ struct Projectile
 {
     Projectile_Kind kind;
     Tile_Damage tile_damage;
-    Entity_Index shooter;
+    Index<Entity> shooter;
     Projectile_State state;
     Vec2f pos;
     Vec2f vel;
@@ -45,9 +46,9 @@ struct Projectile
     Rectf hitbox();
 };
 
-Projectile rock_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
-Projectile water_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
-Projectile fire_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
-Projectile ice_projectile(Vec2f pos, Vec2f vel, Entity_Index shooter);
+Projectile rock_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter);
+Projectile water_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter);
+Projectile fire_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter);
+Projectile ice_projectile(Vec2f pos, Vec2f vel, Index<Entity> shooter);
 
 #endif  // SOMETHING_PROJECTILE_HPP_

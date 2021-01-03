@@ -103,7 +103,7 @@ void Assets::load_frames(String_View id, String_View path)
 
     String_View input = source.unwrap;
     Frames frames = {};
-    Maybe<Texture_Index> spritesheet_texture = {};
+    Maybe<Index<Texture>> spritesheet_texture = {};
 
     for (int line_number = 1; input.count != 0; ++line_number) {
         auto value = input.chop_by_delim('\n');
@@ -202,7 +202,7 @@ void Assets::load_frames(String_View id, String_View path)
     framesen_count += 1;
 }
 
-Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
+Maybe<Index<Sample_S16>> Assets::get_sound_by_id(String_View id)
 {
     for (size_t i = 0; i < sounds_count; ++i) {
         if (sounds[i].id == id) {
@@ -212,12 +212,12 @@ Maybe<Sample_S16_Index> Assets::get_sound_by_id(String_View id)
     return {};
 }
 
-Sample_S16 Assets::get_sound_by_index(Sample_S16_Index index)
+Sample_S16 Assets::get_sound_by_index(Index<Sample_S16> index)
 {
     return sounds[index.unwrap].unwrap;
 }
 
-Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
+Maybe<Index<Texture>> Assets::get_texture_by_id(String_View id)
 {
     for (size_t i = 0; i < textures_count; ++i) {
         if (textures[i].id == id) {
@@ -228,12 +228,12 @@ Maybe<Texture_Index> Assets::get_texture_by_id(String_View id)
     return {};
 }
 
-Texture Assets::get_texture_by_index(Texture_Index index)
+Texture Assets::get_texture_by_index(Index<Texture> index)
 {
     return textures[index.unwrap].unwrap;
 }
 
-Maybe<Frames_Index> Assets::get_frames_by_id(String_View id)
+Maybe<Index<Frames>> Assets::get_frames_by_id(String_View id)
 {
     for (size_t i = 0; i < framesen_count; ++i) {
         if (framesen[i].id == id) {
@@ -244,7 +244,7 @@ Maybe<Frames_Index> Assets::get_frames_by_id(String_View id)
     return {};
 }
 
-Frames Assets::get_frames_by_index(Frames_Index index)
+Frames Assets::get_frames_by_index(Index<Frames> index)
 {
     return framesen[index.unwrap].unwrap;
 }
