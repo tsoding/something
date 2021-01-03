@@ -213,7 +213,14 @@ void command_ls(Game *game, String_View args)
                 game->console.println("Entity #", i);
             }
         }
+    } else if (arg == "sprites"_sv) {
+        game->console.println(assets.sprite_count, " sprites found");
+        for (size_t i = 0; i < assets.sprite_count; ++i) {
+            game->console.println(
+                i, ": ", assets.sprites[i].id, ": ", assets.sprites[i].path);
+            game->console.println("  srcrect=", assets.sprites[i].unwrap.srcrect);
+        }
     } else {
-        game->console.println("ERROR: expected `entities` but got `", arg, "`");
+        game->console.println("ERROR: expected `entities` or `sprites` but got `", arg, "`");
     }
 }
