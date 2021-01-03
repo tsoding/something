@@ -48,6 +48,7 @@ struct Assets
     void load_texture(SDL_Renderer *renderer, String_View id, String_View path);
     void load_sound(String_View id, String_View path);
     void load_frames(String_View id, String_View path);
+    void load_sprite(String_View id, String_View path);
 
     void clean();
     void load_conf(SDL_Renderer *renderer, const char *filepath);

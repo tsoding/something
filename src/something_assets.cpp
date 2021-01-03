@@ -90,6 +90,53 @@ Maybe<String_View> read_file_as_string_view(String_View filename)
     return read_file_as_string_view(filename_cstr);
 }
 
+void Assets::load_sprite(String_View id, String_View path)
+{
+    println(stdout, "Loading sprite ", id, " from ", path, "...");
+    auto source = read_file_as_string_view(path);
+    if (!source.has_value) {
+        panic("Could not load sprite file: `", path, "`");
+    }
+    defer(destroy(source.unwrap));
+
+    String_View input = source.unwrap;
+    Sprite result = {};
+
+    for (size_t line_number = 1; input.count > 0; line_number += 1) {
+        auto line = input.chop_by_delim('\n').trim();
+
+        if (line.count > 0) {
+            const auto key = line.chop_by_delim('=').trim();
+            const auto value = line.trim();
+
+            const auto parse_number = [&path, &line_number](String_View value) {
+                return unwrap_or_panic(
+                    value.as_integer<int>(),
+                    path, ":", line_number, ": `", value, "` is not a number");
+            };
+
+            if (key == "texture"_sv) {
+                result.texture_index = unwrap_or_panic(
+                    get_texture_by_id(value),
+                    path, ":", line_number, ": Unknown texture id `", value, "`");
+            } else if (key == "x"_sv) {
+                result.srcrect.x = parse_number(value);
+            } else if (key == "y"_sv) {
+                result.srcrect.y = parse_number(value);
+            } else if (key == "w"_sv) {
+                result.srcrect.w = parse_number(value);
+            } else if (key == "h"_sv) {
+                result.srcrect.h = parse_number(value);
+            }
+        }
+    }
+
+    sprites[sprite_count].unwrap = result;
+    sprites[sprite_count].id = id;
+    sprites[sprite_count].path = path;
+    sprite_count += 1;
+}
+
 void Assets::load_frames(String_View id, String_View path)
 {
     println(stdout, "Loading animat ", id, " from ", path, "...");
@@ -233,6 +280,22 @@ Texture Assets::get_by_index(Index<Texture> index)
     return textures[index.unwrap].unwrap;
 }
 
+Maybe<Index<Sprite>> Assets::get_sprite_by_id(String_View id)
+{
+    for (size_t i = 0; i < sprite_count; ++i) {
+        if (sprites[i].id == id) {
+            return {true, i};
+        }
+    }
+
+    return {};
+}
+
+Sprite Assets::get_by_index(Index<Sprite> index)
+{
+    return sprites[index.unwrap].unwrap;
+}
+
 Maybe<Index<Frames>> Assets::get_frames_by_id(String_View id)
 {
     for (size_t i = 0; i < framesen_count; ++i) {
@@ -285,6 +348,8 @@ void Assets::load_conf(SDL_Renderer *renderer, const char *filepath)
             load_sound(id, asset_path);
         } else if (type == "animat"_sv) {
             load_frames(id, asset_path);
+        } else if (type == "sprite"_sv) {
+            load_sprite(id, asset_path);
         } else {
             println(stderr, asset_path, ":", line_number, ": ",
                     "Unknown type of asset `", type, "`");
