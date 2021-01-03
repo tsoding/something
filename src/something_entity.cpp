@@ -291,7 +291,7 @@ void Entity::update(float dt, Game *game, Index<Entity> me)
                 game->damage_radius(pos, ENTITY_STOMP_RADIUS, me);
                 game->shake_camera(CAMERA_SHAKING_DURATION);
                 game->mixer.play_sample(STOMP_SOUND_INDEX);
-                game->spike_wave.activate(
+                game->spawn_spike_wave(
                     feet(),
                     normalize(gun_dir * vec2(1.0f, 0.0f)) * SPIKE_WAVE_STEP);
                 unstomp_animat.reset();

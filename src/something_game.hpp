@@ -29,6 +29,7 @@ const size_t ENTITIES_COUNT = 69;
 const size_t PROJECTILES_COUNT = 69;
 const size_t ITEMS_COUNT = 69;
 const size_t SPIKES_COUNT = 69;
+const size_t SPIKE_WAVES_CAPACITY = 69;
 const size_t CAMERA_LOCKS_CAPACITY = 200;
 const size_t ROOM_ROW_COUNT = 8;
 const size_t FPS_BARS_COUNT = 256;
@@ -73,9 +74,7 @@ struct Game
 
     Background background;
 
-    // TODO(#339): game supports only one spike wave
-    //   We should implement a pool of them like entities, projectiles, spikes, etc.
-    Spike_Wave spike_wave;
+    Spike_Wave spike_waves[SPIKE_WAVES_CAPACITY];
 
     // Camera utilities
     void add_camera_lock(Recti rect);
@@ -106,6 +105,7 @@ struct Game
 
     // Spike
     void spawn_spike(Spike spike);
+    void spawn_spike_wave(Vec2f pos, Vec2f dir);
 
     // Projectiles of the Game
     void spawn_projectile(Projectile projectile);

@@ -195,7 +195,10 @@ void Game::update(float dt)
     for (size_t i = 0; i < SPIKES_COUNT; ++i) {
         spikes[i].update(dt);
     }
-    spike_wave.update(dt, this);
+
+    for (size_t i = 0; i < SPIKE_WAVES_CAPACITY; ++i) {
+        spike_waves[i].update(dt, this);
+    }
 
     // Enemy AI //////////////////////////////
     auto &player = entities[PLAYER_ENTITY_INDEX];
@@ -1012,6 +1015,16 @@ void Game::spawn_spike(Spike spike)
         if (spikes[i].state == Spike_State::Ded) {
             spikes[i] = spike;
             spikes[i].activate();
+            return;
+        }
+    }
+}
+
+void Game::spawn_spike_wave(Vec2f pos, Vec2f dir)
+{
+    for (size_t i = 0; i < SPIKE_WAVES_CAPACITY; ++i) {
+        if (spike_waves[i].count == 0) {
+            spike_waves[i].activate(pos, dir);
             return;
         }
     }
