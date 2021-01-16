@@ -281,22 +281,3 @@ Rectf Tile_Grid::rect_of_tile(Vec2i coord)
 {
     return rect(vec_cast<float>(coord) * TILE_SIZE, TILE_SIZE, TILE_SIZE);
 }
-
-Vec2f Tile_Grid::find_floor(Vec2f abs_pos)
-{
-    const size_t THRESHOLD = 10;
-
-    if (is_tile_empty_abs(abs_pos)) {
-        Vec2i tile_pos = abs_to_tile_coord(abs_pos);
-        for (size_t i = 0; is_tile_empty_tile(tile_pos) && i < THRESHOLD; ++i) {
-            tile_pos.y += 1;
-        }
-        return vec2(abs_pos.x, tile_pos.y * TILE_SIZE);
-    } else {
-        Vec2i tile_pos = abs_to_tile_coord(abs_pos);
-        for (size_t i = 0; !is_tile_empty_tile(tile_pos) && i < THRESHOLD; ++i) {
-            tile_pos.y -= 1;
-        }
-        return vec2(abs_pos.x, (tile_pos.y + 1) * TILE_SIZE);
-    }
-}
