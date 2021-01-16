@@ -21,7 +21,7 @@
 //
 // ============================================================
 //
-// aids — 0.36.0 — std replacement for C++. Designed to aid developers
+// aids — 1.0.0 — std replacement for C++. Designed to aid developers
 // to a better programming experience.
 //
 // https://github.com/rexim/aids
@@ -30,6 +30,14 @@
 //
 // ChangeLog (https://semver.org/ is implied)
 //
+//   1.0.0  remove Stretchy_Buffer{}
+//          remove Args::pop()
+//   0.40.0 Fix MSVC warnings
+//   0.39.0 Fix common GCC warnings
+//   0.38.0 struct Mtor{}
+//          struct Fixed_Region{}
+//          Make allocator for read_file_as_string_view customizable
+//   0.37.0 NEVER HAPPENED
 //   0.36.0 void destroy(String_View sv)
 //   0.35.1 Fix compilation when using todo() and unreachable()
 //   0.35.0 [[noreturn]] void unreachable(Args... args)
@@ -106,6 +114,8 @@
 // Contributors:
 //   Alexey Kutepov (github:rexim)
 //   Aodhnait Étaín (github:aodhneine)
+//   Jarosław Wiosna (github:JaroslawWiosna)
+//   Danil Kolumbet (github:kolumb)
 
 #ifndef AIDS_HPP_
 #define AIDS_HPP_
@@ -120,6 +130,75 @@
 
 namespace aids
 {
+    ////////////////////////////////////////////////////////////
+    // ALLOCATORS
+    ////////////////////////////////////////////////////////////
+
+    struct Mtor
+    {
+        template <typename T>
+        T *alloc(size_t count, T def = {})
+        {
+            T *result = static_cast<T*>(malloc(sizeof(T) * count));
+            for (size_t i = 0; i < count; ++i) {
+                result[i] = def;
+            }
+            return result;
+        }
+
+        template <typename T>
+        void dealloc(T *ptr, size_t)
+        {
+            free(ptr);
+        }
+
+        template <typename T>
+        void dealloc(const T *ptr, size_t)
+        {
+            free(const_cast<T*>(ptr));
+        }
+    };
+
+    Mtor mtor;
+
+    template <size_t Capacity>
+    struct Fixed_Region
+    {
+        size_t size;
+        char buffer[Capacity];
+
+        template <typename T>
+        T *alloc(size_t count, T def = T())
+        {
+            if (count * sizeof(T) > Capacity) {
+                return nullptr;
+            }
+
+            T *result = static_cast<T*>(buffer + size);
+            for (size_t i = 0; i < count; ++i) {
+                result[i] = def;
+            }
+
+            size += count * sizeof(T);
+            return result;
+        }
+
+        template <typename T>
+        void dealloc(T*, size_t)
+        {
+        }
+
+        template <typename T>
+        void dealloc(const T*, size_t)
+        {
+        }
+
+        void clean()
+        {
+            size = 0;
+        }
+    };
+
     ////////////////////////////////////////////////////////////
     // ALGORITHM
     ////////////////////////////////////////////////////////////
@@ -466,7 +545,9 @@ namespace aids
         fwrite(view.data, 1, view.count, stream);
     }
 
-    Maybe<String_View> read_file_as_string_view(const char *filename)
+    template <typename Ator = Mtor>
+    Maybe<String_View> read_file_as_string_view(const char *filename,
+                                                Ator *ator = &mtor)
     {
         FILE *f = fopen(filename, "rb");
         if (!f) return {};
@@ -481,7 +562,7 @@ namespace aids
         err = fseek(f, 0, SEEK_SET);
         if (err < 0) return {};
 
-        auto data = malloc(size);
+        auto data = ator->template alloc<char>(size);
         if (!data) return {};
 
         size_t read_size = fread(data, 1, size, f);
@@ -492,14 +573,14 @@ namespace aids
 
     void destroy(String_View sv)
     {
-        free((void*) sv.data);
+        mtor.dealloc(sv.data, sv.count);
     }
 
     ////////////////////////////////////////////////////////////
     // DYNAMIC ARRAY
     ////////////////////////////////////////////////////////////
 
-    template <typename T>
+    template <typename T, typename Ator = Mtor>
     struct Dynamic_Array
     {
         size_t capacity;
@@ -508,8 +589,13 @@ namespace aids
 
         void expand_capacity()
         {
-            capacity = data ? 2 * capacity : 256;
-            data = (T*)realloc((void*)data, capacity * sizeof(T));
+            size_t new_capacity = data ? 2 * capacity : 256;
+            T *new_data = mtor.alloc<T>(new_capacity);
+
+            memcpy(new_data, data, capacity);
+
+            data = new_data;
+            capacity = new_capacity;
         }
 
         void push(T item)
@@ -548,46 +634,8 @@ namespace aids
     void destroy(Dynamic_Array<T> dynamic_array)
     {
         if (dynamic_array.data) {
-            free(dynamic_array.data);
+            mtor.dealloc(dynamic_array.data, dynamic_array.capacity);
         }
-    }
-
-    ////////////////////////////////////////////////////////////
-    // STRETCHY BUFFER
-    ////////////////////////////////////////////////////////////
-
-    namespace deprecated {
-        struct Stretchy_Buffer
-        {
-            size_t capacity;
-            size_t size;
-            char *data;
-
-            void push(const char *that_data, size_t that_size)
-            {
-                if (size + that_size > capacity) {
-                    capacity = 2 * capacity + that_size;
-                    data = (char*)realloc((void*)data, capacity);
-                }
-
-                memcpy(data + size, that_data, that_size);
-                size += that_size;
-            }
-
-            template <typename T>
-            void push(T x)
-            {
-                push((char*) &x, sizeof(x));
-            }
-        };
-    }
-
-    using Stretchy_Buffer [[deprecated("Use Dynamic_Array instead. Stretchy_Buffer is limited to only `char`-s while Dynamic_Array<T> can work with any type T.")]] = deprecated::Stretchy_Buffer;
-
-    [[deprecated("Use Dynamic_Array instead. Stretchy_Buffer is limited to only `char`-s while Dynamic_Array<T> can work with any type T.")]]
-    void print1(FILE *stream, deprecated::Stretchy_Buffer buffer)
-    {
-        fwrite(buffer.data, 1, buffer.size, stream);
     }
 
     ////////////////////////////////////////////////////////////
@@ -598,12 +646,6 @@ namespace aids
     {
         int argc;
         char **argv;
-
-        [[deprecated("Use Args::shift() instead. It was decided to rename `pop` to `shift` since it creates confusion with the pop operation of stacks which removes the elements from the other end. And shift is common operation in Bash and Perl (probably others) for parsing command line arguments.")]]
-        char *pop()
-        {
-            return shift();
-        }
 
         char *shift()
         {
@@ -1129,12 +1171,12 @@ namespace aids
                 assert(capacity == 0);
                 assert(size == 0);
 
-                buckets = (Maybe<Bucket>*) calloc(HASH_MAP_INITIAL_CAPACITY, sizeof(*buckets));
+                buckets = mtor.alloc<Maybe<Bucket>>(HASH_MAP_INITIAL_CAPACITY);
                 capacity = HASH_MAP_INITIAL_CAPACITY;
                 size = 0;
             } else {
                 Hash_Map<Key, Value> new_hash_map = {
-                    (Maybe<Bucket>*) calloc(capacity * 2, sizeof(*buckets)),
+                    mtor.alloc<Maybe<Bucket>>(capacity * 2),
                     capacity * 2,
                     0
                 };
@@ -1147,7 +1189,7 @@ namespace aids
                     }
                 }
 
-                free(buckets);
+                mtor.dealloc(buckets, capacity);
 
                 *this = new_hash_map;
             }
@@ -1211,7 +1253,7 @@ namespace aids
     void destroy(Hash_Map<Key, Value> hash_map)
     {
         if (hash_map.buckets) {
-            free(hash_map.buckets);
+            mtor.dealloc(hash_map.buckets, hash_map.capacity);
         }
     }
 }
