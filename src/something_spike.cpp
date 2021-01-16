@@ -78,14 +78,18 @@ void Spike_Wave::update(float dt, Game *game)
         cooldown -= dt;
         if (cooldown <= 0.0f) {
             const auto scale_step = (SPIKE_WAVE_SCALE_HIGH - SPIKE_WAVE_SCALE_LOW) / SPIKE_WAVE_MAX_COUNT;
-            game->spawn_spike(
-                ice_spike(pos,
-                          rand() % 2 == 0 ? ICE_SPIKE_1_SPRITE_INDEX : ICE_SPIKE_2_SPRITE_INDEX,
-                          scale));
-            scale += scale_step;
-            pos += dir;
-            cooldown = SPIKE_WAVE_COOLDOWN;
-            count -= 1;
+            if (snap_to_floor(&game->grid, &pos)) {
+                game->spawn_spike(
+                    ice_spike(pos,
+                              rand() % 2 == 0 ? ICE_SPIKE_1_SPRITE_INDEX : ICE_SPIKE_2_SPRITE_INDEX,
+                              scale));
+                scale += scale_step;
+                pos += dir;
+                cooldown = SPIKE_WAVE_COOLDOWN;
+                count -= 1;
+            } else {
+                count = 0;
+            }
         }
     }
 }
@@ -99,5 +103,31 @@ void Spike_Wave::activate(Vec2f pos, Vec2f dir)
     this->cooldown = 0.0f;
     this->scale = SPIKE_WAVE_SCALE_LOW;
 }
+
+bool Spike_Wave::snap_to_floor(Tile_Grid *grid, Vec2f *abs_pos)
+{
+    Vec2i tile_pos = grid->abs_to_tile_coord(*abs_pos);
+
+    if (grid->is_tile_empty_abs(*abs_pos)) {
+        for (int i = 0; grid->is_tile_empty_tile(tile_pos); ++i) {
+            if (i >= SPIKE_WAVE_THRESHOLD) {
+                return false;
+            }
+            tile_pos.y += 1;
+        }
+        *abs_pos = vec2(abs_pos->x, tile_pos.y * TILE_SIZE);
+    } else {
+        for (int i = 0; !grid->is_tile_empty_tile(tile_pos); ++i) {
+            if (i >= SPIKE_WAVE_THRESHOLD) {
+                return false;
+            }
+            tile_pos.y -= 1;
+        }
+        *abs_pos = vec2(abs_pos->x, (tile_pos.y + 1) * TILE_SIZE);
+    }
+
+    return true;
+}
+
 
 // TODO(#329): there is no weapon that uses the spikes mechanics

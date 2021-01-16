@@ -34,6 +34,7 @@ struct Spike_Wave
 
     void update(float dt, Game *game);
     void activate(Vec2f pos, Vec2f dir);
+    bool snap_to_floor(Tile_Grid *grid, Vec2f *abs_pos);
 };
 
 #endif  // SOMETHING_SPIKE_HPP_
