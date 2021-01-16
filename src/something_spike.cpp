@@ -78,6 +78,7 @@ void Spike_Wave::update(float dt, Game *game)
         cooldown -= dt;
         if (cooldown <= 0.0f) {
             const auto scale_step = (SPIKE_WAVE_SCALE_HIGH - SPIKE_WAVE_SCALE_LOW) / SPIKE_WAVE_MAX_COUNT;
+            pos = game->grid.find_floor(pos);
             game->spawn_spike(
                 ice_spike(pos,
                           rand() % 2 == 0 ? ICE_SPIKE_1_SPRITE_INDEX : ICE_SPIKE_2_SPRITE_INDEX,

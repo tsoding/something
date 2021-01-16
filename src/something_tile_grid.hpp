@@ -112,6 +112,8 @@ struct Tile_Grid
     Maybe<Vec2i> next_in_bfs(Vec2i dst0, Recti *lock);
     void render_debug_bfs_overlay(SDL_Renderer *renderer, Camera *camera, Recti *lock);
     bool a_sees_b(Vec2f a, Vec2f b);
+
+    Vec2f find_floor(Vec2f abs_pos);
 };
 
 #endif  // TILE_GRID_HPP_
