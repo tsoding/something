@@ -523,11 +523,13 @@ void Game::entity_resolve_collision(Index<Entity> entity_index)
     Entity *entity = &entities[entity_index.unwrap];
 
     if (entity->state == Entity_State::Alive) {
-        const float step_x = entity->hitbox_local.w / (float) ENTITY_MESH_COLS;
-        const float step_y = entity->hitbox_local.h / (float) ENTITY_MESH_ROWS;
+        const float step_x =
+            entity->hitbox_local.w / ceilf(entity->hitbox_local.w / ENTITY_MESH_STEP);
+        const float step_y =
+            entity->hitbox_local.h / ceilf(entity->hitbox_local.h / ENTITY_MESH_STEP);
 
-        for (int rows = 0; rows <= ENTITY_MESH_ROWS; ++rows) {
-            for (int cols = 0; cols <= ENTITY_MESH_COLS; ++cols) {
+        for (int rows = 0; rows * step_x <= entity->hitbox_local.w; ++rows) {
+            for (int cols = 0; cols * step_y <= entity->hitbox_local.h; ++cols) {
                 Vec2f t0 = entity->pos +
                     vec2(entity->hitbox_local.x, entity->hitbox_local.y) +
                     vec2(cols * step_x, rows * step_y);
@@ -537,8 +539,7 @@ void Game::entity_resolve_collision(Index<Entity> entity_index)
 
                 Vec2f d = t1 - t0;
 
-                const int IMPACT_THRESHOLD = 5;
-                if (abs(d.y) >= IMPACT_THRESHOLD && !entity->has_jumped) {
+                if (abs(d.y) >= ENTITY_IMPACT_THRESHOLD && !entity->has_jumped) {
                     if (fabsf(entity->vel.y) > LANDING_PARTICLE_BURST_THRESHOLD) {
                         for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
                             entity->particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, fabsf(entity->vel.y) * 0.25f));
@@ -547,7 +548,7 @@ void Game::entity_resolve_collision(Index<Entity> entity_index)
 
                     entity->vel.y = 0;
                 }
-                if (abs(d.x) >= IMPACT_THRESHOLD) entity->vel.x = 0;
+                if (abs(d.x) >= ENTITY_IMPACT_THRESHOLD) entity->vel.x = 0;
 
                 entity->pos += d;
             }

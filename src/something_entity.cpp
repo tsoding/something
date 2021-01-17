@@ -155,11 +155,11 @@ void Entity::render_debug(SDL_Renderer *renderer, Camera camera, Bitmap_Font *fo
 {
     if (state == Entity_State::Alive) {
         // Collision mesh
-        const float step_x = hitbox_local.w / (float) ENTITY_MESH_COLS;
-        const float step_y = hitbox_local.h / (float) ENTITY_MESH_ROWS;
+        const float step_x = hitbox_local.w / ceilf(hitbox_local.w / ENTITY_MESH_STEP);
+        const float step_y = hitbox_local.h / ceilf(hitbox_local.h / ENTITY_MESH_STEP);
 
-        for (int rows = 0; rows <= ENTITY_MESH_ROWS; ++rows) {
-            for (int cols = 0; cols <= ENTITY_MESH_COLS; ++cols) {
+        for (int rows = 0; rows * step_x <= hitbox_local.w; ++rows) {
+            for (int cols = 0; cols * step_y <= hitbox_local.h; ++cols) {
                 Vec2f t = camera.to_screen(
                     pos +
                     vec2(hitbox_local.x, hitbox_local.y) +

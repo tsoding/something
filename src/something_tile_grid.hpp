@@ -38,7 +38,7 @@ Tile_Def tile_defs[TILE_COUNT] = {
     {true, {}, {}},                           // TILE_ICE_3
 };
 
-const float TILE_SIZE = 128.0f * 0.5f;
+const float TILE_SIZE = 64.0f;
 const float TILE_SIZE_SQR = TILE_SIZE * TILE_SIZE;
 
 const int ROOM_WIDTH  = 10 * 2;
