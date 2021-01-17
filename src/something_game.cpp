@@ -528,30 +528,33 @@ void Game::entity_resolve_collision(Index<Entity> entity_index)
         const float step_y =
             entity->hitbox_local.h / ceilf(entity->hitbox_local.h / ENTITY_MESH_STEP);
 
+        const Vec2f origin = entity->pos;
+
         for (int rows = 0; rows * step_x <= entity->hitbox_local.w; ++rows) {
             for (int cols = 0; cols * step_y <= entity->hitbox_local.h; ++cols) {
                 Vec2f t0 = entity->pos +
                     vec2(entity->hitbox_local.x, entity->hitbox_local.y) +
                     vec2(cols * step_x, rows * step_y);
                 Vec2f t1 = t0;
-
                 grid.resolve_point_collision(&t1);
-
-                Vec2f d = t1 - t0;
-
-                if (abs(d.y) >= ENTITY_IMPACT_THRESHOLD && !entity->has_jumped) {
-                    if (fabsf(entity->vel.y) > LANDING_PARTICLE_BURST_THRESHOLD) {
-                        for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
-                            entity->particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, fabsf(entity->vel.y) * 0.25f));
-                        }
-                    }
-
-                    entity->vel.y = 0;
-                }
-                if (abs(d.x) >= ENTITY_IMPACT_THRESHOLD) entity->vel.x = 0;
-
-                entity->pos += d;
+                entity->pos += t1 - t0;
             }
+        }
+
+        const Vec2f d = entity->pos - origin;
+
+        // NOTE: Don't consider y-impact if x-impact has happened
+        // This is needed to not get stuck in the wall in the middle of the air
+        if (abs(d.x) >= ENTITY_IMPACT_THRESHOLD) {
+            entity->vel.x = 0;
+        } else if (abs(d.y) >= ENTITY_IMPACT_THRESHOLD && !entity->has_jumped) {
+            if (fabsf(entity->vel.y) > LANDING_PARTICLE_BURST_THRESHOLD) {
+                for (int i = 0; i < ENTITY_JUMP_PARTICLE_BURST; ++i) {
+                    entity->particles.push(rand_float_range(PARTICLE_JUMP_VEL_LOW, fabsf(entity->vel.y) * 0.25f));
+                }
+            }
+
+            entity->vel.y = 0;
         }
     }
 }
