@@ -6,7 +6,7 @@ alpha yet. Use it at your own risk. Nothing is documented, anything
 can be changed at any moment or stop working at all.**
 
 ## Quick Start
-Install dependencies for your OS/Distro.
+Install dependencies for your OS/Distro, here is a table for help, this does not include compile and make.
 | OS / Distro                   | Dependency package names                            |
 |-------------------------------|-----------------------------------------------------|
 | Debian or based (Ubuntu)      | libsdl2-dev pkg-config                              |
@@ -21,7 +21,15 @@ Install dependencies for your OS/Distro.
 $ make -B
 $ ./something.debug
 ```
-`Windows`:
+`Windows (Visual Studio)`:
+```
+> curl -fsSL -o SDL2-devel-2.0.12-VC.zip https://www.libsdl.org/release/SDL2-devel-2.0.12-VC.zip
+> tar -xf SDL2-devel-2.0.12-VC.zip
+> move SDL2-2.0.12 SDL2
+> del SDL2-devel-2.0.12-VC.zip
+> build_msvc
+```
+`Windows (MinGW)`:
 ```sh
 $ mingw32-make -B
 $ something.debug.exe
