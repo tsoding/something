@@ -39,29 +39,6 @@ Rect<T> rectf_scale_size(Rect<T> r, T s)
     return rect(vec2(r.x, r.y), r.w * s, r.h * s);
 }
 
-void render_texture_as_gun_in_direction(SDL_Renderer *renderer,
-                                        Index<Texture> texture_index,
-                                        Vec2f begin,
-                                        double angle,
-                                        RGBA shade,
-                                        SDL_RendererFlip flip)
-{
-    const auto sprite = sprite_from_texture_index(texture_index);
-    const auto destrect = rectf_scale_size(
-        rectf_from_sdl(sprite.srcrect), ENTITY_GUN_SCALE);
-    const auto pivot = vec2(0.0f, destrect.h * 0.5f);
-
-    angle = fmodf(angle, 360.0);
-
-    sprite.render(
-        renderer,
-        destrect + begin - pivot,
-        flip,
-        shade,
-        angle,
-        some(pivot));
-}
-
 void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
 {
     const SDL_RendererFlip flip =
@@ -156,16 +133,6 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 mix_colors(shade, effective_flash_color));
         } break;
         }
-
-        // Render the gun
-        Vec2f gun_begin = pos;
-        render_texture_as_gun_in_direction(
-            renderer,
-            GUN_TEXTURE_INDEX,
-            camera.to_screen(gun_begin),
-            vec2f_angle(gun_dir) * 180.0 / PI,
-            shade,
-            gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL);
     } break;
 
     case Entity_State::Poof: {
