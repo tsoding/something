@@ -20,12 +20,14 @@ struct Sprite
                 Rectf destrect,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
                 RGBA shade = {0, 0, 0, 0},
-                double angle = 0.0) const;
+                double angle = 0.0,
+                Maybe<Vec2f> pivot = {}) const;
     void render(SDL_Renderer *renderer,
                 Vec2f pos,
                 SDL_RendererFlip flip = SDL_FLIP_NONE,
                 RGBA shade = {0, 0, 0, 0},
-                double angle = 0.0) const;
+                double angle = 0.0,
+                Maybe<Vec2f> pivot = {}) const;
 };
 
 struct Frames

@@ -181,6 +181,16 @@ SDL_Rect rectf_for_sdl(Rectf rect)
             (int) floorf(rect.h)};
 }
 
+Rectf rectf_from_sdl(SDL_Rect sdl_rect)
+{
+    return {
+        (float) sdl_rect.x,
+        (float) sdl_rect.y,
+        (float) sdl_rect.w,
+        (float) sdl_rect.h
+    };
+}
+
 template <typename U, typename T>
 Vec2<U> vec_cast(Vec2<T> v)
 {
@@ -239,4 +249,9 @@ float rand_float_range(float low, float high)
 {
     const auto r = (float)rand()/(float)(RAND_MAX);
     return low + r * (high - low);
+}
+
+float vec2f_angle(Vec2f v2)
+{
+    return atan2(v2.y, v2.x);
 }
