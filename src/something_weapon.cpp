@@ -12,7 +12,7 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_ind
         const auto destrect = rectf_scale_size(rectf_from_sdl(sprite.srcrect),
                                                gun.skin_scale);
         const auto pivot = vec2(0.0f, destrect.h * 0.5f);
-        const auto angle = fmodf(vec2f_angle(entity.gun_dir) * 180.0 / PI, 360.0);
+        const auto angle = fmodf(vec2f_angle(entity.gun_dir) * 180.0f / PI, 360.0f);
         const auto flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
 
         sprite.render(
