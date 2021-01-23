@@ -19,7 +19,7 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_ind
             renderer,
             destrect + begin - pivot,
             flip,
-            // TODO: guns of enemies are not shaded properly
+            // TODO(#354): guns of enemies are not shaded properly
             {},
             angle,
             some(pivot));
