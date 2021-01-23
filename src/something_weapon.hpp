@@ -8,6 +8,8 @@ struct Game;
 struct Gun
 {
     Projectile projectile;
+    Index<Texture> skin;
+    float skin_scale;
 };
 
 struct Placer

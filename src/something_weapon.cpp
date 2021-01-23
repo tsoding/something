@@ -1,14 +1,32 @@
 #include "./something_game.hpp"
 #include "./something_weapon.hpp"
 
-void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity)
+void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_index)
 {
     switch (type) {
-    case Weapon_Type::Stomp:
-    case Weapon_Type::Gun: {} break;
+    case Weapon_Type::Stomp: {} break;
+    case Weapon_Type::Gun: {
+        const auto &entity = game->entities[entity_index.unwrap];
+        const auto begin = game->camera.to_screen(entity.pos);
+        const auto sprite = sprite_from_texture_index(gun.skin);
+        const auto destrect = rectf_scale_size(rectf_from_sdl(sprite.srcrect),
+                                               gun.skin_scale);
+        const auto pivot = vec2(0.0f, destrect.h * 0.5f);
+        const auto angle = fmodf(vec2f_angle(entity.gun_dir) * 180.0f / PI, 360.0f);
+        const auto flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
+
+        sprite.render(
+            renderer,
+            destrect + begin - pivot,
+            flip,
+            // TODO(#354): guns of enemies are not shaded properly
+            {},
+            angle,
+            some(pivot));
+    } break;
     case Weapon_Type::Placer: {
         bool can_place = false;
-        auto target_tile = game->where_entity_can_place_block(entity, &can_place);
+        auto target_tile = game->where_entity_can_place_block(entity_index, &can_place);
         can_place = can_place && placer.amount > 0;
         tile_defs[placer.tile].top_texture.render(
             renderer,
@@ -26,9 +44,11 @@ void Weapon::shoot(Game *game, Index<Entity> shooter)
 {
     switch (type) {
     case Weapon_Type::Gun: {
+        const auto &entity = game->entities[shooter.unwrap];
+
         Projectile projectile = gun.projectile;
-        projectile.pos = game->entities[shooter.unwrap].pos;
-        projectile.vel = normalize(game->entities[shooter.unwrap].gun_dir) * PROJECTILE_SPEED;
+        projectile.pos = entity.pos + normalize(entity.gun_dir) * ENTITY_GUN_LENGTH;
+        projectile.vel = normalize(entity.gun_dir) * PROJECTILE_SPEED;
         projectile.shooter = shooter;
         game->spawn_projectile(projectile);
     } break;
@@ -76,6 +96,8 @@ Weapon water_gun()
     result.shoot_sample = {true, SPLASH_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = water_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
+    result.gun.skin = GUN_TEXTURE_INDEX;
+    result.gun.skin_scale = ENTITY_GUN_SCALE;
     return result;
 }
 
@@ -85,6 +107,8 @@ Weapon fire_gun()
     result.shoot_sample = {true, FIREBALL_SOUND_INDEX};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = fire_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
+    result.gun.skin = GUN_TEXTURE_INDEX;
+    result.gun.skin_scale = ENTITY_GUN_SCALE;
     return result;
 }
 
@@ -94,6 +118,8 @@ Weapon rock_gun()
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = rock_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
+    result.gun.skin = GUN_TEXTURE_INDEX;
+    result.gun.skin_scale = ENTITY_GUN_SCALE;
     return result;
 }
 
@@ -103,6 +129,8 @@ Weapon ice_gun()
     Weapon result = {};
     result.type = Weapon_Type::Gun;
     result.gun.projectile = ice_projectile(vec2(0.0f, 0.0f), vec2(0.0f, 0.0f), {0});
+    result.gun.skin = GUN_TEXTURE_INDEX;
+    result.gun.skin_scale = ENTITY_GUN_SCALE;
     return result;
 }
 

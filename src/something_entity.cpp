@@ -33,6 +33,12 @@ RGBA mix_colors(RGBA b32, RGBA a32)
     return r;
 }
 
+template <typename T>
+Rect<T> rectf_scale_size(Rect<T> r, T s)
+{
+    return rect(vec2(r.x, r.y), r.w * s, r.h * s);
+}
+
 void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
 {
     const SDL_RendererFlip flip =
@@ -127,15 +133,6 @@ void Entity::render(SDL_Renderer *renderer, Camera camera, RGBA shade) const
                 mix_colors(shade, effective_flash_color));
         } break;
         }
-
-        // Render the gun
-        // TODO(#59): Proper gun rendering
-        Vec2f gun_begin = pos;
-        render_line(
-            renderer,
-            camera.to_screen(gun_begin),
-            camera.to_screen(gun_begin + normalize(gun_dir) * ENTITY_GUN_LENGTH),
-            {1.0f, 0.0f, 0.0f, 1.0f});
     } break;
 
     case Entity_State::Poof: {

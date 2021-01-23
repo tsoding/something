@@ -18,11 +18,16 @@ void Sprite::render(SDL_Renderer *renderer,
                     Rectf destrect,
                     SDL_RendererFlip flip,
                     RGBA shade,
-                    double angle) const
+                    double angle,
+                    Maybe<Vec2f> pivot) const
 {
     if (texture_index.unwrap < assets.textures_count) {
         SDL_Rect rect = rectf_for_sdl(destrect);
         SDL_Color sdl_shade = rgba_to_sdl(shade);
+        SDL_Point center = {
+            (int) floorf(pivot.unwrap.x),
+            (int) floorf(pivot.unwrap.y)
+        };
 
         sec(SDL_RenderCopyEx(
                 renderer,
@@ -30,7 +35,7 @@ void Sprite::render(SDL_Renderer *renderer,
                 &srcrect,
                 &rect,
                 angle,
-                nullptr,
+                pivot.has_value ? &center : nullptr,
                 flip));
 
         sec(SDL_SetTextureColorMod(
@@ -45,8 +50,8 @@ void Sprite::render(SDL_Renderer *renderer,
                 assets.get_by_index(texture_index).texture_mask,
                 &srcrect,
                 &rect,
-                0.0,
-                nullptr,
+                angle,
+                pivot.has_value ? &center : nullptr,
                 flip));
     }
 }
@@ -55,7 +60,8 @@ void Sprite::render(SDL_Renderer *renderer,
                     Vec2f pos,
                     SDL_RendererFlip flip,
                     RGBA shade,
-                    double angle) const
+                    double angle,
+                    Maybe<Vec2f> pivot) const
 {
     const Rectf destrect = {
         pos.x - (float) srcrect.w * 0.5f,
@@ -64,7 +70,7 @@ void Sprite::render(SDL_Renderer *renderer,
         (float) srcrect.h
     };
 
-    render(renderer, destrect, flip, shade, angle);
+    render(renderer, destrect, flip, shade, angle, pivot);
 }
 
 void Frames_Animat::reset()

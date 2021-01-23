@@ -419,6 +419,7 @@ void Game::render(SDL_Renderer *renderer)
         }
     }
 
+    // TODO(#353): enemies don't have their weapons renderered
     {
         auto weapon = entities[PLAYER_ENTITY_INDEX].get_current_weapon();
         if (weapon != NULL) {
