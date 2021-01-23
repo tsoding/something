@@ -1,47 +1,28 @@
 #include "./something_game.hpp"
 #include "./something_weapon.hpp"
 
-void render_texture_as_gun_in_direction(SDL_Renderer *renderer,
-                                        Index<Texture> texture_index,
-                                        Vec2f begin,
-                                        double angle,
-                                        RGBA shade,
-                                        SDL_RendererFlip flip,
-                                        float scale)
-{
-    const auto sprite = sprite_from_texture_index(texture_index);
-    const auto destrect = rectf_scale_size(
-        rectf_from_sdl(sprite.srcrect), scale);
-    const auto pivot = vec2(0.0f, destrect.h * 0.5f);
-
-    angle = fmodf(angle, 360.0);
-
-    sprite.render(
-        renderer,
-        destrect + begin - pivot,
-        flip,
-        shade,
-        angle,
-        some(pivot));
-}
-
 void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_index)
 {
     switch (type) {
     case Weapon_Type::Stomp: {} break;
     case Weapon_Type::Gun: {
         const auto &entity = game->entities[entity_index.unwrap];
+        const auto begin = game->camera.to_screen(entity.pos);
+        const auto sprite = sprite_from_texture_index(gun.skin);
+        const auto destrect = rectf_scale_size(rectf_from_sdl(sprite.srcrect),
+                                               gun.skin_scale);
+        const auto pivot = vec2(0.0f, destrect.h * 0.5f);
+        const auto angle = fmodf(vec2f_angle(entity.gun_dir) * 180.0 / PI, 360.0);
+        const auto flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
 
-        // Render the gun
-        Vec2f gun_begin = entity.pos;
-        render_texture_as_gun_in_direction(
+        sprite.render(
             renderer,
-            GUN_TEXTURE_INDEX,
-            game->camera.to_screen(gun_begin),
-            vec2f_angle(entity.gun_dir) * 180.0 / PI,
+            destrect + begin - pivot,
+            flip,
+            // TODO: guns of enemies are not shaded properly
             {},
-            entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL,
-            gun.skin_scale);
+            angle,
+            some(pivot));
     } break;
     case Weapon_Type::Placer: {
         bool can_place = false;
