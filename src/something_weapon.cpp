@@ -1,7 +1,7 @@
 #include "./something_game.hpp"
 #include "./something_weapon.hpp"
 
-void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_index)
+void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_index, RGBA shade)
 {
     switch (type) {
     case Weapon_Type::Stomp: {} break;
@@ -19,8 +19,7 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_ind
             renderer,
             destrect + begin - pivot,
             flip,
-            // TODO(#354): guns of enemies are not shaded properly
-            {},
+            shade,
             angle,
             some(pivot));
     } break;

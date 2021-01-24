@@ -5,6 +5,7 @@
 
 struct Game;
 
+// TODO(#356): gun does not have a recoil animation
 struct Gun
 {
     Projectile projectile;
@@ -33,7 +34,7 @@ struct Weapon
 
     Maybe<Index<Sample_S16>> shoot_sample;
 
-    void render(SDL_Renderer *renderer, Game *game, Index<Entity> entity);
+    void render(SDL_Renderer *renderer, Game *game, Index<Entity> entity, RGBA shade = {});
     void shoot(Game *game, Index<Entity> shooter);
     Sprite icon() const;
 };
