@@ -11,6 +11,7 @@ struct Gun
     Projectile projectile;
     Index<Texture> skin;
     float skin_scale;
+    float recoil_offset_ratio;
 };
 
 struct Placer
@@ -35,6 +36,7 @@ struct Weapon
     Maybe<Index<Sample_S16>> shoot_sample;
 
     void render(SDL_Renderer *renderer, Game *game, Index<Entity> entity, RGBA shade = {});
+    void update(float delta_time);
     void shoot(Game *game, Index<Entity> shooter);
     Sprite icon() const;
 };
