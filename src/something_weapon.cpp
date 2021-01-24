@@ -12,15 +12,18 @@ void Weapon::render(SDL_Renderer *renderer, Game *game, Index<Entity> entity_ind
         const auto destrect = rectf_scale_size(rectf_from_sdl(sprite.srcrect),
                                                gun.skin_scale);
         const auto pivot = vec2(0.0f, destrect.h * 0.5f);
-        const auto angle = fmodf(vec2f_angle(entity.gun_dir) * 180.0f / PI, 360.0f);
+        const auto angle_rads = vec2f_angle(entity.gun_dir);
+        const auto angle_degrees = fmodf(angle_rads * 180.0f / PI, 360.0f);
         const auto flip = entity.gun_dir.x > 0.0f ? SDL_FLIP_NONE : SDL_FLIP_VERTICAL;
+        const auto recoil_offset_vector =
+            polar(ENTITY_GUN_RECOIL_OFFSET * gun.recoil_offset_ratio, angle_rads);
 
         sprite.render(
             renderer,
-            destrect + begin - pivot,
+            destrect + begin - pivot - recoil_offset_vector,
             flip,
             shade,
-            angle,
+            angle_degrees,
             some(pivot));
     } break;
     case Weapon_Type::Placer: {
@@ -50,6 +53,7 @@ void Weapon::shoot(Game *game, Index<Entity> shooter)
         projectile.vel = normalize(entity.gun_dir) * PROJECTILE_SPEED;
         projectile.shooter = shooter;
         game->spawn_projectile(projectile);
+        gun.recoil_offset_ratio = 1.0f;
     } break;
 
     case Weapon_Type::Placer: {
@@ -87,6 +91,20 @@ Sprite Weapon::icon() const
     assert(0 && "Unreachable");
 
     return {};
+}
+
+void Weapon::update(float delta_time)
+{
+    switch (type) {
+    case Weapon_Type::Gun: {
+        if (gun.recoil_offset_ratio > 0) {
+            gun.recoil_offset_ratio -= delta_time * ENTITY_GUN_RECOIL_SPEED;
+        }
+    } break;
+    case Weapon_Type::Placer:
+    case Weapon_Type::Stomp:
+    default: {}
+    }
 }
 
 Weapon water_gun()

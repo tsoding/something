@@ -209,6 +209,7 @@ void Game::update(float dt)
             lock = &camera_locks[i];
         }
     }
+    player.get_current_weapon()->update(dt);
 
     auto player_tile = grid.abs_to_tile_coord(player.pos);
     if (lock) {
