@@ -5,7 +5,7 @@
 
 struct Game;
 
-// TODO: gun does not have a recoil animation
+// TODO(#356): gun does not have a recoil animation
 struct Gun
 {
     Projectile projectile;
