@@ -4,5 +4,7 @@
 
 using namespace aids;
 
+#include "./something_sdl.cpp"
 #include "./something_game.cpp"
+#include "./something_player.cpp"
 #include "./something_main.cpp"

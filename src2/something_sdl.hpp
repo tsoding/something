@@ -1,6 +1,8 @@
 #ifndef SOMETHING_SDL_HPP_
 #define SOMETHING_SDL_HPP_
 
+#include "./something_v2.hpp"
+
 template <typename T>
 T *sec(T *ptr)
 {
@@ -28,5 +30,9 @@ typedef Uint32 RGBA32;
 
 typedef float Seconds;
 typedef Uint32 Milliseconds;
+
+void fill_rect(SDL_Renderer *renderer,
+               RGBA32 color,
+               V2<float> pos, V2<float> size);
 
 #endif  // SOMETHING_SDL_HPP_
