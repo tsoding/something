@@ -11,6 +11,8 @@ const Milliseconds DELTA_TIME_MS =
 
 int main()
 {
+    config.load_file("src2/vars.conf");
+
     game = new Game{};
     defer(delete game);
 
@@ -25,6 +27,10 @@ int main()
 
     game->renderer =
         SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+
+    game->keyboard = SDL_GetKeyboardState(NULL);
+
+    game->player.pos = V2(0.0f, 200.0f);
 
     while (!game->quit) {
         SDL_Event event;

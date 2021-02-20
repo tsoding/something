@@ -9,6 +9,8 @@ struct Game
     SDL_Renderer *renderer;
     bool quit;
 
+    const Uint8 *keyboard;
+
     Player player;
 
     void handle_event(const SDL_Event *event);
