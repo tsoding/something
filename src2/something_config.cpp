@@ -20,6 +20,8 @@ void Config::load_file(const char *file_path)
             auto name = var_def.chop_by_delim(':').trim();
             auto type = var_def.chop_by_delim('=').trim();
             auto value = var_def.trim();
+            (void) name;
+            (void) value;
             if (type == "float"_sv) {
                 todo("Parsing float is not implemented");
             } else if (type == "int"_sv) {
