@@ -26,4 +26,7 @@ typedef Uint32 RGBA32;
     (color >> (8 * 2)) & 0xFF, \
     (color >> (8 * 3)) & 0xFF
 
+typedef float Seconds;
+typedef Uint32 Milliseconds;
+
 #endif  // SOMETHING_SDL_HPP_
