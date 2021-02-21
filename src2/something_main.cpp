@@ -13,20 +13,24 @@ int main()
 {
     config.load_file("src2/vars.conf");
 
-    game = new Game{};
+    // NOTE: The game object could be too big to put on the stack.
+    // So we are allocating it on the heap.
+    Game *game = new Game{};
     defer(delete game);
 
     sec(SDL_Init(SDL_INIT_VIDEO));
 
-    game->window =
+    SDL_Window * const window =
         sec(SDL_CreateWindow(
                 "Something 2 -- Electric Boogaloo",
                 0, 0,
                 SCREEN_WIDTH, SCREEN_HEIGHT,
                 SDL_WINDOW_RESIZABLE));
+    defer(SDL_DestroyWindow(window));
 
-    game->renderer =
-        SDL_CreateRenderer(game->window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Renderer * const renderer =
+        SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    defer(SDL_DestroyRenderer(renderer));
 
     game->keyboard = SDL_GetKeyboardState(NULL);
 
@@ -39,7 +43,7 @@ int main()
         }
 
         game->update(DELTA_TIME_SECS);
-        game->render();
+        game->render(renderer);
 
         SDL_Delay(DELTA_TIME_MS);
     }

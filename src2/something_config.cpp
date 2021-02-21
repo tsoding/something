@@ -2,7 +2,6 @@
 
 Config config = {};
 
-
 void Config::load_file(const char *file_path)
 {
     auto content =
@@ -23,11 +22,11 @@ void Config::load_file(const char *file_path)
             (void) name;
             (void) value;
             if (type == "float"_sv) {
-                todo("Parsing float is not implemented");
+                println(stderr, "TODO: Parsing float is not implemented");
             } else if (type == "int"_sv) {
-                todo("Parsing int is not implemented");
+                println(stderr, "TODO: Parsing int is not implemented");
             } else if (type == "color"_sv) {
-                todo("Parsing color is not implemented");
+                println(stderr, "TODO: Parsing color is not implemented");
             } else {
                 panic(file_path, ":", line_number, ": Unknown type `", type, "`");
             }

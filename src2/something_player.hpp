@@ -9,15 +9,17 @@ enum class Direction {
     Right,
 };
 
+struct Game;
+
 struct Player {
     V2<float> pos;
     V2<float> vel;
 
-    void render();
-    void update(Seconds dt);
+    void render(const Game *game, SDL_Renderer *renderer) const;
+    void update(Game *game, Seconds dt);
 
     void move(Direction direction);
-    void stop();    
+    void stop();
 };
 
 #endif // SOMETHING_PLAYER_HPP_

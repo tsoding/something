@@ -5,8 +5,6 @@
 
 struct Game
 {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
     bool quit;
 
     const Uint8 *keyboard;
@@ -15,9 +13,7 @@ struct Game
 
     void handle_event(const SDL_Event *event);
     void update(Seconds dt);
-    void render();
+    void render(SDL_Renderer *renderer) const;
 };
-
-extern Game *game;
 
 #endif  // SOMETHING_GAME_HPP_
