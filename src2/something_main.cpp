@@ -77,9 +77,6 @@ int main()
                      BACKGROUND_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        renderer->fill_rect(
-            AABB(V2(-1.0f), V2(2.0f)),
-            RGBA::from_abgr32(0x505050FF));
         game->render(renderer);
 
         SDL_GL_SwapWindow(window);
