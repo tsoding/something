@@ -2,7 +2,7 @@
 #include "./something_sdl.hpp"
 #include "./something_config.hpp"
 
-const RGBA32 BACKGROUND_COLOR = 0xFF181818;
+const RGBA BACKGROUND_COLOR = RGBA::from_abgr32(0x181818FF);
 
 void Game::handle_event(const SDL_Event *event)
 {

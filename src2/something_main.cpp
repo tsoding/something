@@ -36,7 +36,6 @@ int main()
 
     game->keyboard = SDL_GetKeyboardState(NULL);
 
-    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     while (!game->quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -45,9 +44,42 @@ int main()
 
         game->update(DELTA_TIME_SECS);
 
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        {
+            // TODO: don't recompute the GL viewport on every frame
+            int w, h;
+            SDL_GetWindowSize(window, &w, &h);
+
+            const float w_width = static_cast<float>(w);
+            const float w_height = static_cast<float>(h);
+            const float s_width = static_cast<float>(SCREEN_WIDTH);
+            const float s_height = static_cast<float>(SCREEN_HEIGHT);
+
+            float a_height = 0.0f;
+            float a_width = 0.0f;
+
+            if (w_width > w_height) {
+                a_width = s_width * (w_height / s_height);
+                a_height = w_height;
+            } else {
+                a_width = w_width;
+                a_height = s_height * (w_width / s_width);
+            }
+
+            glViewport(
+                w_width * 0.5 - a_width * 0.5,
+                w_height * 0.5 - a_height * 0.5,
+                a_width, a_height);
+        }
+
+        glClearColor(BACKGROUND_COLOR.r,
+                     BACKGROUND_COLOR.g,
+                     BACKGROUND_COLOR.b,
+                     BACKGROUND_COLOR.a);
         glClear(GL_COLOR_BUFFER_BIT);
 
+        renderer->fill_rect(
+            AABB(V2(-1.0f), V2(2.0f)),
+            RGBA::from_abgr32(0x505050FF));
         game->render(renderer);
 
         SDL_GL_SwapWindow(window);
