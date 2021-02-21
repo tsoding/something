@@ -2,8 +2,6 @@
 #include "./something_sdl.hpp"
 #include "./something_config.hpp"
 
-Game *game = nullptr;
-
 const RGBA32 BACKGROUND_COLOR = 0xFF181818;
 
 void Game::handle_event(const SDL_Event *event)
@@ -26,15 +24,15 @@ void Game::handle_event(const SDL_Event *event)
 
 void Game::update(Seconds dt)
 {
-    player.update(dt);
+    player.update(this, dt);
 }
 
-void Game::render()
+void Game::render(SDL_Renderer *renderer) const
 {
     sec(SDL_SetRenderDrawColor(renderer, RGBA32_UNPACK(BACKGROUND_COLOR)));
     sec(SDL_RenderClear(renderer));
 
-    player.render();
+    player.render(this, renderer);
 
     SDL_RenderPresent(renderer);
 }
