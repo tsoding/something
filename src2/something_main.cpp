@@ -25,17 +25,18 @@ int main()
                 "Something 2 -- Electric Boogaloo",
                 0, 0,
                 SCREEN_WIDTH, SCREEN_HEIGHT,
-                SDL_WINDOW_RESIZABLE));
+                SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL));
     defer(SDL_DestroyWindow(window));
 
-    SDL_Renderer * const renderer =
-        SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    defer(SDL_DestroyRenderer(renderer));
+    SDL_GL_CreateContext(window);
+
+    Renderer *renderer = new Renderer{};
+    defer(delete renderer);
+    renderer->init();
 
     game->keyboard = SDL_GetKeyboardState(NULL);
 
-    game->player.pos = V2(0.0f, 200.0f);
-
+    glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     while (!game->quit) {
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
@@ -43,7 +44,13 @@ int main()
         }
 
         game->update(DELTA_TIME_SECS);
+
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         game->render(renderer);
+
+        SDL_GL_SwapWindow(window);
 
         SDL_Delay(DELTA_TIME_MS);
     }

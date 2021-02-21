@@ -1,5 +1,5 @@
 WERROR?=-Werror
-PKGS=sdl2
+PKGS=sdl2 glew
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
 CXXFLAGS_WITHOUT_PKGS=$(CFLAGS) -std=c++17 -fno-exceptions -Wno-missing-braces -Wswitch-enum
 ifdef OS # https://stackoverflow.com/questions/4058840/makefile-that-distincts-between-windows-and-unix-like-systems	

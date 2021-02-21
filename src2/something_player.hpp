@@ -3,6 +3,7 @@
 
 #include "./something_sdl.hpp"
 #include "./something_v2.hpp"
+#include "./something_renderer.hpp"
 
 enum class Direction {
     Left,
@@ -15,7 +16,7 @@ struct Player {
     V2<float> pos;
     V2<float> vel;
 
-    void render(const Game *game, SDL_Renderer *renderer) const;
+    void render(const Game *game, Renderer *renderer) const;
     void update(Game *game, Seconds dt);
 
     void move(Direction direction);

@@ -1,16 +1,14 @@
 #include "./something_player.hpp"
 
-const float PLAYER_SIZE = 100.0f;
+const float PLAYER_SIZE = 0.5f;
 const RGBA32 PLAYER_COLOR = 0xFF0000FF;
-const float PLAYER_SPEED = 1000.0f;
+const float PLAYER_SPEED = 1.0f;
 
-void Player::render(const Game *, SDL_Renderer *renderer) const
+void Player::render(const Game *, Renderer *renderer) const
 {
-    fill_rect(
-        renderer,
-        PLAYER_COLOR,
-        pos,
-        V2(PLAYER_SIZE));
+    renderer->fill_rect(
+        AABB(pos, V2(PLAYER_SIZE)),
+        RGBA::BLUE);
 }
 
 void Player::update(Game *, Seconds dt)

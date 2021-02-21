@@ -27,12 +27,7 @@ void Game::update(Seconds dt)
     player.update(this, dt);
 }
 
-void Game::render(SDL_Renderer *renderer) const
+void Game::render(Renderer *renderer) const
 {
-    sec(SDL_SetRenderDrawColor(renderer, RGBA32_UNPACK(BACKGROUND_COLOR)));
-    sec(SDL_RenderClear(renderer));
-
     player.render(this, renderer);
-
-    SDL_RenderPresent(renderer);
 }
