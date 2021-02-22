@@ -5,13 +5,13 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 const int SCREEN_FPS = 60;
 
-const Seconds DELTA_TIME_SECS = 1.0 / static_cast<Seconds>(SCREEN_FPS);
+const Seconds DELTA_TIME_SECS = 1.0f / static_cast<Seconds>(SCREEN_FPS);
 const Milliseconds DELTA_TIME_MS =
     static_cast<Milliseconds>(floorf(DELTA_TIME_SECS * 1000.0f));
 
 int main()
 {
-    config.load_file("src2/vars.conf");
+    config.load_file("vars.conf");
 
     // NOTE: The game object could be too big to put on the stack.
     // So we are allocating it on the heap.
@@ -25,16 +25,16 @@ int main()
                 "Something 2 -- Electric Boogaloo",
                 0, 0,
                 SCREEN_WIDTH, SCREEN_HEIGHT,
-                SDL_WINDOW_RESIZABLE));
+                SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL));
     defer(SDL_DestroyWindow(window));
 
-    SDL_Renderer * const renderer =
-        SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    defer(SDL_DestroyRenderer(renderer));
+    SDL_GL_CreateContext(window);
+
+    Renderer *renderer = new Renderer{};
+    defer(delete renderer);
+    renderer->init();
 
     game->keyboard = SDL_GetKeyboardState(NULL);
-
-    game->player.pos = V2(0.0f, 200.0f);
 
     while (!game->quit) {
         SDL_Event event;
@@ -43,7 +43,44 @@ int main()
         }
 
         game->update(DELTA_TIME_SECS);
+
+        {
+            // TODO: don't recompute the GL viewport on every frame
+            int w, h;
+            SDL_GetWindowSize(window, &w, &h);
+
+            const float w_width = static_cast<float>(w);
+            const float w_height = static_cast<float>(h);
+            const float s_width = static_cast<float>(SCREEN_WIDTH);
+            const float s_height = static_cast<float>(SCREEN_HEIGHT);
+
+            float a_height = 0.0f;
+            float a_width = 0.0f;
+
+            if (w_width > w_height) {
+                a_width = s_width * (w_height / s_height);
+                a_height = w_height;
+            } else {
+                a_width = w_width;
+                a_height = s_height * (w_width / s_width);
+            }
+
+            glViewport(
+                static_cast<GLint>(floorf(w_width * 0.5f - a_width * 0.5f)),
+                static_cast<GLint>(floorf(w_height * 0.5f - a_height * 0.5f)),
+                static_cast<GLint>(a_width),
+                static_cast<GLint>(a_height));
+        }
+
+        glClearColor(BACKGROUND_COLOR.r,
+                     BACKGROUND_COLOR.g,
+                     BACKGROUND_COLOR.b,
+                     BACKGROUND_COLOR.a);
+        glClear(GL_COLOR_BUFFER_BIT);
+
         game->render(renderer);
+
+        SDL_GL_SwapWindow(window);
 
         SDL_Delay(DELTA_TIME_MS);
     }
