@@ -1,7 +1,7 @@
 #ifndef SOMETHING_RENDERER_HPP_
 #define SOMETHING_RENDERER_HPP_
 
-#include "./something_aabb.hpp"
+#include "./something_geo.hpp"
 #include "./something_rgba.hpp"
 
 struct Renderer {
