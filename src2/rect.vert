@@ -1,5 +1,6 @@
 attribute vec4 aVertexPosition;
 
+// TODO: ratio is hardcoded in rect.vert shader
 #define RATIO (600.0 / 800.0)
 
 uniform vec2 rect_position;

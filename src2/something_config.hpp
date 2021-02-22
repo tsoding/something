@@ -8,7 +8,7 @@ struct Config {
     union Value {
         float as_float;
         int as_int;
-        RGBA32 as_rgba32;
+        RGBA as_rgba32;
     };
 
     Value values[VALUES_CAPACITY];

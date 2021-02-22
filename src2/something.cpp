@@ -6,8 +6,10 @@
 
 using namespace aids;
 
+typedef float Seconds;
+typedef Uint32 Milliseconds;
+
 #include "./something_renderer.cpp"
-#include "./something_sdl.cpp"
 #include "./something_config.cpp"
 #include "./something_game.cpp"
 #include "./something_player.cpp"
