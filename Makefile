@@ -1,5 +1,5 @@
 WERROR?=-Werror
-PKGS=sdl2 glew
+PKGS=sdl2
 CFLAGS=-Wall -Wextra $(WERROR) -pedantic -I.
 CXXFLAGS_WITHOUT_PKGS=$(CFLAGS) -std=c++17 -fno-exceptions -Wno-missing-braces -Wswitch-enum
 ifdef OS # https://stackoverflow.com/questions/4058840/makefile-that-distincts-between-windows-and-unix-like-systems	
@@ -17,9 +17,6 @@ CXXFLAGS_RELEASE=$(CXXFLAGS) -DSOMETHING_RELEASE -O3 -ggdb
 
 .PHONY: all
 all: something.debug something.release
-
-something2.debug: $(wildcard src2/something*.cpp) $(wildcard src2/something*.hpp) src2/aids.hpp
-	$(CXX) $(CXXFLAGS_DEBUG) -o $(addsuffix $(EXESUFF),something2.debug) src2/something.cpp $(LIBS)
 
 something.debug: $(wildcard src/something*.cpp) $(wildcard src/something*.hpp) stb_image.o config_types.hpp assets_types.hpp
 	$(CXX) $(CXXFLAGS_DEBUG) -o $(addsuffix $(EXESUFF),something.debug) src/something.cpp stb_image.o $(LIBS)

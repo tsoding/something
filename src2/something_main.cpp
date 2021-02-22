@@ -5,7 +5,7 @@ const int SCREEN_WIDTH = 800;
 const int SCREEN_HEIGHT = 600;
 const int SCREEN_FPS = 60;
 
-const Seconds DELTA_TIME_SECS = 1.0 / static_cast<Seconds>(SCREEN_FPS);
+const Seconds DELTA_TIME_SECS = 1.0f / static_cast<Seconds>(SCREEN_FPS);
 const Milliseconds DELTA_TIME_MS =
     static_cast<Milliseconds>(floorf(DELTA_TIME_SECS * 1000.0f));
 
@@ -66,9 +66,10 @@ int main()
             }
 
             glViewport(
-                w_width * 0.5 - a_width * 0.5,
-                w_height * 0.5 - a_height * 0.5,
-                a_width, a_height);
+                static_cast<GLint>(floorf(w_width * 0.5f - a_width * 0.5f)),
+                static_cast<GLint>(floorf(w_height * 0.5f - a_height * 0.5f)),
+                static_cast<GLint>(a_width),
+                static_cast<GLint>(a_height));
         }
 
         glClearColor(BACKGROUND_COLOR.r,

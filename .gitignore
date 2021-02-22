@@ -1,6 +1,5 @@
 SDL2/
 something.debug
-something2.debug
 something.release
 config_baker
 config_typer
