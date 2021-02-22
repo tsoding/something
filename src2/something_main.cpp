@@ -11,7 +11,7 @@ const Milliseconds DELTA_TIME_MS =
 
 int main()
 {
-    config.load_file("src2/vars.conf");
+    config.load_file("vars.conf");
 
     // NOTE: The game object could be too big to put on the stack.
     // So we are allocating it on the heap.

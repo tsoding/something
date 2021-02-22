@@ -82,8 +82,8 @@ void Renderer::init()
                  quad,
                  GL_STATIC_DRAW);
 
-    const auto rect_vert = compile_shader_file("src2/rect.vert", GL_VERTEX_SHADER);
-    const auto rect_frag = compile_shader_file("src2/rect.frag", GL_FRAGMENT_SHADER);
+    const auto rect_vert = compile_shader_file("rect.vert", GL_VERTEX_SHADER);
+    const auto rect_frag = compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
     rect_program = link_program(rect_vert, rect_frag);
     glUseProgram(rect_program);
 

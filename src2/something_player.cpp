@@ -1,6 +1,6 @@
 #include "./something_player.hpp"
 
-const float PLAYER_SIZE = 0.5f;
+const float PLAYER_SIZE = 0.25f;
 const RGBA PLAYER_COLOR = RGBA::from_abgr32(0xFF0000FF);
 const float PLAYER_SPEED = 1.0f;
 
