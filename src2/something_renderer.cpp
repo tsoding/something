@@ -63,13 +63,16 @@ void Renderer::fill_rect(AABB<float> aabb, RGBA color)
     glUniform2f(u_rect_position, aabb.pos.x, aabb.pos.y);
     glUniform2f(u_rect_size, aabb.size.x, aabb.size.y);
     glUniform4f(u_color, color.r, color.g, color.b, color.a);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    glDrawArrays(GL_TRIANGLES, 0, 6);
 }
 
 void Renderer::init()
 {
     float quad[] = {
         0.0, 0.0,
+        1.0, 0.0,
+        0.0, 1.0,
+
         1.0, 0.0,
         0.0, 1.0,
         1.0, 1.0,
