@@ -9,6 +9,23 @@ const Seconds DELTA_TIME_SECS = 1.0f / static_cast<Seconds>(SCREEN_FPS);
 const Milliseconds DELTA_TIME_MS =
     static_cast<Milliseconds>(floorf(DELTA_TIME_SECS * 1000.0f));
 
+void MessageCallback(GLenum source,
+                     GLenum type,
+                     GLuint id,
+                     GLenum severity,
+                     GLsizei length,
+                     const GLchar* message,
+                     const void* userParam)
+{
+    (void) source;
+    (void) id;
+    (void) length;
+    (void) userParam;
+    fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
+            (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
+            type, severity, message);
+}
+
 int main()
 {
     config.load_file("vars.conf");
@@ -29,6 +46,20 @@ int main()
     defer(SDL_DestroyWindow(window));
 
     SDL_GL_CreateContext(window);
+
+    {
+        int major;
+        int minor;
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+        SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+        // TODO: GL compatibility code
+        // We need to be able to identify what versions of GL are
+        // available and always pick the best suited one
+        println(stdout, "GL version ", major, ".", minor);
+    }
+
+    glEnable(GL_DEBUG_OUTPUT);
+    glDebugMessageCallback(MessageCallback, 0);
 
     Renderer *renderer = new Renderer{};
     defer(delete renderer);
@@ -79,6 +110,8 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         game->render(renderer);
+
+        renderer->present();
 
         SDL_GL_SwapWindow(window);
 

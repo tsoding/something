@@ -1,8 +1,6 @@
 #include "./something_renderer.hpp"
 
-static Fixed_Region<1000 * 1000> shader_buffer;
-
-static GLuint compile_shader_file(const char *file_path, GLenum shader_type)
+GLuint Renderer::gl_compile_shader_file(const char *file_path, GLenum shader_type)
 {
     const auto source = unwrap_or_panic(
                             read_file_as_string_view(file_path, &shader_buffer),
@@ -32,12 +30,13 @@ static GLuint compile_shader_file(const char *file_path, GLenum shader_type)
     return shader;
 }
 
-static GLuint link_program(GLuint vert_shader, GLuint frag_shader)
+GLuint Renderer::gl_link_program(GLuint *shader, size_t shader_size)
 {
     GLuint program = glCreateProgram();
 
-    glAttachShader(program, vert_shader);
-    glAttachShader(program, frag_shader);
+    for (size_t i = 0; i < shader_size; ++i) {
+        glAttachShader(program, shader[i]);
+    }
     glLinkProgram(program);
 
     GLint linked = 0;
@@ -58,50 +57,118 @@ static GLuint link_program(GLuint vert_shader, GLuint frag_shader)
     return program;
 }
 
-void Renderer::fill_rect(AABB<float> aabb, RGBA color)
+void Renderer::fill_rect(AABB<GLfloat> aabb, RGBA rgba)
 {
-    glUniform2f(u_rect_position, aabb.pos.x, aabb.pos.y);
-    glUniform2f(u_rect_size, aabb.size.x, aabb.size.y);
-    glUniform4f(u_color, color.r, color.g, color.b, color.a);
-    glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    Triangle<GLfloat> lower, upper;
+    aabb.split_into_triangles(&lower, &upper);
+    fill_triangle(lower, rgba);
+    fill_triangle(upper, rgba);
+}
+
+void Renderer::fill_triangle(Triangle<GLfloat> triangle, RGBA rgba)
+{
+    // NOTE: I'm not sure if we should ignore the call if the buffer is full or crash.
+    // Crash can help to troubleshoot disappearing triangles problem in the future.
+    assert(batch_buffer_size < BATCH_BUFFER_CAPACITY);
+    triangles_buffer[batch_buffer_size] = triangle;
+    colors_buffer[batch_buffer_size * 3 + 0] = rgba;
+    colors_buffer[batch_buffer_size * 3 + 1] = rgba;
+    colors_buffer[batch_buffer_size * 3 + 2] = rgba;
+    batch_buffer_size += 1;
 }
 
 void Renderer::init()
 {
-    float quad[] = {
-        0.0, 0.0,
-        1.0, 0.0,
-        0.0, 1.0,
-        1.0, 1.0,
-    };
+    println(stderr, "LOG: compiling the shader program");
 
-    glGenBuffers(1, &quad_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, quad_buffer);
-    glBufferData(GL_ARRAY_BUFFER,
-                 sizeof(quad),
-                 quad,
-                 GL_STATIC_DRAW);
-
-    const auto rect_vert = compile_shader_file("rect.vert", GL_VERTEX_SHADER);
-    const auto rect_frag = compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
-    rect_program = link_program(rect_vert, rect_frag);
+    // Compiling The Shader Program
+    {
+        GLuint shaders[2] = {0};
+        shaders[0] = gl_compile_shader_file("rect.vert", GL_VERTEX_SHADER);
+        shaders[1] = gl_compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
+        rect_program = gl_link_program(shaders, sizeof(shaders) / sizeof(shaders[0]));
+    }
     glUseProgram(rect_program);
 
-    u_color = glGetUniformLocation(rect_program, "color");
-    u_rect_position = glGetUniformLocation(rect_program, "rect_position");
-    u_rect_size = glGetUniformLocation(rect_program, "rect_size");
+    println(stderr, "LOG: initializing vertex position attribute");
 
-    GLint vertexPosition = glGetAttribLocation(rect_program, "aVertexPosition");
+    // Initializing Vertex Position Attribute
+    {
+        const size_t V2_COMPONENTS = 2;
+        glGenBuffers(1, &triangles_buffer_id);
+        glBindBuffer(GL_ARRAY_BUFFER, triangles_buffer_id);
+        {
+            const size_t TRIANGLE_VERTICES = 3;
+            static_assert(
+                sizeof(triangles_buffer) == sizeof(GLfloat) * V2_COMPONENTS * TRIANGLE_VERTICES * BATCH_BUFFER_CAPACITY,
+                "Looks like compiler did an oopsie-doopsie and padded something incorrectly in the Triangle or V2 structures");
+        }
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(triangles_buffer),
+                     triangles_buffer,
+                     GL_DYNAMIC_DRAW);
+        const GLint vertex_position = 1;
+        println(stderr, "vertex_position: ", vertex_position);
+        glEnableVertexAttribArray(vertex_position);
 
-    glVertexAttribPointer(
-        vertexPosition,     // index
-        2,                  // numComponents
-        GL_FLOAT,           // type
-        0,                  // normalized
-        0,                  // stride
-        0                   // offset
-    );
+        glVertexAttribPointer(
+            vertex_position,    // index
+            V2_COMPONENTS,      // numComponents
+            GL_FLOAT,           // type
+            0,                  // normalized
+            0,                  // stride
+            0                   // offset
+        );
+    }
 
-    glEnableVertexAttribArray(vertexPosition);
+    println(stderr, "LOG: initializing vertex color attribute");
+    // Initializing Vertex Color Attribute
+    {
+        const size_t RGBA_COMPONENTS = 4;
+        glGenBuffers(1, &colors_buffer_id);
+        glBindBuffer(GL_ARRAY_BUFFER, colors_buffer_id);
+        {
+            const size_t TRIANGLE_VERTICES = 3;
+            static_assert(
+                sizeof(colors_buffer) == sizeof(GLfloat) * RGBA_COMPONENTS * TRIANGLE_VERTICES * BATCH_BUFFER_CAPACITY,
+                "Looks like compiler did an oopsie-doopsie and padded something incorrectly in the RGBA structure");
+        }
+        glBufferData(GL_ARRAY_BUFFER,
+                     sizeof(colors_buffer),
+                     colors_buffer,
+                     GL_DYNAMIC_DRAW);
+        const GLint vertex_color = 2;
+        println(stderr, "vertex_color: ", vertex_color);
+
+        glEnableVertexAttribArray(vertex_color);
+        glVertexAttribPointer(
+            vertex_color,       // index
+            RGBA_COMPONENTS,    // numComponents
+            GL_FLOAT,           // type
+            0,                  // normalized
+            0,                  // stride
+            0                   // offset
+        );
+    }
 }
 
+void Renderer::present()
+{
+    glBindBuffer(GL_ARRAY_BUFFER, triangles_buffer_id);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    sizeof(triangles_buffer[0]) * batch_buffer_size,
+                    triangles_buffer);
+
+    glBindBuffer(GL_ARRAY_BUFFER, colors_buffer_id);
+    glBufferSubData(GL_ARRAY_BUFFER,
+                    0,
+                    sizeof(colors_buffer[0]) * 3 * batch_buffer_size,
+                    colors_buffer);
+
+    glDrawArrays(GL_TRIANGLES,
+                 0,
+                 static_cast<GLsizei>(batch_buffer_size) * 3 * 2);
+
+    batch_buffer_size = 0;
+}

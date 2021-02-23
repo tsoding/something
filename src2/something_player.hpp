@@ -2,7 +2,7 @@
 #define SOMETHING_PLAYER_HPP_
 
 #include "./something_sdl.hpp"
-#include "./something_v2.hpp"
+#include "./something_geo.hpp"
 #include "./something_renderer.hpp"
 
 enum class Direction {
