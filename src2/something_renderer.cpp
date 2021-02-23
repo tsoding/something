@@ -107,7 +107,7 @@ void Renderer::init()
                      sizeof(triangles_buffer),
                      triangles_buffer,
                      GL_DYNAMIC_DRAW);
-        const GLint vertex_position = 1;//glGetAttribLocation(rect_program, "vertex_position");
+        const GLint vertex_position = 1;
         println(stderr, "vertex_position: ", vertex_position);
         glEnableVertexAttribArray(vertex_position);
 
@@ -137,7 +137,7 @@ void Renderer::init()
                      sizeof(colors_buffer),
                      colors_buffer,
                      GL_DYNAMIC_DRAW);
-        const GLint vertex_color = 2;// glGetAttribLocation(rect_program, "vertex_color");
+        const GLint vertex_color = 2;
         println(stderr, "vertex_color: ", vertex_color);
 
         glEnableVertexAttribArray(vertex_color);
