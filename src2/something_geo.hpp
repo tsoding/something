@@ -58,10 +58,24 @@ V2<T> operator*(V2<T> a, T s)
 }
 
 template <typename T>
+V2<T> operator*(V2<T> a, V2<T> b)
+{
+    return V2<T>(a.x * b.x, a.y * b.y);
+}
+
+template <typename T>
 V2<T> operator*(T s, V2<T> a)
 {
     return V2<T>(a.x * s, a.y * s);
 }
+
+template <typename T>
+void print1(FILE *stream, V2<T> v2)
+{
+    print(stream, "V2(", v2.x, ", ", v2.y, ")");
+}
+
+// Triangle //////////////////////////////
 
 template <typename T>
 struct Triangle {
@@ -69,10 +83,18 @@ struct Triangle {
     V2<T> b;
     V2<T> c;
 
+    Triangle() = default;
+
     Triangle(V2<T> a, V2<T> b, V2<T> c):
         a(a), b(b), c(c)
     {}
 };
+
+template <typename T>
+void print1(FILE *stream, Triangle<T> tri)
+{
+    print(stream, "Triangle(", tri.a, ", ", tri.b, ", ", tri.c, ")");
+}
 
 // Axis-Aligned Bounding Box //////////////////////////////
 
@@ -104,11 +126,11 @@ struct AABB {
     void split_into_triangles(Triangle<T> *lower, Triangle<T> *upper)
     {
         if (lower) {
-            *lower = Triangle(pos, pos + size * V2(0.0, 1.0), pos + size * V2(1.0, 0.0));
+            *lower = Triangle(pos, pos + size * V2(0, 1).template cast_to<T>(), pos + size * V2(1, 0).template cast_to<T>());
         }
 
         if (upper) {
-            *upper = Triangle(pos + size * V2(0.0, 1.0), pos + size * V2(1.0, 0.0), pos + size);
+            *upper = Triangle(pos + size * V2(0, 1).template cast_to<T>(), pos + size * V2(1, 0).template cast_to<T>(), pos + size);
         }
     }
 };
