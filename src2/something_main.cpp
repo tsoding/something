@@ -17,6 +17,10 @@ void MessageCallback(GLenum source,
                      const GLchar* message,
                      const void* userParam)
 {
+    (void) source;
+    (void) id;
+    (void) length;
+    (void) userParam;
     fprintf(stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n",
             (type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : ""),
             type, severity, message);
@@ -48,6 +52,9 @@ int main()
         int minor;
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
         SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+        // TODO: GL compatibility code
+        // We need to be able to identify what versions of GL are
+        // available and always pick the best suited one
         println(stdout, "GL version ", major, ".", minor);
     }
 
