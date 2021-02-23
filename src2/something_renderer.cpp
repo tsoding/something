@@ -1,8 +1,6 @@
 #include "./something_renderer.hpp"
 
-static Fixed_Region<1000 * 1000> shader_buffer;
-
-static GLuint compile_shader_file(const char *file_path, GLenum shader_type)
+GLuint Renderer::gl_compile_shader_file(const char *file_path, GLenum shader_type)
 {
     const auto source = unwrap_or_panic(
                             read_file_as_string_view(file_path, &shader_buffer),
@@ -32,7 +30,7 @@ static GLuint compile_shader_file(const char *file_path, GLenum shader_type)
     return shader;
 }
 
-static GLuint link_program(GLuint vert_shader, GLuint frag_shader)
+GLuint Renderer::gl_link_program(GLuint vert_shader, GLuint frag_shader)
 {
     GLuint program = glCreateProgram();
 
@@ -83,9 +81,9 @@ void Renderer::init()
     println(stderr, "LOG: compiling the shader program");
 
     // Compiling The Shader Program
-    const auto rect_vert = compile_shader_file("rect.vert", GL_VERTEX_SHADER);
-    const auto rect_frag = compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
-    rect_program = link_program(rect_vert, rect_frag);
+    const auto rect_vert = gl_compile_shader_file("rect.vert", GL_VERTEX_SHADER);
+    const auto rect_frag = gl_compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
+    rect_program = gl_link_program(rect_vert, rect_frag);
     glUseProgram(rect_program);
 
     println(stderr, "LOG: initializing vertex position attribute");
