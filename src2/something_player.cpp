@@ -9,6 +9,12 @@ void Player::render(const Game *, Renderer *renderer) const
     renderer->fill_rect(
         AABB(pos, V2(PLAYER_SIZE)),
         PLAYER_COLOR);
+    renderer->fill_rect(
+        AABB(pos + V2(PLAYER_SIZE, 0.0f), V2(PLAYER_SIZE)),
+        RGBA::BLUE);
+    renderer->fill_rect(
+        AABB(pos + V2(0.0f, PLAYER_SIZE), V2(PLAYER_SIZE)),
+        RGBA::GREEN);
 }
 
 void Player::update(Game *, Seconds dt)

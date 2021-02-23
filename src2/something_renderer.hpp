@@ -15,7 +15,7 @@ struct Renderer {
     GLuint colors_buffer_id;
 
     Triangle<GLfloat> triangles_buffer[BATCH_BUFFER_CAPACITY];
-    RGBA colors_buffer[BATCH_BUFFER_CAPACITY * 3];
+    RGBA colors_buffer[BATCH_BUFFER_CAPACITY][3];
     size_t batch_buffer_size;
 
     Fixed_Region<1000 * 1000> shader_buffer;

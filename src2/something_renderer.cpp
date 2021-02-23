@@ -71,9 +71,9 @@ void Renderer::fill_triangle(Triangle<GLfloat> triangle, RGBA rgba)
     // Crash can help to troubleshoot disappearing triangles problem in the future.
     assert(batch_buffer_size < BATCH_BUFFER_CAPACITY);
     triangles_buffer[batch_buffer_size] = triangle;
-    colors_buffer[batch_buffer_size * 3 + 0] = rgba;
-    colors_buffer[batch_buffer_size * 3 + 1] = rgba;
-    colors_buffer[batch_buffer_size * 3 + 2] = rgba;
+    colors_buffer[batch_buffer_size][0] = rgba;
+    colors_buffer[batch_buffer_size][1] = rgba;
+    colors_buffer[batch_buffer_size][2] = rgba;
     batch_buffer_size += 1;
 }
 
