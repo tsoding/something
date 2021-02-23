@@ -30,12 +30,13 @@ GLuint Renderer::gl_compile_shader_file(const char *file_path, GLenum shader_typ
     return shader;
 }
 
-GLuint Renderer::gl_link_program(GLuint vert_shader, GLuint frag_shader)
+GLuint Renderer::gl_link_program(GLuint *shader, size_t shader_size)
 {
     GLuint program = glCreateProgram();
 
-    glAttachShader(program, vert_shader);
-    glAttachShader(program, frag_shader);
+    for (size_t i = 0; i < shader_size; ++i) {
+        glAttachShader(program, shader[i]);
+    }
     glLinkProgram(program);
 
     GLint linked = 0;
@@ -81,9 +82,12 @@ void Renderer::init()
     println(stderr, "LOG: compiling the shader program");
 
     // Compiling The Shader Program
-    const auto rect_vert = gl_compile_shader_file("rect.vert", GL_VERTEX_SHADER);
-    const auto rect_frag = gl_compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
-    rect_program = gl_link_program(rect_vert, rect_frag);
+    {
+        GLuint shaders[2] = {0};
+        shaders[0] = gl_compile_shader_file("rect.vert", GL_VERTEX_SHADER);
+        shaders[1] = gl_compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
+        rect_program = gl_link_program(shaders, sizeof(shaders) / sizeof(shaders[0]));
+    }
     glUseProgram(rect_program);
 
     println(stderr, "LOG: initializing vertex position attribute");

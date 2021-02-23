@@ -26,7 +26,7 @@ struct Renderer {
     void present();
 
     GLuint gl_compile_shader_file(const char *file_path, GLenum shader_type);
-    GLuint gl_link_program(GLuint vert_shader, GLuint frag_shader);
+    GLuint gl_link_program(GLuint *shader, size_t shader_size);
 };
 
 #endif  // SOMETHING_RENDERER_HPP_
