@@ -1,0 +1,47 @@
+#include "./something_texture.hpp"
+
+Texture Texture::from_file(const char *file_path)
+{
+    int width, height;
+    RGBA32 *const pixels =
+        reinterpret_cast<RGBA32*>(
+            stbi_load(
+                file_path,
+                &width,
+                &height,
+                NULL, 4));
+
+    return Texture::from_memory(width, height, pixels);
+}
+
+Texture Texture::from_memory(int width, int height, RGBA32 *pixels)
+{
+    Texture texture = {};
+    texture.width = width;
+    texture.height = height;
+    texture.pixels = pixels;
+
+    glGenTextures(1, &texture.gl_id);
+    glBindTexture(GL_TEXTURE_2D, texture.gl_id);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGBA,
+                 texture.width,
+                 texture.height,
+                 0,
+                 GL_RGBA,
+                 GL_UNSIGNED_BYTE,
+                 texture.pixels);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texture;
+}
