@@ -15,11 +15,13 @@ struct Texture {
     int height;
     RGBA32 *pixels;
     const char *file_path;
+    String_View id;
 
-    static Texture from_file(const char *file_path)
+    static Texture from_file(const char *file_path, String_View id)
     {
         Texture result = {};
 
+        result.id = id;
         result.file_path = file_path;
         result.pixels =
             reinterpret_cast<RGBA32*>(
@@ -143,9 +145,6 @@ int main(void)
 #else
 int main(int argc, char **argv)
 {
-    // TODO: atlas_packer should generate uv coords as well
-    // TODO: customizable ids for textures in atlas.conf
-
     // Parse command line arguments
     Args args = {argc, argv};
     const char *program_name = args.shift();
@@ -187,10 +186,15 @@ int main(int argc, char **argv)
 
     while (atlas_conf_content.count > 0) {
         String_View line = atlas_conf_content.chop_by_delim('\n').trim();
-        if (line.count > 0) {
-            const char *file_path = line.as_cstr();
+        String_View key_value = line.chop_by_delim('#').trim();
+
+        if (key_value.count > 0) {
+            String_View key = key_value.chop_by_delim('=').trim();
+            String_View value = key_value.trim();
+
+            const char *file_path = value.as_cstr();
             assert(file_path != nullptr);
-            textures.push(Texture::from_file(file_path));
+            textures.push(Texture::from_file(file_path, key));
         }
     }
 
@@ -226,16 +230,43 @@ int main(int argc, char **argv)
     println(atlas_hpp_file, "#define ATLAS_HPP_");
     println(atlas_hpp_file);
 
+    println(atlas_hpp_file, "struct Coord {");
+    println(atlas_hpp_file, "    float uv_x, uv_y, uv_w, uv_h;");
+    println(atlas_hpp_file, "    int x, y, w, h;");
+    println(atlas_hpp_file, "};");
+    println(atlas_hpp_file);
+    println(atlas_hpp_file, "const size_t COORDS_COUNT = ", textures.size, ";");
+    println(atlas_hpp_file);
+    for (size_t i = 0; i < textures.size; ++i) {
+        println(atlas_hpp_file, "const size_t ", textures.data[i].id, " = ", i, ";");
+    }
+    println(atlas_hpp_file);
+    println(atlas_hpp_file, "const Coord coords[COORDS_COUNT] = {");
     int atlas_row = 0;
     for (size_t i = 0; i < textures.size; ++i) {
         const Texture *texture = &textures.data[i];
 
-        const String_View texture_id = id_of_file(texture->file_path);
-        println(atlas_hpp_file, "const int ", texture_id, "_X = ", 0, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_Y = ", atlas_row, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_WIDTH = ", texture->width, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_HEIGHT = ", texture->height, ";");
-        println(atlas_hpp_file);
+        const int x = 0;
+        const int y = atlas_row;
+        const int w = texture->width;
+        const int h = texture->height;
+
+        const float uv_x = static_cast<float>(x) / static_cast<float>(atlas_width);
+        const float uv_y = static_cast<float>(y) / static_cast<float>(atlas_height);
+        const float uv_w = static_cast<float>(w) / static_cast<float>(atlas_width);
+        const float uv_h = static_cast<float>(h) / static_cast<float>(atlas_height);
+
+        println(atlas_hpp_file,
+                "    {",
+                uv_x, "f", ",",
+                uv_y, "f", ",",
+                uv_w, "f", ",",
+                uv_h, "f", ",",
+                x, ",",
+                y, ",",
+                w, ",",
+                h, ",",
+                "},");
 
         for (int row = 0; row < textures.data[i].height; ++row) {
             memcpy(&atlas_pixels[atlas_row * atlas_width],
@@ -244,6 +275,7 @@ int main(int argc, char **argv)
             atlas_row += 1;
         }
     }
+    println(atlas_hpp_file, "};");
 
     println(atlas_hpp_file, "#endif  // ATLAS_HPP_");
 
