@@ -60,6 +60,7 @@ jobs:
       - name: build the game
         shell: cmd
         run: |
+          cd .\01-iteration\
           ./build_msvc.bat
   build-freebsd:
     runs-on: macos-latest
