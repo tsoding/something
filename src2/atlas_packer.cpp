@@ -15,11 +15,13 @@ struct Texture {
     int height;
     RGBA32 *pixels;
     const char *file_path;
+    String_View id;
 
-    static Texture from_file(const char *file_path)
+    static Texture from_file(const char *file_path, String_View id)
     {
         Texture result = {};
 
+        result.id = id;
         result.file_path = file_path;
         result.pixels =
             reinterpret_cast<RGBA32*>(
@@ -187,10 +189,15 @@ int main(int argc, char **argv)
 
     while (atlas_conf_content.count > 0) {
         String_View line = atlas_conf_content.chop_by_delim('\n').trim();
-        if (line.count > 0) {
-            const char *file_path = line.as_cstr();
+        String_View key_value = line.chop_by_delim('#').trim();
+
+        if (key_value.count > 0) {
+            String_View key = key_value.chop_by_delim('=').trim();
+            String_View value = key_value.trim();
+
+            const char *file_path = value.as_cstr();
             assert(file_path != nullptr);
-            textures.push(Texture::from_file(file_path));
+            textures.push(Texture::from_file(file_path, key));
         }
     }
 
@@ -230,11 +237,10 @@ int main(int argc, char **argv)
     for (size_t i = 0; i < textures.size; ++i) {
         const Texture *texture = &textures.data[i];
 
-        const String_View texture_id = id_of_file(texture->file_path);
-        println(atlas_hpp_file, "const int ", texture_id, "_X = ", 0, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_Y = ", atlas_row, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_WIDTH = ", texture->width, ";");
-        println(atlas_hpp_file, "const int ", texture_id, "_HEIGHT = ", texture->height, ";");
+        println(atlas_hpp_file, "const int ", texture->id, "_X = ", 0, ";");
+        println(atlas_hpp_file, "const int ", texture->id, "_Y = ", atlas_row, ";");
+        println(atlas_hpp_file, "const int ", texture->id, "_WIDTH = ", texture->width, ";");
+        println(atlas_hpp_file, "const int ", texture->id, "_HEIGHT = ", texture->height, ";");
         println(atlas_hpp_file);
 
         for (int row = 0; row < textures.data[i].height; ++row) {
