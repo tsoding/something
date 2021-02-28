@@ -1,9 +1,7 @@
 [![Build Status](https://github.com/tsoding/something/workflows/CI/badge.svg)](https://github.com/tsoding/something/actions)
 
 # something
-**WARNING! The game is in an active development state and is not even
-alpha yet. Use it at your own risk. Nothing is documented, anything
-can be changed at any moment or stop working at all.**
+**The development of this game is moved to [https://github.com/tsoding/something-rewrite](https://github.com/tsoding/something-rewrite)**
 
 ## Quick Start
 Install dependencies for your OS/Distro, here is a table for help, this does not include compile and make.
