@@ -21,8 +21,15 @@ Texture Texture::from_memory(int width, int height, RGBA32 *pixels)
     texture.height = height;
     texture.pixels = pixels;
 
-    glGenTextures(1, &texture.gl_id);
-    glBindTexture(GL_TEXTURE_2D, texture.gl_id);
+    return texture;
+}
+
+GL_Texture GL_Texture::from_texture(Texture texture)
+{
+    GL_Texture result = {};
+
+    glGenTextures(1, &result.id);
+    glBindTexture(GL_TEXTURE_2D, result.id);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -43,5 +50,5 @@ Texture Texture::from_memory(int width, int height, RGBA32 *pixels)
 
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    return texture;
+    return result;
 }

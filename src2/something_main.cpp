@@ -65,6 +65,8 @@ int main()
     defer(delete renderer);
     renderer->init();
 
+    Atlas atlas = Atlas::from_config("./assets/atlas.conf");
+
     game->keyboard = SDL_GetKeyboardState(NULL);
 
     while (!game->quit) {
