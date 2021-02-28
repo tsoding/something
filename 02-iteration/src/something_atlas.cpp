@@ -36,6 +36,7 @@ Atlas Atlas::from_config(const char *file_path)
 
     const size_t atlas_pixels_size = sizeof(RGBA32) * atlas_width * atlas_height;
     RGBA32 *atlas_pixels = static_cast<RGBA32*>(malloc(atlas_pixels_size));
+    assert(atlas_pixels != nullptr);
     memset(atlas_pixels, 0, atlas_pixels_size);
 
     int atlas_row = 0;

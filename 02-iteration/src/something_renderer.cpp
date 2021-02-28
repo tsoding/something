@@ -96,8 +96,8 @@ void Renderer::init(const char *atlas_conf_path)
     // Compiling The Shader Program
     {
         GLuint shaders[2] = {0};
-        shaders[0] = gl_compile_shader_file("rect.vert", GL_VERTEX_SHADER);
-        shaders[1] = gl_compile_shader_file("rect.frag", GL_FRAGMENT_SHADER);
+        shaders[0] = gl_compile_shader_file("./assets/shaders/rect.vert", GL_VERTEX_SHADER);
+        shaders[1] = gl_compile_shader_file("./assets/shaders/rect.frag", GL_FRAGMENT_SHADER);
         rect_program = gl_link_program(shaders, sizeof(shaders) / sizeof(shaders[0]));
     }
     glUseProgram(rect_program);

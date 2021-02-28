@@ -66,7 +66,7 @@ int main()
 
     Renderer *renderer = new Renderer{};
     defer(delete renderer);
-    renderer->init("./assets/atlas.conf");
+    renderer->init("./assets/textures/atlas.conf");
 
     game->keyboard = SDL_GetKeyboardState(NULL);
 

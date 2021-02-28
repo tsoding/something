@@ -10,6 +10,9 @@ Texture Texture::from_file(const char *file_path)
                 &width,
                 &height,
                 NULL, 4));
+    if (pixels == nullptr) {
+        panic("ERROR: could not load file `", file_path, "`: ", strerror(errno));
+    }
 
     return Texture::from_memory(width, height, pixels);
 }
