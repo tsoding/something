@@ -13,6 +13,8 @@ Atlas Atlas::from_config(const char *file_path)
 
     Dynamic_Array<Texture> textures = {};
 
+    textures.push(Texture::from_solid_color(10, 10, 0xFFFFFFFF));
+
     while (conf_content.count > 0) {
         String_View line = conf_content.chop_by_delim('\n').trim();
         String_View file_path_sv = line.chop_by_delim('#').trim();

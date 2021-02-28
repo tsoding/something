@@ -14,6 +14,17 @@ Texture Texture::from_file(const char *file_path)
     return Texture::from_memory(width, height, pixels);
 }
 
+Texture Texture::from_solid_color(int width, int height, RGBA32 color)
+{
+    RGBA32 *const pixels =
+        static_cast<RGBA32*>(
+            malloc(sizeof(RGBA32) * width * height));
+    for (int i = 0; i < width * height; ++i) {
+        pixels[i] = color;
+    }
+    return Texture::from_memory(width, height, pixels);
+}
+
 Texture Texture::from_memory(int width, int height, RGBA32 *pixels)
 {
     Texture texture = {};
@@ -48,7 +59,7 @@ GL_Texture GL_Texture::from_texture(Texture texture)
                  texture.pixels);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glBindTexture(GL_TEXTURE_2D, 0);
+    // glActiveTexture(GL_TEXTURE0);
 
     return result;
 }

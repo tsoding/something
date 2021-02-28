@@ -12,6 +12,9 @@ typedef Uint32 Milliseconds;
 #define STB_IMAGE_IMPLEMENTATION
 #include "./stb_image.h"
 
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "./stb_image_write.h"
+
 #include "./something_atlas.cpp"
 #include "./something_renderer.cpp"
 #include "./something_texture.cpp"

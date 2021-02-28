@@ -12,6 +12,7 @@ struct Texture {
 
     static Texture from_file(const char *file_path);
     static Texture from_memory(int width, int height, RGBA32 *pixels);
+    static Texture from_solid_color(int width, int height, RGBA32 color);
 };
 
 struct GL_Texture {

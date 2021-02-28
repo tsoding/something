@@ -47,6 +47,9 @@ int main()
 
     SDL_GL_CreateContext(window);
 
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     {
         int major;
         int minor;
@@ -63,9 +66,7 @@ int main()
 
     Renderer *renderer = new Renderer{};
     defer(delete renderer);
-    renderer->init();
-
-    Atlas atlas = Atlas::from_config("./assets/atlas.conf");
+    renderer->init("./assets/atlas.conf");
 
     game->keyboard = SDL_GetKeyboardState(NULL);
 
