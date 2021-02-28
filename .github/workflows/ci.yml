@@ -12,6 +12,7 @@ jobs:
           sudo apt-get install -qq libsdl2-dev
       - name: build the game
         run: |
+          cd ./01-iteration/
           make
         env:
           CC: gcc
@@ -26,6 +27,7 @@ jobs:
           sudo apt-get install -qq libsdl2-dev
       - name: build the game
         run: |
+          cd ./01-iteration/
           make
         env:
           CC: clang
@@ -38,6 +40,7 @@ jobs:
         run: brew install sdl2 pkg-config
       - name: build the game
         run: |
+          cd ./01-iteration/
           make
         env:
           CC: clang
@@ -50,6 +53,7 @@ jobs:
       - uses: seanmiddleditch/gha-setup-vsdevenv@master
       - name: download sdl2
         run: |
+          cd .\01-iteration\
           curl -fsSL -o SDL2-devel-2.0.12-VC.zip https://www.libsdl.org/release/SDL2-devel-2.0.12-VC.zip
           tar -xf SDL2-devel-2.0.12-VC.zip
           mv SDL2-2.0.12 SDL2
@@ -69,5 +73,6 @@ jobs:
           usesh: true
           prepare: pkg install -y sdl2 pkgconf gmake png
           run: |
+            cd ./01-iteration/
             freebsd-version
             gmake
