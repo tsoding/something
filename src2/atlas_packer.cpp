@@ -11,7 +11,6 @@ using namespace aids;
 using RGBA32 = uint32_t;
 
 struct Texture {
-
     int width;
     int height;
     RGBA32 *pixels;
@@ -97,32 +96,56 @@ void usage(FILE *stream, const char *program_name)
     println(stream, "Usage: ", program_name, " [-o <output-folder>] <atlas.conf>");
 }
 
+#ifdef TESTING
 void test_file_name_of_path(void)
 {
-    const char * const cases[] = {
-        "atlas",
-        "atlas.conf",
-        "foo/atlas.conf",
-        "foo/atlas",
-        "/",
-        "/.",
-        ".",
-        "",
-        ".conf",
-        "/.conf",
-        "/..conf",
-        "/..",
-        "..",
+    struct Test_Case {
+        const char *input;
+        String_View expected_output;
+    };
+
+    Test_Case cases[] = {
+        {"atlas", "atlas"_sv},
+        {"atlas.conf", "atlas"_sv},
+        {"foo/atlas.conf", "atlas"_sv},
+        {"foo/atlas", "atlas"_sv},
+        {"/", ""_sv},
+        {"/.", ""_sv},
+        {".", ""_sv},
+        {"", ""_sv},
+        {".conf", ""_sv},
+        {"/.conf", ""_sv},
+        {"/..conf", "."_sv},
+        {"/..", "."_sv},
+        {"..", "."_sv},
     };
     const size_t cases_size = sizeof(cases) / sizeof(cases[0]);
 
     for (size_t i = 0; i < cases_size; ++i) {
-        println(stdout, '"', cases[i], '"', " -> ", '"', file_name_of_path(cases[i]), '"');
+        const auto actual_output = file_name_of_path(cases[i].input);
+
+        if (actual_output != cases[i].expected_output) {
+            println(stderr, "TEST FAILED!");
+            println(stderr, "  Expected: \"", cases[i].expected_output, '"');
+            println(stderr, "  Actual:   \"", actual_output, '"');
+            exit(1);
+        }
+
+        println(stdout, '"', cases[i].input, '"', " -> ", '"', actual_output, '"');
     }
 }
 
+int main(void)
+{
+    test_file_name_of_path();
+    return 0;
+}
+#else
 int main(int argc, char **argv)
 {
+    // TODO: atlas_packer should generate uv coords as well
+    // TODO: customizable ids for textures in atlas.conf
+
     // Parse command line arguments
     Args args = {argc, argv};
     const char *program_name = args.shift();
@@ -243,3 +266,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
+#endif // TESTING
