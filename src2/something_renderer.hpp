@@ -10,19 +10,25 @@ struct Renderer {
     // The GLSL program that can render a rectangle
     GLuint rect_program;
 
+    // Atlas
+    GLuint u_atlas;
+    Atlas atlas;
+
     // Buffers
     GLuint triangles_buffer_id;
     GLuint colors_buffer_id;
+    GLuint uv_buffer_id;
 
     Triangle<GLfloat> triangles_buffer[BATCH_BUFFER_CAPACITY];
     RGBA colors_buffer[BATCH_BUFFER_CAPACITY][3];
+    Triangle<GLfloat> uv_buffer[BATCH_BUFFER_CAPACITY];
     size_t batch_buffer_size;
 
     Fixed_Region<1000 * 1000> shader_buffer;
 
-    void init();
-    void fill_triangle(Triangle<GLfloat> triangle, RGBA rgba);
-    void fill_rect(AABB<float> aabb, RGBA rgba);
+    void init(const char *atlas_conf_path);
+    void fill_triangle(Triangle<GLfloat> triangle, RGBA rgba, Triangle<GLfloat> uv);
+    void fill_rect(AABB<float> aabb, RGBA shade, int atlas_index);
     void present();
 
     GLuint gl_compile_shader_file(const char *file_path, GLenum shader_type);

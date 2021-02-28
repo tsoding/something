@@ -3,17 +3,22 @@
 
 #include <stdint.h>
 
-struct Texture {
-    using RGBA32 = uint32_t;
+using RGBA32 = uint32_t;
 
+struct Texture {
     int width;
     int height;
     RGBA32 *pixels;
 
-    GLuint gl_id;
-
     static Texture from_file(const char *file_path);
     static Texture from_memory(int width, int height, RGBA32 *pixels);
+    static Texture from_solid_color(int width, int height, RGBA32 color);
+};
+
+struct GL_Texture {
+    GLuint id;
+
+    static GL_Texture from_texture(Texture texture);
 };
 
 #endif  // SOMETHING_TEXTURE_HPP_
