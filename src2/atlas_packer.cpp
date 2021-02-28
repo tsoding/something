@@ -145,9 +145,6 @@ int main(void)
 #else
 int main(int argc, char **argv)
 {
-    // TODO: atlas_packer should generate uv coords as well
-    // TODO: customizable ids for textures in atlas.conf
-
     // Parse command line arguments
     Args args = {argc, argv};
     const char *program_name = args.shift();
@@ -233,15 +230,43 @@ int main(int argc, char **argv)
     println(atlas_hpp_file, "#define ATLAS_HPP_");
     println(atlas_hpp_file);
 
+    println(atlas_hpp_file, "struct Coord {");
+    println(atlas_hpp_file, "    float uv_x, uv_y, uv_w, uv_h;");
+    println(atlas_hpp_file, "    int x, y, w, h;");
+    println(atlas_hpp_file, "};");
+    println(atlas_hpp_file);
+    println(atlas_hpp_file, "const size_t COORDS_COUNT = ", textures.size, ";");
+    println(atlas_hpp_file);
+    for (size_t i = 0; i < textures.size; ++i) {
+        println(atlas_hpp_file, "const size_t ", textures.data[i].id, " = ", i, ";");
+    }
+    println(atlas_hpp_file);
+    println(atlas_hpp_file, "const Coord coords[COORDS_COUNT] = {");
     int atlas_row = 0;
     for (size_t i = 0; i < textures.size; ++i) {
         const Texture *texture = &textures.data[i];
 
-        println(atlas_hpp_file, "const int ", texture->id, "_X = ", 0, ";");
-        println(atlas_hpp_file, "const int ", texture->id, "_Y = ", atlas_row, ";");
-        println(atlas_hpp_file, "const int ", texture->id, "_WIDTH = ", texture->width, ";");
-        println(atlas_hpp_file, "const int ", texture->id, "_HEIGHT = ", texture->height, ";");
-        println(atlas_hpp_file);
+        const int x = 0;
+        const int y = atlas_row;
+        const int w = texture->width;
+        const int h = texture->height;
+
+        const float uv_x = static_cast<float>(x) / static_cast<float>(atlas_width);
+        const float uv_y = static_cast<float>(y) / static_cast<float>(atlas_height);
+        const float uv_w = static_cast<float>(w) / static_cast<float>(atlas_width);
+        const float uv_h = static_cast<float>(h) / static_cast<float>(atlas_height);
+
+        println(atlas_hpp_file,
+                "    {",
+                uv_x, "f", ",",
+                uv_y, "f", ",",
+                uv_w, "f", ",",
+                uv_h, "f", ",",
+                x, ",",
+                y, ",",
+                w, ",",
+                h, ",",
+                "},");
 
         for (int row = 0; row < textures.data[i].height; ++row) {
             memcpy(&atlas_pixels[atlas_row * atlas_width],
@@ -250,6 +275,7 @@ int main(int argc, char **argv)
             atlas_row += 1;
         }
     }
+    println(atlas_hpp_file, "};");
 
     println(atlas_hpp_file, "#endif  // ATLAS_HPP_");
 
